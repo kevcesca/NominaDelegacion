@@ -1,0 +1,21 @@
+.card {
+    margin: 20px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+.title {
+    margin-bottom: 20px;
+}
+
+.info {
+    margin-bottom: 20px;
+}
+
+.licencia {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

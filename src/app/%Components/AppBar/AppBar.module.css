@@ -1,0 +1,42 @@
+/* AppBar.module.css */
+.customTabMenu {
+    background-color: var(--custom-bg-color) !important;
+    /* Color de fondo personalizado */
+}
+
+.customTabMenuNav {
+    background-color: #24242c !important;
+    color: white;
+}
+
+.customTabMenuItem {
+    color: var(--custom-text-color) !important;
+    /* Color del texto de los ítems */
+}
+
+.customTabMenuItemLink:hover {
+    background-color: #104674 !important;
+    /* Color de fondo al pasar el mouse */
+    color: var(--custom-text-color) !important;
+    /* Color del texto al pasar el mouse */
+}
+
+.customTabMenuItemLink {
+    background-color: var(--custom-bg-color) !important;
+    /* Color de fondo de los ítems */
+    color: var(--custom-text-color) !important;
+    /* Color del texto de los ítems */
+}
+
+.navbar{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.image {
+    width: 400px; /* Ajusta el tamaño de las imágenes según tus necesidades */
+    height: auto;
+    margin: 1rem;
+}

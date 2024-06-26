@@ -1,0 +1,45 @@
+.NavbarContainer {
+    font-family: 'Montserrat', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+    color: black;
+}
+
+.hamburgerIcon{
+    color: white;
+}
+
+.hamburgerIcon:hover{
+    background-color: #104674;
+}
+
+.bgblack{
+    background-color: #0F0F12;
+    inherits: true;
+}
+
+.bgblack:hover{
+    background-color: #104674 !important; 
+}
+
+
+
+.botonNavbar {
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 1rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 4px;
+    /* Ajusta este valor si deseas más espacio alrededor del ícono */
+}
+
+.botonNavbar:hover {
+    background-color: #4B4B5C;
+    border-radius: 10%;
+}
