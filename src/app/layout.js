@@ -1,9 +1,9 @@
 // src/app/layout.js
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Wrapper from "./%Components/Wrapper/Wrapper";
-
+import { AuthProvider } from "./context/AuthContext";
 import { PrimeReactProvider } from "primereact/api";
+import AuthWrapper from "./%Components/Wrapper/AuthWrapper";  // Asegúrate de que la ruta es correcta
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,15 +17,11 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <meta name="viewport" content="initial-scale=1, width=device-width" />
       <body className={inter.className}>
-      <PrimeReactProvider>
-        <Wrapper>
-          {children}
-        </Wrapper>
-
-        
-
-      </PrimeReactProvider>
-        
+        <AuthProvider>
+          <AuthWrapper>
+            {children}
+          </AuthWrapper>
+        </AuthProvider>
       </body>
     </html>
   );

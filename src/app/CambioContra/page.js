@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import { Box, TextField, Button, Card, CardContent, Typography, Alert } from '@mui/material';
+import Link from 'next/link';
 import styles from './page.module.css';
 
 export default function CambioContra() {
@@ -66,13 +67,14 @@ export default function CambioContra() {
                             >
                                 Actualizar
                             </Button>
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                href="/Perfil"
-                            >
-                                Cancelar
-                            </Button>
+                            <Link href="/Perfil" passHref>
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                >
+                                    Cancelar
+                                </Button>
+                            </Link>
                         </Box>
                     </Box>
                 </CardContent>
