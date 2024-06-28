@@ -6,8 +6,9 @@
     color: black;
 }
 
-.hamburgerIcon{
+.hamburgerIcon, .tWhite{
     color: white;
+    text-decoration: none;
 }
 
 .hamburgerIcon:hover{

@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Sidebar, Menu, MenuItem, SubMenu, sidebarClasses } from 'react-pro-sidebar';
 import styles from './NavBar.module.css';
 
@@ -55,10 +56,12 @@ export default function NavBar() {
             <MenuItem icon={<CalendarTodayIcon />} className={styles.bgblack}> Calendar</MenuItem>
             <MenuItem icon={<StorefrontIcon />} className={styles.bgblack}> E-commerce</MenuItem>
           </SubMenu>
-          <SubMenu label="Ubicación" icon={<PlaceIcon />}>
-            <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}> Documentation</MenuItem>
-            <MenuItem icon={<CalendarTodayIcon />} className={styles.bgblack}> Calendar</MenuItem>
-            <MenuItem icon={<StorefrontIcon />} className={styles.bgblack}> E-commerce</MenuItem>
+          <SubMenu label="Permisos" icon={<PlaceIcon />}>
+            <Link className={styles.tWhite} href="/CargarDatos" passHref>
+              <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}> Ver usuarios</MenuItem>
+            </Link>
+              <MenuItem icon={<CalendarTodayIcon />} className={styles.bgblack}> Calendar</MenuItem>
+              <MenuItem icon={<StorefrontIcon />} className={styles.bgblack}> E-commerce</MenuItem>
           </SubMenu>
         </Menu>
       </Sidebar>
