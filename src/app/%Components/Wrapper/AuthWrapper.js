@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import Wrapper from './Wrapper';
-import Login from '../Login/Login';
+import Login from '../../Login/page';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
@@ -24,16 +25,32 @@ const theme = createTheme({
 
 const AuthWrapper = ({ children }) => {
     const { isLoggedIn } = useAuth();
+    const router = useRouter();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const publicRoutes = ['/RecuperarContra', '/Registrarse', '/login'];
+
+    if (!mounted) {
+        return null; // O muestra un cargando, si prefieres
+    }
+
+    if (!isLoggedIn && !publicRoutes.includes(router.pathname)) {
+        return (
+            <ThemeProvider theme={theme}>
+                <Login />
+            </ThemeProvider>
+        );
+    }
 
     return (
         <ThemeProvider theme={theme}>
-            {isLoggedIn ? (
-                <Wrapper>
-                    {children}
-                </Wrapper>
-            ) : (
-                <Login />
-            )}
+            <Wrapper>
+                {children}
+            </Wrapper>
         </ThemeProvider>
     );
 };

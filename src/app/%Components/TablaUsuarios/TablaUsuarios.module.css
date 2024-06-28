@@ -1,0 +1,37 @@
+.dataTable {
+    --tw-bg-opacity: 1;
+    background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+    color: #000000;
+}
+
+.dataTable-header {
+    --tw-bg-opacity: 1;
+    background-color: #104674;
+    color: #FFFFFF;
+    font-weight: bold;
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+}
+
+.dataTable-row {
+    --tw-bg-opacity: 1;
+    background-color: rgba(240, 240, 240, var(--tw-bg-opacity));
+    color: #000000;
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+}
+
+.dataTable-row:hover {
+    --tw-bg-opacity: 1;
+    background-color: rgba(230, 230, 230, var(--tw-bg-opacity));
+}
+
+.actions {
+    cursor: pointer;
+}
+
+.action-icon {
+    cursor: pointer;
+}
