@@ -1,16 +1,16 @@
-// src/app/%Components/TablaPostNomina/TablaPostNomina.js
-'use client';
+// src/components/TablaResumenNomina/TablaResumenNomina.js
 import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { PostNominaService } from './PostNominaService';
-import styles from './TablaPostNomina.module.css';
+import { ResumenNominaService } from './ResumenNominaService';
+import styles from './TablaResumenNomina.module.css';
+import FileUpload from '../FileUpload/FileUpload';
 
-export default function TablaPostNomina() {
+export default function TablaResumenNomina() {
     const [archivos, setArchivos] = useState([]);
 
     useEffect(() => {
-        PostNominaService.getArchivos().then(data => setArchivos(data));
+        ResumenNominaService.getArchivos().then(data => setArchivos(data));
     }, []);
 
     const descargaTemplate = (rowData) => {

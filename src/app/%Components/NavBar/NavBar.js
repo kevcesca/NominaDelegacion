@@ -51,17 +51,11 @@ export default function NavBar() {
             <MenuItem icon={<NetworkCheckIcon />} className={styles.bgblack}> Red</MenuItem>
             <MenuItem icon={<AppsIcon />} className={styles.bgblack}> Aplicaciones</MenuItem>
           </SubMenu>
-          <SubMenu label="Horarios" icon={<AccessTimeIcon />}>
-            <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}> Documentation</MenuItem>
-            <MenuItem icon={<CalendarTodayIcon />} className={styles.bgblack}> Calendar</MenuItem>
-            <MenuItem icon={<StorefrontIcon />} className={styles.bgblack}> E-commerce</MenuItem>
-          </SubMenu>
           <SubMenu label="Permisos" icon={<PlaceIcon />}>
             <Link className={styles.tWhite} href="/CargarDatos" passHref>
               <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}> Ver usuarios</MenuItem>
             </Link>
-              <MenuItem icon={<CalendarTodayIcon />} className={styles.bgblack}> Calendar</MenuItem>
-              <MenuItem icon={<StorefrontIcon />} className={styles.bgblack}> E-commerce</MenuItem>
+              <MenuItem icon={<CalendarTodayIcon />} className={styles.bgblack}>Validar Registros</MenuItem>
           </SubMenu>
         </Menu>
       </Sidebar>
