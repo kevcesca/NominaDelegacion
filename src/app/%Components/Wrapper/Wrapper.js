@@ -1,4 +1,3 @@
-// src/app/%Components/Wrapper/Wrapper.js
 'use client';
 import "../../globals.css";
 import { Grid } from "@mui/material";
@@ -25,7 +24,7 @@ export default function Wrapper({ children }) {
                     </div>
                 </Grid>
             </Grid>
-            <Footer /> {/* Añadimos el footer aquí */}
+            <Footer /> 
         </div>
     );
 }

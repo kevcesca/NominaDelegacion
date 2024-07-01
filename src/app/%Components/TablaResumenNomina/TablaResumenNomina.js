@@ -1,10 +1,10 @@
-// src/components/TablaResumenNomina/TablaResumenNomina.js
+// src/app/%Components/TablaResumenNomina/TablaResumenNomina.js
+'use client';
 import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ResumenNominaService } from './ResumenNominaService';
 import styles from './TablaResumenNomina.module.css';
-import FileUpload from '../FileUpload/FileUpload';
 
 export default function TablaResumenNomina() {
     const [archivos, setArchivos] = useState([]);

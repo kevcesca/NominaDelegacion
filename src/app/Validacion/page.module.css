@@ -1,0 +1,57 @@
+/* src/app/comparative/page.module.css */
+.main {
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: white;
+    background-color: black;
+    padding: 1rem;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.legendItem {
+    margin: 0 10px;
+    display: flex;
+    align-items: center;
+}
+
+.legendColor {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.noCoinciden {
+    background-color: #ffcccc; /* rojo claro */
+}
+
+.cambioCuenta {
+    background-color: #ffe6b3; /* naranja claro */
+}
+
+.incompleto {
+    background-color: #e6ccff; /* morado claro */
+}
+
+
+.table2{
+    margin-top: 2rem;
+    padding-top: 2rem;
+}
+
+.tableContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+}

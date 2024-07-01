@@ -7,7 +7,6 @@ import TablaUsuarios from '../%Components/TablaUsuarios/TablaUsuarios'; // Aseg√
 export default function CrearNomina() {
     return (
         <main className={styles.main}>
-            <h1>Crear Usuario</h1>
             <div className={styles.buttonContainer}>
                 <Link href="/CrearNomina/CrearUsuario" passHref>
                     <button className={styles.createButton}>

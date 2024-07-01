@@ -1,0 +1,24 @@
+/* src/app/%Components/ComparativeTable/ComparativeTable.module.css */
+.card {
+    margin: 20px;
+}
+
+.scrollContainer {
+    overflow-x: auto;
+}
+
+.dataTable {
+    width: 100%;
+}
+
+.noCoinciden {
+    background-color: #ffcccc; /* rojo claro */
+}
+
+.cambioCuenta {
+    background-color: #ffe6b3; /* naranja claro */
+}
+
+.incompleto {
+    background-color: #e6ccff; /* morado claro */
+}

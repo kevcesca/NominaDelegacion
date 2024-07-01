@@ -1,3 +1,4 @@
+// src/app/%Components/NavBar/NavBar.js
 import React from 'react';
 import Link from 'next/link';
 import { Sidebar, Menu, MenuItem, SubMenu, sidebarClasses } from 'react-pro-sidebar';
@@ -5,14 +6,14 @@ import styles from './NavBar.module.css';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import MenuIcon from '@mui/icons-material/Menu';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import DescriptionIcon from '@mui/icons-material/Description';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PlaceIcon from '@mui/icons-material/Place';
-import StorageIcon from '@mui/icons-material/Storage';
-import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
-import AppsIcon from '@mui/icons-material/Apps';
+import PeopleIcon from '@mui/icons-material/People';
+import SecurityIcon from '@mui/icons-material/Security';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import FolderIcon from '@mui/icons-material/Folder';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import MemoryIcon from '@mui/icons-material/Memory';
+import ComputerIcon from '@mui/icons-material/Computer';
+import CloudIcon from '@mui/icons-material/Cloud';
 
 export default function NavBar() {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -47,15 +48,17 @@ export default function NavBar() {
             <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
           </button>
           <SubMenu label="Configuración" icon={<SettingsIcon />} >
-            <MenuItem icon={<StorageIcon />} className={styles.bgblack}> Recursos</MenuItem>
-            <MenuItem icon={<NetworkCheckIcon />} className={styles.bgblack}> Red</MenuItem>
-            <MenuItem icon={<AppsIcon />} className={styles.bgblack}> Aplicaciones</MenuItem>
+            <MenuItem icon={<MemoryIcon />} className={styles.bgblack}> Recursos</MenuItem>
+            <MenuItem icon={<CloudIcon />} className={styles.bgblack}> Red</MenuItem>
+            <MenuItem icon={<ComputerIcon />} className={styles.bgblack}> Aplicaciones</MenuItem>
           </SubMenu>
-          <SubMenu label="Permisos" icon={<PlaceIcon />}>
+          <SubMenu label="Permisos" icon={<SecurityIcon />}>
             <Link className={styles.tWhite} href="/CargarDatos" passHref>
-              <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}> Ver usuarios</MenuItem>
+              <MenuItem icon={<PeopleIcon />} className={styles.bgblack}> Ver usuarios</MenuItem>
             </Link>
-              <MenuItem icon={<CalendarTodayIcon />} className={styles.bgblack}>Validar Registros</MenuItem>
+            <Link className={styles.tWhite} href="/Validacion" passHref>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}> Validar Registros</MenuItem>
+            </Link>
           </SubMenu>
         </Menu>
       </Sidebar>

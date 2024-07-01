@@ -1,4 +1,3 @@
-// src/app/%Components/TablaPostNomina/TablaPostNomina.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
