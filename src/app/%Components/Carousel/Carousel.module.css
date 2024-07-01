@@ -1,0 +1,36 @@
+.carouselContainer {
+    width: 100%;
+    margin: 0 auto; /* Centrar el carrusel */
+}
+
+.images{
+    width: 40vw;
+    height: auto;
+}
+
+.carouselItem {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: none;
+}
+
+.imageContainer {
+    position: relative;
+    width: 40%;
+    height: 400px;
+}
+
+.textContainer {
+    width: 45%;
+    padding: 20px;
+}
+
+.textContainer .MuiTypography-h5 {
+    margin-bottom: 10px;
+}
+
+.textContainer .MuiButton-root {
+    margin-top: 20px;
+}

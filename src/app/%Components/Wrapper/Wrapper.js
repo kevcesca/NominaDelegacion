@@ -24,7 +24,7 @@ export default function Wrapper({ children }) {
                     </div>
                 </Grid>
             </Grid>
-            <Footer /> 
+            <Footer />
         </div>
     );
 }
