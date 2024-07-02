@@ -9,8 +9,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import PeopleIcon from '@mui/icons-material/People';
 import SecurityIcon from '@mui/icons-material/Security';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import FolderIcon from '@mui/icons-material/Folder';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import MemoryIcon from '@mui/icons-material/Memory';
 import ComputerIcon from '@mui/icons-material/Computer';
 import CloudIcon from '@mui/icons-material/Cloud';
@@ -59,6 +58,9 @@ export default function NavBar() {
             <Link className={styles.tWhite} href="/Validacion" passHref>
               <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}> Validar Registros</MenuItem>
             </Link>
+          </SubMenu>
+          <SubMenu label="Reportes" icon={<AssessmentIcon />}>
+          <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Reporte1</MenuItem>
           </SubMenu>
         </Menu>
       </Sidebar>

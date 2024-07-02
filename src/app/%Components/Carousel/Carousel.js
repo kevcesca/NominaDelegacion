@@ -9,15 +9,15 @@ import styles from './Carousel.module.css';
 
 const responsive = {
     superLargeDesktop: {
-        breakpoint: { max: 4000, min: 3000 },
+        breakpoint: { max: 2000, min: 1500 },
         items: 1
     },
     desktop: {
-        breakpoint: { max: 3000, min: 1024 },
+        breakpoint: { max: 1000, min: 800 },
         items: 1
     },
     tablet: {
-        breakpoint: { max: 1024, min: 464 },
+        breakpoint: { max: 500, min: 464 },
         items: 1
     },
     mobile: {
@@ -48,7 +48,7 @@ const CarouselItem = ({ item }) => (
         <Box className={styles.textContainer}>
             <Typography variant="h5">{item.title}</Typography>
             <Typography variant="body1">{item.description}</Typography>
-            <Button variant="contained" color="primary" endIcon={<ArrowForwardIcon />}>
+            <Button className={styles.boton} variant="contained" color="primary" endIcon={<ArrowForwardIcon />}>
                 Ver más
             </Button>
         </Box>
