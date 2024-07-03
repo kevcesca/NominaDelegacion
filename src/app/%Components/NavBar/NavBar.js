@@ -60,9 +60,14 @@ export default function NavBar() {
             </Link>
           </SubMenu>
           <SubMenu label="Reportes" icon={<AssessmentIcon />}>
-          <Link className={styles.tWhite} href="/Reportes" passHref>
-            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Generar reporte</MenuItem>
-          </Link>
+            <Link className={styles.tWhite} href="/Reportes" passHref>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Generar reporte</MenuItem>
+            </Link>
+          </SubMenu>
+          <SubMenu label="Cheques" icon={<AssessmentIcon />}>
+            <Link className={styles.tWhite} href="/GenerarCheque" passHref>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Generar cheque</MenuItem>
+            </Link>
           </SubMenu>
         </Menu>
       </Sidebar>

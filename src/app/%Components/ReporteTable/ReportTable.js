@@ -6,6 +6,7 @@ import { FilterMatchMode } from 'primereact/api';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Tag } from 'primereact/tag';
+import styles from './ReportTable.module.css'
 
 const DynamicTable = ({ data, columns }) => {
     const [filters, setFilters] = React.useState({
@@ -69,7 +70,7 @@ const DynamicTable = ({ data, columns }) => {
     const header = renderHeader();
 
     return (
-        <div className="card">
+        <div className={styles.tableContainer}>
             <DataTable value={data} paginator rows={10} dataKey="REGISTRO" filters={filters} filterDisplay="row" loading={loading}
                 globalFilterFields={columns} header={header} emptyMessage="No se encontraron registros."
                 rowClassName={rowClassName}>
