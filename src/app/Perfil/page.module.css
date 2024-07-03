@@ -1,29 +1,35 @@
 .main {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background-color: #f0f0f0;
 }
 
 .card {
-    margin: 20px;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
+    width: 100%;
+    max-width: 600px;
+    margin: 2rem;
 }
 
 .title {
-    margin-bottom: 20px;
+    text-align: center;
+    margin-bottom: 1rem;
 }
 
 .info {
-    margin-bottom: 20px;
+    margin-top: 1rem;
 }
 
 .licencia {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.cambiar {
+    text-align: center;
+    margin-top: 1rem;
 }

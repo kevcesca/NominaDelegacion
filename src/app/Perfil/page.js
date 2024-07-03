@@ -1,7 +1,8 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Box, Typography, Card, CardContent, Button } from '@mui/material';
+import { Box, Typography, Card, CardContent, Button, Grid, IconButton } from '@mui/material';
+import { Email, Phone, VpnKey, Edit } from '@mui/icons-material';
 import styles from './page.module.css';
 
 export default function Perfil() {
@@ -18,8 +19,6 @@ export default function Perfil() {
     
         localStorage.setItem('usuario', JSON.stringify(usuario));
     }, []);
-    
-
 
     useEffect(() => {
         const storedUser = localStorage.getItem('usuario');
@@ -38,21 +37,43 @@ export default function Perfil() {
                         Perfil de Usuario
                     </Typography>
                     <Box className={styles.info}>
-                        <Typography variant="body1"><strong>Nombre de Usuario:</strong> {usuario.nombre}</Typography>
-                        <Typography variant="body1"><strong>Email:</strong> {usuario.email}</Typography>
-                        <Typography variant="body1"><strong>Teléfono:</strong> {usuario.telefono}</Typography>
-                        <Typography variant="body1"><strong>Email Secundario:</strong> {usuario.emailSecundario}</Typography>
-                        <Box className={styles.licencia}>
-                            <Typography variant="body1"><strong>Licencia Key:</strong> {usuario.licenciaKey}</Typography>
-                            <Button variant="contained" color="primary">Activar</Button>
-                        </Box>
-                        <Box className={styles.cambiar}>
-                            <Link href="/CambioContra" passHref>
-                                <Button variant="contained" color="secondary">
-                                    Cambiar la contraseña
-                                </Button>
-                            </Link>
-                        </Box>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <Typography variant="body1"><strong>Nombre de Usuario:</strong> {usuario.nombre}</Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="body1">
+                                    <Email /> <strong>Email:</strong> {usuario.email}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="body1">
+                                    <Phone /> <strong>Teléfono:</strong> {usuario.telefono}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="body1">
+                                    <Email /> <strong>Email Secundario:</strong> {usuario.emailSecundario}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Box className={styles.licencia}>
+                                    <Typography variant="body1">
+                                        <VpnKey /> <strong>Licencia Key:</strong> {usuario.licenciaKey}
+                                    </Typography>
+                                    <Button variant="contained" color="primary" startIcon={<Edit />}>Activar</Button>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Box className={styles.cambiar}>
+                                    <Link href="/CambioContra" passHref>
+                                        <Button variant="contained" color="secondary">
+                                            Cambiar la contraseña
+                                        </Button>
+                                    </Link>
+                                </Box>
+                            </Grid>
+                        </Grid>
                     </Box>
                 </CardContent>
             </Card>

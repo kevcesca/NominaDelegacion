@@ -51,16 +51,18 @@ export default function NavBar() {
             <MenuItem icon={<CloudIcon />} className={styles.bgblack}> Red</MenuItem>
             <MenuItem icon={<ComputerIcon />} className={styles.bgblack}> Aplicaciones</MenuItem>
           </SubMenu>
-          <SubMenu label="Permisos" icon={<SecurityIcon />}>
-            <Link className={styles.tWhite} href="/CargarDatos" passHref>
-              <MenuItem icon={<PeopleIcon />} className={styles.bgblack}> Ver usuarios</MenuItem>
+          <SubMenu label="Nomina" icon={<SecurityIcon />}>
+            <Link className={styles.tWhite} href="/CrearNomina" passHref>
+              <MenuItem icon={<PeopleIcon />} className={styles.bgblack}> Crear Nomina</MenuItem>
             </Link>
             <Link className={styles.tWhite} href="/Validacion" passHref>
-              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}> Validar Registros</MenuItem>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}> Validacion de nomina</MenuItem>
             </Link>
           </SubMenu>
           <SubMenu label="Reportes" icon={<AssessmentIcon />}>
-          <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Reporte1</MenuItem>
+          <Link className={styles.tWhite} href="/Reportes" passHref>
+            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Generar reporte</MenuItem>
+          </Link>
           </SubMenu>
         </Menu>
       </Sidebar>

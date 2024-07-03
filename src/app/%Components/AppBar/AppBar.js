@@ -5,6 +5,10 @@ import { TabMenu } from 'primereact/tabmenu';
 import styles from './AppBar.module.css';
 import Image from 'next/image';
 import { useAuth } from '../../context/AuthContext';
+import HomeIcon from '@mui/icons-material/Home';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import GroupIcon from '@mui/icons-material/Group';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 export default function AppBar() {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -12,10 +16,29 @@ export default function AppBar() {
     const { logout } = useAuth();
 
     const items = [
-        { label: 'Inicio', icon: 'pi pi-home', command: () => router.push('/') },
-        { label: 'Mi Cuenta', icon: 'pi pi-user', command: () => router.push('/Perfil') },
-        { label: 'Crear Nomina', icon: 'pi pi-chart-line', command: () => router.push('/CrearNomina') },
-        { label: 'Cerrar Sesión', icon: 'pi pi-sign-out', command: () => { logout(); router.push('/logout'); } }
+        { 
+            label: 'Inicio', 
+            icon: <HomeIcon />, 
+            command: () => router.push('/') 
+        },
+        { 
+            label: 'Mi Cuenta', 
+            icon: <AccountCircleIcon />, 
+            command: () => router.push('/Perfil') 
+        },
+        { 
+            label: 'Usuarios', 
+            icon: <GroupIcon />, 
+            command: () => router.push('/Usuarios') 
+        },
+        { 
+            label: 'Cerrar Sesión', 
+            icon: <ExitToAppIcon />, 
+            command: () => { 
+                logout(); 
+                router.push('/logout'); 
+            } 
+        }
     ];
 
     useEffect(() => {
@@ -28,7 +51,7 @@ export default function AppBar() {
             case '/Perfil':
                 setActiveIndex(1);
                 break;
-            case '/CrearNomina':
+            case '/Usuarios':
                 setActiveIndex(2);
                 break;
             case '/logout':
@@ -40,7 +63,7 @@ export default function AppBar() {
     }, [router.isReady, router.pathname]);
 
     return (
-        <div>
+        <div className={styles.appBarContainer}>
             <div className={styles.navbar}>
                 <Image src="/logo.png" alt="Logotipo Alcaldia Azcapotzalco" width={1000} height={500} className={styles.image} />
             </div>

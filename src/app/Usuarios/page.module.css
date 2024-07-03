@@ -1,0 +1,53 @@
+.main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 0;
+}
+
+.createButton {
+    background-color: #0D375C;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.createButton i {
+    margin-right: 10px;
+}
+
+.createButton:hover {
+    background-color: #0A2D4D;
+}
+
+.exportButton {
+    background-color: #0D375C;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.exportButton i {
+    margin-right: 10px;
+}
+
+.exportButton:hover {
+    background-color: #0A2D4D;
+}
