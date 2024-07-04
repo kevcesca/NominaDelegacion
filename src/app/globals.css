@@ -1,7 +1,29 @@
+/* Global Styles */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-
-body{
+body {
   background-color: #F6F1F1;
   font-family: 'Montserrat', sans-serif;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 12px; /* Ancho de la barra de desplazamiento vertical */
+  height: 12px; /* Ancho de la barra de desplazamiento horizontal */
+}
+
+::-webkit-scrollbar-track {
+  background: #24242c; /* Color de fondo de la pista de desplazamiento */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #0D375C; /* Color del "pulgar" */
+  border-radius: 10px; /* Esquinas redondeadas */
+  border: 3px solid #24242c; /* Espacio alrededor del "pulgar" */
+}
+
+/* Estilo para la barra de desplazamiento en Firefox */
+html {
+  scrollbar-width: thin; /* Ancho de la barra de desplazamiento */
+  scrollbar-color: #155A96 #24242c; /* Color del "pulgar" y la pista */
 }

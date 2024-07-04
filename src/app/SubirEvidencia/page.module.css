@@ -1,0 +1,103 @@
+/* src/app/page.module.css */
+.main {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: stretch;
+}
+
+.h1 {
+    text-align: center;
+    color: white;
+    background-color: black;
+    width: 100%;
+    padding: 1rem;
+}
+
+.selectorContainer {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.datePicker {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.progressContainer {
+    margin-bottom: 20px;
+}
+
+.h2 {
+    background-color: #104674;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+.buttonContainer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.exportButton {
+    background-color: #FFA726;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.exportButton:hover {
+    background-color: #FB8C00;
+}
+
+.sectionContainer {
+    margin-bottom: 20px;
+}
+
+.uploadButton {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.uploadButton:hover {
+    background-color: #218838;
+}
+
+.dataTable .p-datatable-header {
+    background-color: #104674;
+    color: white;
+}
+
+.dataTable .p-datatable-thead > tr > th {
+    background-color: #28a745;
+    color: white;
+    text-align: center;
+}
+
+.downloadButton {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.downloadButton:hover {
+    background-color: #0056b3;
+}

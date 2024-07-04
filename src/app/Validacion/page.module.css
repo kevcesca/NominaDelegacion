@@ -32,16 +32,20 @@
 }
 
 .noCoinciden {
-    background-color: #ffcccc; /* rojo claro */
+    color: white;
+    background-color: #d31525; /* rojo claro */
 }
 
 .cambioCuenta {
-    background-color: #ffe6b3; /* naranja claro */
+    color: white;
+    background-color: #c6c622; /* naranja claro */
 }
 
 .incompleto {
-    background-color: #e6ccff; /* morado claro */
+    color: white;
+    background-color: #427cb1; /* morado claro */
 }
+
 
 
 .table2{

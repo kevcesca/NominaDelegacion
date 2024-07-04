@@ -112,9 +112,9 @@ const Cheque = ({
                 <Grid item xs={4}>
                     <Typography variant="body2">Recibí Cheque:</Typography>
                     <Box className={styles.receiptBox}>
-                        <Typography variant="body2">Nombre:</Typography>
-                        <Typography variant="body2">Firma:</Typography>
-                        <Typography variant="body2">Fecha:</Typography>
+                        <Typography variant="body2"><b>Nombre:</b></Typography>
+                        <Typography variant="body2"><b>Firma:</b></Typography>
+                        <Typography variant="body2"><b>Fecha:</b></Typography>
                     </Box>
                 </Grid>
             </Grid>

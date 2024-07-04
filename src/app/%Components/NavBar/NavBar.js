@@ -1,4 +1,3 @@
-// src/app/%Components/NavBar/NavBar.js
 import React from 'react';
 import Link from 'next/link';
 import { Sidebar, Menu, MenuItem, SubMenu, sidebarClasses } from 'react-pro-sidebar';
@@ -13,6 +12,9 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import MemoryIcon from '@mui/icons-material/Memory';
 import ComputerIcon from '@mui/icons-material/Computer';
 import CloudIcon from '@mui/icons-material/Cloud';
+import DescriptionIcon from '@mui/icons-material/Description';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import MoneyIcon from '@mui/icons-material/Money';
 
 export default function NavBar() {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -58,15 +60,18 @@ export default function NavBar() {
             <Link className={styles.tWhite} href="/Validacion" passHref>
               <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}> Validacion de nomina</MenuItem>
             </Link>
+            <Link className={styles.tWhite} href="/SubirEvidencia" passHref>
+              <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Subir Evidencia</MenuItem>
+            </Link>
           </SubMenu>
           <SubMenu label="Reportes" icon={<AssessmentIcon />}>
             <Link className={styles.tWhite} href="/Reportes" passHref>
-              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Generar reporte</MenuItem>
+              <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Generar reporte</MenuItem>
             </Link>
           </SubMenu>
-          <SubMenu label="Cheques" icon={<AssessmentIcon />}>
+          <SubMenu label="Cheques" icon={<MoneyIcon />}>
             <Link className={styles.tWhite} href="/GenerarCheque" passHref>
-              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Generar cheque</MenuItem>
+              <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Generar cheque</MenuItem>
             </Link>
           </SubMenu>
         </Menu>
