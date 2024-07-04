@@ -9,7 +9,7 @@ import styles from './page.module.css';
 export default function GenerarCheque() {
     return (
         <main className={styles.main}>
-            <h1 className={styles.h1}>Generacion cheque</h1>
+            <h1 className={styles.h1}>Generar cheque</h1>
             <Cheque
                 polizaNo="5360"
                 noDe="108345"

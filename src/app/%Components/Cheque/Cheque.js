@@ -57,42 +57,65 @@ const Cheque = ({
 
                 </Grid>
             </Grid>
+            {/* Parte de abajo del cheque */}
             <Grid container spacing={2} className={styles.header}>
-                <Grid item xs={4} className={styles.conceptBox}>
-                    <Typography variant="body2">CONCEPTO DE PAGO:</Typography>
-                    <Typography variant="body2">{conceptoPago}</Typography>
-                    <Typography variant="body2">R.F.C.: {rfc}</Typography>
-                    <Typography variant="body2">Tipo de nómina: {tipoNomina}</Typography>
+                <Grid item xs={4}>
+                    <Box className={styles.conceptBox}>
+                        <b variant="body2">CONCEPTO DE PAGO:</b>
+                        <p variant="body2"><b>{conceptoPago}</b></p>
+                        <p variant="body2">R.F.C.: {rfc}</p>
+                        <p variant="body2">Tipo de nómina: {tipoNomina}</p>
+                    </Box>
+                    <Box className={styles.conceptBox2}>
+                        <b>Pago Caja: </b> <b className={styles.margin1}> y/o responsable: </b>
+                    </Box>
+                </Grid>
+
+                <Grid item xs={4} sx={{translate: '-8px'}}>
+                    <Box>
+                        <Box className={styles.textAround3}>
+                            <b align="center"> PERCEPCIONES </b>
+                            <b align="center"> DEDUCCIONES </b>
+                            <b align="center"> LÍQUIDO </b>
+                        </Box>
+                        <br/>
+                        <Box className={styles.fila3}>
+                            <Typography className={styles.textAround} variant="body2" align="center">${percepciones}</Typography>
+                            <Typography className={styles.textAround} variant="body2" align="center">${deducciones}</Typography>
+                            <Typography className={styles.textAround} variant="body2" align="center">${liquido}</Typography>
+                        </Box>
+                    </Box>
+
+                    <Box className={styles.identificationBox}>
+                        <p className={styles.subrayado}>El empleado se identificó con:</p>
+                        <Box className={styles.fila1}>
+                            <Box className={styles.columna3}>
+                                <Typography variant="body2" align="center">INE</Typography>
+                                <p className={styles.textAround4}> </p>
+                            </Box>
+                            <Box className={styles.columna3}>
+                                <Typography variant="body2" align="center">PASAPORTE</Typography>
+                                <p className={styles.textAround4}> </p>
+                            </Box>
+                            <Box className={styles.columna3}>
+                                <Typography variant="body2" align="center">CÉDULA</Typography>
+                                <p className={styles.textAround4}> </p>
+                            </Box>
+                            <Box className={styles.columna3}>
+                                <Typography variant="body2" align="center">CREDENCIAL</Typography>
+                                <p className={styles.textAround4}> </p>
+                            </Box>
+                        </Box>
+
+                    </Box>
                 </Grid>
                 <Grid item xs={4}>
-                    <Box>
-
-                        <Typography variant="body2" align="center">PERCEPCIONES</Typography>
-                        <Typography variant="body2" align="center">${percepciones}</Typography>
-
-                        <Typography variant="body2" align="center">DEDUCCIONES</Typography>
-                        <Typography variant="body2" align="center">${deducciones}</Typography>
-
-                        <Typography variant="body2" align="center">LÍQUIDO</Typography>
-                        <Typography variant="body2" align="center">${liquido}</Typography>
-
-                    </Box>
-                    <Box className={styles.identificationBox}>
-                        <Typography variant="body2">El empleado se identificó con:</Typography>
-                        <Typography variant="body2" align="center">INE</Typography>
-
-                        <Typography variant="body2" align="center">PASAPORTE</Typography>
-
-                        <Typography variant="body2" align="center">CÉDULA</Typography>
-
-                        <Typography variant="body2" align="center">CREDENCIAL DE TRABAJO</Typography>
-                    </Box>
-                </Grid>
-                <Grid item xs={4} className={styles.receiptBox}>
                     <Typography variant="body2">Recibí Cheque:</Typography>
-                    <Typography variant="body2">Nombre: {nombre}</Typography>
-                    <Typography variant="body2">Firma:</Typography>
-                    <Typography variant="body2">Fecha: {fecha}</Typography>
+                    <Box className={styles.receiptBox}>
+                        <Typography variant="body2">Nombre:</Typography>
+                        <Typography variant="body2">Firma:</Typography>
+                        <Typography variant="body2">Fecha:</Typography>
+                    </Box>
                 </Grid>
             </Grid>
         </Box>
