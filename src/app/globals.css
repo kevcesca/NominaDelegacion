@@ -7,6 +7,18 @@ html, body {
   padding: 0;
 }
 
+:root {
+  --color-primary-light: #b9274b;
+  --color-primary-main: #9f2241;
+  --color-primary-dark: #711c31;
+  --color-primary-contrastText: #fff;
+  --color-secondary-light: #e2b673;
+  --color-secondary-main: #bc955c;
+  --color-secondary-dark: #987849;
+  --color-secondary-contrastText: #000;
+}
+
+
 body {
   background: linear-gradient(to bottom, #F6F1F1 80%, #bc955c 100%); /* Degradado de blanco a #bc955c */
   font-family: 'Montserrat', sans-serif;

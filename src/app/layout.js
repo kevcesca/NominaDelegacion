@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "./globals.css"; // Asegúrate de que la ruta sea correcta
 import { AuthProvider } from "./context/AuthContext";
 import AuthWrapper from "./%Components/Wrapper/AuthWrapper";  // Asegúrate de que la ruta es correcta
 

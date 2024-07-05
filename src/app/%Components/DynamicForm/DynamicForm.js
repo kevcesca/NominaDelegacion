@@ -1,8 +1,9 @@
 'use client';
 import React, { useState } from 'react';
-import { TextField, Button, MenuItem, Box, Typography } from '@mui/material';
+import { TextField, Button, MenuItem, Box, Typography, ThemeProvider } from '@mui/material';
 import DynamicTable from '../ReporteTable/ReportTable'; 
 import { ReporteService } from '../ReporteTable/ReporteService';
+import theme from '../../$tema/theme'; // Asegúrate de ajustar la ruta si es necesario
 
 const formFields = {
     "HISTÓRICO DE MOVIMIENTOS DE PERCEPCIÓN DE PERSONAL": ["REGISTRO", "NO. EMPLEADO", "NOMBRE", "TIPO DE NOMINA", "CLC DE LA NOMINA GENERADA", "PERIODO", "MONTO", "PAGO", "NO. DE REGISTRO", "FECHA DE PAGO"],
@@ -56,54 +57,56 @@ const DynamicForm = () => {
     };
 
     return (
-        <Box>
-            <Typography variant="h6" gutterBottom>
-                Seleccione el tipo de reporte
-            </Typography>
-            <TextField
-                select
-                label="Tipo de Reporte"
-                value={reportType}
-                onChange={handleReportTypeChange}
-                fullWidth
-                margin="normal"
-            >
-                {Object.keys(formFields).map((key) => (
-                    <MenuItem key={key} value={key}>
-                        {key}
-                    </MenuItem>
-                ))}
-            </TextField>
-
-            {reportType && (
-                <form onSubmit={handleSubmit}>
-                    {formFields[reportType].map((field) => (
-                        <TextField
-                            key={field}
-                            name={field}
-                            label={field}
-                            value={formValues[field] || ''}
-                            onChange={handleInputChange}
-                            fullWidth
-                            margin="normal"
-                        />
+        <ThemeProvider theme={theme}>
+            <Box>
+                <Typography variant="h6" gutterBottom>
+                    Seleccione el tipo de reporte
+                </Typography>
+                <TextField
+                    select
+                    label="Tipo de Reporte"
+                    value={reportType}
+                    onChange={handleReportTypeChange}
+                    fullWidth
+                    margin="normal"
+                >
+                    {Object.keys(formFields).map((key) => (
+                        <MenuItem key={key} value={key}>
+                            {key}
+                        </MenuItem>
                     ))}
-                    <Button type="submit" variant="contained" color="primary">
-                        Enviar
-                    </Button>
-                </form>
-            )}
+                </TextField>
 
-            {/* Renderizar la tabla solo si hay datos */}
-            {tableData.length > 0 && (
-                <Box mt={4}>
-                    <DynamicTable data={tableData} columns={tableColumns} />
-                    <Button onClick={handleExport} variant="contained" color="secondary" style={{ marginTop: '16px' }}>
-                        Exportar
-                    </Button>
-                </Box>
-            )}
-        </Box>
+                {reportType && (
+                    <form onSubmit={handleSubmit}>
+                        {formFields[reportType].map((field) => (
+                            <TextField
+                                key={field}
+                                name={field}
+                                label={field}
+                                value={formValues[field] || ''}
+                                onChange={handleInputChange}
+                                fullWidth
+                                margin="normal"
+                            />
+                        ))}
+                        <Button type="submit" variant="contained" color="primary">
+                            Enviar
+                        </Button>
+                    </form>
+                )}
+
+                {/* Renderizar la tabla solo si hay datos */}
+                {tableData.length > 0 && (
+                    <Box mt={4}>
+                        <DynamicTable data={tableData} columns={tableColumns} />
+                        <Button onClick={handleExport} variant="contained" color="secondary" style={{ marginTop: '16px' }}>
+                            Exportar
+                        </Button>
+                    </Box>
+                )}
+            </Box>
+        </ThemeProvider>
     );
 };
 

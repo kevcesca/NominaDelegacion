@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { Box, Button, CircularProgress, MenuItem, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, MenuItem, TextField, Typography, ThemeProvider } from '@mui/material';
+import theme from '../../$tema/theme'; // Ajusta la ruta según tu estructura de proyecto
 
 const quincenas = [
     "1a Quincena de Enero", "2a Quincena de Enero",
@@ -69,76 +70,78 @@ const UploadForm = () => {
     };
 
     return (
-        <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 500, mx: 'auto', mt: 5, p: 3, boxShadow: 3, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom>
-                Cargar Documento
-            </Typography>
-            <TextField
-                select
-                label="Selecciona la Quincena"
-                value={quincena}
-                onChange={handleQuincenaChange}
-                fullWidth
-                margin="normal"
-            >
-                {quincenas.map((quin, index) => (
-                    <MenuItem key={index} value={quin}>
-                        {quin}
-                    </MenuItem>
-                ))}
-            </TextField>
-            <Button
-                variant="contained"
-                component="label"
-                fullWidth
-                sx={{ mt: 2 }}
-            >
-                Subir Archivo
-                <input
-                    type="file"
-                    hidden
-                    onChange={handleFileChange}
+        <ThemeProvider theme={theme}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 500, mx: 'auto', mt: 5, p: 3, boxShadow: 3, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                    Cargar Documento
+                </Typography>
+                <TextField
+                    select
+                    label="Selecciona la Quincena"
+                    value={quincena}
+                    onChange={handleQuincenaChange}
+                    fullWidth
+                    margin="normal"
+                >
+                    {quincenas.map((quin, index) => (
+                        <MenuItem key={index} value={quin}>
+                            {quin}
+                        </MenuItem>
+                    ))}
+                </TextField>
+                <Button
+                    variant="contained"
+                    component="label"
+                    fullWidth
+                    sx={{ mt: 2 }}
+                >
+                    Subir Archivo
+                    <input
+                        type="file"
+                        hidden
+                        onChange={handleFileChange}
+                    />
+                </Button>
+                {archivo && (
+                    <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                        <CircularProgress variant="determinate" value={progress} />
+                        <Typography sx={{ ml: 2 }}>{progress}%</Typography>
+                    </Box>
+                )}
+                <TextField
+                    select
+                    label="Selecciona el Empleado"
+                    value={empleado}
+                    onChange={handleEmpleadoChange}
+                    fullWidth
+                    margin="normal"
+                >
+                    {empleados.map((emp) => (
+                        <MenuItem key={emp.id} value={emp.nombre}>
+                            {emp.nombre}
+                        </MenuItem>
+                    ))}
+                </TextField>
+                <TextField
+                    label="Comentario"
+                    multiline
+                    rows={4}
+                    value={comentario}
+                    onChange={handleComentarioChange}
+                    fullWidth
+                    margin="normal"
                 />
-            </Button>
-            {archivo && (
-                <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                    <CircularProgress variant="determinate" value={progress} />
-                    <Typography sx={{ ml: 2 }}>{progress}%</Typography>
-                </Box>
-            )}
-            <TextField
-                select
-                label="Selecciona el Empleado"
-                value={empleado}
-                onChange={handleEmpleadoChange}
-                fullWidth
-                margin="normal"
-            >
-                {empleados.map((emp) => (
-                    <MenuItem key={emp.id} value={emp.nombre}>
-                        {emp.nombre}
-                    </MenuItem>
-                ))}
-            </TextField>
-            <TextField
-                label="Comentario"
-                multiline
-                rows={4}
-                value={comentario}
-                onChange={handleComentarioChange}
-                fullWidth
-                margin="normal"
-            />
-            <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                fullWidth
-                sx={{ mt: 2 }}
-            >
-                Enviar
-            </Button>
-        </Box>
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ mt: 2 }}
+                >
+                    Enviar
+                </Button>
+            </Box>
+        </ThemeProvider>
     );
 };
 
