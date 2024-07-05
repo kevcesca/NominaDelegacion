@@ -2,22 +2,23 @@
 import React from 'react';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
-import { Paper, Button, Typography, Box } from '@mui/material';
+import { Paper, Button, Typography, Box, ThemeProvider } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Image from 'next/image';
 import styles from './Carousel.module.css';
+import theme from '../../$tema/theme';
 
 const responsive = {
     superLargeDesktop: {
-        breakpoint: { max: 2000, min: 1500 },
+        breakpoint: { max: 4000, min: 3000 },
         items: 1
     },
     desktop: {
-        breakpoint: { max: 1000, min: 800 },
+        breakpoint: { max: 3000, min: 1024 },
         items: 1
     },
     tablet: {
-        breakpoint: { max: 500, min: 464 },
+        breakpoint: { max: 1024, min: 464 },
         items: 1
     },
     mobile: {
@@ -30,12 +31,12 @@ const items = [
     {
         title: "Genera Reportes de Nómina",
         description: "Pellentesque egestas elementum egestas faucibus sem. Velit nunc egestas ut morbi. Leo diam diam nibh eget fermentum massa pretium. Mi mauris nulla ac dictum ut mauris non.",
-        image: "nomina.jpg"
+        image: "/nomina.jpg"
     },
     {
         title: "Genera Reportes de Nómina",
         description: "Pellentesque egestas elementum egestas faucibus sem. Velit nunc egestas ut morbi. Leo diam diam nibh eget fermentum massa pretium. Mi mauris nulla ac dictum ut mauris non.",
-        image: "nomina.jpg"
+        image: "/nomina.jpg"
     },
     // Otros elementos...
 ];
@@ -57,13 +58,15 @@ const CarouselItem = ({ item }) => (
 
 const CustomCarousel = () => {
     return (
-        <div className={styles.carouselContainer}>
-            <Carousel responsive={responsive}>
-                {items.map((item, index) => (
-                    <CarouselItem key={index} item={item} />
-                ))}
-            </Carousel>
-        </div>
+        <ThemeProvider theme={theme}>
+            <div className={styles.carouselContainer}>
+                <Carousel responsive={responsive}>
+                    {items.map((item, index) => (
+                        <CarouselItem key={index} item={item} />
+                    ))}
+                </Carousel>
+            </div>
+        </ThemeProvider>
     );
 };
 

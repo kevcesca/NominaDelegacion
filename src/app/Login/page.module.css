@@ -1,3 +1,4 @@
+/* page.module.css */
 .main {
     display: flex;
     flex-direction: column;
@@ -7,20 +8,19 @@
 }
 
 .image {
-    width: 400px; /* Ajusta el tamaño de las imágenes según tus necesidades */
+    width: 600px; /* Ajusta el tamaño de las imágenes según tus necesidades */
     height: auto;
-    margin: 1rem;
 }
 
 .card{
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
-    background-color: #4B4B5C;
+    background-color: white;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.125);
+    border: 15px solid #711c31;
     padding: 2rem;
 }
 
 .tWhite{
-    color: white;
+    color: black;
 }

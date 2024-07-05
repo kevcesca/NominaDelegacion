@@ -26,8 +26,8 @@ export default function NavBar() {
         transitionDuration={1000}
         rootStyles={{
           [`.${sidebarClasses.container}`]: {
-            backgroundColor: '#24242c',
-            color: 'white'
+            backgroundColor: 'transparent',
+            color: '#235b4e'
           },
           [`.${sidebarClasses.MenuItem}`]: {
             backgroundColor: 'black',
@@ -39,7 +39,7 @@ export default function NavBar() {
           menuItemStyles={{
             button: ({ level, active, disabled }) => ({
               '&:hover': {
-                backgroundColor: '#104674',
+                backgroundColor: '#9f2241',
                 color: 'white',
               },
             }),
@@ -48,11 +48,6 @@ export default function NavBar() {
           <button className={styles.botonNavbar} onClick={() => setCollapsed(!collapsed)}>
             <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
           </button>
-          <SubMenu label="Configuración" icon={<SettingsIcon />} >
-            <MenuItem icon={<MemoryIcon />} className={styles.bgblack}> Recursos</MenuItem>
-            <MenuItem icon={<CloudIcon />} className={styles.bgblack}> Red</MenuItem>
-            <MenuItem icon={<ComputerIcon />} className={styles.bgblack}> Aplicaciones</MenuItem>
-          </SubMenu>
           <SubMenu label="Nomina" icon={<SecurityIcon />}>
             <Link className={styles.tWhite} href="/CrearNomina" passHref>
               <MenuItem icon={<PeopleIcon />} className={styles.bgblack}> Crear Nomina</MenuItem>

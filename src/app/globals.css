@@ -1,8 +1,14 @@
 /* Global Styles */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+html, body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  background-color: #F6F1F1;
+  background: linear-gradient(to bottom, #F6F1F1 80%, #bc955c 100%); /* Degradado de blanco a #bc955c */
   font-family: 'Montserrat', sans-serif;
 }
 
@@ -12,18 +18,15 @@ body {
   height: 12px; /* Ancho de la barra de desplazamiento horizontal */
 }
 
-::-webkit-scrollbar-track {
-  background: #24242c; /* Color de fondo de la pista de desplazamiento */
-}
 
 ::-webkit-scrollbar-thumb {
-  background-color: #0D375C; /* Color del "pulgar" */
+  background-color: #9f2241; /* Color del "pulgar" */
   border-radius: 10px; /* Esquinas redondeadas */
-  border: 3px solid #24242c; /* Espacio alrededor del "pulgar" */
+  border: 3px solid #9f2241; /* Espacio alrededor del "pulgar" */
 }
 
 /* Estilo para la barra de desplazamiento en Firefox */
 html {
   scrollbar-width: thin; /* Ancho de la barra de desplazamiento */
-  scrollbar-color: #155A96 #24242c; /* Color del "pulgar" y la pista */
+  scrollbar-color: #9f2241 #fff/* Color del "pulgar" y la pista */
 }

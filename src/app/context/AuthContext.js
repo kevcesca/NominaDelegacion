@@ -1,5 +1,7 @@
-'use client'
+'use client';
 import React, { createContext, useContext, useState } from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from '../$tema/theme';  // Asegúrate de que la ruta es correcta
 
 const AuthContext = createContext();
 
@@ -11,7 +13,9 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
-            {children}
+            <ThemeProvider theme={theme}>
+                {children}
+            </ThemeProvider>
         </AuthContext.Provider>
     );
 };

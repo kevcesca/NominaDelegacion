@@ -25,7 +25,8 @@ const Login = () => {
             <Container component="main" maxWidth="xs" className={styles.tWhite}>
                 <Box
                     sx={{
-                        marginTop: 8,
+                        marginTop: 4,
+                        marginBottom: 4,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
@@ -40,7 +41,7 @@ const Login = () => {
                             alignItems: 'center',
                         }}
                     >
-                        <AccountCircleIcon sx={{ fontSize: 100, color: 'white' }} />
+                        <AccountCircleIcon sx={{ fontSize: 100, color: '#711c31' }} />
                         <Typography component="h1" variant="h5" className={styles.tWhite}>
                             Bienvenido
                         </Typography>
@@ -75,6 +76,7 @@ const Login = () => {
                                 type="button"
                                 fullWidth
                                 variant="contained"
+                                color="primary"
                                 sx={{ mt: 3, mb: 2 }}
                                 onClick={handleLogin}
                             >

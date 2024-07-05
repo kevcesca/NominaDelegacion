@@ -2,8 +2,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #0F0F12 !important;
-    color: #fff !important;
+    background-color: #711c31 !important; /* Color primario oscuro */
+    color: #fff !important; /* Color del texto */
     padding: 3rem;
     margin: 5rem auto;
     border-radius: 10px;
@@ -25,6 +25,7 @@
 }
 
 .button {
-    background-color: #ff9800;
+    background-color: #bc955c !important; /* Color secundario principal */
+    color: #fff !important;
     margin-top: 2rem !important;
 }

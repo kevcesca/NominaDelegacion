@@ -7,37 +7,35 @@
 
 .customTabMenu {
     background-color: var(--custom-bg-color) !important;
-    /* Color de fondo personalizado */
     width: 100%;
+    border: 6px solid #bc955c;
+    border-radius: 10px;
 }
 
 .customTabMenuNav {
-    background-color: #24242c !important;
+    background-color: #235b4e !important;
     color: white;
     display: flex;
     justify-content: space-between;
     padding: 0 2rem;
+    position: relative; /* Añadido */
 }
 
 .customTabMenuItem {
     color: var(--custom-text-color) !important;
-    /* Color del texto de los ítems */
     flex: 1;
     text-align: center;
 }
 
 .customTabMenuItemLink:hover {
-    background-color: #104674 !important;
-    /* Color de fondo al pasar el mouse */
+    background-color: #9f2241 !important;
     color: var(--custom-text-color) !important;
-    /* Color del texto al pasar el mouse */
+    border-radius: 10px;
 }
 
 .customTabMenuItemLink {
     background-color: var(--custom-bg-color) !important;
-    /* Color de fondo de los ítems */
     color: var(--custom-text-color) !important;
-    /* Color del texto de los ítems */
 }
 
 .navbar {
@@ -47,7 +45,8 @@
 }
 
 .image {
-    width: 400px; /* Ajusta el tamaño de las imágenes según tus necesidades */
+    width: 400px;
     height: auto;
     margin: 1rem;
 }
+

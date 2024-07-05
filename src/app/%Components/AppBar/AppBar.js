@@ -78,6 +78,7 @@ export default function AppBar() {
                     action: { className: styles.customTabMenuItemLink }
                 }}
             />
+            <div className={styles.underline}></div> {/* Añadido */}
         </div>
     );
 }

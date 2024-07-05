@@ -4,13 +4,18 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #f0f0f0;
 }
 
 .card {
     width: 100%;
     max-width: 600px;
     margin: 2rem;
+    background-color: white;
+    border-radius: 12px;
+    border: 15px solid #711c31;
+    padding: 2rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
 .title {

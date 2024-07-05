@@ -4,24 +4,26 @@
     font-weight: 700;
     font-style: normal;
     color: black;
+    border-radius: 5px;
 }
 
 .hamburgerIcon, .tWhite{
-    color: white;
+    color: #9f2241;
     text-decoration: none;
 }
 
 .hamburgerIcon:hover{
-    background-color: #104674;
+    background-color: #9f2241;
+    color: white;
 }
 
 .bgblack{
-    background-color: #0F0F12;
+    background-color: #ffffffad;
     inherits: true;
 }
 
 .bgblack:hover{
-    background-color: #104674 !important; 
+    background-color: #9f2241 !important; 
 }
 
 
