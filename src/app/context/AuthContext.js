@@ -1,29 +1,43 @@
 'use client';
-import React, { createContext, useContext, useState } from 'react';
-import { ThemeProvider } from '@mui/material/styles';
-import theme from '../$tema/theme';  // Asegúrate de que la ruta es correcta
+// src/app/context/AuthContext.js
+
+import { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const router = useRouter();
 
-    const login = () => setIsLoggedIn(true);
-    const logout = () => setIsLoggedIn(false);
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            setIsLoggedIn(true);
+        } else {
+            setIsLoggedIn(false);
+        }
+    }, []);
+
+    const login = () => {
+        setIsLoggedIn(true);
+        localStorage.setItem('authToken', 'dummy_token'); // Simulate a token
+        router.push('/');
+    };
+
+    const logout = () => {
+        setIsLoggedIn(false);
+        localStorage.removeItem('authToken');
+        router.push('/login');
+    };
 
     return (
         <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
-            <ThemeProvider theme={theme}>
-                {children}
-            </ThemeProvider>
+            {children}
         </AuthContext.Provider>
     );
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+    return useContext(AuthContext);
 };

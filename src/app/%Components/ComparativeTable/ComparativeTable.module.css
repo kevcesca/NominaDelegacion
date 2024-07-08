@@ -12,15 +12,15 @@
 
 .noCoinciden {
     color: white;
-    background-color: #d31525; /* rojo claro */
+    background-color: #9f2241; /* rojo claro */
 }
 
 .cambioCuenta {
     color: white;
-    background-color: #c6c622; /* naranja claro */
+    background-color: #bc955c; /* naranja claro */
 }
 
 .incompleto {
     color: white;
-    background-color: #427cb1; /* morado claro */
+    background-color: #235b4e; /* morado claro */
 }

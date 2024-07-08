@@ -48,6 +48,13 @@ export default function NavBar() {
           <button className={styles.botonNavbar} onClick={() => setCollapsed(!collapsed)}>
             <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
           </button>
+          <SubMenu label="Configuración" icon={<SettingsIcon />} >
+            <Link className={styles.tWhite} href="/CargarLogo" passHref>
+              <MenuItem icon={<MemoryIcon />} className={styles.bgblack}> Cambiar Logo</MenuItem>
+            </Link>
+            <MenuItem icon={<CloudIcon />} className={styles.bgblack}> Red</MenuItem>
+            <MenuItem icon={<ComputerIcon />} className={styles.bgblack}> Aplicaciones</MenuItem>
+          </SubMenu>
           <SubMenu label="Nomina" icon={<SecurityIcon />}>
             <Link className={styles.tWhite} href="/CrearNomina" passHref>
               <MenuItem icon={<PeopleIcon />} className={styles.bgblack}> Crear Nomina</MenuItem>
