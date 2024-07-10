@@ -52,7 +52,9 @@ export default function NavBar() {
             <Link className={styles.tWhite} href="/CargarLogo" passHref>
               <MenuItem icon={<MemoryIcon />} className={styles.bgblack}> Cambiar Logo</MenuItem>
             </Link>
-            <MenuItem icon={<CloudIcon />} className={styles.bgblack}> Red</MenuItem>
+            <Link className={styles.tWhite} href="/Calendario" passHref>
+              <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Calendario</MenuItem>
+            </Link>
             <MenuItem icon={<ComputerIcon />} className={styles.bgblack}> Aplicaciones</MenuItem>
           </SubMenu>
           <SubMenu label="Nomina" icon={<SecurityIcon />}>
