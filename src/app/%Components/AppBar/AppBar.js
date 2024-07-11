@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { TabMenu } from 'primereact/tabmenu';
 import styles from './AppBar.module.css';
 import Image from 'next/image';
-import { useAuth } from '../../context/AuthContext';
+import { signOut } from 'next-auth/react';
 import HomeIcon from '@mui/icons-material/Home';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GroupIcon from '@mui/icons-material/Group';
@@ -13,7 +13,6 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 export default function AppBar() {
     const [activeIndex, setActiveIndex] = useState(0);
     const router = useRouter();
-    const { logout } = useAuth();
 
     const items = [
         { 
@@ -35,8 +34,7 @@ export default function AppBar() {
             label: 'Cerrar Sesión', 
             icon: <ExitToAppIcon />, 
             command: () => { 
-                logout(); 
-                router.push('/logout'); 
+                signOut({ callbackUrl: '/' });
             } 
         }
     ];

@@ -1,23 +1,36 @@
 'use client';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { useAuth } from '../../context/AuthContext';
 import { Button, TextField, Container, Typography, Box, ThemeProvider } from '@mui/material';
+import GoogleIcon from '@mui/icons-material/Google';
 import styles from './Login.module.css';
 import theme from '../../$tema/theme';
 
 const Login = () => {
-    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const router = useRouter();
+    const [error, setError] = useState('');
 
-    const handleLogin = () => {
-        login();
-        router.push('/'); // Redirige a la página de inicio
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        const result = await signIn('credentials', {
+            redirect: false,
+            email,
+            password
+        });
+
+        if (!result.error) {
+            window.location.href = '/';
+        } else {
+            setError('Invalid email or password');
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        signIn('google');
     };
 
     return (
@@ -45,7 +58,7 @@ const Login = () => {
                         <Typography component="h1" variant="h5" className={styles.tWhite}>
                             Bienvenido
                         </Typography>
-                        <Box component="form" noValidate sx={{ mt: 1 }}>
+                        <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleLogin}>
                             <TextField
                                 margin="normal"
                                 required
@@ -72,17 +85,31 @@ const Login = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Password"
                             />
+                            {error && (
+                                <Typography color="error" align="center" sx={{ mt: 2 }}>
+                                    {error}
+                                </Typography>
+                            )}
                             <Button
-                                type="button"
+                                type="submit"
                                 fullWidth
                                 variant="contained"
                                 color="primary"
                                 sx={{ mt: 3, mb: 2 }}
-                                onClick={handleLogin}
                             >
                                 Iniciar
                             </Button>
-                            <Link className={styles.tWhite} href="/RecuperarContra" passHref> 
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="primary"
+                                startIcon={<GoogleIcon />}
+                                onClick={handleGoogleSignIn}
+                                sx={{ mt: 1, mb: 2 }}
+                            >
+                                Iniciar con Google
+                            </Button>
+                            <Link className={styles.tWhite} href="/RecuperarContra" passHref>
                                 <Typography variant="body2" align="center" sx={{ mt: 2 }}>
                                     ¿Perdiste tu contraseña?
                                 </Typography>

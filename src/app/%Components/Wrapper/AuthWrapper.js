@@ -1,7 +1,9 @@
+// src/app/%Components/Wrapper/AuthWrapper.js
+
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
+import { useSession } from 'next-auth/react';
 import Wrapper from './Wrapper';
 import Login from '../Login/Login';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -24,12 +26,16 @@ const theme = createTheme({
 });
 
 const AuthWrapper = ({ children }) => {
-    const { isLoggedIn } = useAuth();
+    const { data: session, status } = useSession();
     const router = useRouter();
 
     const publicRoutes = ['/RecuperarContra', '/Registrarse'];
 
-    if (!isLoggedIn && !publicRoutes.includes(router.pathname)) {
+    if (status === 'loading') {
+        return <div>Loading...</div>; // O un spinner de carga, si prefieres
+    }
+
+    if (!session && !publicRoutes.includes(router.pathname)) {
         return (
             <ThemeProvider theme={theme}>
                 <Login />
