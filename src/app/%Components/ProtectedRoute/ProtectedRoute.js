@@ -1,30 +1,19 @@
-// src/app/%Components/ProtectedRoute/ProtectedRoute.js
-'use client';
+// src/components/ProtectedRoute.js
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
-
-const publicRoutes = ['/login', '/RecuperarContra', '/Registrarse'];
 
 const ProtectedRoute = ({ children }) => {
-    const { isLoggedIn } = useAuth();
+    const { data: session, status } = useSession();
     const router = useRouter();
 
     useEffect(() => {
-        const isPublicRoute = publicRoutes.includes(router.pathname);
-        console.log(router.pathname)
+        if (status === 'loading') return; // Do nothing while loading
+        if (!session) router.push('/Login'); // Redirect if not authenticated
+    }, [session, status, router]);
 
-        if (!isLoggedIn && !isPublicRoute) {
-            router.push('/login');
-        }
-        if (isLoggedIn && isPublicRoute) {
-            router.push('/');
-        }
-    }, [isLoggedIn, router]);
-
-    const isPublicRoute = publicRoutes.includes(router.pathname);
-    if (!isLoggedIn && !isPublicRoute) {
-        return null; // O muestra un cargador
+    if (status === 'loading' || !session) {
+        return <div>Loading...</div>; // Add a loading spinner or message
     }
 
     return children;

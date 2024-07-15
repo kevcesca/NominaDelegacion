@@ -1,11 +1,10 @@
-// src/app/%Components/Wrapper/AuthWrapper.js
-
 'use client';
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Wrapper from './Wrapper';
 import Login from '../Login/Login';
+import Registrarse from '../Registrarse/Registrarse';
+import RecuperarContra from '../RecuperarContra/RecuperarContra';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
@@ -27,29 +26,55 @@ const theme = createTheme({
 
 const AuthWrapper = ({ children }) => {
     const { data: session, status } = useSession();
-    const router = useRouter();
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
 
-    const publicRoutes = ['/RecuperarContra', '/Registrarse'];
+    console.log("Session:", session);
+    console.log("Pathname:", pathname);
+
+    const publicRoutes = ['/RecuperarContra', '/Registrarse', '/Login'];
 
     if (status === 'loading') {
         return <div>Loading...</div>; // O un spinner de carga, si prefieres
     }
 
-    if (!session && !publicRoutes.includes(router.pathname)) {
+    else if (!session) {
+        switch (pathname) {
+            case '/Registrarse':
+                return (
+                    <ThemeProvider theme={theme}>
+                        <Registrarse />
+                    </ThemeProvider>
+                );
+            case '/RecuperarContra':
+                return (
+                    <ThemeProvider theme={theme}>
+                        <RecuperarContra />
+                    </ThemeProvider>
+                );
+            case '/Login':
+                return (
+                    <ThemeProvider theme={theme}>
+                        <Login />
+                    </ThemeProvider>
+                );
+            default:
+                return (
+                    <ThemeProvider theme={theme}>
+                        <Login />
+                    </ThemeProvider>
+                );
+        }
+    }
+
+    else if (session) {
         return (
             <ThemeProvider theme={theme}>
-                <Login />
+                <Wrapper>
+                    {children}
+                </Wrapper>
             </ThemeProvider>
         );
     }
-
-    return (
-        <ThemeProvider theme={theme}>
-            <Wrapper>
-                {children}
-            </Wrapper>
-        </ThemeProvider>
-    );
 };
 
 export default AuthWrapper;

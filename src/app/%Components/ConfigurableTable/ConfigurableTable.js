@@ -1,51 +1,109 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     TextField,
-    MenuItem,
-    Button,
-    Box,
-    Typography,
     Table,
     TableHead,
     TableBody,
     TableRow,
     TableCell,
-    Select,
-    ThemeProvider,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
+    Box,
+    Button,
+    ThemeProvider
 } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import theme from '../../$tema/theme';
 import styles from './ConfigurableTable.module.css';
+import dayjs from 'dayjs';
+import data from './data.json'; // Importa el archivo JSON
 
 const ConfigurableTable = ({ year }) => {
-    const [dates, setDates] = useState(
-        Array.from({ length: 24 }, () => ({
-            captura: null,
-            revision: null,
-            preNomina: null,
-            validacion: null,
-            atencion: null,
-            cierre: null,
-            publicacion: null,
-            traslado: null,
-            ministracion: null,
-            diasPago: null,
-            inicioCaptura: null,
-            cierreCaptura: null,
-            publicacionWeb: null
-        }))
-    );
+    const [dates, setDates] = useState([]);
+
+    useEffect(() => {
+        // Cargar los datos del año seleccionado desde el JSON
+        if (data[year]) {
+            setDates(data[year].map(item => ({
+                captura: item.captura ? dayjs(item.captura) : null,
+                revision: item.revision ? dayjs(item.revision) : null,
+                preNomina: item.preNomina ? dayjs(item.preNomina) : null,
+                validacion: item.validacion ? dayjs(item.validacion) : null,
+                atencion: item.atencion ? dayjs(item.atencion) : null,
+                cierre: item.cierre ? dayjs(item.cierre) : null,
+                publicacion: item.publicacion ? dayjs(item.publicacion) : null,
+                traslado: item.traslado ? dayjs(item.traslado) : null,
+                ministracion: item.ministracion ? dayjs(item.ministracion) : null,
+                diasPago: item.diasPago ? dayjs(item.diasPago) : null,
+                inicioCaptura: item.inicioCaptura ? dayjs(item.inicioCaptura) : null,
+                cierreCaptura: item.cierreCaptura ? dayjs(item.cierreCaptura) : null,
+                publicacionWeb: item.publicacionWeb ? dayjs(item.publicacionWeb) : null,
+            })));
+        } else {
+            setDates(
+                Array.from({ length: 24 }, () => ({
+                    captura: null,
+                    revision: null,
+                    preNomina: null,
+                    validacion: null,
+                    atencion: null,
+                    cierre: null,
+                    publicacion: null,
+                    traslado: null,
+                    ministracion: null,
+                    diasPago: null,
+                    inicioCaptura: null,
+                    cierreCaptura: null,
+                    publicacionWeb: null
+                }))
+            );
+        }
+    }, [year]);
 
     const handleDateChange = (index, key, newValue) => {
         const newDates = [...dates];
         newDates[index][key] = newValue;
         setDates(newDates);
+    };
+
+    const saveDates = async () => {
+        const updatedData = dates.map(date => ({
+            captura: date.captura ? date.captura.format('YYYY-MM-DD') : null,
+            revision: date.revision ? date.revision.format('YYYY-MM-DD') : null,
+            preNomina: date.preNomina ? date.preNomina.format('YYYY-MM-DD') : null,
+            validacion: date.validacion ? date.validacion.format('YYYY-MM-DD') : null,
+            atencion: date.atencion ? date.atencion.format('YYYY-MM-DD') : null,
+            cierre: date.cierre ? date.cierre.format('YYYY-MM-DD') : null,
+            publicacion: date.publicacion ? date.publicacion.format('YYYY-MM-DD') : null,
+            traslado: date.traslado ? date.traslado.format('YYYY-MM-DD') : null,
+            ministracion: date.ministracion ? date.ministracion.format('YYYY-MM-DD') : null,
+            diasPago: date.diasPago ? date.diasPago.format('YYYY-MM-DD') : null,
+            inicioCaptura: date.inicioCaptura ? date.inicioCaptura.format('YYYY-MM-DD') : null,
+            cierreCaptura: date.cierreCaptura ? date.cierreCaptura.format('YYYY-MM-DD') : null,
+            publicacionWeb: date.publicacionWeb ? date.publicacionWeb.format('YYYY-MM-DD') : null,
+        }));
+
+        data[year] = updatedData;
+
+        try {
+            // Guarda los datos actualizados en el archivo JSON
+            const response = await fetch('/api/saveDates', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save dates');
+            }
+
+            alert('Fechas guardadas correctamente');
+        } catch (error) {
+            console.error('Error saving dates:', error);
+            alert('Error al guardar las fechas');
+        }
     };
 
     const quincenas = [
@@ -63,108 +121,57 @@ const ConfigurableTable = ({ year }) => {
     ];
 
     return (
-        <Box className={styles.tableContainer}>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        {headers.map((header) => (
-                            <TableCell
-                                key={header}
-                                sx={{
-                                    backgroundColor: theme.palette.secondary.main,
-                                    color: 'white',
-                                    textAlign: 'center',
-                                    position: 'sticky',
-                                    top: -20,
-                                    paddingTop: '10px',
-                                    zIndex: 1
-                                }}
-                                className={styles.tableHeader}
-                            >
-                                {header}
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {quincenas.map((quincena, index) => (
-                        <TableRow key={quincena}>
-                            <TableCell>{quincena}</TableCell>
-                            {Object.keys(dates[0]).map((key) => (
-                                <TableCell key={key} sx={{ minWidth: 180 }}>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                            value={dates[index][key]}
-                                            onChange={(newValue) => handleDateChange(index, key, newValue)}
-                                            renderInput={(params) => (
-                                                <TextField {...params} variant="outlined" size="small" fullWidth className={styles.datePicker} />
-                                            )}
-                                        />
-                                    </LocalizationProvider>
+        <ThemeProvider theme={theme}>
+            <Box className={styles.tableContainer}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            {headers.map((header) => (
+                                <TableCell
+                                    key={header}
+                                    sx={{
+                                        backgroundColor: theme.palette.secondary.main,
+                                        color: 'white',
+                                        textAlign: 'center',
+                                        position: 'sticky',
+                                        top: -20,
+                                        paddingTop: '10px',
+                                        zIndex: 1
+                                    }}
+                                    className={styles.tableHeader}
+                                >
+                                    {header}
                                 </TableCell>
                             ))}
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </Box>
-    );
-};
-
-const YearSelector = () => {
-    const [year, setYear] = useState(new Date().getFullYear());
-    const [showTable, setShowTable] = useState(false);
-
-    const handleYearChange = (event) => {
-        setYear(event.target.value);
-    };
-
-    const handleShowTable = () => {
-        setShowTable(true);
-    };
-
-    const handleClose = () => {
-        setShowTable(false);
-    };
-
-    return (
-        <ThemeProvider theme={theme}>
-            <Box sx={{ padding: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                    Seleccionar Año
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Select value={year} onChange={handleYearChange} displayEmpty>
-                        {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map((y) => (
-                            <MenuItem key={y} value={y}>
-                                {y}
-                            </MenuItem>
+                    </TableHead>
+                    <TableBody>
+                        {quincenas.map((quincena, index) => (
+                            <TableRow key={quincena}>
+                                <TableCell>{quincena}</TableCell>
+                                {dates[index] && Object.keys(dates[index]).map((key) => (
+                                    <TableCell key={key} sx={{ minWidth: 180 }}>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DatePicker
+                                                value={dates[index][key]}
+                                                onChange={(newValue) => handleDateChange(index, key, newValue)}
+                                                renderInput={(params) => (
+                                                    <TextField {...params} variant="outlined" size="small" fullWidth className={styles.datePicker} />
+                                                )}
+                                            />
+                                        </LocalizationProvider>
+                                    </TableCell>
+                                ))}
+                            </TableRow>
                         ))}
-                    </Select>
-                    <Button variant="contained" color="primary" onClick={handleShowTable} sx={{ marginLeft: 2 }}>
-                        Mostrar Tabla
-                    </Button>
-                </Box>
-                <Dialog
-                    open={showTable}
-                    onClose={handleClose}
-                    maxWidth="xl"
-                    fullWidth
-                    scroll="paper"
-                >
-                    <DialogTitle>Configurar Fechas de Quincenas - Año {year}</DialogTitle>
-                    <DialogContent dividers>
-                        <ConfigurableTable year={year} />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleClose} color="primary">
-                            Cerrar
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+                    </TableBody>
+                </Table>
+                <Button variant="contained" color="primary" onClick={saveDates} sx={{ marginTop: 2 }}>
+                    Guardar Fechas
+                </Button>
             </Box>
         </ThemeProvider>
     );
 };
 
-export default YearSelector;
+export default ConfigurableTable;

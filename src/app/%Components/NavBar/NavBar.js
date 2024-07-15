@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Sidebar, Menu, MenuItem, SubMenu, sidebarClasses } from 'react-pro-sidebar';
 import styles from './NavBar.module.css';
+import { useSession } from 'next-auth/react';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -15,6 +16,8 @@ import CloudIcon from '@mui/icons-material/Cloud';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import MoneyIcon from '@mui/icons-material/Money';
+
+
 
 export default function NavBar() {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -49,13 +52,15 @@ export default function NavBar() {
             <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
           </button>
           <SubMenu label="Configuración" icon={<SettingsIcon />} >
-            <Link className={styles.tWhite} href="/CargarLogo" passHref>
-              <MenuItem icon={<MemoryIcon />} className={styles.bgblack}> Cambiar Logo</MenuItem>
-            </Link>
-            <Link className={styles.tWhite} href="/Calendario" passHref>
-              <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Calendario</MenuItem>
-            </Link>
             <MenuItem icon={<ComputerIcon />} className={styles.bgblack}> Aplicaciones</MenuItem>
+          </SubMenu>
+          <SubMenu label="Calendario" icon={<SettingsIcon />} >
+            <Link className={styles.tWhite} href="/Calendario" passHref>
+              <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Editar</MenuItem>
+            </Link>
+            <Link className={styles.tWhite} href="/Calendario/Exportar" passHref>
+              <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Exportar</MenuItem>
+            </Link>
           </SubMenu>
           <SubMenu label="Nomina" icon={<SecurityIcon />}>
             <Link className={styles.tWhite} href="/CrearNomina" passHref>

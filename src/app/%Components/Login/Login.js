@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
-import Link from 'next/link';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Button, TextField, Container, Typography, Box, ThemeProvider } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -31,6 +30,14 @@ const Login = () => {
 
     const handleGoogleSignIn = async () => {
         signIn('google');
+    };
+
+    const handleRecoverPassword = () => {
+        window.location.href = '/RecuperarContra';
+    };
+
+    const handleRegister = () => {
+        window.location.href = '/Registrarse';
     };
 
     return (
@@ -109,16 +116,24 @@ const Login = () => {
                             >
                                 Iniciar con Google
                             </Button>
-                            <Link className={styles.tWhite} href="/RecuperarContra" passHref>
-                                <Typography variant="body2" align="center" sx={{ mt: 2 }}>
-                                    ¿Perdiste tu contraseña?
-                                </Typography>
-                            </Link>
-                            <Link className={styles.tWhite} href="/Registrarse" passHref>
-                                <Typography variant="body2" align="center" sx={{ mt: 1 }}>
-                                    ¿No tienes cuenta? Regístrate
-                                </Typography>
-                            </Link>
+                            <Button
+                                fullWidth
+                                variant="text"
+                                color="primary"
+                                onClick={handleRecoverPassword}
+                                sx={{ mt: 2 }}
+                            >
+                                ¿Perdiste tu contraseña?
+                            </Button>
+                            <Button
+                                fullWidth
+                                variant="text"
+                                color="primary"
+                                onClick={handleRegister}
+                                sx={{ mt: 1 }}
+                            >
+                                ¿No tienes cuenta? Regístrate
+                            </Button>
                         </Box>
                     </Box>
                 </Box>

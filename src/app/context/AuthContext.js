@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         setIsLoggedIn(false);
         localStorage.removeItem('authToken');
-        router.push('/login');
+        router.push('/RecuperarContra');
     };
 
     return (
