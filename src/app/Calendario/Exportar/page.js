@@ -15,7 +15,7 @@ const Page = () => {
 
     return (
         <main className={styles.main}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 5 }}>
                 <FormControl>
                     <InputLabel id="year-label">Seleccionar Año</InputLabel>
                     <Select

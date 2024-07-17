@@ -2,22 +2,19 @@ import React from 'react';
 import Link from 'next/link';
 import { Sidebar, Menu, MenuItem, SubMenu, sidebarClasses } from 'react-pro-sidebar';
 import styles from './NavBar.module.css';
-import { useSession } from 'next-auth/react';
-
 import SettingsIcon from '@mui/icons-material/Settings';
 import MenuIcon from '@mui/icons-material/Menu';
 import PeopleIcon from '@mui/icons-material/People';
 import SecurityIcon from '@mui/icons-material/Security';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AssessmentIcon from '@mui/icons-material/Assessment';
-import MemoryIcon from '@mui/icons-material/Memory';
 import ComputerIcon from '@mui/icons-material/Computer';
 import CloudIcon from '@mui/icons-material/Cloud';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import MoneyIcon from '@mui/icons-material/Money';
-
-
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
 export default function NavBar() {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -52,22 +49,22 @@ export default function NavBar() {
             <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
           </button>
           <SubMenu label="Configuración" icon={<SettingsIcon />} >
-            <MenuItem icon={<ComputerIcon />} className={styles.bgblack}> Aplicaciones</MenuItem>
+            <MenuItem icon={<ComputerIcon />} className={styles.bgblack}>Aplicaciones</MenuItem>
           </SubMenu>
-          <SubMenu label="Calendario" icon={<SettingsIcon />} >
+          <SubMenu label="Calendario" icon={<CalendarTodayIcon />} >
             <Link className={styles.tWhite} href="/Calendario" passHref>
-              <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Editar</MenuItem>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Editar</MenuItem>
             </Link>
             <Link className={styles.tWhite} href="/Calendario/Exportar" passHref>
               <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Exportar</MenuItem>
             </Link>
           </SubMenu>
-          <SubMenu label="Nomina" icon={<SecurityIcon />}>
+          <SubMenu label="Nómina" icon={<SecurityIcon />}>
             <Link className={styles.tWhite} href="/CrearNomina" passHref>
-              <MenuItem icon={<PeopleIcon />} className={styles.bgblack}> Crear Nomina</MenuItem>
+              <MenuItem icon={<PeopleIcon />} className={styles.bgblack}>Crear Nómina</MenuItem>
             </Link>
             <Link className={styles.tWhite} href="/Validacion" passHref>
-              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}> Validacion de nomina</MenuItem>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Validación de Nómina</MenuItem>
             </Link>
             <Link className={styles.tWhite} href="/SubirEvidencia" passHref>
               <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Subir Evidencia</MenuItem>
@@ -75,12 +72,17 @@ export default function NavBar() {
           </SubMenu>
           <SubMenu label="Reportes" icon={<AssessmentIcon />}>
             <Link className={styles.tWhite} href="/Reportes" passHref>
-              <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Generar reporte</MenuItem>
+              <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Generar Reporte</MenuItem>
+            </Link>
+          </SubMenu>
+          <SubMenu label="Historial" icon={<FormatListBulletedIcon />}>
+            <Link className={styles.tWhite} href="/ConsultarHistorial" passHref>
+              <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Consultar Historial</MenuItem>
             </Link>
           </SubMenu>
           <SubMenu label="Cheques" icon={<MoneyIcon />}>
             <Link className={styles.tWhite} href="/GenerarCheque" passHref>
-              <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Generar cheque</MenuItem>
+              <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Generar Cheque</MenuItem>
             </Link>
           </SubMenu>
         </Menu>

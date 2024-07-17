@@ -7,3 +7,13 @@
     max-width: 200px;
 }
 
+.tituloTabla{
+    align-self: center;
+    text-align: center;
+    color: white;
+    width: 92.5vw;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    background-color: #bc955c;
+    translate: 0 10px;
+}

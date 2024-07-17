@@ -2,13 +2,13 @@
 import React from 'react';
 import {
     Box,
-    Typography,
     Table,
     TableHead,
     TableBody,
     TableRow,
     TableCell,
     Button,
+    Typography,
     ThemeProvider
 } from '@mui/material';
 import { jsPDF } from 'jspdf';
@@ -17,18 +17,20 @@ import theme from '../../$tema/theme';
 import styles from './ConfigurableTable.module.css';
 
 const ViewOnlyTable = ({ year, data }) => {
-    const quincenas = [
-        "1RA. ENE", "2DA. ENE", "1RA. FEB", "2DA. FEB", "1RA. MAR", "2DA. MAR",
-        "1RA. ABR", "2DA. ABR", "1RA. MAY", "2DA. MAY", "1RA. JUN", "2DA. JUN",
-        "1RA. JUL", "2DA. JUL", "1RA. AGO", "2DA. AGO", "1RA. SEP", "2DA. SEP",
-        "1RA. OCT", "2DA. OCT", "1RA. NOV", "2DA. NOV", "1RA. DIC", "2DA. DIC"
-    ];
-
     const headers = [
-        "Quincena", "Captura e Importación", "Revisiones y Cálculo de Nómina", "Pre-Nómina",
-        "Validación de Pre-Nómina", "Atención a los Problemas", "Cierre de Proceso",
-        "Publicación en Web", "Traslado de la CLC", "Ministración de Tarjetas", "Días de Pago",
-        "Inicio de Captura", "Cierre de Captura", "Publicación Web"
+        { title: "Quincena", colSpan: 1 },
+        { title: "Captura e Importación", colSpan: 1 },
+        { title: "Revisiones y Cálculo de Nómina", colSpan: 2 },
+        { title: "Pre-Nómina", colSpan: 1 },
+        { title: "Validación de Pre-Nómina", colSpan: 1 },
+        { title: "Atención a los Problemas", colSpan: 2 },
+        { title: "Cierre de Proceso", colSpan: 1 },
+        { title: "Publicación en Web", colSpan: 1 },
+        { title: "Traslado de la CLC", colSpan: 1 },
+        { title: "Ministración de Tarjetas", colSpan: 1 },
+        { title: "Días de Pago", colSpan: 2 },
+        { title: "Cierre de Captura", colSpan: 1 },
+        { title: "Publicación en Web", colSpan: 1 }
     ];
 
     const exportToPDF = () => {
@@ -44,33 +46,48 @@ const ViewOnlyTable = ({ year, data }) => {
     return (
         <ThemeProvider theme={theme}>
             <Box className={styles.tableContainer} id="tableContainer">
+                <h3 className={styles.tituloTabla} gutterBottom>
+                    Calendario de Procesos de la Nómina {year}
+                </h3>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            {headers.map((header) => (
+                            {headers.map((header, index) => (
                                 <TableCell
-                                    key={header}
+                                    key={index}
+                                    colSpan={header.colSpan}
                                     sx={{
                                         backgroundColor: theme.palette.secondary.main,
                                         color: 'white',
                                         textAlign: 'center',
+                                        border: '1px solid white' // Bordes blancos
                                     }}
                                     className={styles.tableHeader}
                                 >
-                                    {header}
+                                    {header.title}
                                 </TableCell>
                             ))}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {quincenas.map((quincena, index) => (
-                            <TableRow key={quincena}>
-                                <TableCell>{quincena}</TableCell>
-                                {data[index] && Object.keys(data[index]).map((key) => (
-                                    <TableCell key={key} sx={{ minWidth: 180 }}>
-                                        {data[index][key] ? new Date(data[index][key]).toLocaleDateString() : ''}
-                                    </TableCell>
-                                ))}
+                        {data.map((row, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{row.quincena}</TableCell>
+                                <TableCell>{new Date(row.capturaImportacion).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.revision1).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.revision2).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.preNomina).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.validacionPreNomina).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.atencion1).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.atencion2).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.cierre).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.publicacionWeb1).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.traslado).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.ministracion).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.diasPago1).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.diasPago2).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.cierreCaptura).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.publicacionWeb2).toLocaleDateString()}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

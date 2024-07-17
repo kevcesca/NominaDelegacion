@@ -26,16 +26,18 @@ const ConfigurableTable = ({ year }) => {
         if (data[year]) {
             setDates(data[year].map(item => ({
                 captura: item.captura ? dayjs(item.captura) : null,
-                revision: item.revision ? dayjs(item.revision) : null,
+                revision1: item.revision1 ? dayjs(item.revision1) : null,
+                revision2: item.revision2 ? dayjs(item.revision2) : null,
                 preNomina: item.preNomina ? dayjs(item.preNomina) : null,
                 validacion: item.validacion ? dayjs(item.validacion) : null,
-                atencion: item.atencion ? dayjs(item.atencion) : null,
+                atencion1: item.atencion1 ? dayjs(item.atencion1) : null,
+                atencion2: item.atencion2 ? dayjs(item.atencion2) : null,
                 cierre: item.cierre ? dayjs(item.cierre) : null,
                 publicacion: item.publicacion ? dayjs(item.publicacion) : null,
                 traslado: item.traslado ? dayjs(item.traslado) : null,
                 ministracion: item.ministracion ? dayjs(item.ministracion) : null,
-                diasPago: item.diasPago ? dayjs(item.diasPago) : null,
-                inicioCaptura: item.inicioCaptura ? dayjs(item.inicioCaptura) : null,
+                diasPago1: item.diasPago1 ? dayjs(item.diasPago1) : null,
+                diasPago2: item.diasPago2 ? dayjs(item.diasPago2) : null,
                 cierreCaptura: item.cierreCaptura ? dayjs(item.cierreCaptura) : null,
                 publicacionWeb: item.publicacionWeb ? dayjs(item.publicacionWeb) : null,
             })));
@@ -43,16 +45,18 @@ const ConfigurableTable = ({ year }) => {
             setDates(
                 Array.from({ length: 24 }, () => ({
                     captura: null,
-                    revision: null,
+                    revision1: null,
+                    revision2: null,
                     preNomina: null,
                     validacion: null,
-                    atencion: null,
+                    atencion1: null,
+                    atencion2: null,
                     cierre: null,
                     publicacion: null,
                     traslado: null,
                     ministracion: null,
-                    diasPago: null,
-                    inicioCaptura: null,
+                    diasPago1: null,
+                    diasPago2: null,
                     cierreCaptura: null,
                     publicacionWeb: null
                 }))
@@ -69,16 +73,18 @@ const ConfigurableTable = ({ year }) => {
     const saveDates = async () => {
         const updatedData = dates.map(date => ({
             captura: date.captura ? date.captura.format('YYYY-MM-DD') : null,
-            revision: date.revision ? date.revision.format('YYYY-MM-DD') : null,
+            revision1: date.revision1 ? date.revision1.format('YYYY-MM-DD') : null,
+            revision2: date.revision2 ? date.revision2.format('YYYY-MM-DD') : null,
             preNomina: date.preNomina ? date.preNomina.format('YYYY-MM-DD') : null,
             validacion: date.validacion ? date.validacion.format('YYYY-MM-DD') : null,
-            atencion: date.atencion ? date.atencion.format('YYYY-MM-DD') : null,
+            atencion1: date.atencion1 ? date.atencion1.format('YYYY-MM-DD') : null,
+            atencion2: date.atencion2 ? date.atencion2.format('YYYY-MM-DD') : null,
             cierre: date.cierre ? date.cierre.format('YYYY-MM-DD') : null,
             publicacion: date.publicacion ? date.publicacion.format('YYYY-MM-DD') : null,
             traslado: date.traslado ? date.traslado.format('YYYY-MM-DD') : null,
             ministracion: date.ministracion ? date.ministracion.format('YYYY-MM-DD') : null,
-            diasPago: date.diasPago ? date.diasPago.format('YYYY-MM-DD') : null,
-            inicioCaptura: date.inicioCaptura ? date.inicioCaptura.format('YYYY-MM-DD') : null,
+            diasPago1: date.diasPago1 ? date.diasPago1.format('YYYY-MM-DD') : null,
+            diasPago2: date.diasPago2 ? date.diasPago2.format('YYYY-MM-DD') : null,
             cierreCaptura: date.cierreCaptura ? date.cierreCaptura.format('YYYY-MM-DD') : null,
             publicacionWeb: date.publicacionWeb ? date.publicacionWeb.format('YYYY-MM-DD') : null,
         }));
@@ -114,10 +120,10 @@ const ConfigurableTable = ({ year }) => {
     ];
 
     const headers = [
-        "Quincena", "Captura e Importación", "Revisiones y Cálculo de Nómina", "Pre-Nómina",
-        "Validación de Pre-Nómina", "Atención a los Problemas", "Cierre de Proceso",
-        "Publicación en Web", "Traslado de la CLC", "Ministración de Tarjetas", "Días de Pago",
-        "Inicio de Captura", "Cierre de Captura", "Publicación Web"
+        "Quincena", "Captura e Importación", "Revisiones y Cálculo de Nómina 1", "Revisiones y Cálculo de Nómina 2", "Pre-Nómina",
+        "Validación de Pre-Nómina", "Atención a los Problemas 1", "Atención a los Problemas 2", "Cierre de Proceso",
+        "Publicación en Web", "Traslado de la CLC", "Ministración de Tarjetas", "Días de Pago 1",
+        "Días de Pago 2", "Cierre de Captura", "Publicación Web"
     ];
 
     return (
@@ -175,3 +181,6 @@ const ConfigurableTable = ({ year }) => {
 };
 
 export default ConfigurableTable;
+
+
+
