@@ -1,9 +1,14 @@
 // src/app/layout.js
 import { Inter } from 'next/font/google';
 import './globals.css';
+import 'primereact/resources/themes/saga-blue/theme.css'; 
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 import { AuthProvider } from './context/AuthContext';
 import AuthWrapper from './%Components/Wrapper/AuthWrapper';
 import SessionProviderWrapper from './%Components/Wrapper/SessionProviderWrapper';
+import { AlertProvider } from './context/AlertContext';
+import AlertWrapper from './%Components/Wrapper/AlertWrapper'; 
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,7 +24,11 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <SessionProviderWrapper>
           <AuthProvider>
-            <AuthWrapper>{children}</AuthWrapper>
+            <AlertProvider>
+              <AuthWrapper>
+                <AlertWrapper>{children}</AlertWrapper>
+              </AuthWrapper>
+            </AlertProvider>
           </AuthProvider>
         </SessionProviderWrapper>
       </body>

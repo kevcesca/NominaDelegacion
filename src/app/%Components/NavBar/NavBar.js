@@ -49,7 +49,9 @@ export default function NavBar() {
             <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
           </button>
           <SubMenu label="Configuración" icon={<SettingsIcon />} >
-            <MenuItem icon={<ComputerIcon />} className={styles.bgblack}>Aplicaciones</MenuItem>
+            <Link className={styles.tWhite} href="/Configuracion/Alertas" passHref>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Alertas</MenuItem>
+            </Link>
           </SubMenu>
           <SubMenu label="Calendario" icon={<CalendarTodayIcon />} >
             <Link className={styles.tWhite} href="/Calendario" passHref>

@@ -12,6 +12,7 @@ import { Toolbar } from 'primereact/toolbar';
 import { Checkbox } from 'primereact/checkbox';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
+import { Tooltip } from 'primereact/tooltip';
 import 'primereact/resources/themes/saga-blue/theme.css';  // o el tema que estés usando
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -169,6 +170,16 @@ export default function TablaUsuarios() {
         );
     };
 
+    const roleBodyTemplate = (rowData) => {
+        const roleInfo = rowData.role === 'admin' ? 'Puede ver todas las vistas y modificar a otros usuarios' : 'Solo puede ver algunas vistas';
+        return (
+            <span>
+                <span className="p-overlay-badge" data-pr-tooltip={roleInfo}>{rowData.role}</span>
+                <Tooltip target=".p-overlay-badge" />
+            </span>
+        );
+    };
+
     const header = (
         <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
             <h4 className="m-0">Manage Users</h4>
@@ -228,7 +239,7 @@ export default function TablaUsuarios() {
                     <Column field="nombre" header="Nombre" sortable style={{ minWidth: '150px' }}></Column>
                     <Column field="apellidos" header="Apellidos" sortable style={{ minWidth: '150px' }}></Column>
                     <Column field="email" header="Email" sortable style={{ minWidth: '200px' }}></Column>
-                    <Column field="role" header="Role" sortable style={{ minWidth: '100px' }}></Column>
+                    <Column field="role" header="Role" body={roleBodyTemplate} sortable style={{ minWidth: '100px' }}></Column>
                     <Column field="activo" header="Activo" body={(rowData) => <Checkbox checked={rowData.activo === "SI"} disabled />} sortable style={{ minWidth: '80px' }}></Column>
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '100px' }}></Column>
                 </DataTable>
