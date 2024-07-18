@@ -53,7 +53,7 @@ export default function NavBar() {
               <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Alertas</MenuItem>
             </Link>
           </SubMenu>
-          <SubMenu label="Calendario" icon={<CalendarTodayIcon />} >
+          <SubMenu label="Calendario de nómina" icon={<CalendarTodayIcon />} >
             <Link className={styles.tWhite} href="/Calendario" passHref>
               <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Editar</MenuItem>
             </Link>
@@ -63,10 +63,10 @@ export default function NavBar() {
           </SubMenu>
           <SubMenu label="Nómina" icon={<SecurityIcon />}>
             <Link className={styles.tWhite} href="/CrearNomina" passHref>
-              <MenuItem icon={<PeopleIcon />} className={styles.bgblack}>Crear Nómina</MenuItem>
+              <MenuItem icon={<PeopleIcon />} className={styles.bgblack}>Cargar Nómina</MenuItem>
             </Link>
             <Link className={styles.tWhite} href="/Validacion" passHref>
-              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Validación de Nómina</MenuItem>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Cambios en la Nómina</MenuItem>
             </Link>
             <Link className={styles.tWhite} href="/SubirEvidencia" passHref>
               <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Subir Evidencia</MenuItem>

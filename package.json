@@ -20,8 +20,10 @@
     "axios": "^1.7.2",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.11",
+    "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "next": "14.2.3",
     "next-auth": "^4.24.7",
     "numero-a-letras": "^1.0.6",
@@ -36,7 +38,8 @@
     "react-toastify": "^10.0.5",
     "slick-carousel": "^1.8.1",
     "styled-components": "^6.1.11",
-    "swiper": "^11.1.4"
+    "swiper": "^11.1.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "20.13.0",

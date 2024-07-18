@@ -45,6 +45,18 @@ export default function TablaUsuarios() {
         { label: 'Admin', value: 'admin' }
     ];
 
+    const cols = [
+        { field: 'id', header: 'ID' },
+        { field: 'fechaAlta', header: 'Fecha Alta' },
+        { field: 'nombre', header: 'Nombre' },
+        { field: 'apellidos', header: 'Apellidos' },
+        { field: 'email', header: 'Email' },
+        { field: 'role', header: 'Role' },
+        { field: 'activo', header: 'Activo' }
+    ];
+
+    const exportColumns = cols.map(col => ({ title: col.header, dataKey: col.field }));
+
     useEffect(() => {
         UserService.getUsuarios().then(data => {
             // Convertir las fechas de los usuarios a objetos Date
@@ -144,8 +156,46 @@ export default function TablaUsuarios() {
         return password;
     };
 
-    const exportCSV = () => {
-        dt.current.exportCSV();
+    const exportCSV = (selectionOnly) => {
+        dt.current.exportCSV({ selectionOnly });
+    };
+
+    const exportPdf = () => {
+        import('jspdf').then((jsPDF) => {
+            import('jspdf-autotable').then(() => {
+                const doc = new jsPDF.default(0, 0);
+
+                doc.autoTable(exportColumns, usuarios);
+                doc.save('usuarios.pdf');
+            });
+        });
+    };
+
+    const exportExcel = () => {
+        import('xlsx').then((xlsx) => {
+            const worksheet = xlsx.utils.json_to_sheet(usuarios);
+            const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+            const excelBuffer = xlsx.write(workbook, {
+                bookType: 'xlsx',
+                type: 'array'
+            });
+
+            saveAsExcelFile(excelBuffer, 'usuarios');
+        });
+    };
+
+    const saveAsExcelFile = (buffer, fileName) => {
+        import('file-saver').then((module) => {
+            if (module && module.default) {
+                let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+                let EXCEL_EXTENSION = '.xlsx';
+                const data = new Blob([buffer], {
+                    type: EXCEL_TYPE
+                });
+
+                module.default.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+            }
+        });
     };
 
     const leftToolbarTemplate = () => {
@@ -158,7 +208,13 @@ export default function TablaUsuarios() {
     };
 
     const rightToolbarTemplate = () => {
-        return <Button label="Export" icon="pi pi-upload" className={`${styles['button-teal']} ${styles['button-margin']}`} onClick={exportCSV} />;
+        return (
+            <div className="flex align-items-center justify-content-end gap-2">
+                <Button type="button" icon="pi pi-file" rounded onClick={() => exportCSV(false)} data-pr-tooltip="CSV" />
+                <Button type="button" icon="pi pi-file-excel" severity="success" rounded onClick={exportExcel} data-pr-tooltip="XLS" />
+                <Button type="button" icon="pi pi-file-pdf" severity="warning" rounded onClick={exportPdf} data-pr-tooltip="PDF" />
+            </div>
+        );
     };
 
     const actionBodyTemplate = (rowData) => {
