@@ -1,19 +1,33 @@
-.tableContainer {
-    max-width:10vw;
+.dataTableWrapper {
+    overflow-x: auto;
+    width: 100%;
+    height: 600px; /* Ajusta la altura del contenedor */
 }
 
-.datePicker {
-    width: 200px; /* Ajusta el ancho según tus necesidades */
-    max-width: 200px;
+.flex {
+    display: flex;
 }
 
-.tituloTabla{
-    align-self: center;
-    text-align: center;
-    color: white;
-    width: 92.5vw;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    background-color: #bc955c;
-    translate: 0 10px;
+.alignItemsCenter {
+    align-items: center;
+}
+
+.justifyContentEnd {
+    justify-content: end;
+}
+
+.gap2 {
+    gap: 2rem;
+}
+
+.card {
+    overflow-x: auto;
+    padding: 1rem;
+    margin: auto;
+    max-width: 80vw;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+    background-color: #bc955c !important;
+    color: white !important;
 }
