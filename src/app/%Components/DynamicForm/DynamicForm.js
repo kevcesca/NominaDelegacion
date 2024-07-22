@@ -58,7 +58,7 @@ const DynamicForm = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <Box>
+            <Box sx={{paddingBottom: '2rem'}}>
                 <Typography variant="h6" gutterBottom>
                     Seleccione el tipo de reporte
                 </Typography>

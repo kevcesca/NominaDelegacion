@@ -1,8 +1,7 @@
-"use client";
+"use client"
 
-import React, { useState } from 'react';
-import { saveAs } from 'file-saver';
-import { TextField, Button, Grid, Box, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { TextField, Button, Container, Box } from '@mui/material';
 
 const campos = [
     "SECT_PRES", "ID_UNIDAD_ADM", "ID_EMPLEADO", "APELLIDO_1", "APELLIDO_2",
@@ -24,6 +23,14 @@ const PropertiesForm = () => {
         }, {})
     );
 
+    useEffect(() => {
+        // Cargar valores desde localStorage si están disponibles
+        const storedValues = localStorage.getItem('formValues');
+        if (storedValues) {
+            setValues(JSON.parse(storedValues));
+        }
+    }, []);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setValues({ ...values, [name]: value });
@@ -31,36 +38,43 @@ const PropertiesForm = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const properties = campos.map(campo => `${campo}=${values[campo]}`).join('\n');
-        const blob = new Blob([properties], { type: 'text/plain;charset=utf-8' });
-        saveAs(blob, 'config.properties');
+        localStorage.setItem('formValues', JSON.stringify(values));
+        alert('Valores guardados en localStorage');
+    };
+
+    const handleDownload = () => {
+        const blob = new Blob([JSON.stringify(values, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'formValues.json';
+        a.click();
+        URL.revokeObjectURL(url);
     };
 
     return (
-        <Box component="form" onSubmit={handleSubmit} sx={{ m: 2 }}>
-            <Typography variant="h6" gutterBottom>
-                Configurar Properties
-            </Typography>
-            <Grid container spacing={2}>
+        <Container>
+            <form onSubmit={handleSubmit}>
                 {campos.map(campo => (
-                    <Grid item xs={12} sm={6} key={campo}>
+                    <Box key={campo} sx={{ marginBottom: 2 }}>
                         <TextField
-                            name={campo}
                             label={campo}
+                            variant="outlined"
+                            fullWidth
+                            name={campo}
                             value={values[campo]}
                             onChange={handleChange}
-                            fullWidth
-                            variant="outlined"
                         />
-                    </Grid>
+                    </Box>
                 ))}
-                <Grid item xs={12}>
-                    <Button type="submit" variant="contained" color="primary">
-                        Guardar Archivo Properties
-                    </Button>
-                </Grid>
-            </Grid>
-        </Box>
+                <Button type="submit" variant="contained" color="primary">
+                    Guardar en localStorage
+                </Button>
+                <Button variant="contained" color="secondary" onClick={handleDownload} sx={{ ml: 2 }}>
+                    Descargar JSON
+                </Button>
+            </form>
+        </Container>
     );
 };
 

@@ -13,27 +13,6 @@ export default function CrearNomina() {
         <ThemeProvider theme={theme}>
             <main className={styles.main}>
                 <TablaUsuarios />
-                <Box className={styles.buttonContainer}>
-                    <Link href="/Usuarios/CrearUsuario" passHref>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<AddCircleIcon />}
-                            className={styles.createButton}
-                            sx={{marginRight: 20}}
-                        >
-                            Crear nuevo usuario
-                        </Button>
-                    </Link>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<DownloadIcon />}
-                        className={styles.exportButton}
-                    >
-                        Exportar
-                    </Button>
-                </Box>
             </main>
         </ThemeProvider>
     );

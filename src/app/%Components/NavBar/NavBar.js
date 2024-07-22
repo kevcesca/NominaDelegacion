@@ -61,6 +61,11 @@ export default function NavBar() {
               <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Exportar</MenuItem>
             </Link>
           </SubMenu>
+          <SubMenu label="Empleados" icon={<MoneyIcon />}>
+            <Link className={styles.tWhite} href="/Empleados" passHref>
+              <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Ver Empleados</MenuItem>
+            </Link>
+          </SubMenu>
           <SubMenu label="Nómina" icon={<SecurityIcon />}>
             <Link className={styles.tWhite} href="/CrearNomina" passHref>
               <MenuItem icon={<PeopleIcon />} className={styles.bgblack}>Cargar Nómina</MenuItem>

@@ -5,9 +5,12 @@ import DynamicForm from '../%Components/DynamicForm/DynamicForm';
 
 export default function CargarDatos() {
     return (
-        <main className={styles.main}>
+        <main >
             <h1 className={styles.h1}>Reportes</h1>
-            <DynamicForm />
+            
+            <div className={styles.main}>
+                <DynamicForm />
+            </div>
         </main>
     );
 }

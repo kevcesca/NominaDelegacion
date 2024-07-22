@@ -2,12 +2,11 @@
 .main {
     padding: 20px;
     font-family: Arial, sans-serif;
-    min-height: 80vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: stretch;
-    background-color: white;
 }
 
 .h1 {
