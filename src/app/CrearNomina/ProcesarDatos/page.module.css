@@ -1,0 +1,19 @@
+/* src/app/page.module.css */
+.main {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.h1 {
+    text-align: center;
+    color: white;
+    background-color: #bc955c;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+}

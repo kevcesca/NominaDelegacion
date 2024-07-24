@@ -8,6 +8,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ThemeProvider, Box, Typography, Button, Select, MenuItem } from '@mui/material';
 import theme from '../$tema/theme'; // Asegúrate de que la ruta sea correcta
+import Link from 'next/link';
 
 export default function CargarDatos() {
     const [quincena, setQuincena] = useState('01');
@@ -83,9 +84,11 @@ export default function CargarDatos() {
                 </Button>
                 <TablaResumenNomina />
                 <Box className={styles.buttonContainer}>
-                    <Button variant="contained" color="primary" className={styles.exportButton}>
-                        Procesar datos
-                    </Button>
+                    <Link href="/CrearNomina/ProcesarDatos" passHref>
+                        <Button variant="contained" color="primary" className={styles.exportButton}>
+                            Procesar datos
+                        </Button>
+                    </Link>
                 </Box>
             </Box>
         </ThemeProvider>

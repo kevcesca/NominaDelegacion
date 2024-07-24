@@ -1,10 +1,11 @@
-'use client'
+"use client"
 
 import React, { useState, useEffect, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
+import { ProgressBar } from 'primereact/progressbar';
 import 'primereact/resources/themes/saga-blue/theme.css';  
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -14,11 +15,13 @@ export default function TablaEmpleados() {
     const [selectedEmpleado, setSelectedEmpleado] = useState(null);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const dt = useRef(null);
 
     useEffect(() => {
         const fetchEmpleados = async () => {
             try {
+                setIsLoading(true); // Mostrar la barra de carga
                 const response = await fetch('http://192.168.100.77:8080/empleados');
                 if (!response.ok) {
                     throw new Error('Network response was not ok ' + response.statusText);
@@ -27,6 +30,8 @@ export default function TablaEmpleados() {
                 setEmpleados(data);
             } catch (error) {
                 console.error('Error fetching the empleados:', error);
+            } finally {
+                setIsLoading(false); // Ocultar la barra de carga
             }
         };
 
@@ -41,7 +46,9 @@ export default function TablaEmpleados() {
     const formatDate = (value) => {
         if (!value) return '';
         const date = new Date(value);
-        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const offset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+        const localDate = new Date(date.getTime() + offset); // convert to local time
+        return localDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
 
     const header = (
@@ -64,17 +71,21 @@ export default function TablaEmpleados() {
 
     return (
         <div className="card">
-            <DataTable ref={dt} value={empleados} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
-                dataKey="idEmpleado" onRowDoubleClick={(e) => handleRowDoubleClick(e.data)} globalFilter={globalFilter} header={header}>
-                <Column field="idEmpleado" header="ID" sortable style={{ minWidth: '100px' }}></Column>
-                <Column field="nombre" header="Nombre" sortable style={{ minWidth: '150px' }}></Column>
-                <Column field="apellido1" header="Apellido Paterno" sortable style={{ minWidth: '150px' }}></Column>
-                <Column field="apellido2" header="Apellido Materno" sortable style={{ minWidth: '150px' }}></Column>
-                <Column field="curp" header="CURP" sortable style={{ minWidth: '200px' }}></Column>
-                <Column field="idLegal" header="ID Legal" sortable style={{ minWidth: '150px' }}></Column>
-                <Column field="fecNac" header="Fecha de Nacimiento" body={(rowData) => formatDate(rowData.fecNac)} sortable style={{ minWidth: '150px' }}></Column>
-                <Column field="fecAltaEmpleado" header="Fecha de Alta" body={(rowData) => formatDate(rowData.fecAltaEmpleado)} sortable style={{ minWidth: '150px' }}></Column>
-            </DataTable>
+            {isLoading ? (
+                <ProgressBar mode="indeterminate" style={{ height: '6px' }} />
+            ) : (
+                <DataTable ref={dt} value={empleados} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+                    dataKey="idEmpleado" onRowDoubleClick={(e) => handleRowDoubleClick(e.data)} globalFilter={globalFilter} header={header}>
+                    <Column field="idEmpleado" header="ID" sortable style={{ minWidth: '100px' }}></Column>
+                    <Column field="nombre" header="Nombre" sortable style={{ minWidth: '150px' }}></Column>
+                    <Column field="apellido1" header="Apellido Paterno" sortable style={{ minWidth: '150px' }}></Column>
+                    <Column field="apellido2" header="Apellido Materno" sortable style={{ minWidth: '150px' }}></Column>
+                    <Column field="curp" header="CURP" sortable style={{ minWidth: '200px' }}></Column>
+                    <Column field="idLegal" header="ID Legal" sortable style={{ minWidth: '150px' }}></Column>
+                    <Column field="fecNac" header="Fecha de Nacimiento" body={(rowData) => formatDate(rowData.fecNac)} sortable style={{ minWidth: '150px' }}></Column>
+                    <Column field="fecAltaEmpleado" header="Fecha de Alta" body={(rowData) => formatDate(rowData.fecAltaEmpleado)} sortable style={{ minWidth: '150px' }}></Column>
+                </DataTable>
+            )}
 
             <Dialog header="Detalles del Empleado" visible={isDialogVisible} style={{ width: '50vw' }} modal footer={empleadoDialogFooter} onHide={() => setIsDialogVisible(false)}>
                 {selectedEmpleado && (
@@ -91,6 +102,8 @@ export default function TablaEmpleados() {
                         <p><strong>Fecha de Antigüedad:</strong> {formatDate(selectedEmpleado.fecAntiguedad)}</p>
                         <p><strong>Número de Seguro Social:</strong> {selectedEmpleado.numeroSs}</p>
                         <p><strong>Días Laborados:</strong> {selectedEmpleado.diasLab}</p>
+                        <p><strong>ID_REG_ISSSTE: </strong> {selectedEmpleado.idRegIssste}</p>
+                        <p><strong>AHORR_SOLI_PORC: </strong> {selectedEmpleado.ahorrSoliPorc}</p>
                         <p><strong>Estado:</strong> {selectedEmpleado.estado}</p>
                         <p><strong>Delegación/Municipio:</strong> {selectedEmpleado.delegMunic}</p>
                         <p><strong>Población:</strong> {selectedEmpleado.poblacion}</p>
@@ -104,6 +117,8 @@ export default function TablaEmpleados() {
                         <p><strong>Entidad Federativa:</strong> {selectedEmpleado.entFederativa}</p>
                         <p><strong>Sector Presupuestal:</strong> {selectedEmpleado.sectPres}</p>
                         <p><strong>Nombre del Puesto:</strong> {selectedEmpleado.nPuesto}</p>
+                        <p><strong>FECHA_INSERCION:</strong> {formatDate(selectedEmpleado.fechaInsercion)}</p>
+                        <p><strong>FECHA_CAMBIO:</strong> {formatDate(selectedEmpleado.fechaCambio)}</p>
                         <p><strong>Activo:</strong> {selectedEmpleado.activo ? "Sí" : "No"}</p>
                     </div>
                 )}

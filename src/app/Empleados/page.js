@@ -1,3 +1,5 @@
+// src/app/Empleados/page.js
+
 import React from 'react';
 import styles from './page.module.css';
 import TablaEmpleados from '../%Components/TablaEmpleados/TablaEmpleados';

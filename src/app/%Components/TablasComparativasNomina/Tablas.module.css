@@ -1,0 +1,20 @@
+/* src/app/styles/Tablas.module.css */
+
+.card {
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header {
+    color: #ffffff;
+    background-color: #235b4e;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    margin: 0;
+}
+
+.boldText {
+    font-weight: bold;
+}
