@@ -1,19 +1,59 @@
 /* src/app/page.module.css */
+
 .main {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: stretch;
+    align-items: center;
+    overflow: hidden;
 }
 
 .h1 {
     text-align: center;
-    color: white;
-    background-color: #bc955c;
-    width: 100%;
-    padding: 1rem;
-    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Dos columnas de igual tamaño */
+    gap: 10px; /* Espacio entre las tablas */
+    width: 95%;
+}
+
+.gridItem1 {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    max-width: 40vw;
+}
+
+.gridItem2 {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    max-width: 40vw;
+}
+
+.gridItem.dragging {
+    transform: rotate(3deg);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+.dragHandle {
+    cursor: grab;
+    background-color: #f0f0f0;
+    padding: 5px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.dragHandle:active {
+    cursor: grabbing;
+}
+
+.dragBar {
+    text-align: center;
+    font-weight: bold;
+    color: #333;
 }

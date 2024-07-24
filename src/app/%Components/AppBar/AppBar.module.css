@@ -10,6 +10,7 @@
     width: 100%;
     border: 6px solid #bc955c;
     border-radius: 10px;
+    overflow: hidden;
 }
 
 .customTabMenuNav {

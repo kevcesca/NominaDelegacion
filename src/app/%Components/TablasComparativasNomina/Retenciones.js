@@ -8,12 +8,12 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './Tablas.module.css';
 
-export default function Retensiones() {
-    const retensionesData = [
-        { empleado: 0, retensiones: '-', totalReal: 262809.82 },
-        { empleado: 1, retensiones: 3489.39, totalReal: 3258376.91 },
-        { empleado: 1, retensiones: 3014.45, totalReal: 102467.40 },
-        { empleado: 'TOTAL', retensiones: '3,623,654.13', totalReal: '3,623,654.13' }
+export default function Retenciones() {
+    const retencionesData = [
+        { empleado: 0, retenciones: '-', totalReal: 262809.82 },
+        { empleado: 1, retenciones: 3489.39, totalReal: 3258376.91 },
+        { empleado: 1, retenciones: 3014.45, totalReal: 102467.40 },
+        { empleado: 'TOTAL', retenciones: '3,623,654.13', totalReal: '3,623,654.13' }
     ];
 
     const empleadoTemplate = (rowData) => {
@@ -23,11 +23,11 @@ export default function Retensiones() {
     return (
         <div className={`card ${styles.card}`}>
             <div className="flex justify-content-between align-items-center mb-4 mt-4">
-                <h2 className={styles.header}>RETENSIONES</h2>
+                <h2 className={styles.header}>RETENCIONES</h2>
             </div>
-            <DataTable value={retensionesData} paginator={false} rows={10} className="p-datatable-sm">
+            <DataTable value={retencionesData} paginator={false} rows={10} className="p-datatable-sm">
                 <Column field="empleado" header="EMPL." sortable body={empleadoTemplate}></Column>
-                <Column field="retensiones" header="RETENSIONES" sortable body={data => data.retensiones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}></Column>
+                <Column field="retenciones" header="RETENCIONES" sortable body={data => data.retenciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}></Column>
                 <Column field="totalReal" header="TOTAL REAL" sortable body={data => data.totalReal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}></Column>
             </DataTable>
         </div>
