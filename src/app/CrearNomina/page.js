@@ -1,53 +1,50 @@
-'use client'
-import React, { useState } from 'react';
+// src/app/CrearNomina/page.js
+'use client';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useSession } from 'next-auth/react';
 import styles from './page.module.css';
 import TablaPostNomina from '../%Components/TablaPostNomina/TablaPostNomina';
 import TablaResumenNomina from '../%Components/TablaResumenNomina/TablaResumenNomina';
 import { ProgressBar } from 'primereact/progressbar';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import { ThemeProvider, Box, Typography, Button, Select, MenuItem } from '@mui/material';
 import theme from '../$tema/theme'; // Asegúrate de que la ruta sea correcta
 import Link from 'next/link';
 
 export default function CargarDatos() {
+    const { data: session } = useSession(); // Obtener la sesión desde el cliente
     const [quincena, setQuincena] = useState('01');
-    const [fecha, setFecha] = useState(new Date());
+    const [anio, setAnio] = useState(2020);
+    const [tipoNomina, setTipoNomina] = useState('Base');
     const [progressPostNomina, setProgressPostNomina] = useState(0);
     const [progressResumenNomina, setProgressResumenNomina] = useState(0);
 
-    const handleDateChange = (date) => {
-        setFecha(date);
-    };
+    useEffect(() => {
+        console.log("Session:", session);
+    }, [session]);
 
-    const handleFileUploadPostNomina = () => {
-        setProgressPostNomina(0);
-        setTimeout(() => {
-            let progressInterval = setInterval(() => {
-                setProgressPostNomina((prevProgress) => {
-                    if (prevProgress >= 100) {
-                        clearInterval(progressInterval);
-                        return 100;
-                    }
-                    return prevProgress + 10;
-                });
-            }, 300);
-        }, 100);
-    };
+    const handleFileUpload = async (event, setProgress) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    const handleFileUploadResumenNomina = () => {
-        setProgressResumenNomina(0);
-        setTimeout(() => {
-            let progressInterval = setInterval(() => {
-                setProgressResumenNomina((prevProgress) => {
-                    if (prevProgress >= 100) {
-                        clearInterval(progressInterval);
-                        return 100;
-                    }
-                    return prevProgress + 10;
-                });
-            }, 300);
-        }, 100);
+        setProgress(0);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await axios.post(`http://192.168.100.77:8080/uploads?anio=${anio}&quincena=${quincena}&tipo=${tipoNomina}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setProgress(progress);
+                },
+            });
+            console.log('File uploaded successfully', response.data);
+        } catch (error) {
+            console.error('Error uploading file', error);
+        }
     };
 
     return (
@@ -62,7 +59,19 @@ export default function CargarDatos() {
                             </MenuItem>
                         ))}
                     </Select>
-                    <DatePicker selected={fecha} onChange={handleDateChange} dateFormat="dd-MM-yyyy" className={styles.datePicker} portalId="root-portal" />
+                    <Select value={anio} onChange={(e) => setAnio(e.target.value)} variant="outlined">
+                        {[...Array(21).keys()].map(n => (
+                            <MenuItem key={2020 + n} value={2020 + n}>
+                                Año {2020 + n}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                    <Select value={tipoNomina} onChange={(e) => setTipoNomina(e.target.value)} variant="outlined">
+                        <MenuItem value="Base">Base</MenuItem>
+                        <MenuItem value="Estructura">Estructura</MenuItem>
+                        <MenuItem value="Nomina 8">Nomina 8</MenuItem>
+                        <MenuItem value="Honorarios">Honorarios</MenuItem>
+                    </Select>
                 </Box>
                 <Typography variant="h5" className={styles.h2}>Post Nomina</Typography>
                 <Box className={styles.progressContainer}>
@@ -71,7 +80,7 @@ export default function CargarDatos() {
                 </Box>
                 <Button variant="contained" component="label" className={styles.uploadButton}>
                     Subir archivo
-                    <input type="file" hidden onChange={handleFileUploadPostNomina} />
+                    <input type="file" hidden onChange={(e) => handleFileUpload(e, setProgressPostNomina)} accept=".xlsx" />
                 </Button>
                 <TablaPostNomina />
                 <Typography variant="h5" className={styles.h2}>Resumen de Nomina</Typography>
@@ -80,7 +89,7 @@ export default function CargarDatos() {
                 </Box>
                 <Button variant="contained" component="label" className={styles.uploadButton}>
                     Subir archivo
-                    <input type="file" hidden onChange={handleFileUploadResumenNomina} />
+                    <input type="file" hidden onChange={(e) => handleFileUpload(e, setProgressResumenNomina)} accept=".xlsx" />
                 </Button>
                 <TablaResumenNomina />
                 <Box className={styles.buttonContainer}>

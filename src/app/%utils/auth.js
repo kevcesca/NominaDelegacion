@@ -2,6 +2,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 
+// Función existente
 export async function requireAuth(ctx) {
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
     if (!session) {
@@ -10,4 +11,9 @@ export async function requireAuth(ctx) {
         return { props: {} };
     }
     return { props: { session } };
+}
+
+// Nueva función para obtener la sesión sin redirigir
+export async function getSession(ctx) {
+    return await getServerSession(ctx.req, ctx.res, authOptions);
 }

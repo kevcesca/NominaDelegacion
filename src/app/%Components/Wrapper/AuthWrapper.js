@@ -1,3 +1,4 @@
+// src/app/%Components/Wrapper/AuthWrapper.js
 'use client';
 import React from 'react';
 import { useSession } from 'next-auth/react';
@@ -37,7 +38,7 @@ const AuthWrapper = ({ children }) => {
         return <div>Loading...</div>; // O un spinner de carga, si prefieres
     }
 
-    else if (!session) {
+    if (!session) {
         switch (pathname) {
             case '/Registrarse':
                 return (
@@ -66,15 +67,13 @@ const AuthWrapper = ({ children }) => {
         }
     }
 
-    else if (session) {
-        return (
-            <ThemeProvider theme={theme}>
-                <Wrapper>
-                    {children}
-                </Wrapper>
-            </ThemeProvider>
-        );
-    }
+    return (
+        <ThemeProvider theme={theme}>
+            <Wrapper session={session}>
+                {children}
+            </Wrapper>
+        </ThemeProvider>
+    );
 };
 
 export default AuthWrapper;

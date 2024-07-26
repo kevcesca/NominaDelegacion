@@ -1,9 +1,8 @@
+// src/app/%Components/Wrapper/SessionProviderWrapper.js
 'use client';
 
 import { SessionProvider } from 'next-auth/react';
 
-const SessionProviderWrapper = ({ children }) => {
+export default function SessionProviderWrapper({ children }) {
     return <SessionProvider>{children}</SessionProvider>;
-};
-
-export default SessionProviderWrapper;
+}
