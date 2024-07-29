@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from 'react';
 import { DataTable } from 'primereact/datatable';
@@ -8,11 +8,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './Tablas.module.css';
 
-export default function ImporteLiquido() {
-    const importeLiquidoData = [
-        { importeLiquidoTotal: 27194183.49, retencionesDeposito: 27090063.98, diferencia: 104119.51 },
-    ];
-
+export default function ImporteLiquido({ importeLiquidoData }) {
     const diferenciaTemplate = (rowData) => {
         return <span className={styles.diferenciaText}>{rowData.diferencia.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>;
     };

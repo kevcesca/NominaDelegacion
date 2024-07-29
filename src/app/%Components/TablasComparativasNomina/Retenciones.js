@@ -8,14 +8,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './Tablas.module.css';
 
-export default function Retenciones() {
-    const retencionesData = [
-        { empleado: 0, retenciones: '-', totalReal: 262809.82 },
-        { empleado: 1, retenciones: 3489.39, totalReal: 3258376.91 },
-        { empleado: 1, retenciones: 3014.45, totalReal: 102467.40 },
-        { empleado: 'TOTAL', retenciones: '3,623,654.13', totalReal: '3,623,654.13' }
-    ];
-
+export default function Retenciones({ retencionesData }) {
     const empleadoTemplate = (rowData) => {
         return <span className={styles.boldText}>{rowData.empleado}</span>;
     };

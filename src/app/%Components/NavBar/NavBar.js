@@ -8,26 +8,24 @@ import PeopleIcon from '@mui/icons-material/People';
 import SecurityIcon from '@mui/icons-material/Security';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AssessmentIcon from '@mui/icons-material/Assessment';
-import ComputerIcon from '@mui/icons-material/Computer';
 import CloudIcon from '@mui/icons-material/Cloud';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import MoneyIcon from '@mui/icons-material/Money';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
 export default function NavBar() {
   const [collapsed, setCollapsed] = React.useState(false);
 
   return (
-    <div className={styles.NavbarContainer} style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
+    <div className={styles.NavbarContainer}>
       <Sidebar
         collapsed={collapsed}
         transitionDuration={1000}
         rootStyles={{
           [`.${sidebarClasses.container}`]: {
             backgroundColor: 'transparent',
-            color: '#235b4e'
+            border: '2px solid transparent', // Esto se puede ajustar según sea necesario
           },
           [`.${sidebarClasses.MenuItem}`]: {
             backgroundColor: 'black',
@@ -80,11 +78,6 @@ export default function NavBar() {
           <SubMenu label="Reportes" icon={<AssessmentIcon />}>
             <Link className={styles.tWhite} href="/Reportes" passHref>
               <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Generar Reporte</MenuItem>
-            </Link>
-          </SubMenu>
-          <SubMenu label="Historial" icon={<FormatListBulletedIcon />}>
-            <Link className={styles.tWhite} href="/ConsultarHistorial" passHref>
-              <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Consultar Historial</MenuItem>
             </Link>
           </SubMenu>
           <SubMenu label="Cheques" icon={<MoneyIcon />}>

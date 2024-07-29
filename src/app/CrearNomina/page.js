@@ -47,6 +47,25 @@ export default function CargarDatos() {
         }
     };
 
+    const handleFileDownload = async () => {
+        try {
+            const response = await axios.get(`http://192.168.100.77:8080/download?quincena=${quincena}&anio=${anio}&tipo=${tipoNomina}`, {
+                responseType: 'blob', // Indica que la respuesta será un blob para manejar archivos binarios
+            });
+
+            // Crear una URL para el archivo descargado
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `reporte_${tipoNomina}_${anio}_${quincena}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        } catch (error) {
+            console.error('Error downloading file', error);
+        }
+    };
+
     return (
         <ThemeProvider theme={theme}>
             <Box className={styles.main}>
@@ -67,10 +86,10 @@ export default function CargarDatos() {
                         ))}
                     </Select>
                     <Select value={tipoNomina} onChange={(e) => setTipoNomina(e.target.value)} variant="outlined">
-                        <MenuItem value="Base">Base</MenuItem>
-                        <MenuItem value="Estructura">Estructura</MenuItem>
-                        <MenuItem value="Nomina 8">Nomina 8</MenuItem>
-                        <MenuItem value="Honorarios">Honorarios</MenuItem>
+                        <MenuItem value="base">Base, Nomina 8, Estructura</MenuItem>
+                        <MenuItem value="finiquitos">Finiquitos</MenuItem>
+                        <MenuItem value="extraordinarios">Extraordinarios</MenuItem>
+                        <MenuItem value="honorarios">Honorarios</MenuItem>
                     </Select>
                 </Box>
                 <Typography variant="h5" className={styles.h2}>Post Nomina</Typography>
@@ -98,6 +117,9 @@ export default function CargarDatos() {
                             Procesar datos
                         </Button>
                     </Link>
+                    <Button variant="contained" color="secondary" className={styles.exportButton} onClick={handleFileDownload}>
+                        Descargar archivo
+                    </Button>
                 </Box>
             </Box>
         </ThemeProvider>

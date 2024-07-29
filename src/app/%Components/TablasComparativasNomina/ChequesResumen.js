@@ -8,14 +8,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './Tablas.module.css';
 
-export default function ChequesResumen() {
-    const resumenData = [
-        { tipoNomina: 'ESTRUCTURA', percepciones: 3563493.50, deducciones: 93539.68, importeLiquido: 262809.82, empleados: 18 },
-        { tipoNomina: 'BASE', percepciones: 4618518.46, deducciones: 1356652.16, importeLiquido: 3261866.30, empleados: 521 },
-        { tipoNomina: 'NOM. 8', percepciones: 125772.35, deducciones: 20290.50, importeLiquido: 105481.85, empleados: 31 },
-        { tipoNomina: 'TOTAL', percepciones: 5100640.31, deducciones: 1470482.34, importeLiquido: 3630157.97, empleados: 570 },
-    ];
-
+export default function ChequesResumen({ resumenData }) {
     const tipoNominaTemplate = (rowData) => {
         return <span className={styles.boldText}>{rowData.tipoNomina}</span>;
     };

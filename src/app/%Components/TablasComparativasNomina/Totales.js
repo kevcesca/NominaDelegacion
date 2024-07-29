@@ -8,14 +8,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './Tablas.module.css';
 
-export default function Totales() {
-    const totalesData = [
-        { cheques: 'ESTRUCTURA', percepciones: 3325486.00, deducciones: 794268.97, importeLiquido: 2531217.03, empleados: 187 },
-        { cheques: 'BASE', percepciones: 30667317.21, deducciones: 9044163.51, importeLiquido: 21623153.70, empleados: 3664 },
-        { cheques: 'NOM. 8', percepciones: 3682534.77, deducciones: 642722.01, importeLiquido: 3039812.76, empleados: 877 },
-        { cheques: 'TOTAL', percepciones: 37675337.98, deducciones: 10481154.49, importeLiquido: 27194183.49, empleados: 4728 },
-    ];
-
+export default function Totales({ totalesData }) {
     const chequesTemplate = (rowData) => {
         return <span className={styles.boldText}>{rowData.cheques}</span>;
     };

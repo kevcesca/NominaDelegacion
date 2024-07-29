@@ -39,16 +39,20 @@
 .buttonContainer {
     text-align: center;
     margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
 }
 
 .exportButton {
     background-color: var(--color-primary);
     border: none;
-    color: white;
+    color: white !important;
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
     border-radius: 4px;
+    margin: 2rem;
 }
 
 .exportButton:hover {
