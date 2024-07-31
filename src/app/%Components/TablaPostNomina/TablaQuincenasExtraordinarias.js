@@ -1,20 +1,31 @@
-// src/app/%Components/TablaPostNomina/TablaPostNomina.js
+// src/app/%Components/TablaQuincenasExtraordinarias/TablaQuincenasExtraordinarias.js
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import styles from './TablaPostNomina.module.css';
-import { Button } from '@mui/material';
+import { Button, Select, MenuItem } from '@mui/material';
 import { Toast } from 'primereact/toast';
 
-export default function TablaPostNomina({ quincena, anio, session, setProgress, setUploaded }) {
+const tiposExtraordinarios = [
+    'DIA DE LA MUJER',
+    'DIA DE LA MADRE',
+    'DIA DEL PADRE',
+    'SEPARACION VOLUNTARIA',
+    'FONAC',
+    'VESTUARIO ADMINISTRATIVO',
+    'PREMIO DE ANTIGÜEDAD',
+    'PREMIO DE ESTIMULOS Y RECOMPENSAS',
+    'VALES DE DESPENSA NOMINA PAGADA EN VALES',
+    'PAGO UNICO HONORARIOS',
+    'AGUINALDO'
+];
+
+export default function TablaQuincenasExtraordinarias({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
-    const router = useRouter();
-    const [tiposNomina, setTiposNomina] = useState([
-        { nombreArchivo: 'Vacío', tipoNomina: 'Base, Nomina 8, Estructura', paramTipoNomina: 'base', archivoNombre: '' },
-        { nombreArchivo: 'Vacío', tipoNomina: 'Honorarios', paramTipoNomina: 'honorarios', archivoNombre: '' },
+    const [extraordinarios, setExtraordinarios] = useState([
+        { nombreArchivo: 'Vacío', tipoNomina: 'Extraordinarios', paramTipoNomina: 'extraordinarios', archivoNombre: '', tipoExtraordinario: '' }
     ]);
 
     useEffect(() => {
@@ -23,7 +34,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
 
     const fetchNominaData = async () => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/listArchivos?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`http://192.168.100.77:8080/listArchivos?anio=${anio}&quincena=${quincena}&tipo=extraordinarios`);
             const data = response.data.reduce((acc, item) => {
                 const tipoIndex = acc.findIndex(row => row.paramTipoNomina === item.nombre_nomina);
                 if (tipoIndex !== -1) {
@@ -31,13 +42,14 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                         nombreArchivo: item.nombre_archivo || 'Vacío',
                         tipoNomina: capitalizeFirstLetter(item.nombre_nomina),
                         paramTipoNomina: item.nombre_nomina,
-                        archivoNombre: item.nombre_archivo || ''
+                        archivoNombre: item.nombre_archivo || '',
+                        tipoExtraordinario: item.tipoExtraordinario || ''
                     };
                 }
                 return acc;
-            }, [...tiposNomina]);
+            }, [...extraordinarios]);
 
-            setTiposNomina(data);
+            setExtraordinarios(data);
         } catch (error) {
             console.error('Error fetching nomina data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los datos de nómina', life: 3000 });
@@ -52,7 +64,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         return filename.replace(/\.[^/.]+$/, "");
     };
 
-    const handleFileUpload = async (event, tipoNomina) => {
+    const handleFileUpload = async (event, tipoNomina, tipoExtraordinario) => {
         if (!tipoNomina) {
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Tipo de nómina no definido', life: 3000 });
             console.error('Tipo de nómina no definido');
@@ -66,6 +78,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         setUploaded(false);
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('tipoExtraordinario', tipoExtraordinario);
 
         try {
             const response = await axios.post(`http://192.168.100.77:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&usuario=${session?.user?.name || 'unknown'}`, formData, {
@@ -122,7 +135,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             <div>
                 <Button variant="contained" component="label" className={styles.uploadButton}>
                     Subir archivo
-                    <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoNomina)} accept=".xlsx" />
+                    <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoNomina, rowData.tipoExtraordinario)} accept=".xlsx" />
                 </Button>
             </div>
         );
@@ -136,18 +149,40 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         );
     };
 
+    const tipoExtraordinarioTemplate = (rowData) => {
+        return (
+            <Select
+                value={rowData.tipoExtraordinario}
+                onChange={(e) => {
+                    const newExtraordinarios = [...extraordinarios];
+                    const index = newExtraordinarios.findIndex(x => x.paramTipoNomina === rowData.paramTipoNomina);
+                    newExtraordinarios[index].tipoExtraordinario = e.target.value;
+                    setExtraordinarios(newExtraordinarios);
+                }}
+                variant="outlined"
+                displayEmpty
+                className={styles.select}
+            >
+                <MenuItem value="" disabled>
+                    Selecciona tipo extraordinario
+                </MenuItem>
+                {tiposExtraordinarios.map((tipo, index) => (
+                    <MenuItem key={index} value={tipo}>{tipo}</MenuItem>
+                ))}
+            </Select>
+        );
+    };
+
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
-            <DataTable value={tiposNomina} sortMode="multiple" className={styles.dataTable}>
-                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
-                <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '30%' }}></Column>
+            <DataTable value={extraordinarios} sortMode="multiple" className={styles.dataTable}>
+                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '20%' }}></Column>
+                <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '20%' }}></Column>
+                <Column body={tipoExtraordinarioTemplate} header="TIPO EXTRAORDINARIO" style={{ width: '20%' }}></Column>
                 <Column body={uploadTemplate} header="SUBIR ARCHIVO" style={{ width: '20%' }}></Column>
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '20%' }}></Column>
             </DataTable>
-            <Button variant="contained" color="primary" className={styles.validateButton} onClick={() => router.push('/AprobarCargaNomina')}>
-                Validar Datos
-            </Button>
         </div>
     );
 }

@@ -19,8 +19,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang='en'>
-      <meta name='viewport' content='initial-scale=1, width=device-width' />
+    <html lang="en">
+      <head>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body className={inter.className}>
         <SessionProviderWrapper>
           <AuthProvider>

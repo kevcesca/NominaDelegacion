@@ -1,4 +1,4 @@
-// src/app/%Components/TablaPostNomina/TablaPostNomina.js
+// src/app/%Components/TablaFiniquitos/TablaFiniquitos.js
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
@@ -9,56 +9,44 @@ import styles from './TablaPostNomina.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 
-export default function TablaPostNomina({ quincena, anio, session, setProgress, setUploaded }) {
+export default function TablaFiniquitos({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
     const router = useRouter();
-    const [tiposNomina, setTiposNomina] = useState([
-        { nombreArchivo: 'Vacío', tipoNomina: 'Base, Nomina 8, Estructura', paramTipoNomina: 'base', archivoNombre: '' },
-        { nombreArchivo: 'Vacío', tipoNomina: 'Honorarios', paramTipoNomina: 'honorarios', archivoNombre: '' },
+    const [finiquitos, setFiniquitos] = useState([
+        { nombreArchivo: 'Vacío', tipoNomina: 'Finiquitos', paramTipoNomina: 'finiquitos', archivoNombre: '' },
     ]);
 
     useEffect(() => {
-        fetchNominaData();
+        fetchFiniquitosData();
     }, [anio, quincena]);
 
-    const fetchNominaData = async () => {
+    const fetchFiniquitosData = async () => {
         try {
             const response = await axios.get(`http://192.168.100.77:8080/listArchivos?anio=${anio}&quincena=${quincena}`);
             const data = response.data.reduce((acc, item) => {
-                const tipoIndex = acc.findIndex(row => row.paramTipoNomina === item.nombre_nomina);
-                if (tipoIndex !== -1) {
-                    acc[tipoIndex] = {
-                        nombreArchivo: item.nombre_archivo || 'Vacío',
-                        tipoNomina: capitalizeFirstLetter(item.nombre_nomina),
-                        paramTipoNomina: item.nombre_nomina,
-                        archivoNombre: item.nombre_archivo || ''
+                if (item.nombre_nomina === 'finiquitos') {
+                    acc[0] = {
+                        nombreArchivo: item.nombre_archivo || 'Vacío', // Si no hay archivo, ponemos "Vacío"
+                        tipoNomina: 'Finiquitos',
+                        paramTipoNomina: 'finiquitos',
+                        archivoNombre: item.nombre_archivo || '' // Almacenamos el nombre del archivo recuperado
                     };
                 }
                 return acc;
-            }, [...tiposNomina]);
+            }, [...finiquitos]);
 
-            setTiposNomina(data);
+            setFiniquitos(data);
         } catch (error) {
-            console.error('Error fetching nomina data', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los datos de nómina', life: 3000 });
+            console.error('Error fetching finiquitos data', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los datos de finiquitos', life: 3000 });
         }
-    };
-
-    const capitalizeFirstLetter = (string) => {
-        return string.charAt(0).toUpperCase() + string.slice(1);
     };
 
     const removeFileExtension = (filename) => {
         return filename.replace(/\.[^/.]+$/, "");
     };
 
-    const handleFileUpload = async (event, tipoNomina) => {
-        if (!tipoNomina) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Tipo de nómina no definido', life: 3000 });
-            console.error('Tipo de nómina no definido');
-            return;
-        }
-
+    const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
@@ -68,7 +56,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         formData.append('file', file);
 
         try {
-            const response = await axios.post(`http://192.168.100.77:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`http://192.168.100.77:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=finiquitos&usuario=${session?.user?.name || 'unknown'}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -77,36 +65,38 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                     setProgress(progress);
                 },
             });
-            setProgress(100);
+            setProgress(100); // Asegurarse de que la barra de progreso se establece al 100%
             setUploaded(true);
             console.log('File uploaded successfully', response.data);
             toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
 
-            fetchNominaData();
+            // Volver a cargar los archivos después de subir uno con éxito
+            fetchFiniquitosData();
         } catch (error) {
             console.error('Error uploading file', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
         }
     };
 
-    const handleFileDownload = async (tipoNomina, archivoNombre) => {
-        if (!tipoNomina) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Tipo de nómina no definido', life: 3000 });
-            console.error('Tipo de nómina no definido');
+    const handleFileDownload = async (archivoNombre) => {
+        if (!archivoNombre) {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'No se ha definido un archivo para descargar', life: 3000 });
+            console.error('No se ha definido un archivo para descargar');
             return;
         }
 
         const nombreSinExtension = removeFileExtension(archivoNombre);
 
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&nombre=${nombreSinExtension}`, {
-                responseType: 'blob',
+            const response = await axios.get(`http://192.168.100.77:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=finiquitos&nombre=${nombreSinExtension}`, {
+                responseType: 'blob', // Indica que la respuesta será un blob para manejar archivos binarios
             });
 
+            // Crear una URL para el archivo descargado
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', archivoNombre || `reporte_${tipoNomina}_${anio}_${quincena}.xlsx`);
+            link.setAttribute('download', archivoNombre || `reporte_finiquitos_${anio}_${quincena}.xlsx`); // Usa el nombre del archivo recuperado
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
@@ -122,7 +112,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             <div>
                 <Button variant="contained" component="label" className={styles.uploadButton}>
                     Subir archivo
-                    <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoNomina)} accept=".xlsx" />
+                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
                 </Button>
             </div>
         );
@@ -130,7 +120,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
 
     const descargaTemplate = (rowData) => {
         return (
-            <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.paramTipoNomina, rowData.archivoNombre)}>
+            <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.archivoNombre)}>
                 <i className="pi pi-download"></i>
             </button>
         );
@@ -139,15 +129,12 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
-            <DataTable value={tiposNomina} sortMode="multiple" className={styles.dataTable}>
+            <DataTable value={finiquitos} sortMode="multiple" className={styles.dataTable}>
                 <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
                 <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '30%' }}></Column>
                 <Column body={uploadTemplate} header="SUBIR ARCHIVO" style={{ width: '20%' }}></Column>
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '20%' }}></Column>
             </DataTable>
-            <Button variant="contained" color="primary" className={styles.validateButton} onClick={() => router.push('/AprobarCargaNomina')}>
-                Validar Datos
-            </Button>
         </div>
     );
 }
