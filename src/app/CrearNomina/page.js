@@ -6,18 +6,18 @@ import { useSession } from 'next-auth/react';
 import { Toast } from 'primereact/toast';
 import styles from './page.module.css';
 import TablaPostNomina from '../%Components/TablaPostNomina/TablaPostNomina';
-import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQuincenasExtraordinarias'; // Importar el nuevo componente
-import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos'; // Importar el nuevo componente
+import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQuincenasExtraordinarias';
+import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
 import TablaResumenNomina from '../%Components/TablaResumenNomina/TablaResumenNomina';
 import { ProgressBar } from 'primereact/progressbar';
 import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormControlLabel } from '@mui/material';
-import theme from '../$tema/theme'; // Asegúrate de que la ruta sea correcta
+import theme from '../$tema/theme';
 import Link from 'next/link';
 
 export default function CargarDatos() {
-    const { data: session } = useSession(); // Obtener la sesión desde el cliente
+    const { data: session } = useSession();
     const [quincena, setQuincena] = useState('01');
-    const [anio, setAnio] = useState('2020');
+    const [anio, setAnio] = useState('2024');
     const [progressPostNomina, setProgressPostNomina] = useState(0);
     const [progressResumenNomina, setProgressResumenNomina] = useState(0);
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
@@ -48,7 +48,7 @@ export default function CargarDatos() {
                     setProgress(progress);
                 },
             });
-            setProgress(100); // Asegurarse de que la barra de progreso se establece al 100%
+            setProgress(100);
             setUploaded(true);
             toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
             console.log('File uploaded successfully', response.data);
@@ -61,10 +61,9 @@ export default function CargarDatos() {
     const handleFileDownload = async (tipoNomina) => {
         try {
             const response = await axios.get(`http://192.168.100.77:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}`, {
-                responseType: 'blob', // Indica que la respuesta será un blob para manejar archivos binarios
+                responseType: 'blob',
             });
 
-            // Crear una URL para el archivo descargado
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -121,8 +120,8 @@ export default function CargarDatos() {
                     </Select>
                     <Select value={anio} onChange={(e) => setAnio(e.target.value)} variant="outlined">
                         {[...Array(21).keys()].map(n => (
-                            <MenuItem key={2020 + n} value={2020 + n}>
-                                Año {2020 + n}
+                            <MenuItem key={2024 + n} value={2024 + n}>
+                                Año {2024 + n}
                             </MenuItem>
                         ))}
                     </Select>
@@ -189,14 +188,11 @@ export default function CargarDatos() {
                 )}
 
                 <Box className={styles.buttonContainer}>
-                    <Link href="/CrearNomina/ProcesarDatos" passHref>
+                    <Link href={`/CrearNomina/ProcesarDatos?anio=${anio}&quincena=${quincena}`} passHref>
                         <Button variant="contained" color="primary" className={styles.exportButton}>
                             Procesar datos
                         </Button>
                     </Link>
-                    <Button variant="contained" color="secondary" className={styles.exportButton} onClick={() => handleFileDownload('base')}>
-                        Descargar archivo
-                    </Button>
                 </Box>
             </Box>
         </ThemeProvider>
