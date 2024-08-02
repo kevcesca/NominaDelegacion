@@ -16,28 +16,44 @@ const CargarDatos = () => {
     const anio = searchParams.get('anio');
     const quincena = searchParams.get('quincena');
 
-    const [resumenData, setResumenData] = useState([]);
+    const [chequesData, setChequesData] = useState([]);
+    const [depositoData, setDepositoData] = useState([]);
+    const [totalesData, setTotalesData] = useState([]);
 
     useEffect(() => {
         if (anio && quincena) {
-            fetchResumenData(anio, quincena);
+            fetchChequesData(anio, quincena);
+            fetchDepositoData(anio, quincena);
+            fetchTotalesData(anio, quincena);
         }
     }, [anio, quincena]);
 
-    const fetchResumenData = async (anio, quincena) => {
+    const fetchChequesData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/getReport?anio=${anio}&quincena=${quincena}`);
-            setResumenData(response.data);
+            const response = await axios.get(`http://192.168.100.77:8080/resumenCheques?anio=${anio}&quincena=${quincena}`);
+            setChequesData(response.data);
         } catch (error) {
-            console.error('Error fetching resumen cheques data', error);
+            console.error('Error fetching cheques data', error);
         }
     };
 
-    const chequesData = resumenData.slice(0, resumenData.findIndex(data => !data.ANIO));
-    const start = resumenData.findIndex(data => !data.ANIO) + 1;
-    const end = resumenData.findIndex((data, index) => index > start && !data.ANIO);
-    const depositoData = resumenData.slice(start, end);
-    const totalesData = resumenData.slice(end + 1);
+    const fetchDepositoData = async (anio, quincena) => {
+        try {
+            const response = await axios.get(`http://192.168.100.77:8080/resumenTransferencia?anio=${anio}&quincena=${quincena}`);
+            setDepositoData(response.data);
+        } catch (error) {
+            console.error('Error fetching deposito data', error);
+        }
+    };
+
+    const fetchTotalesData = async (anio, quincena) => {
+        try {
+            const response = await axios.get(`http://192.168.100.77:8080/resumenTotal?anio=${anio}&quincena=${quincena}`);
+            setTotalesData(response.data);
+        } catch (error) {
+            console.error('Error fetching totales data', error);
+        }
+    };
 
     const exportExcel = () => {
         const workbook = XLSX.utils.book_new();
@@ -83,11 +99,11 @@ const CargarDatos = () => {
                 <Typography variant="h6">Año: {anio}</Typography>
                 <Typography variant="h6">Quincena: {quincena}</Typography>
                 <div className={styles.grid}>
-                    <div className={styles.gridItem1}>
-                        <ChequesResumen resumenData={chequesData} anio={anio} quincena={quincena} />
-                    </div>
                     <div className={styles.gridItem2}>
                         <DepositoResumen resumenData={depositoData} anio={anio} quincena={quincena} />
+                    </div>
+                    <div className={styles.gridItem1}>
+                        <ChequesResumen resumenData={chequesData} anio={anio} quincena={quincena} />
                     </div>
                     <div className={styles.gridItem1}>
                         <Totales resumenData={totalesData} anio={anio} quincena={quincena} />

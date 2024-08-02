@@ -22,7 +22,10 @@ export default function Totales({ resumenData, anio, quincena }) {
                 <h2 className={styles.header}>TOTALES (QNA {quincena}/{anio})</h2>
             </div>
             <DataTable value={totalesData} paginator={false} rows={10} className="p-datatable-sm">
+                <Column field="ANIO" header="ANIO" sortable></Column>
+                <Column field="QUINCENA" header="QUINCENA" sortable></Column>
                 <Column field="NOMINA" header="CHEQUES" sortable body={chequesTemplate}></Column>
+                <Column field="BANCO" header="BANCO" sortable></Column>
                 <Column field="PERCEPCIONES" header="PERCEPCIONES" sortable body={data => parseFloat(data.PERCEPCIONES ? data.PERCEPCIONES.replace(/,/g, '') : 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}></Column>
                 <Column field="DEDUCCIONES" header="DEDUCCIONES" sortable body={data => parseFloat(data.DEDUCCIONES ? data.DEDUCCIONES.replace(/,/g, '') : 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}></Column>
                 <Column field="LIQUIDO" header="IMPORTE LIQUIDO" sortable body={data => parseFloat(data.LIQUIDO ? data.LIQUIDO.replace(/,/g, '') : 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}></Column>
