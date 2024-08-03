@@ -1,12 +1,13 @@
-// src/app/%Components/ComparativaTable.js
+// src/app/%Components/TablaAceptacion/ComparativaTable.js
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { useSession } from 'next-auth/react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { RadioButton } from 'primereact/radiobutton';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Toast } from 'primereact/toast';
-import { UserService } from './UserService'; // Asegúrate de tener este servicio configurado para obtener datos
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -15,27 +16,74 @@ const ComparativaTable = () => {
     const [records, setRecords] = useState([]);
     const toast = useRef(null);
     const dt = useRef(null);
+    const { data: session } = useSession();
 
     useEffect(() => {
-        UserService.getComparativaData().then(data => setRecords(data));
+        const fetchData = async () => {
+            try {
+                const response = await axios.get('http://192.168.100.77:8080/filtrarNominaCtrl?pendiente=true&cancelado=false');
+                setRecords(response.data);
+            } catch (error) {
+                console.error('Error fetching data', error);
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error fetching data', life: 3000 });
+            }
+        };
+
+        fetchData();
     }, []);
 
     const approveTemplate = (rowData) => {
         return (
             <div className="p-field-radiobutton">
-                <RadioButton inputId={`approve${rowData.key}`} name={rowData.key} value="Aprobar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Aprobar'} />
-                <label htmlFor={`approve${rowData.key}`}>Aprobar</label>
-                <RadioButton inputId={`cancel${rowData.key}`} name={rowData.key} value="Cancelar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Cancelar'} />
-                <label htmlFor={`cancel${rowData.key}`}>Cancelar</label>
+                <RadioButton inputId={`approve${rowData.idx}`} name={rowData.idx} value="Aprobar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Aprobar'} />
+                <label htmlFor={`approve${rowData.idx}`}>Aprobar</label>
+                <RadioButton inputId={`cancel${rowData.idx}`} name={rowData.idx} value="Cancelar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Cancelar'} />
+                <label htmlFor={`cancel${rowData.idx}`}>Cancelar</label>
             </div>
         );
     };
 
     const onRadioChange = (e, rowData) => {
         let updatedRecords = [...records];
-        let recordIndex = updatedRecords.findIndex(record => record.key === rowData.key);
+        let recordIndex = updatedRecords.findIndex(record => record.idx === rowData.idx);
         updatedRecords[recordIndex] = { ...rowData, status: e.value };
         setRecords(updatedRecords);
+    };
+
+    const handleConfirm = async () => {
+        const confirmed = window.confirm("¿Son correctos los datos?");
+        if (!confirmed) {
+            return;
+        }
+
+        if (!session || !session.user) {
+            toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'Usuario no autenticado', life: 3000 });
+            return;
+        }
+
+        const userRevision = session.user.name;
+        const updatePromises = records.map(async (record) => {
+            if (!record.status) {
+                return; // No actualizar los registros que no tienen un estado seleccionado
+            }
+            const params = new URLSearchParams({
+                cancelado: record.status === 'Cancelar',
+                aprobado: record.status === 'Aprobar',
+                user_revision: userRevision,
+                pendiente_dem: false, // Pendiente ahora es false
+                idx: record.idx
+            }).toString();
+
+            try {
+                await axios.get(`http://192.168.100.77:8080/actualizarNominaCtrl?${params}`);
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Estado de la nómina ${record.idx} actualizado correctamente`, life: 3000 });
+            } catch (error) {
+                console.error('Error updating record', error);
+                toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al actualizar la nómina ${record.idx}`, life: 3000 });
+            }
+        });
+
+        await Promise.all(updatePromises.filter(Boolean)); // Filtrar las promesas nulas
     };
 
     const exportCSV = () => {
@@ -47,8 +95,8 @@ const ComparativaTable = () => {
             import('jspdf-autotable').then(() => {
                 const doc = new jsPDF.default();
                 doc.autoTable({
-                    head: [['Key', 'Año', 'Quincena', 'Tipo Nómina', 'Usuario', 'Fecha Carga', 'Deducciones', 'Prestaciones', 'Líquido']],
-                    body: records.map(record => [record.key, record.anio, record.quincena, record.tipo_nomina, record.usuario, record.fecha_carga, record.deducciones, record.prestaciones, record.liquido])
+                    head: [['Idx', 'Año', 'Quincena', 'Nombre Nómina', 'Nombre Archivo', 'Fecha Carga', 'Usuario Carga']],
+                    body: records.map(record => [record.idx, record.anio, record.quincena, record.nombre_nomina, record.nombre_archivo, record.fecha_carga, record.user_carga])
                 });
                 doc.save('comparativa.pdf');
             });
@@ -87,19 +135,19 @@ const ComparativaTable = () => {
                 </div>
             )} />
             <DataTable ref={dt} value={records} responsiveLayout="scroll">
-                <Column field="key" header="Key" sortable />
+                <Column field="idx" header="Idx" sortable />
                 <Column field="anio" header="Año" sortable />
                 <Column field="quincena" header="Quincena" sortable />
-                <Column field="tipo_nomina" header="Tipo Nómina" sortable />
-                <Column field="usuario" header="Usuario" sortable />
+                <Column field="nombre_nomina" header="Nombre Nómina" sortable />
+                <Column field="nombre_archivo" header="Nombre Archivo" sortable />
                 <Column field="fecha_carga" header="Fecha Carga" sortable />
-                <Column field="deducciones" header="Deducciones" sortable />
-                <Column field="prestaciones" header="Prestaciones" sortable />
-                <Column field="liquido" header="Líquido" sortable />
+                <Column field="user_carga" header="Usuario Carga" sortable />
                 <Column body={approveTemplate} header="Acción" />
             </DataTable>
+            <Button label="Confirmar" icon="pi pi-check" onClick={handleConfirm} />
         </div>
     );
 };
 
 export default ComparativaTable;
+
