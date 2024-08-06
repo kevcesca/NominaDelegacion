@@ -1,22 +1,17 @@
 // middleware.js
-import { withAuth } from 'next-auth/middleware';
+import { NextResponse } from 'next/server';
 
-export default withAuth({
-    pages: {
-        signIn: '/Login',
-        error: '/Login', // Display the login page on error
-    },
-    callbacks: {
-        async authorized({ req, token }) {
-            const { pathname } = req.nextUrl;
-            // Allow public routes without authentication
-            if (pathname.startsWith('/RecuperarContra') || pathname.startsWith('/Registrarse') || pathname.startsWith('/Login')) {
-                return true;
-            }
-            // Require authentication for other routes
-            return !!token;
-        },
-    },
-});
+export default function middleware(req) {
+    const token = req.cookies.get('access_token');
+    const url = req.nextUrl.clone();
 
-export const config = { matcher: ['/Calendario', '/CambioContra', '/CargarLogo', '/context', '/CrearNomina', '/GenerarCheque', '/Perfil', '/Reportes', '/SubirEvidencia', '/Usuarios', '/Validacion'] };
+    if (!token && url.pathname !== '/Login') {
+        return NextResponse.redirect(new URL('/Login', req.url));
+    }
+
+    return NextResponse.next();
+}
+
+export const config = {
+    matcher: ['/Calendario', '/CambioContra', '/CargarLogo', '/context', '/CrearNomina', '/GenerarCheque', '/Perfil', '/Reportes', '/SubirEvidencia', '/Usuarios', '/Validacion'],
+};

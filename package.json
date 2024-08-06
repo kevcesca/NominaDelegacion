@@ -27,6 +27,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
+    "keycloak-js": "^25.0.2",
     "next": "14.2.3",
     "next-auth": "^4.24.7",
     "numero-a-letras": "^1.0.6",
