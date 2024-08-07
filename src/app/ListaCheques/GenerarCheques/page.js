@@ -2,13 +2,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Cheque from '../../%Components/Cheque/Cheque';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import axios from 'axios';
 import { Box } from '@mui/material';
 import { Button } from 'primereact/button';
-import axios from 'axios';
 import styles from './page.module.css';
+import Cheque from '../../%Components/Cheque/Cheque'
 
 const GenerarChequesPage = () => {
     const [cheques, setCheques] = useState([]);
@@ -20,7 +18,7 @@ const GenerarChequesPage = () => {
 
     const loadCheques = async () => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/consultaEmpleados/TotalesCheques?anio=2024&quincena=01`); // Update with your parameters
+            const response = await axios.get(`http://192.168.100.77:8080/consultaEmpleados/TotalesCheques?anio=2024&quincena=01`);
             setCheques(response.data);
         } catch (error) {
             console.error('Error loading cheques:', error);
@@ -28,23 +26,17 @@ const GenerarChequesPage = () => {
     };
 
     const exportPDF = async () => {
-        const doc = new jsPDF();
-        const chequeElements = document.querySelectorAll('.cheque');
-
-        for (let i = 0; i < chequeElements.length; i++) {
-            const canvas = await html2canvas(chequeElements[i]);
-            const imgData = canvas.toDataURL('image/png');
-            const imgProperties = doc.getImageProperties(imgData);
-            const pdfWidth = doc.internal.pageSize.getWidth();
-            const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
-
-            if (i > 0) {
-                doc.addPage();
-            }
-            doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        try {
+            const response = await axios.post('/api/generarPdf', { cheques }, { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'cheques.pdf');
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error('Error generating PDF:', error);
         }
-
-        doc.save('cheques.pdf');
     };
 
     return (

@@ -1,0 +1,31 @@
+/* src/app/%Components/CrudUniversos/CrudUniversos.module.css */
+.button-gold {
+    background-color: #bc955c;
+    border-color: #bc955c;
+    color: #fff;
+}
+
+
+.button-red {
+    background-color: #c0392b;
+    border-color: #c0392b;
+    color: #fff;
+}
+
+
+.button-teal {
+    background-color: #1abc9c;
+    border-color: #1abc9c;
+    color: #fff;
+}
+
+
+.button-margin {
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+
+.main{
+    min-height: 100vh;
+}

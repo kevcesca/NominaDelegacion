@@ -24,7 +24,7 @@ const Login = () => {
         if (!result.error) {
             window.location.href = '/';
         } else {
-            setError('Invalid email or password');
+            setError('Email o contraseña inválidos');
         }
     };
 

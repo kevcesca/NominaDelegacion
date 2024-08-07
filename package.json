@@ -34,6 +34,7 @@
     "primeicons": "^7.0.0",
     "primereact": "^10.6.6",
     "properties-reader": "^2.3.0",
+    "puppeteer": "^22.15.0",
     "react": "^18",
     "react-beautiful-dnd": "^13.1.1",
     "react-datepicker": "^7.2.0",

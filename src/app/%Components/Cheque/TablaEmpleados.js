@@ -1,4 +1,3 @@
-// src/app/%Components/TotalConceptosTable/TotalChequesTable.js
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
@@ -7,12 +6,18 @@ import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
-import { Select, MenuItem } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { Select, MenuItem } from '@mui/material';  // Asegúrate de importar estos componentes
+import { useRouter } from 'next/navigation';  // Importa el hook useRouter
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './Cheque.module.css';
+
+const buttonStyles = {
+    backgroundColor: '#bc955c',
+    borderColor: '#bc955c',
+    color: '#fff'
+};
 
 const toolbarButtonStyles = {
     backgroundColor: '#358874',
@@ -26,7 +31,7 @@ const TotalChequesTable = () => {
     const [quincena, setQuincena] = useState('01');
     const dt = useRef(null);
     const toast = useRef(null);
-    const router = useRouter();
+    const router = useRouter();  // Usa el hook useRouter
 
     useEffect(() => {
         loadCheques();
@@ -41,12 +46,18 @@ const TotalChequesTable = () => {
         }
     };
 
-    const exportCSV = () => {
-        dt.current.exportCSV();
-    };
-
-    const generateCheques = () => {
-        router.push('/ListaCheques/GenerarCheques');
+    const generarPDF = async () => {
+        try {
+            const response = await axios.post('/api/generatePdf', { cheques });
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cheques.pdf';
+            a.click();
+        } catch (error) {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al generar el PDF', life: 3000 });
+        }
     };
 
     const quincenas = [
@@ -79,10 +90,7 @@ const TotalChequesTable = () => {
     const header = (
         <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
             <h4 className="m-0">Totales de Cheques</h4>
-            <div>
-                <Button type="button" icon="pi pi-file" label="Exportar" onClick={exportCSV} style={toolbarButtonStyles} />
-                <Button type="button" icon="pi pi-check" label="Generar Cheques" onClick={generateCheques} style={{...toolbarButtonStyles, marginLeft: '10px'}} />
-            </div>
+            <Button type="button" icon="pi pi-file" label="Exportar" onClick={generarPDF} style={toolbarButtonStyles} />
         </div>
     );
 
@@ -114,12 +122,11 @@ const TotalChequesTable = () => {
                     <Column field="apellido_2" header="Apellido 2" sortable></Column>
                     <Column field="id_legal" header="RFC" sortable></Column>
                     <Column field="nombre_nomina" header="Nombre Nómina" sortable></Column>
-                    <Column field="poliza" header="Póliza" sortable></Column>
-                    <Column field="cheque" header="Cheque" sortable></Column>
                     <Column field="percepciones" header="Percepciones" sortable></Column>
                     <Column field="deducciones" header="Deducciones" sortable></Column>
                     <Column field="liquido" header="Líquido" sortable></Column>
                 </DataTable>
+                <Button type="button" label="Generar Cheques" onClick={() => router.push('/ListaCheques/GenerarCheques')} />
             </div>
         </div>
     );
