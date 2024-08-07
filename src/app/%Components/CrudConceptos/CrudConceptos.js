@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { classNames } from 'primereact/utils';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -8,8 +9,6 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
-import { Tooltip } from 'primereact/tooltip';
-import axios from 'axios';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -17,7 +16,7 @@ import styles from './CrudConceptos.module.css';
 
 const CrudConceptos = () => {
     let emptyConcepto = {
-        id_concepto: null,
+        id_concepto: '',
         nombre_concepto: ''
     };
 
@@ -60,23 +59,43 @@ const CrudConceptos = () => {
     const saveConcepto = () => {
         setSubmitted(true);
 
-        if (concepto.nombre_concepto.trim()) {
+        if (concepto.nombre_concepto.trim() && concepto.id_concepto.trim()) {
             let _conceptos = [...conceptos];
             let _concepto = { ...concepto };
 
             if (concepto.id_concepto) {
-                const index = findIndexById(concepto.id_concepto);
-                _conceptos[index] = _concepto;
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Updated', life: 3000 });
+                axios.post(`http://192.168.100.77:8080/actualizarConcepto`, null, {
+                    params: {
+                        id_concepto: _concepto.id_concepto,
+                        nombre_concepto: _concepto.nombre_concepto
+                    }
+                }).then(response => {
+                    const index = findIndexById(concepto.id_concepto);
+                    _conceptos[index] = _concepto;
+                    setConceptos(_conceptos);
+                    setConceptoDialog(false);
+                    setConcepto(emptyConcepto);
+                    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Updated', life: 3000 });
+                }).catch(error => {
+                    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error updating concepto', life: 3000 });
+                });
             } else {
-                _concepto.id_concepto = createId();
-                _conceptos.push(_concepto);
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Created', life: 3000 });
+                axios.post(`http://192.168.100.77:8080/insertarConcepto`, null, {
+                    params: {
+                        id_concepto: _concepto.id_concepto,
+                        nombre_concepto: _concepto.nombre_concepto
+                    }
+                }).then(response => {
+                    _concepto.id_concepto = createId();
+                    _conceptos.push(_concepto);
+                    setConceptos(_conceptos);
+                    setConceptoDialog(false);
+                    setConcepto(emptyConcepto);
+                    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Created', life: 3000 });
+                }).catch(error => {
+                    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error creating concepto', life: 3000 });
+                });
             }
-
-            setConceptos(_conceptos);
-            setConceptoDialog(false);
-            setConcepto(emptyConcepto);
         }
     };
 
@@ -91,11 +110,19 @@ const CrudConceptos = () => {
     };
 
     const deleteConcepto = () => {
-        let _conceptos = conceptos.filter(val => val.id_concepto !== concepto.id_concepto);
-        setConceptos(_conceptos);
-        setDeleteConceptoDialog(false);
-        setConcepto(emptyConcepto);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Deleted', life: 3000 });
+        axios.post(`http://192.168.100.77:8080/eliminarConcepto`, null, {
+            params: {
+                id_concepto: concepto.id_concepto
+            }
+        }).then(response => {
+            let _conceptos = conceptos.filter(val => val.id_concepto !== concepto.id_concepto);
+            setConceptos(_conceptos);
+            setDeleteConceptoDialog(false);
+            setConcepto(emptyConcepto);
+            toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Deleted', life: 3000 });
+        }).catch(error => {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error deleting concepto', life: 3000 });
+        });
     };
 
     const findIndexById = (id) => {
@@ -233,8 +260,13 @@ const CrudConceptos = () => {
 
             <Dialog visible={conceptoDialog} style={{ width: '450px' }} header="Concepto Details" modal className="p-fluid" footer={conceptoDialogFooter} onHide={hideDialog}>
                 <div className="field">
+                    <label htmlFor="id_concepto">ID Concepto</label>
+                    <InputText id="id_concepto" value={concepto.id_concepto} onChange={(e) => onInputChange(e, 'id_concepto')} required autoFocus className={classNames({ 'p-invalid': submitted && !concepto.id_concepto })} />
+                    {submitted && !concepto.id_concepto && <small className="p-error">ID Concepto is required.</small>}
+                </div>
+                <div className="field">
                     <label htmlFor="nombre_concepto">Nombre Concepto</label>
-                    <InputText id="nombre_concepto" value={concepto.nombre_concepto} onChange={(e) => onInputChange(e, 'nombre_concepto')} required autoFocus className={classNames({ 'p-invalid': submitted && !concepto.nombre_concepto })} />
+                    <InputText id="nombre_concepto" value={concepto.nombre_concepto} onChange={(e) => onInputChange(e, 'nombre_concepto')} required className={classNames({ 'p-invalid': submitted && !concepto.nombre_concepto })} />
                     {submitted && !concepto.nombre_concepto && <small className="p-error">Nombre Concepto is required.</small>}
                 </div>
             </Dialog>
