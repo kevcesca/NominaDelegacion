@@ -190,7 +190,7 @@ export default function CargarDatos() {
                 <Box className={styles.buttonContainer}>
                     <Link href={`/CrearNomina/ProcesarDatos?anio=${anio}&quincena=${quincena}`} passHref>
                         <Button variant="contained" color="primary" className={styles.exportButton}>
-                            Procesar datos
+                            Validar Datos
                         </Button>
                     </Link>
                 </Box>

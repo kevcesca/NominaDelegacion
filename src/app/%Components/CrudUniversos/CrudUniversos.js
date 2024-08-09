@@ -1,4 +1,3 @@
-// src/app/%Components/CrudUniversos/CrudUniversos.js
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
@@ -10,7 +9,6 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
-import { Tooltip } from 'primereact/tooltip';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -24,6 +22,7 @@ const CrudUniversos = () => {
 
     const [universos, setUniversos] = useState([]);
     const [universoDialog, setUniversoDialog] = useState(false);
+    const [editUniversoDialog, setEditUniversoDialog] = useState(false);
     const [deleteUniversoDialog, setDeleteUniversoDialog] = useState(false);
     const [universo, setUniverso] = useState(emptyUniverso);
     const [selectedUniversos, setSelectedUniversos] = useState(null);
@@ -47,6 +46,7 @@ const CrudUniversos = () => {
     const hideDialog = () => {
         setSubmitted(false);
         setUniversoDialog(false);
+        setEditUniversoDialog(false);
     };
 
     const hideDeleteUniversoDialog = () => {
@@ -60,25 +60,53 @@ const CrudUniversos = () => {
             let _universos = [...universos];
             let _universo = { ...universo };
 
-            if (universo.id_universo) {
+            // Método GET para crear universo
+            axios.get(`http://192.168.100.77:8080/insertarUniverso`, {
+                params: {
+                    id_universo: _universo.id_universo,
+                    nombre_nomina: _universo.nombre_nomina
+                }
+            }).then(response => {
+                _universos.push(_universo);
+                setUniversos(_universos);
+                setUniversoDialog(false);
+                setUniverso(emptyUniverso);
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Universo Created', life: 3000 });
+            }).catch(error => {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error creating universo', life: 3000 });
+            });
+        }
+    };
+
+    const updateUniverso = () => {
+        setSubmitted(true);
+
+        if (universo.id_universo.trim() && universo.nombre_nomina.trim()) {
+            let _universos = [...universos];
+            let _universo = { ...universo };
+
+            // Método GET para actualizar universo
+            axios.get(`http://192.168.100.77:8080/actualizarUniverso`, {
+                params: {
+                    id_universo: _universo.id_universo,
+                    nombre_nomina: _universo.nombre_nomina
+                }
+            }).then(response => {
                 const index = findIndexById(universo.id_universo);
                 _universos[index] = _universo;
+                setUniversos(_universos);
+                setEditUniversoDialog(false);
+                setUniverso(emptyUniverso);
                 toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Universo Updated', life: 3000 });
-            } else {
-                _universo.id_universo = createId();
-                _universos.push(_universo);
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Universo Created', life: 3000 });
-            }
-
-            setUniversos(_universos);
-            setUniversoDialog(false);
-            setUniverso(emptyUniverso);
+            }).catch(error => {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error updating universo', life: 3000 });
+            });
         }
     };
 
     const editUniverso = (universo) => {
         setUniverso({ ...universo });
-        setUniversoDialog(true);
+        setEditUniversoDialog(true);
     };
 
     const confirmDeleteUniverso = (universo) => {
@@ -87,11 +115,19 @@ const CrudUniversos = () => {
     };
 
     const deleteUniverso = () => {
-        let _universos = universos.filter(val => val.id_universo !== universo.id_universo);
-        setUniversos(_universos);
-        setDeleteUniversoDialog(false);
-        setUniverso(emptyUniverso);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Universo Deleted', life: 3000 });
+        axios.get(`http://192.168.100.77:8080/eliminarUniverso`, {
+            params: {
+                id_universo: universo.id_universo
+            }
+        }).then(response => {
+            let _universos = universos.filter(val => val.id_universo !== universo.id_universo);
+            setUniversos(_universos);
+            setDeleteUniversoDialog(false);
+            setUniverso(emptyUniverso);
+            toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Universo Deleted', life: 3000 });
+        }).catch(error => {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error deleting universo', life: 3000 });
+        });
     };
 
     const findIndexById = (id) => {
@@ -200,6 +236,13 @@ const CrudUniversos = () => {
         </React.Fragment>
     );
 
+    const editUniversoDialogFooter = (
+        <React.Fragment>
+            <Button label="Cancel" icon="pi pi-times" outlined className={`${styles['button-teal']} ${styles['button-margin']}`} onClick={hideDialog} />
+            <Button label="Save" icon="pi pi-check" className={`${styles['button-gold']} ${styles['button-margin']}`} onClick={updateUniverso} />
+        </React.Fragment>
+    );
+
     const deleteUniversoDialogFooter = (
         <React.Fragment>
             <Button label="No" icon="pi pi-times" outlined className={`${styles['button-teal']} ${styles['button-margin']}`} onClick={hideDeleteUniversoDialog} />
@@ -228,6 +271,19 @@ const CrudUniversos = () => {
             </div>
 
             <Dialog visible={universoDialog} style={{ width: '450px' }} header="Universo Details" modal className="p-fluid" footer={universoDialogFooter} onHide={hideDialog}>
+                <div className="field">
+                    <label htmlFor="id_universo">ID Universo</label>
+                    <InputText id="id_universo" value={universo.id_universo} onChange={(e) => onInputChange(e, 'id_universo')} required autoFocus className={classNames({ 'p-invalid': submitted && !universo.id_universo })} />
+                    {submitted && !universo.id_universo && <small className="p-error">ID Universo is required.</small>}
+                </div>
+                <div className="field">
+                    <label htmlFor="nombre_nomina">Nombre Nómina</label>
+                    <InputText id="nombre_nomina" value={universo.nombre_nomina} onChange={(e) => onInputChange(e, 'nombre_nomina')} required className={classNames({ 'p-invalid': submitted && !universo.nombre_nomina })} />
+                    {submitted && !universo.nombre_nomina && <small className="p-error">Nombre Nómina is required.</small>}
+                </div>
+            </Dialog>
+
+            <Dialog visible={editUniversoDialog} style={{ width: '450px' }} header="Universo Details" modal className="p-fluid" footer={editUniversoDialogFooter} onHide={hideDialog}>
                 <div className="field">
                     <label htmlFor="id_universo">ID Universo</label>
                     <InputText id="id_universo" value={universo.id_universo} onChange={(e) => onInputChange(e, 'id_universo')} required autoFocus className={classNames({ 'p-invalid': submitted && !universo.id_universo })} />

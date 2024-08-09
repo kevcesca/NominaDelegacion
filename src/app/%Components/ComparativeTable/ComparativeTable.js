@@ -1,105 +1,145 @@
-import React, { useState, useEffect } from 'react';
-import { classNames } from 'primereact/utils';
-import { FilterMatchMode } from 'primereact/api';
+// src/app/%Components/TablaAceptacion/ComparativaTable.js
+
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { InputText } from 'primereact/inputtext';
-import { Dropdown } from 'primereact/dropdown';
-import { Tag } from 'primereact/tag';
-import { ComparativeService } from './ComparativeService';
-import styles from './ComparativeTable.module.css';
+import { RadioButton } from 'primereact/radiobutton';
+import { Button } from 'primereact/button';
+import { Toolbar } from 'primereact/toolbar';
+import { Toast } from 'primereact/toast';
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
-export default function ComparativeTable() {
-    const [customers, setCustomers] = useState([]);
-    const [filters, setFilters] = useState({
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        id: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        idEmpleado: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        empleado: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        percepciones: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        deducciones: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        liquido: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        cuenta: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        status: { value: null, matchMode: FilterMatchMode.EQUALS },
-    });
-    const [loading, setLoading] = useState(true);
-    const [globalFilterValue, setGlobalFilterValue] = useState('');
-    const [statuses] = useState([
-        { label: 'No coinciden', value: 'noCoinciden' },
-        { label: 'Cambio de cuenta', value: 'cambioCuenta' },
-        { label: 'Incompleto', value: 'incompleto' },
-        { label: 'Ok', value: 'ok' }
-    ]);
+const ComparativaTable = ({ userRevision }) => {
+    const [records, setRecords] = useState([]);
+    const toast = useRef(null);
+    const dt = useRef(null);
 
     useEffect(() => {
-        ComparativeService.getData().then((data) => {
-            setCustomers(data);
-            setLoading(false);
-        });
+        const fetchData = async () => {
+            try {
+                const response = await axios.get('http://192.168.100.77:8080/filtrarNominaCtrl?pendiente=true&cancelado=false');
+                setRecords(response.data);
+            } catch (error) {
+                console.error('Error fetching data', error);
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error fetching data', life: 3000 });
+            }
+        };
+
+        fetchData();
     }, []);
 
-    const onGlobalFilterChange = (e) => {
-        const value = e.target.value;
-        let _filters = { ...filters };
-        _filters['global'].value = value;
-        setFilters(_filters);
-        setGlobalFilterValue(value);
-    };
-
-    const renderHeader = () => {
+    const approveTemplate = (rowData) => {
         return (
-            <div className="flex justify-content-end">
-                <span className="p-input-icon-left">
-                    <i className="pi pi-search" />
-                    <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Buscar por palabra clave" />
-                </span>
+            <div className="p-field-radiobutton">
+                <RadioButton inputId={`approve${rowData.idx}`} name={rowData.idx} value="Aprobar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Aprobar'} />
+                <label htmlFor={`approve${rowData.idx}`}>Aprobar</label>
+                <RadioButton inputId={`cancel${rowData.idx}`} name={rowData.idx} value="Cancelar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Cancelar'} />
+                <label htmlFor={`cancel${rowData.idx}`}>Cancelar</label>
             </div>
         );
     };
 
-    const statusBodyTemplate = (rowData) => {
-        if (rowData.status === 'noCoinciden') {
-            return <Tag value="No coinciden" severity="danger" />;
-        } else if (rowData.status === 'cambioCuenta') {
-            return <Tag value="Cambio de cuenta" severity="warning" />;
-        } else if (rowData.status === 'incompleto') {
-            return <Tag value="Incompleto" severity="info" />;
-        } else {
-            return <Tag value="Ok" severity="success" />;
+    const onRadioChange = (e, rowData) => {
+        let updatedRecords = [...records];
+        let recordIndex = updatedRecords.findIndex(record => record.idx === rowData.idx);
+        updatedRecords[recordIndex] = { ...rowData, status: e.value };
+        setRecords(updatedRecords);
+    };
+
+    const handleConfirm = async () => {
+        const confirmed = window.confirm("¿Son correctos los datos?");
+        if (!confirmed) {
+            return;
         }
+
+        const updatePromises = records.map(async (record) => {
+            if (!record.status) {
+                return; // No actualizar los registros que no tienen un estado seleccionado
+            }
+            const params = new URLSearchParams({
+                cancelado: record.status === 'Cancelar',
+                aprobado: record.status === 'Aprobar',
+                user_revision: userRevision,  // Aquí se usa el usuario recibido
+                pendiente_dem: false, // Pendiente ahora es false
+                idx: record.idx
+            }).toString();
+
+            try {
+                await axios.get(`http://192.168.100.77:8080/actualizarNominaCtrl?${params}`);
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Estado de la nómina ${record.idx} actualizado correctamente`, life: 3000 });
+            } catch (error) {
+                console.error('Error updating record', error);
+                toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al actualizar la nómina ${record.idx}`, life: 3000 });
+            }
+        });
+
+        await Promise.all(updatePromises.filter(Boolean)); // Filtrar las promesas nulas
     };
 
-    const statusRowFilterTemplate = (options) => {
-        return (
-            <Dropdown value={options.value} options={statuses} onChange={(e) => options.filterApplyCallback(e.value)} placeholder="Seleccionar uno" className="p-column-filter" showClear />
-        );
+    const exportCSV = () => {
+        dt.current.exportCSV();
     };
 
-    const rowClassName = (data) => {
-        return {
-            [styles.noCoinciden]: data.status === 'noCoinciden',
-            [styles.cambioCuenta]: data.status === 'cambioCuenta',
-            [styles.incompleto]: data.status === 'incompleto',
-            [styles.ok]: data.status === 'ok',
-        };
+    const exportPdf = () => {
+        import('jspdf').then((jsPDF) => {
+            import('jspdf-autotable').then(() => {
+                const doc = new jsPDF.default();
+                doc.autoTable({
+                    head: [['Idx', 'Año', 'Quincena', 'Nombre Nómina', 'Nombre Archivo', 'Fecha Carga', 'Usuario Carga']],
+                    body: records.map(record => [record.idx, record.anio, record.quincena, record.nombre_nomina, record.nombre_archivo, record.fecha_carga, record.user_carga])
+                });
+                doc.save('comparativa.pdf');
+            });
+        });
     };
 
-    const header = renderHeader();
+    const exportExcel = () => {
+        import('xlsx').then((xlsx) => {
+            const worksheet = xlsx.utils.json_to_sheet(records);
+            const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+            const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+            saveAsExcelFile(excelBuffer, 'comparativa');
+        });
+    };
+
+    const saveAsExcelFile = (buffer, fileName) => {
+        import('file-saver').then((module) => {
+            if (module && module.default) {
+                let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+                let EXCEL_EXTENSION = '.xlsx';
+                const data = new Blob([buffer], { type: EXCEL_TYPE });
+                module.default.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+            }
+        });
+    };
 
     return (
-        <div className="card">
-            <DataTable value={customers} paginator rows={10} dataKey="id" filters={filters} filterDisplay="row" loading={loading}
-                globalFilterFields={['id', 'idEmpleado', 'empleado', 'percepciones', 'deducciones', 'liquido', 'cuenta', 'status']} header={header} emptyMessage="No se encontraron registros."
-                rowClassName={rowClassName}>
-                <Column field="id" header="No." filter filterPlaceholder="Buscar por ID" style={{ minWidth: '10rem' }} />
-                <Column field="idEmpleado" header="ID EMPLEADO" filter filterPlaceholder="Buscar por empleado" style={{ minWidth: '10rem' }} />
-                <Column field="empleado" header="NOMBRE" filter filterPlaceholder="Buscar por nombre" style={{ minWidth: '10rem' }} />
-                <Column field="percepciones" header="PERCEPCIONES" filter filterPlaceholder="Buscar por percepciones" style={{ minWidth: '10rem' }} />
-                <Column field="deducciones" header="DEDUCCIONES" filter filterPlaceholder="Buscar por deducciones" style={{ minWidth: '10rem' }} />
-                <Column field="liquido" header="LIQUIDO" filter filterPlaceholder="Buscar por líquido" style={{ minWidth: '10rem' }} />
-                <Column field="cuenta" header="CUENTA" filter filterPlaceholder="Buscar por cuenta" style={{ minWidth: '10rem' }} />
-                <Column field="status" header="STATUS" filter filterElement={statusRowFilterTemplate} style={{ minWidth: '10rem', maxWidth: '12rem' }} body={statusBodyTemplate} />
+        <div>
+            <Toast ref={toast} />
+            <Toolbar className="mb-4" right={() => (
+                <div className="flex align-items-center justify-content-end gap-2">
+                    <Button type="button" icon="pi pi-file" rounded onClick={() => exportCSV()} data-pr-tooltip="CSV" />
+                    <Button type="button" icon="pi pi-file-excel" severity="success" rounded onClick={() => exportExcel()} data-pr-tooltip="XLS" />
+                    <Button type="button" icon="pi pi-file-pdf" severity="warning" rounded onClick={() => exportPdf()} data-pr-tooltip="PDF" />
+                </div>
+            )} />
+            <DataTable ref={dt} value={records} responsiveLayout="scroll">
+                <Column field="idx" header="Idx" sortable />
+                <Column field="anio" header="Año" sortable />
+                <Column field="quincena" header="Quincena" sortable />
+                <Column field="nombre_nomina" header="Nombre Nómina" sortable />
+                <Column field="nombre_archivo" header="Nombre Archivo" sortable />
+                <Column field="fecha_carga" header="Fecha Carga" sortable />
+                <Column field="user_carga" header="Usuario Carga" sortable />
+                <Column body={approveTemplate} header="Acción" />
             </DataTable>
+            <Button label='Confirmar' type="button" icon="pi pi-file-excel" severity="success" onClick={handleConfirm} />
         </div>
     );
-}
+};
+
+export default ComparativaTable;

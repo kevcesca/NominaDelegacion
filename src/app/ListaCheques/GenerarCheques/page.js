@@ -1,4 +1,3 @@
-// src/app/ListaCheques/GenerarCheques/page.js
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -6,7 +5,7 @@ import axios from 'axios';
 import { Box } from '@mui/material';
 import { Button } from 'primereact/button';
 import styles from './page.module.css';
-import Cheque from '../../%Components/Cheque/Cheque'
+import Cheque from '../../%Components/Cheque/Cheque';
 
 const GenerarChequesPage = () => {
     const [cheques, setCheques] = useState([]);
@@ -26,16 +25,24 @@ const GenerarChequesPage = () => {
     };
 
     const exportPDF = async () => {
-        try {
-            const response = await axios.post('/api/generarPdf', { cheques }, { responseType: 'blob' });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'cheques.pdf');
-            document.body.appendChild(link);
-            link.click();
-        } catch (error) {
-            console.error('Error generating PDF:', error);
+        const batchSize = 500;  // Ajustado a 100 cheques por archivo
+        const totalBatches = Math.ceil(cheques.length / batchSize);
+
+        for (let i = 0; i < totalBatches; i++) {
+            const batchCheques = cheques.slice(i * batchSize, (i + 1) * batchSize);
+
+            try {
+                const response = await axios.post('/api/generarPdf', { cheques: batchCheques }, { responseType: 'blob' });
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `cheques_batch_${i + 1}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+            }
         }
     };
 
@@ -46,7 +53,7 @@ const GenerarChequesPage = () => {
             {cheques.length > 0 && (
                 <Box>
                     {cheques.map((cheque, index) => (
-                        <div key={index} className="cheque">
+                        <div key={index} id={`cheque-${index}`} className="cheque">
                             <Cheque
                                 polizaNo={cheque.poliza}
                                 noDe={cheque.cheque}

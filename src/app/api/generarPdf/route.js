@@ -1,55 +1,55 @@
 import puppeteer from 'puppeteer';
+import { NextResponse } from 'next/server';
 
 export async function POST(request) {
-    const { cheques } = await request.json();
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+    try {
+        const { cheques } = await request.json();
+        
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
 
-    let pdfChunks = [];
-
-    for (let cheque of cheques) {
-        const content = `
+        const htmlContent = `
             <html>
-                <head>
-                    <style>
-                        body { font-family: Arial, sans-serif; }
-                        .cheque { border: 1px solid black; padding: 16px; margin-bottom: 16px; }
-                    </style>
-                </head>
-                <body>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    .cheque { page-break-after: always; margin-bottom: 20px; }
+                    .cheque:last-child { page-break-after: auto; }
+                </style>
+            </head>
+            <body>
+                ${cheques.map((cheque, index) => `
                     <div class="cheque">
-                        <h1>Cheque</h1>
-                        <p><strong>Poliza No:</strong> ${cheque.poliza}</p>
-                        <p><strong>No De:</strong> ${cheque.cheque}</p>
-                        <p><strong>No Empleado:</strong> ${cheque.id_empleado}</p>
-                        <p><strong>Nombre Beneficiario:</strong> ${cheque.nombre} ${cheque.apellido_1} ${cheque.apellido_2}</p>
-                        <p><strong>Importe Letra:</strong> ${cheque.importeLetra || ''}</p>
-                        <p><strong>Concepto Pago:</strong> ${cheque.conceptoPago || ''}</p>
-                        <p><strong>RFC:</strong> ${cheque.id_legal}</p>
-                        <p><strong>Tipo Nomina:</strong> ${cheque.nombre_nomina}</p>
-                        <p><strong>Percepciones:</strong> ${cheque.percepciones}</p>
-                        <p><strong>Deducciones:</strong> ${cheque.deducciones}</p>
-                        <p><strong>Liquido:</strong> ${cheque.liquido}</p>
-                        <p><strong>Fecha:</strong> ${cheque.fecha || ''}</p>
+                        <h1>Cheque #${index + 1}</h1>
+                        <p>Poliza No: ${cheque.poliza}</p>
+                        <p>No De: ${cheque.cheque}</p>
+                        <p>No Empleado: ${cheque.id_empleado}</p>
+                        <p>Nombre Beneficiario: ${cheque.nombre} ${cheque.apellido_1} ${cheque.apellido_2}</p>
+                        <p>RFC: ${cheque.id_legal}</p>
+                        <p>Percepciones: ${cheque.percepciones}</p>
+                        <p>Deducciones: ${cheque.deducciones}</p>
+                        <p>Liquido: ${cheque.liquido}</p>
+                        <p>Fecha: 15/04/2024</p>
                     </div>
-                </body>
+                `).join('')}
+            </body>
             </html>
         `;
 
-        await page.setContent(content);
-        const pdf = await page.pdf({ format: 'A4' });
-        pdfChunks.push(pdf);
+        await page.setContent(htmlContent, { waitUntil: 'load' });
+        const pdf = await page.pdf({ format: 'A4', printBackground: true });
+
+        await browser.close();
+
+        return new NextResponse(pdf, {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': 'attachment; filename=cheques.pdf'
+            }
+        });
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        return new NextResponse(JSON.stringify({ error: 'Failed to generate PDF' }), { status: 500 });
     }
-
-    await browser.close();
-
-    // Combine all PDF buffers
-    const combinedPdf = Buffer.concat(pdfChunks);
-
-    return new Response(combinedPdf, {
-        headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': 'attachment; filename="cheques.pdf"',
-        },
-    });
 }

@@ -81,7 +81,7 @@ export default function NavBar() {
             </Link>
           </SubMenu>
           <SubMenu label="Cheques" icon={<MoneyIcon />}>
-            <Link className={styles.tWhite} href="/GenerarCheque" passHref>
+            <Link className={styles.tWhite} href="/ListaCheques" passHref>
               <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Generar Cheque</MenuItem>
             </Link>
           </SubMenu>

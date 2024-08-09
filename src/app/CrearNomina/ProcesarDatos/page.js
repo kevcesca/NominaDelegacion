@@ -1,3 +1,4 @@
+// src/app/CrearNomina/page.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -10,6 +11,8 @@ import theme from '../../$tema/theme';
 import ChequesResumen from '../../%Components/TablasComparativasNomina/ChequesResumen';
 import DepositoResumen from '../../%Components/TablasComparativasNomina/DepositoResumen';
 import Totales from '../../%Components/TablasComparativasNomina/Totales';
+import ComparativaTable from '../../%Components/ComparativeTable/ComparativeTable'; // Importa la tabla de aprobación
+import { useSession } from 'next-auth/react';
 
 const CargarDatos = () => {
     const searchParams = useSearchParams();
@@ -19,6 +22,7 @@ const CargarDatos = () => {
     const [chequesData, setChequesData] = useState([]);
     const [depositoData, setDepositoData] = useState([]);
     const [totalesData, setTotalesData] = useState([]);
+    const { data: session } = useSession(); // Obtén la sesión para pasar el usuario
 
     useEffect(() => {
         if (anio && quincena) {
@@ -112,6 +116,11 @@ const CargarDatos = () => {
                 <Box className={styles.buttonContainer}>
                     <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportExcel}>Exportar a Excel</Button>
                     <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportPDF}>Exportar a PDF</Button>
+                </Box>
+                {/* Aquí integras la tabla de aprobación */}
+                <Box mt={4}>
+                    <Typography variant="h6">Aprobación de Nóminas</Typography>
+                    {session && <ComparativaTable userRevision={session.user.name} />} {/* Pasas el usuario que aprueba */}
                 </Box>
             </main>
         </ThemeProvider>

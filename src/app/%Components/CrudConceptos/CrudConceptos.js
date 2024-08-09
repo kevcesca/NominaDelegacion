@@ -23,6 +23,7 @@ const CrudConceptos = () => {
     const [conceptos, setConceptos] = useState([]);
     const [conceptoDialog, setConceptoDialog] = useState(false);
     const [deleteConceptoDialog, setDeleteConceptoDialog] = useState(false);
+    const [editConceptoDialog, setEditConceptoDialog] = useState(false);
     const [concepto, setConcepto] = useState(emptyConcepto);
     const [selectedConceptos, setSelectedConceptos] = useState(null);
     const [submitted, setSubmitted] = useState(false);
@@ -50,6 +51,7 @@ const CrudConceptos = () => {
     const hideDialog = () => {
         setSubmitted(false);
         setConceptoDialog(false);
+        setEditConceptoDialog(false);
     };
 
     const hideDeleteConceptoDialog = () => {
@@ -63,45 +65,53 @@ const CrudConceptos = () => {
             let _conceptos = [...conceptos];
             let _concepto = { ...concepto };
 
-            if (concepto.id_concepto) {
-                axios.post(`http://192.168.100.77:8080/actualizarConcepto`, null, {
-                    params: {
-                        id_concepto: _concepto.id_concepto,
-                        nombre_concepto: _concepto.nombre_concepto
-                    }
-                }).then(response => {
-                    const index = findIndexById(concepto.id_concepto);
-                    _conceptos[index] = _concepto;
-                    setConceptos(_conceptos);
-                    setConceptoDialog(false);
-                    setConcepto(emptyConcepto);
-                    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Updated', life: 3000 });
-                }).catch(error => {
-                    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error updating concepto', life: 3000 });
-                });
-            } else {
-                axios.post(`http://192.168.100.77:8080/insertarConcepto`, null, {
-                    params: {
-                        id_concepto: _concepto.id_concepto,
-                        nombre_concepto: _concepto.nombre_concepto
-                    }
-                }).then(response => {
-                    _concepto.id_concepto = createId();
-                    _conceptos.push(_concepto);
-                    setConceptos(_conceptos);
-                    setConceptoDialog(false);
-                    setConcepto(emptyConcepto);
-                    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Created', life: 3000 });
-                }).catch(error => {
-                    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error creating concepto', life: 3000 });
-                });
-            }
+            // Método GET para crear concepto
+            axios.get(`http://192.168.100.77:8080/insertarConcepto`, {
+                params: {
+                    id_concepto: _concepto.id_concepto,
+                    nombre_concepto: _concepto.nombre_concepto
+                }
+            }).then(response => {
+                _conceptos.push(_concepto);
+                setConceptos(_conceptos);
+                setConceptoDialog(false);
+                setConcepto(emptyConcepto);
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Created', life: 3000 });
+            }).catch(error => {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error creating concepto', life: 3000 });
+            });
+        }
+    };
+
+    const updateConcepto = () => {
+        setSubmitted(true);
+
+        if (concepto.nombre_concepto.trim() && concepto.id_concepto.trim()) {
+            let _conceptos = [...conceptos];
+            let _concepto = { ...concepto };
+
+            // Método GET para actualizar concepto
+            axios.get(`http://192.168.100.77:8080/actualizarConcepto`, {
+                params: {
+                    id_concepto: _concepto.id_concepto,
+                    nombre_concepto: _concepto.nombre_concepto
+                }
+            }).then(response => {
+                const index = findIndexById(concepto.id_concepto);
+                _conceptos[index] = _concepto;
+                setConceptos(_conceptos);
+                setEditConceptoDialog(false);
+                setConcepto(emptyConcepto);
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Updated', life: 3000 });
+            }).catch(error => {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error updating concepto', life: 3000 });
+            });
         }
     };
 
     const editConcepto = (concepto) => {
         setConcepto({ ...concepto });
-        setConceptoDialog(true);
+        setEditConceptoDialog(true);
     };
 
     const confirmDeleteConcepto = (concepto) => {
@@ -110,7 +120,7 @@ const CrudConceptos = () => {
     };
 
     const deleteConcepto = () => {
-        axios.post(`http://192.168.100.77:8080/eliminarConcepto`, null, {
+        axios.get(`http://192.168.100.77:8080/eliminarConcepto`, {
             params: {
                 id_concepto: concepto.id_concepto
             }
@@ -134,15 +144,6 @@ const CrudConceptos = () => {
             }
         }
         return index;
-    };
-
-    const createId = () => {
-        let id = '';
-        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (let i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
     };
 
     const exportCSV = (selectionOnly) => {
@@ -231,6 +232,13 @@ const CrudConceptos = () => {
         </React.Fragment>
     );
 
+    const editConceptoDialogFooter = (
+        <React.Fragment>
+            <Button label="Cancel" icon="pi pi-times" outlined className={`${styles['button-teal']} ${styles['button-margin']}`} onClick={hideDialog} />
+            <Button label="Save" icon="pi pi-check" className={`${styles['button-gold']} ${styles['button-margin']}`} onClick={updateConcepto} />
+        </React.Fragment>
+    );
+
     const deleteConceptoDialogFooter = (
         <React.Fragment>
             <Button label="No" icon="pi pi-times" outlined className={`${styles['button-teal']} ${styles['button-margin']}`} onClick={hideDeleteConceptoDialog} />
@@ -259,6 +267,19 @@ const CrudConceptos = () => {
             </div>
 
             <Dialog visible={conceptoDialog} style={{ width: '450px' }} header="Concepto Details" modal className="p-fluid" footer={conceptoDialogFooter} onHide={hideDialog}>
+                <div className="field">
+                    <label htmlFor="id_concepto">ID Concepto</label>
+                    <InputText id="id_concepto" value={concepto.id_concepto} onChange={(e) => onInputChange(e, 'id_concepto')} required autoFocus className={classNames({ 'p-invalid': submitted && !concepto.id_concepto })} />
+                    {submitted && !concepto.id_concepto && <small className="p-error">ID Concepto is required.</small>}
+                </div>
+                <div className="field">
+                    <label htmlFor="nombre_concepto">Nombre Concepto</label>
+                    <InputText id="nombre_concepto" value={concepto.nombre_concepto} onChange={(e) => onInputChange(e, 'nombre_concepto')} required className={classNames({ 'p-invalid': submitted && !concepto.nombre_concepto })} />
+                    {submitted && !concepto.nombre_concepto && <small className="p-error">Nombre Concepto is required.</small>}
+                </div>
+            </Dialog>
+
+            <Dialog visible={editConceptoDialog} style={{ width: '450px' }} header="Concepto Details" modal className="p-fluid" footer={editConceptoDialogFooter} onHide={hideDialog}>
                 <div className="field">
                     <label htmlFor="id_concepto">ID Concepto</label>
                     <InputText id="id_concepto" value={concepto.id_concepto} onChange={(e) => onInputChange(e, 'id_concepto')} required autoFocus className={classNames({ 'p-invalid': submitted && !concepto.id_concepto })} />
