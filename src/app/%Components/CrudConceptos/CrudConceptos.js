@@ -13,6 +13,7 @@ import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './CrudConceptos.module.css';
+import API_BASE_URL from '../../%Config/apiConfig'; // Importa el endpoint base
 
 const CrudConceptos = () => {
     let emptyConcepto = {
@@ -32,7 +33,7 @@ const CrudConceptos = () => {
     const dt = useRef(null);
 
     useEffect(() => {
-        axios.get('http://192.168.100.77:8080/cat/conceptos')
+        axios.get(`${API_BASE_URL}/cat/conceptos`)
             .then(response => {
                 setConceptos(response.data);
             })
@@ -66,7 +67,7 @@ const CrudConceptos = () => {
             let _concepto = { ...concepto };
 
             // Método GET para crear concepto
-            axios.get(`http://192.168.100.77:8080/insertarConcepto`, {
+            axios.get(`${API_BASE_URL}/insertarConcepto`, {
                 params: {
                     id_concepto: _concepto.id_concepto,
                     nombre_concepto: _concepto.nombre_concepto
@@ -91,7 +92,7 @@ const CrudConceptos = () => {
             let _concepto = { ...concepto };
 
             // Método GET para actualizar concepto
-            axios.get(`http://192.168.100.77:8080/actualizarConcepto`, {
+            axios.get(`${API_BASE_URL}/actualizarConcepto`, {
                 params: {
                     id_concepto: _concepto.id_concepto,
                     nombre_concepto: _concepto.nombre_concepto
@@ -120,7 +121,7 @@ const CrudConceptos = () => {
     };
 
     const deleteConcepto = () => {
-        axios.get(`http://192.168.100.77:8080/eliminarConcepto`, {
+        axios.get(`${API_BASE_URL}/eliminarConcepto`, {
             params: {
                 id_concepto: concepto.id_concepto
             }

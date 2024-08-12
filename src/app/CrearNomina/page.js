@@ -15,6 +15,7 @@ import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormC
 import theme from '../$tema/theme';
 import Link from 'next/link';
 import withAdminRole from '../%Components/hoc/withAdminRole';  // Importa el HOC
+import API_BASE_URL from '../%Config/apiConfig'
 
 function CargarDatos() {
     const { data: session } = useSession();
@@ -43,7 +44,7 @@ function CargarDatos() {
         formData.append('extra', extra);  // Siempre enviar el parámetro extra
 
         try {
-            const response = await axios.post(`http://192.168.100.215:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&usuario=${session?.user?.name || 'unknown'}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -64,7 +65,7 @@ function CargarDatos() {
 
     const handleFileDownload = async (tipoNomina) => {
         try {
-            const response = await axios.get(`http://192.168.100.215:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}`, {
+            const response = await axios.get(`${API_BASE_URL}/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}`, {
                 responseType: 'blob',
             });
 

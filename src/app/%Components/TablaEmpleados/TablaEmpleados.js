@@ -9,6 +9,7 @@ import { ProgressBar } from 'primereact/progressbar';
 import 'primereact/resources/themes/saga-blue/theme.css';  
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import API_BASE_URL from '../../%Config/apiConfig'
 
 export default function TablaEmpleados() {
     const [empleados, setEmpleados] = useState([]);
@@ -22,7 +23,7 @@ export default function TablaEmpleados() {
         const fetchEmpleados = async () => {
             try {
                 setIsLoading(true); // Mostrar la barra de carga
-                const response = await fetch('http://192.168.100.77:8080/empleados');
+                const response = await fetch(`${API_BASE_URL}/empleados`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok ' + response.statusText);
                 }

@@ -13,6 +13,7 @@ import DepositoResumen from '../../%Components/TablasComparativasNomina/Deposito
 import Totales from '../../%Components/TablasComparativasNomina/Totales';
 import ComparativaTable from '../../%Components/ComparativeTable/ComparativeTable'; // Importa la tabla de aprobación
 import { useSession } from 'next-auth/react';
+import API_BASE_URL from '../../%Config/apiConfig'
 
 const CargarDatos = () => {
     const searchParams = useSearchParams();
@@ -34,7 +35,7 @@ const CargarDatos = () => {
 
     const fetchChequesData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`http://192.168.100.215:8080/resumenCheques?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`${API_BASE_URL}/resumenCheques?anio=${anio}&quincena=${quincena}`);
             setChequesData(response.data);
         } catch (error) {
             console.error('Error fetching cheques data', error);
@@ -43,7 +44,7 @@ const CargarDatos = () => {
 
     const fetchDepositoData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`http://192.168.100.215:8080/resumenTransferencia?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`${API_BASE_URL}/resumenTransferencia?anio=${anio}&quincena=${quincena}`);
             setDepositoData(response.data);
         } catch (error) {
             console.error('Error fetching deposito data', error);
@@ -52,7 +53,7 @@ const CargarDatos = () => {
 
     const fetchTotalesData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`http://192.168.100.215:8080/resumenTotal?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`${API_BASE_URL}/resumenTotal?anio=${anio}&quincena=${quincena}`);
             setTotalesData(response.data);
         } catch (error) {
             console.error('Error fetching totales data', error);

@@ -11,6 +11,7 @@ import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './Cheque.module.css';
+import API_BASE_URL from '../../%Config/apiConfig'
 
 const TotalChequesTable = () => {
     const [cheques, setCheques] = useState([]);
@@ -25,7 +26,7 @@ const TotalChequesTable = () => {
     // Primera solicitud: insertar cheques
     const insertarCheques = async () => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/insertar/cheques`, {
+            const response = await axios.get(`${API_BASE_URL}/insertar/cheques`, {
                 params: {
                     quincena: quincena,
                     anio: anio,
@@ -53,7 +54,7 @@ const TotalChequesTable = () => {
     // Segunda solicitud: obtener datos de los cheques
     const cargarCheques = async () => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/consultaEmpleados/TotalesCheques`, {
+            const response = await axios.get(`${API_BASE_URL}/consultaEmpleados/TotalesCheques`, {
                 params: {
                     anio: anio,
                     quincena: quincena,

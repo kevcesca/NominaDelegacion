@@ -10,6 +10,7 @@ import { InputText } from 'primereact/inputtext';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import API_BASE_URL from '../../%Config/apiConfig'
 
 const TotalCLCsTable = () => {
     const [records, setRecords] = useState([]);
@@ -20,7 +21,7 @@ const TotalCLCsTable = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://192.168.100.77:8080/totalCLCs');
+                const response = await axios.get(`${API_BASE_URL}/totalCLCs`);
                 setRecords(response.data);
             } catch (error) {
                 console.error('Error fetching data', error);

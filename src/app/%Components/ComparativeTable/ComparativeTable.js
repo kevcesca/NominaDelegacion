@@ -11,6 +11,7 @@ import { Toast } from 'primereact/toast';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import API_BASE_URL from '../../%Config/apiConfig'
 
 const ComparativaTable = ({ userRevision }) => {
     const [records, setRecords] = useState([]);
@@ -20,7 +21,7 @@ const ComparativaTable = ({ userRevision }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://192.168.100.77:8080/filtrarNominaCtrl?pendiente=true&cancelado=false');
+                const response = await axios.get(`${API_BASE_URL}/filtrarNominaCtrl?pendiente=true&cancelado=false`);
                 setRecords(response.data);
             } catch (error) {
                 console.error('Error fetching data', error);
@@ -68,7 +69,7 @@ const ComparativaTable = ({ userRevision }) => {
             }).toString();
 
             try {
-                await axios.get(`http://192.168.100.77:8080/actualizarNominaCtrl?${params}`);
+                await axios.get(`${API_BASE_URL}/actualizarNominaCtrl?${params}`);
                 toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Estado de la nómina ${record.idx} actualizado correctamente`, life: 3000 });
             } catch (error) {
                 console.error('Error updating record', error);

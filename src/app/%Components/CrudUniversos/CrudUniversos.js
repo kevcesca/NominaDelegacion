@@ -13,6 +13,7 @@ import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './CrudUniversos.module.css';
+import API_BASE_URL from '../../%Config/apiConfig'
 
 const CrudUniversos = () => {
     let emptyUniverso = {
@@ -32,7 +33,7 @@ const CrudUniversos = () => {
     const dt = useRef(null);
 
     useEffect(() => {
-        axios.get('http://192.168.100.77:8080/cat/universos')
+        axios.get(`${API_BASE_URL}/cat/universos`)
             .then(response => setUniversos(response.data))
             .catch(error => toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los datos', life: 3000 }));
     }, []);
@@ -61,7 +62,7 @@ const CrudUniversos = () => {
             let _universo = { ...universo };
 
             // Método GET para crear universo
-            axios.get(`http://192.168.100.77:8080/insertarUniverso`, {
+            axios.get(`${API_BASE_URL}/insertarUniverso`, {
                 params: {
                     id_universo: _universo.id_universo,
                     nombre_nomina: _universo.nombre_nomina
@@ -86,7 +87,7 @@ const CrudUniversos = () => {
             let _universo = { ...universo };
 
             // Método GET para actualizar universo
-            axios.get(`http://192.168.100.77:8080/actualizarUniverso`, {
+            axios.get(`${API_BASE_URL}/actualizarUniverso`, {
                 params: {
                     id_universo: _universo.id_universo,
                     nombre_nomina: _universo.nombre_nomina
@@ -115,7 +116,7 @@ const CrudUniversos = () => {
     };
 
     const deleteUniverso = () => {
-        axios.get(`http://192.168.100.77:8080/eliminarUniverso`, {
+        axios.get(`${API_BASE_URL}/eliminarUniverso`, {
             params: {
                 id_universo: universo.id_universo
             }

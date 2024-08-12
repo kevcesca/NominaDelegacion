@@ -7,6 +7,7 @@ import { Column } from 'primereact/column';
 import styles from './TablaPostNomina.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
+import API_BASE_URL from '../../%Config/apiConfig';
 
 export default function TablaPostNomina({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
@@ -22,7 +23,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
 
     const fetchNominaData = async () => {
         try {
-            const response = await axios.get(`http://192.168.100.215:8080/listArchivos?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&quincena=${quincena}`);
             const data = response.data.reduce((acc, item) => {
                 const tipoNominaCap = capitalizeFirstLetter(item.nombre_nomina);
                 const tipoIndex = acc.findIndex(row => row.paramTipoNomina.toLowerCase() === item.nombre_nomina.toLowerCase());
@@ -71,7 +72,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         const capitalizedTipoNomina = capitalizeFirstLetter(tipoNomina);  // Capitalizar el tipo de nómina
 
         try {
-            const response = await axios.post(`http://192.168.100.215:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizedTipoNomina}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizedTipoNomina}&usuario=${session?.user?.name || 'unknown'}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -102,7 +103,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         const nombreSinExtension = removeFileExtension(archivoNombre);
 
         try {
-            const response = await axios.get(`http://192.168.100.215:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizeFirstLetter(tipoNomina)}&nombre=${nombreSinExtension}`, {
+            const response = await axios.get(`${API_BASE_URL}/download?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizeFirstLetter(tipoNomina)}&nombre=${nombreSinExtension}`, {
                 responseType: 'blob',
             });
 

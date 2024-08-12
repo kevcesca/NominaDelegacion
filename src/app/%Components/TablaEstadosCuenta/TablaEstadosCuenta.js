@@ -7,6 +7,7 @@ import { Column } from 'primereact/column';
 import styles from './TablaEstadosCuenta.module.css';
 import { Button, Select, MenuItem } from '@mui/material';
 import { Toast } from 'primereact/toast';
+import API_BASE_URL from '../../%Config/apiConfig'
 
 const meses = [
     { label: 'Enero', value: '01' },
@@ -36,7 +37,7 @@ export default function TablaEstadosCuenta({ anio, session, setProgress, setUplo
 
     const fetchEstadosCuentaData = async () => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/listArchivos?anio=${anio}&mes=${selectedMes}&tipo=Cuenta`);
+            const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&mes=${selectedMes}&tipo=Cuenta`);
             const data = response.data.reduce((acc, item) => {
                 const tipoIndex = acc.findIndex(row => row.paramTipoEstado === item.nombre_estado);
                 if (tipoIndex !== -1) {
@@ -74,7 +75,7 @@ export default function TablaEstadosCuenta({ anio, session, setProgress, setUplo
         formData.append('extra', '');  // Siempre enviar el parámetro extra
 
         try {
-            const response = await axios.post(`http://192.168.100.77:8080/uploads?anio=${String(anio)}&mes=${selectedMes}&tipo=${capitalizeFirstLetter(tipoEstado)}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/uploads?anio=${String(anio)}&mes=${selectedMes}&tipo=${capitalizeFirstLetter(tipoEstado)}&usuario=${session?.user?.name || 'unknown'}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -105,7 +106,7 @@ export default function TablaEstadosCuenta({ anio, session, setProgress, setUplo
         const nombreSinExtension = removeFileExtension(archivoNombre);
 
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/download?anio=${String(anio)}&mes=${selectedMes}&tipo=${capitalizeFirstLetter(tipoEstado)}&nombre=${nombreSinExtension}`, {
+            const response = await axios.get(`${API_BASE_URL}/download?anio=${String(anio)}&mes=${selectedMes}&tipo=${capitalizeFirstLetter(tipoEstado)}&nombre=${nombreSinExtension}`, {
                 responseType: 'blob',
             });
 
