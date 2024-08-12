@@ -1,4 +1,3 @@
-// src/app/CrearNomina/page.js
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
@@ -26,62 +25,12 @@ function CargarDatos() {
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
     const [showExtraordinarias, setShowExtraordinarias] = useState(false);
     const [showFiniquitos, setShowFiniquitos] = useState(false);
-    const [showEstadosCuenta, setShowEstadosCuenta] = useState(false);  // Nuevo estado para el switch
+    const [showEstadosCuenta, setShowEstadosCuenta] = useState(false);
     const toast = useRef(null);
 
     useEffect(() => {
         console.log("Session:", session);
     }, [session]);
-
-    const handleFileUpload = async (event, tipoNomina, setProgress, setUploaded, extra = '') => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        setProgress(0);
-        setUploaded(false);
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('extra', extra);  // Siempre enviar el parámetro extra
-
-        try {
-            const response = await axios.post(`${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&usuario=${session?.user?.name || 'unknown'}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                onUploadProgress: (progressEvent) => {
-                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setProgress(progress);
-                },
-            });
-            setProgress(100);
-            setUploaded(true);
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
-            console.log('File uploaded successfully', response.data);
-        } catch (error) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
-            console.error('Error uploading file', error);
-        }
-    };
-
-    const handleFileDownload = async (tipoNomina) => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}`, {
-                responseType: 'blob',
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `reporte_${tipoNomina}_${anio}_${quincena}.xlsx`);
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Archivo descargado correctamente', life: 3000 });
-        } catch (error) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
-            console.error('Error downloading file', error);
-        }
-    };
 
     const quincenas = [
         { label: '1ra ene', value: '01' },
@@ -158,7 +107,6 @@ function CargarDatos() {
                             session={session}
                             setProgress={setProgressPostNomina}
                             setUploaded={setPostNominaUploaded}
-                            extra="DIA DE LA MADRE" // Aquí puedes cambiar el valor de extra según sea necesario
                         />
                     </>
                 )}
