@@ -1,4 +1,3 @@
-// src/app/%Components/TablaPostNomina/TablaPostNomina.js
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
@@ -13,7 +12,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     const toast = useRef(null);
     const router = useRouter();
     const [tiposNomina, setTiposNomina] = useState([
-        { nombreArchivo: 'Vacío', tipoNomina: 'Base, Nomina 8, Estructura', paramTipoNomina: 'base', archivoNombre: '' },
+        { nombreArchivo: 'Vacío', tipoNomina: 'Compuesta, Nomina 8, Estructura', paramTipoNomina: 'compuesta', archivoNombre: '' },
         { nombreArchivo: 'Vacío', tipoNomina: 'Honorarios', paramTipoNomina: 'honorarios', archivoNombre: '' },
     ]);
 
@@ -23,14 +22,15 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
 
     const fetchNominaData = async () => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/listArchivos?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`http://192.168.100.215:8080/listArchivos?anio=${anio}&quincena=${quincena}`);
             const data = response.data.reduce((acc, item) => {
-                const tipoIndex = acc.findIndex(row => row.paramTipoNomina === item.nombre_nomina);
+                const tipoNominaCap = capitalizeFirstLetter(item.nombre_nomina);
+                const tipoIndex = acc.findIndex(row => row.paramTipoNomina.toLowerCase() === item.nombre_nomina.toLowerCase());
                 if (tipoIndex !== -1) {
                     acc[tipoIndex] = {
                         nombreArchivo: item.nombre_archivo || 'Vacío',
-                        tipoNomina: capitalizeFirstLetter(item.nombre_nomina),
-                        paramTipoNomina: item.nombre_nomina,
+                        tipoNomina: tipoNominaCap,
+                        paramTipoNomina: tipoNominaCap,
                         archivoNombre: item.nombre_archivo || ''
                     };
                 }
@@ -45,14 +45,14 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     };
 
     const capitalizeFirstLetter = (string) => {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
 
     const removeFileExtension = (filename) => {
         return filename.replace(/\.[^/.]+$/, "");
     };
 
-    const handleFileUpload = async (event, tipoNomina) => {
+    const handleFileUpload = async (event, tipoNomina, extra = '') => {
         if (!tipoNomina) {
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Tipo de nómina no definido', life: 3000 });
             console.error('Tipo de nómina no definido');
@@ -66,9 +66,12 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         setUploaded(false);
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('extra', extra);
+
+        const capitalizedTipoNomina = capitalizeFirstLetter(tipoNomina);  // Capitalizar el tipo de nómina
 
         try {
-            const response = await axios.post(`http://192.168.100.77:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`http://192.168.100.215:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizedTipoNomina}&usuario=${session?.user?.name || 'unknown'}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -99,7 +102,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         const nombreSinExtension = removeFileExtension(archivoNombre);
 
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&nombre=${nombreSinExtension}`, {
+            const response = await axios.get(`http://192.168.100.215:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizeFirstLetter(tipoNomina)}&nombre=${nombreSinExtension}`, {
                 responseType: 'blob',
             });
 
@@ -122,7 +125,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             <div>
                 <Button variant="contained" component="label" className={styles.uploadButton}>
                     Subir archivo
-                    <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoNomina)} accept=".xlsx" />
+                    <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoNomina, '')} accept=".xlsx" />
                 </Button>
             </div>
         );

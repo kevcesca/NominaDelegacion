@@ -29,7 +29,17 @@ const handler = NextAuth({
           const user = await res.json();
 
           if (res.ok && user) {
-            return user;
+            // Decodificar el access_token para obtener los roles del usuario
+            const decodedToken = JSON.parse(Buffer.from(user.access_token.split('.')[1], 'base64').toString());
+
+            return {
+              accessToken: user.access_token,
+              refreshToken: user.refresh_token,
+              idToken: user.id_token,
+              roles: decodedToken.realm_access?.roles || [], // Extraer roles del token decodificado
+              name: user.name || credentials.email.split('@')[0],
+              email: credentials.email,
+            };
           }
           return null;
         } catch (error) {
@@ -46,19 +56,25 @@ const handler = NextAuth({
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async session({ session, token }) {
-      session.user.id = token.id;
-      session.accessToken = token.accessToken;
-      return session;
-    },
-    async jwt({ token, user, account, profile }) {
-      if (account) {
-        token.accessToken = account.access_token;
-      }
-      if (user) {
-        token.id = user.id;
+    async jwt({ token, user, account }) {
+      if (account && user) {
+        token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
+        token.idToken = user.idToken;
+        token.name = user.name;
+        token.email = user.email;
+        token.roles = user.roles || []; // Añadir roles al token JWT
       }
       return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = token.accessToken;
+      session.refreshToken = token.refreshToken;
+      session.idToken = token.idToken;
+      session.user.name = token.name;
+      session.user.email = token.email;
+      session.roles = token.roles || []; // Pasar los roles a la sesión
+      return session;
     }
   }
 });

@@ -1,4 +1,3 @@
-// src/app/%Components/TablaQuincenasExtraordinarias/TablaQuincenasExtraordinarias.js
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
@@ -34,7 +33,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session,
 
     const fetchNominaData = async () => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/listArchivos?anio=${anio}&quincena=${quincena}&tipo=extraordinarios`);
+            const response = await axios.get(`http://192.168.100.215:8080/listArchivos?anio=${anio}&quincena=${quincena}&tipo=Extraordinarios`);
             const data = response.data.reduce((acc, item) => {
                 const tipoIndex = acc.findIndex(row => row.paramTipoNomina === item.nombre_nomina);
                 if (tipoIndex !== -1) {
@@ -57,7 +56,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session,
     };
 
     const capitalizeFirstLetter = (string) => {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
 
     const removeFileExtension = (filename) => {
@@ -80,8 +79,10 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session,
         formData.append('file', file);
         formData.append('tipoExtraordinario', tipoExtraordinario);
 
+        const capitalizedTipoNomina = capitalizeFirstLetter(tipoNomina);  // Capitalizar el tipo de nómina
+
         try {
-            const response = await axios.post(`http://192.168.100.77:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`http://192.168.100.215:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizedTipoNomina}&usuario=${session?.user?.name || 'unknown'}&extra=${tipoExtraordinario}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -102,24 +103,25 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session,
         }
     };
 
-    const handleFileDownload = async (tipoNomina, archivoNombre) => {
+    const handleFileDownload = async (tipoNomina, archivoNombre, tipoExtraordinario) => {
         if (!tipoNomina) {
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Tipo de nómina no definido', life: 3000 });
             console.error('Tipo de nómina no definido');
             return;
         }
 
+        const capitalizedTipoNomina = capitalizeFirstLetter(tipoNomina);  // Capitalizar el tipo de nómina
         const nombreSinExtension = removeFileExtension(archivoNombre);
 
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&nombre=${nombreSinExtension}`, {
+            const response = await axios.get(`http://192.168.100.215:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizedTipoNomina}&nombre=${nombreSinExtension}&extra=${tipoExtraordinario}`, {
                 responseType: 'blob',
             });
 
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', archivoNombre || `reporte_${tipoNomina}_${anio}_${quincena}.xlsx`);
+            link.setAttribute('download', archivoNombre || `reporte_${capitalizedTipoNomina}_${anio}_${quincena}.xlsx`);
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
@@ -143,7 +145,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session,
 
     const descargaTemplate = (rowData) => {
         return (
-            <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.paramTipoNomina, rowData.archivoNombre)}>
+            <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.paramTipoNomina, rowData.archivoNombre, rowData.tipoExtraordinario)}>
                 <i className="pi pi-download"></i>
             </button>
         );

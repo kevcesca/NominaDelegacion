@@ -18,11 +18,12 @@ const TotalChequesTable = () => {
     const [quincena, setQuincena] = useState('01');
     const [tipo, setTipo] = useState('base');
     const [iniCheq, setIniCheq] = useState('');
-    const [showTable, setShowTable] = useState(false);  // Estado para controlar la visibilidad de la tabla
+    const [showTable, setShowTable] = useState(false);  // Controlar la visibilidad de la tabla
     const toast = useRef(null);
     const dt = useRef(null);
 
-    const loadCheques = async () => {
+    // Primera solicitud: insertar cheques
+    const insertarCheques = async () => {
         try {
             const response = await axios.get(`http://192.168.100.77:8080/insertar/cheques`, {
                 params: {
@@ -32,11 +33,48 @@ const TotalChequesTable = () => {
                     ini_cheq: iniCheq
                 }
             });
-            setCheques(response.data);
-            setShowTable(true);  // Mostrar la tabla solo después de recibir la respuesta
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Cheques cargados correctamente', life: 3000 });
+
+            const responseData = response.data.trim(); // Limpiar espacios en blanco
+
+            if (responseData === 'El script se ejecutó correctamente.') {
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: responseData, life: 3000 });
+                await cargarCheques();  // Llamar a la función para cargar la tabla si la inserción fue exitosa
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: responseData, life: 3000 });
+                setShowTable(false);  // Ocultar la tabla si hay un error
+            }
         } catch (error) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los cheques', life: 3000 });
+            const errorMessage = 'Hubo un error al comunicarse con el servidor';
+            toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+            setShowTable(false);
+        }
+    };
+
+    // Segunda solicitud: obtener datos de los cheques
+    const cargarCheques = async () => {
+        try {
+            const response = await axios.get(`http://192.168.100.77:8080/consultaEmpleados/TotalesCheques`, {
+                params: {
+                    anio: anio,
+                    quincena: quincena,
+                    nombre_nomina: tipo
+                }
+            });
+
+            const responseData = response.data;
+
+            if (responseData.length > 0) {
+                setShowTable(true);  // Mostrar la tabla después de obtener los datos correctamente
+                setCheques(responseData);  // Asignar los datos recibidos a la tabla
+            } else {
+                toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'No se encontraron datos.', life: 3000 });
+                setShowTable(false);  // Ocultar la tabla si no hay datos
+            }
+        } catch (error) {
+            const errorMessage = 'Hubo un error al cargar los datos';
+            toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+            setShowTable(false);
+            setCheques([]);  // Limpiar la tabla si hay un error
         }
     };
 
@@ -73,13 +111,6 @@ const TotalChequesTable = () => {
         { label: 'Extraordinaria', value: 'extraordinaria' }
     ];
 
-    const header = (
-        <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-            <h4 className="m-0">Totales de Cheques</h4>
-            <Button type="button" icon="pi pi-file" label="Exportar" onClick={() => generarPDF()} className={styles.submitButton} />
-        </div>
-    );
-
     const generarPDF = async () => {
         try {
             const response = await axios.post('/api/generatePdf', { cheques });
@@ -93,6 +124,13 @@ const TotalChequesTable = () => {
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al generar el PDF', life: 3000 });
         }
     };
+
+    const header = (
+        <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
+            <h4 className="m-0">Totales de Cheques</h4>
+            <Button type="button" icon="pi pi-file" label="Exportar" onClick={generarPDF} className={styles.submitButton} />
+        </div>
+    );
 
     return (
         <div>
@@ -146,7 +184,7 @@ const TotalChequesTable = () => {
                         value={iniCheq}
                         onChange={(e) => setIniCheq(e.target.value)}
                     />
-                    <Button label="Generar Cheques" onClick={loadCheques} className={styles.submitButton} />
+                    <Button label="Generar Cheques" onClick={insertarCheques} className={styles.submitButton} />
                 </div>
 
                 {showTable && (  // Renderizar la tabla solo si se ha cargado la data
@@ -154,14 +192,16 @@ const TotalChequesTable = () => {
                         <Toolbar className="mb-4" right={header}></Toolbar>
                         <DataTable ref={dt} value={cheques} paginator rows={10} rowsPerPageOptions={[5, 10, 25]} dataKey="id_empleado">
                             <Column field="id_empleado" header="ID Empleado" sortable></Column>
+                            <Column field="Poliza" header="Póliza" sortable></Column>
+                            <Column field="Cheque" header="Cheque" sortable></Column>
                             <Column field="nombre" header="Nombre" sortable></Column>
                             <Column field="apellido_1" header="Apellido 1" sortable></Column>
                             <Column field="apellido_2" header="Apellido 2" sortable></Column>
                             <Column field="id_legal" header="RFC" sortable></Column>
                             <Column field="nombre_nomina" header="Nombre Nómina" sortable></Column>
-                            <Column field="percepciones" header="Percepciones" sortable></Column>
-                            <Column field="deducciones" header="Deducciones" sortable></Column>
-                            <Column field="liquido" header="Líquido" sortable></Column>
+                            <Column field="PERCEPCIONES" header="Percepciones" sortable></Column>
+                            <Column field="DEDUCCIONES" header="Deducciones" sortable></Column>
+                            <Column field="LIQUIDO" header="Líquido" sortable></Column>
                         </DataTable>
                     </>
                 )}

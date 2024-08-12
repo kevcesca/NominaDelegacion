@@ -50,6 +50,12 @@ export default function NavBar() {
             <Link className={styles.tWhite} href="/Configuracion/Alertas" passHref>
               <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Alertas</MenuItem>
             </Link>
+            <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Conceptos</MenuItem>
+            </Link>
+            <Link className={styles.tWhite} href="/Configuracion/Universos" passHref>
+              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Universos</MenuItem>
+            </Link>
           </SubMenu>
           <SubMenu label="Calendario de nómina" icon={<CalendarTodayIcon />} >
             <Link className={styles.tWhite} href="/Calendario" passHref>

@@ -9,12 +9,14 @@ import TablaPostNomina from '../%Components/TablaPostNomina/TablaPostNomina';
 import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQuincenasExtraordinarias';
 import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
 import TablaResumenNomina from '../%Components/TablaResumenNomina/TablaResumenNomina';
+import TablaEstadosCuenta from '../%Components/TablaEstadosCuenta/TablaEstadosCuenta';
 import { ProgressBar } from 'primereact/progressbar';
 import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormControlLabel } from '@mui/material';
 import theme from '../$tema/theme';
 import Link from 'next/link';
+import withAdminRole from '../%Components/hoc/withAdminRole';  // Importa el HOC
 
-export default function CargarDatos() {
+function CargarDatos() {
     const { data: session } = useSession();
     const [quincena, setQuincena] = useState('01');
     const [anio, setAnio] = useState('2024');
@@ -23,13 +25,14 @@ export default function CargarDatos() {
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
     const [showExtraordinarias, setShowExtraordinarias] = useState(false);
     const [showFiniquitos, setShowFiniquitos] = useState(false);
+    const [showEstadosCuenta, setShowEstadosCuenta] = useState(false);  // Nuevo estado para el switch
     const toast = useRef(null);
 
     useEffect(() => {
         console.log("Session:", session);
     }, [session]);
 
-    const handleFileUpload = async (event, tipoNomina, setProgress, setUploaded) => {
+    const handleFileUpload = async (event, tipoNomina, setProgress, setUploaded, extra = '') => {
         const file = event.target.files[0];
         if (!file) return;
 
@@ -37,9 +40,10 @@ export default function CargarDatos() {
         setUploaded(false);
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('extra', extra);  // Siempre enviar el parámetro extra
 
         try {
-            const response = await axios.post(`http://192.168.100.77:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`http://192.168.100.215:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}&usuario=${session?.user?.name || 'unknown'}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -60,7 +64,7 @@ export default function CargarDatos() {
 
     const handleFileDownload = async (tipoNomina) => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}`, {
+            const response = await axios.get(`http://192.168.100.215:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina.toLowerCase()}`, {
                 responseType: 'blob',
             });
 
@@ -137,6 +141,7 @@ export default function CargarDatos() {
                     session={session}
                     setProgress={setProgressPostNomina}
                     setUploaded={setPostNominaUploaded}
+                    extra="" // Aquí extra es vacío
                 />
 
                 <FormControlLabel
@@ -152,6 +157,7 @@ export default function CargarDatos() {
                             session={session}
                             setProgress={setProgressPostNomina}
                             setUploaded={setPostNominaUploaded}
+                            extra="DIA DE LA MADRE" // Aquí puedes cambiar el valor de extra según sea necesario
                         />
                     </>
                 )}
@@ -169,6 +175,24 @@ export default function CargarDatos() {
                             session={session}
                             setProgress={setProgressPostNomina}
                             setUploaded={setPostNominaUploaded}
+                            extra="" // Aquí extra es vacío
+                        />
+                    </>
+                )}
+
+                <FormControlLabel
+                    control={<Switch checked={showEstadosCuenta} onChange={() => setShowEstadosCuenta(!showEstadosCuenta)} />}
+                    label="Mostrar Estados de Cuenta"
+                />
+                {showEstadosCuenta && (
+                    <>
+                        <Typography variant="h5" className={styles.h2}>Estados de Cuenta</Typography>
+                        <TablaEstadosCuenta
+                            quincena={quincena}
+                            anio={anio}
+                            session={session}
+                            setProgress={setProgressPostNomina}
+                            setUploaded={setPostNominaUploaded}
                         />
                     </>
                 )}
@@ -181,7 +205,7 @@ export default function CargarDatos() {
                         </Box>
                         <Button variant="contained" component="label" className={styles.uploadButton}>
                             Subir archivo
-                            <input type="file" hidden onChange={(e) => handleFileUpload(e, 'resumen', setProgressResumenNomina, () => {})} accept=".xlsx" />
+                            <input type="file" hidden onChange={(e) => handleFileUpload(e, 'resumen', setProgressResumenNomina, setPostNominaUploaded, '')} accept=".xlsx" />
                         </Button>
                         <TablaResumenNomina />
                     </>
@@ -198,3 +222,5 @@ export default function CargarDatos() {
         </ThemeProvider>
     );
 }
+
+export default withAdminRole(CargarDatos);

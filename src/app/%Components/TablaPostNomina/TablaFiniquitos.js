@@ -22,7 +22,7 @@ export default function TablaFiniquitos({ quincena, anio, session, setProgress, 
 
     const fetchFiniquitosData = async () => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/listArchivos?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`http://192.168.100.215:8080/listArchivos?anio=${anio}&quincena=${quincena}`);
             const data = response.data.reduce((acc, item) => {
                 if (item.nombre_nomina === 'finiquitos') {
                     acc[0] = {
@@ -56,7 +56,7 @@ export default function TablaFiniquitos({ quincena, anio, session, setProgress, 
         formData.append('file', file);
 
         try {
-            const response = await axios.post(`http://192.168.100.77:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=finiquitos&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`http://192.168.100.215:8080/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=finiquitos&usuario=${session?.user?.name || 'unknown'}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -88,7 +88,7 @@ export default function TablaFiniquitos({ quincena, anio, session, setProgress, 
         const nombreSinExtension = removeFileExtension(archivoNombre);
 
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=finiquitos&nombre=${nombreSinExtension}`, {
+            const response = await axios.get(`http://192.168.100.215:8080/download?quincena=${quincena}&anio=${String(anio)}&tipo=finiquitos&nombre=${nombreSinExtension}`, {
                 responseType: 'blob', // Indica que la respuesta será un blob para manejar archivos binarios
             });
 

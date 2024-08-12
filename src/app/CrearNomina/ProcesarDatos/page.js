@@ -34,7 +34,7 @@ const CargarDatos = () => {
 
     const fetchChequesData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/resumenCheques?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`http://192.168.100.215:8080/resumenCheques?anio=${anio}&quincena=${quincena}`);
             setChequesData(response.data);
         } catch (error) {
             console.error('Error fetching cheques data', error);
@@ -43,7 +43,7 @@ const CargarDatos = () => {
 
     const fetchDepositoData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/resumenTransferencia?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`http://192.168.100.215:8080/resumenTransferencia?anio=${anio}&quincena=${quincena}`);
             setDepositoData(response.data);
         } catch (error) {
             console.error('Error fetching deposito data', error);
@@ -52,7 +52,7 @@ const CargarDatos = () => {
 
     const fetchTotalesData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`http://192.168.100.77:8080/resumenTotal?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`http://192.168.100.215:8080/resumenTotal?anio=${anio}&quincena=${quincena}`);
             setTotalesData(response.data);
         } catch (error) {
             console.error('Error fetching totales data', error);
