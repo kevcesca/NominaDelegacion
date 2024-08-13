@@ -1,5 +1,5 @@
 'use client'
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Box, ThemeProvider } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import styles from './page.module.css';
@@ -7,15 +7,17 @@ import TablaUsuarios from '../%Components/TablaUsuarios/TablaUsuarios'; // Aseg�
 import theme from '../$tema/theme'; // Importa tu tema personalizado
 
 export default function CrearNomina() {
+    const [iframeUrl, setIframeUrl] = useState('');
+
     const handleRedirectToKeycloak = () => {
-        // Redirige a la URL de administraci처n de Keycloak
-        window.location.href = 'http://localhost:8081/admin/master/console/#/reino-NominaAzcapo/users';
+        // Establece la URL en el iframe en lugar de redirigir
+        setIframeUrl('http://localhost:8081/admin/master/console/#/reino-NominaAzcapo/users');
     };
 
     return (
         <ThemeProvider theme={theme}>
             <main className={styles.main}>
-                {/* Bot처n para redirigir a la consola de administraci처n de Keycloak */}
+                {/* Bot처n para cargar la consola de administraci처n de Keycloak en un iframe */}
                 <Box display="flex" justifyContent="flex-end" mb={2}>
                     <Button
                         variant="contained"
@@ -29,6 +31,19 @@ export default function CrearNomina() {
 
                 {/* Tabla de usuarios */}
                 <TablaUsuarios />
+
+                {/* Iframe que muestra la consola de administraci처n de Keycloak */}
+                {iframeUrl && (
+                    <Box mt={4} className={styles.iframeContainer}>
+                        <iframe
+                            src={iframeUrl}
+                            width="100%"
+                            height="600px"
+                            frameBorder="0"
+                            title="Keycloak Admin"
+                        ></iframe>
+                    </Box>
+                )}
             </main>
         </ThemeProvider>
     );

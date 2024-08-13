@@ -10,7 +10,7 @@ export default function Home() {
         <main className={styles.main}>
           <div className={styles.carouselContainer}>
             <Banner/>
-            <CustomCarousel />
+            {/* <CustomCarousel /> */}
           </div>
         </main>
     );

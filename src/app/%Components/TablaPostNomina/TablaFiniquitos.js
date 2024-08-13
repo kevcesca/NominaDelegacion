@@ -54,9 +54,10 @@ export default function TablaFiniquitos({ quincena, anio, session, setProgress, 
         setUploaded(false);
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('extra', ''); // Mandar el parámetro extra como string vacío
 
         try {
-            const response = await axios.post(`${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=finiquitos&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&usuario=${session?.user?.name || 'unknown'}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -88,7 +89,7 @@ export default function TablaFiniquitos({ quincena, anio, session, setProgress, 
         const nombreSinExtension = removeFileExtension(archivoNombre);
 
         try {
-            const response = await axios.get(`${API_BASE_URL}/download?quincena=${quincena}&anio=${String(anio)}&tipo=finiquitos&nombre=${nombreSinExtension}`, {
+            const response = await axios.get(`${API_BASE_URL}/download?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&nombre=${nombreSinExtension}`, {
                 responseType: 'blob', // Indica que la respuesta será un blob para manejar archivos binarios
             });
 

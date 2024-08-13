@@ -1,48 +1,43 @@
-export const UserService = {
-    getUsuariosData() {
-        return [
-            {
-                id: 1,
-                fechaAlta: "10-04-2024",
-                nombre: "HECTOR",
-                apellidos: "CHAVEZ MIRANDA",
-                email: "control.personal@azcapotzalco.cdmx.gob.mx",
-                password: "password123",
-                role: "admin",
-                activo: "SI"
-            },
-            {
-                id: 2,
-                fechaAlta: "10-04-2024",
-                nombre: "LIZETH",
-                apellidos: "RUIZ HÉRNANDEZ",
-                email: "administracion.personal@azcapotzalco.cdmx.gob.mx",
-                password: "password123",
-                role: "user",
-                activo: "SI"
-            },
-            {
-                id: 3,
-                fechaAlta: "10-04-2024",
-                nombre: "FRANCISCO",
-                apellidos: "MATA VELASCO",
-                email: "fcomatvel@hotmail.com",
-                password: "password123",
-                role: "user",
-                activo: "SI"
-            }
-        ];
-    },
+// src/app/%Services/UserService.js
+export async function fetchUsersFromKeycloak() {
+    const realm = 'reino-NominaAzcapo'; // Reemplaza con el nombre de tu realm
+    const clientId = process.env.KEYCLOAK_CLIENT_ID;
+    const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET;
+    const tokenUrl = `http://localhost:8081/realms/${realm}/protocol/openid-connect/token`;
+    const usersUrl = `http://localhost:8081/admin/realms/${realm}/users`;
 
-    getUsuariosMini() {
-        return Promise.resolve(this.getUsuariosData().slice(0, 1));
-    },
+    // Paso 1: Obtener el token de acceso
+    const tokenResponse = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'grant_type': 'client_credentials',
+            'client_id': clientId,
+            'client_secret': clientSecret,
+        }),
+    });
 
-    getUsuariosSmall() {
-        return Promise.resolve(this.getUsuariosData().slice(0, 2));
-    },
-
-    getUsuarios() {
-        return Promise.resolve(this.getUsuariosData());
+    if (!tokenResponse.ok) {
+        throw new Error('Error fetching access token from Keycloak');
     }
-};
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+
+    // Paso 2: Obtener la lista de usuarios
+    const usersResponse = await fetch(usersUrl, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!usersResponse.ok) {
+        throw new Error('Error fetching users from Keycloak');
+    }
+
+    return await usersResponse.json();
+}
