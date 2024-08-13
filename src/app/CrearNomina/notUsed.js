@@ -7,6 +7,7 @@ import styles from './page.module.css';
 import TablaPostNomina from '../%Components/TablaPostNomina/TablaPostNomina';
 import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQuincenasExtraordinarias';
 import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
+import TablaResumenNomina from '../%Components/TablaResumenNomina/TablaResumenNomina';
 import TablaEstadosCuenta from '../%Components/TablaEstadosCuenta/TablaEstadosCuenta';
 import { ProgressBar } from 'primereact/progressbar';
 import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormControlLabel } from '@mui/material';
@@ -20,6 +21,7 @@ function CargarDatos() {
     const [quincena, setQuincena] = useState('01');
     const [anio, setAnio] = useState('2024');
     const [progressPostNomina, setProgressPostNomina] = useState(0);
+    const [progressResumenNomina, setProgressResumenNomina] = useState(0);
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
     const [showExtraordinarias, setShowExtraordinarias] = useState(false);
     const [showFiniquitos, setShowFiniquitos] = useState(false);
@@ -141,6 +143,20 @@ function CargarDatos() {
                             setProgress={setProgressPostNomina}
                             setUploaded={setPostNominaUploaded}
                         />
+                    </>
+                )}
+
+                {postNominaUploaded && (
+                    <>
+                        <Typography variant="h5" className={styles.h2}>Resumen de Nomina</Typography>
+                        <Box className={styles.progressContainer}>
+                            <ProgressBar value={progressResumenNomina} className={styles.progressBar} />
+                        </Box>
+                        <Button variant="contained" component="label" className={styles.uploadButton}>
+                            Subir archivo
+                            <input type="file" hidden onChange={(e) => handleFileUpload(e, 'resumen', setProgressResumenNomina, setPostNominaUploaded, '')} accept=".xlsx" />
+                        </Button>
+                        <TablaResumenNomina />
                     </>
                 )}
 

@@ -74,22 +74,6 @@ export default function NavBar() {
             <Link className={styles.tWhite} href="/CrearNomina" passHref>
               <MenuItem icon={<PeopleIcon />} className={styles.bgblack}>Cargar Nómina</MenuItem>
             </Link>
-            <Link className={styles.tWhite} href="/Validacion" passHref>
-              <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Cambios en la Nómina</MenuItem>
-            </Link>
-            <Link className={styles.tWhite} href="/SubirEvidencia" passHref>
-              <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Subir Evidencia</MenuItem>
-            </Link>
-          </SubMenu>
-          <SubMenu label="Reportes" icon={<AssessmentIcon />}>
-            <Link className={styles.tWhite} href="/Reportes" passHref>
-              <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Generar Reporte</MenuItem>
-            </Link>
-          </SubMenu>
-          <SubMenu label="Cheques" icon={<MoneyIcon />}>
-            <Link className={styles.tWhite} href="/ListaCheques" passHref>
-              <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Generar Cheque</MenuItem>
-            </Link>
           </SubMenu>
         </Menu>
       </Sidebar>

@@ -32,14 +32,6 @@ const Login = () => {
         signIn('google');
     };
 
-    const handleRecoverPassword = () => {
-        window.location.href = '/RecuperarContra';
-    };
-
-    const handleRegister = () => {
-        window.location.href = '/Registrarse';
-    };
-
     return (
         <ThemeProvider theme={theme}>
             <Container component="main" maxWidth="xs" className={styles.tWhite}>
@@ -105,34 +97,6 @@ const Login = () => {
                                 sx={{ mt: 3, mb: 2 }}
                             >
                                 Iniciar
-                            </Button>
-                            <Button
-                                fullWidth
-                                variant="outlined"
-                                color="primary"
-                                startIcon={<GoogleIcon />}
-                                onClick={handleGoogleSignIn}
-                                sx={{ mt: 1, mb: 2 }}
-                            >
-                                Iniciar con Google
-                            </Button>
-                            <Button
-                                fullWidth
-                                variant="text"
-                                color="primary"
-                                onClick={handleRecoverPassword}
-                                sx={{ mt: 2 }}
-                            >
-                                ¿Perdiste tu contraseña?
-                            </Button>
-                            <Button
-                                fullWidth
-                                variant="text"
-                                color="primary"
-                                onClick={handleRegister}
-                                sx={{ mt: 1 }}
-                            >
-                                ¿No tienes cuenta? Regístrate
                             </Button>
                         </Box>
                     </Box>

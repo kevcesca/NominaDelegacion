@@ -149,9 +149,6 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                 <Column body={uploadTemplate} header="SUBIR ARCHIVO" style={{ width: '20%' }}></Column>
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '20%' }}></Column>
             </DataTable>
-            <Button variant="contained" color="primary" className={styles.validateButton} onClick={() => router.push('/AprobarCargaNomina')}>
-                Validar Datos
-            </Button>
         </div>
     );
 }

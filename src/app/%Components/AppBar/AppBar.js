@@ -28,13 +28,16 @@ export default function AppBar() {
         { 
             label: 'Usuarios', 
             icon: <GroupIcon />, 
-            command: () => router.push('/Usuarios') 
+            command: () => { 
+                // Redirige a la URL de administración de usuarios en Keycloak
+                window.location.href = 'http://localhost:8081/admin/master/console/#/reino-NominaAzcapo/users';
+            }
         },
         { 
             label: 'Cerrar Sesión', 
             icon: <ExitToAppIcon />, 
             command: () => { 
-                signOut({ callbackUrl: '/' });
+                signOut({ callbackUrl: '/' }); // Cambiado a una ruta relativa
             } 
         }
     ];
