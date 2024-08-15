@@ -3,24 +3,24 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import styles from './TablaEstadosCuenta.module.css';
+import styles from './TablaRetenciones.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
 
-export default function TablaEstadosCuenta({ anio, mes, session, setProgress, setUploaded }) {
+export default function TablaRetenciones({ anio, mes, session, setProgress, setUploaded }) {
     const toast = useRef(null);
-    const [estadosCuenta, setEstadosCuenta] = useState([
-        { nombreArchivo: 'Vacío', paramTipoEstado: 'cuenta', archivoNombre: '', mes: '' }
+    const [retenciones, setRetenciones] = useState([
+        { nombreArchivo: 'Vacío', paramTipoEstado: 'retencion', archivoNombre: '', mes: '' }
     ]);
 
     useEffect(() => {
-        fetchEstadosCuentaData();
+        fetchRetencionesData();
     }, [anio, mes]);
 
-    const fetchEstadosCuentaData = async () => {
+    const fetchRetencionesData = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&mes=${mes}&tipo=Cuenta`);
+            const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&mes=${mes}&tipo=Retencion`);
             const data = response.data.reduce((acc, item) => {
                 const tipoIndex = acc.findIndex(row => row.paramTipoEstado === item.nombre_estado);
                 if (tipoIndex !== -1) {
@@ -32,12 +32,12 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
                     };
                 }
                 return acc;
-            }, [...estadosCuenta]);
+            }, [...retenciones]);
 
-            setEstadosCuenta(data);
+            setRetenciones(data);
         } catch (error) {
-            console.error('Error fetching estados de cuenta data', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los estados de cuenta', life: 3000 });
+            console.error('Error fetching retenciones data', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar las retenciones', life: 3000 });
         }
     };
 
@@ -72,7 +72,7 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
             console.log('File uploaded successfully', response.data);
             toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
 
-            fetchEstadosCuentaData();
+            fetchRetencionesData();
         } catch (error) {
             console.error('Error uploading file', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
@@ -89,7 +89,7 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
         const nombreSinExtension = removeFileExtension(archivoNombre);
 
         try {
-            const response = await axios.get(`${API_BASE_URL}/download?anio=${String(anio)}&mes=${mes}&tipo=${capitalizeFirstLetter(tipoEstado)}&nombre={nombreSinExtension}`, {
+            const response = await axios.get(`${API_BASE_URL}/download?anio=${String(anio)}&mes=${mes}&tipo=${capitalizeFirstLetter(tipoEstado)}&nombre=${nombreSinExtension}`, {
                 responseType: 'blob',
             });
 
@@ -129,7 +129,7 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
-            <DataTable value={estadosCuenta} sortMode="multiple" className={styles.dataTable}>
+            <DataTable value={retenciones} sortMode="multiple" className={styles.dataTable}>
                 <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '50%' }}></Column>
                 <Column body={uploadTemplate} header="SUBIR ARCHIVO" style={{ width: '25%' }}></Column>
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '25%' }}></Column>

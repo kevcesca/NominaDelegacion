@@ -1,13 +1,11 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { Toast } from 'primereact/toast';
 import styles from './page.module.css';
 import TablaPostNomina from '../%Components/TablaPostNomina/TablaPostNomina';
 import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQuincenasExtraordinarias';
 import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
-import TablaEstadosCuenta from '../%Components/TablaEstadosCuenta/TablaEstadosCuenta';
 import { ProgressBar } from 'primereact/progressbar';
 import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormControlLabel } from '@mui/material';
 import theme from '../$tema/theme';
@@ -23,7 +21,6 @@ function CargarDatos() {
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
     const [showExtraordinarias, setShowExtraordinarias] = useState(false);
     const [showFiniquitos, setShowFiniquitos] = useState(false);
-    const [showEstadosCuenta, setShowEstadosCuenta] = useState(false);
     const toast = useRef(null);
 
     useEffect(() => {
@@ -127,25 +124,8 @@ function CargarDatos() {
                     </>
                 )}
 
-                <FormControlLabel
-                    control={<Switch checked={showEstadosCuenta} onChange={() => setShowEstadosCuenta(!showEstadosCuenta)} />}
-                    label="Mostrar Estados de Cuenta"
-                />
-                {showEstadosCuenta && (
-                    <>
-                        <Typography variant="h5" className={styles.h2}>Estados de Cuenta</Typography>
-                        <TablaEstadosCuenta
-                            quincena={quincena}
-                            anio={anio}
-                            session={session}
-                            setProgress={setProgressPostNomina}
-                            setUploaded={setPostNominaUploaded}
-                        />
-                    </>
-                )}
-
                 <Box className={styles.buttonContainer}>
-                    <Link href={`/CrearNomina/ProcesarDatos?anio=${anio}&quincena=${quincena}`} passHref>
+                    <Link href={`/CrearNomina/ProcesarDatos?anio=${anio}&quincena={quincena}`} passHref>
                         <Button variant="contained" color="primary" className={styles.exportButton}>
                             Validar Datos
                         </Button>
