@@ -153,6 +153,15 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
             </DataTable>
             <div className={styles.uploadContainer}>
+                <Button
+                    variant="contained"
+                    component="label"
+                    className={styles.uploadButton}
+                    disabled={!selectedTipo}
+                >
+                    Subir Nómina Extraordinaria
+                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
+                </Button>
                 <Select
                     value={selectedTipo}
                     onChange={(e) => setSelectedTipo(e.target.value)}
@@ -160,22 +169,13 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     displayEmpty
                     className={styles.select}
                 >
-                    <MenuItem value="" disabled className={styles.Espacio}>
+                    <MenuItem value="" disabled>
                         Selecciona tipo extraordinario para subir
                     </MenuItem>
                     {tiposExtraordinarios.map((tipo, index) => (
                         <MenuItem key={index} value={tipo}>{tipo}</MenuItem>
                     ))}
                 </Select>
-                <Button 
-                    variant="contained" 
-                    component="label" 
-                    className={styles.uploadButton}
-                    disabled={!selectedTipo}
-                >
-                    Subir Nómina Extraordinaria
-                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
-                </Button>
             </div>
         </div>
     );
