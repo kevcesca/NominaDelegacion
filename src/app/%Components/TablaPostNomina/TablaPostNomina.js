@@ -12,32 +12,85 @@ import API_BASE_URL from '../../%Config/apiConfig';
 export default function TablaPostNomina({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
     const router = useRouter();
-    const [archivos, setArchivos] = useState([]);
+    const [tiposNomina, setTiposNomina] = useState([
+        { nombreArchivo: 'Vacío', tipoNomina: 'Compuesta, Nomina 8, Estructura', paramTipoNomina: 'compuesta', archivoNombre: '' },
+        { nombreArchivo: 'Vacío', tipoNomina: 'Honorarios', paramTipoNomina: 'honorarios', archivoNombre: '' },
+    ]);
 
     useEffect(() => {
-        fetchArchivosData();
+        fetchNominaData();
     }, [anio, quincena]);
 
-    const fetchArchivosData = async () => {
+    const fetchNominaData = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&quincena=${quincena}`);
-            const data = response.data.map(item => ({
-                idx: item.idx,
-                nombreArchivo: item.nombre_archivo || 'Vacío',
-                tipoNomina: item.nombre_nomina,
-                archivoNombre: item.nombre_archivo,
-                fechaCarga: item.fecha_carga,
-                userCarga: item.user_carga,
-            }));
-            setArchivos(data);
+            const data = response.data.reduce((acc, item) => {
+                const tipoNominaCap = capitalizeFirstLetter(item.nombre_nomina);
+                const tipoIndex = acc.findIndex(row => row.paramTipoNomina.toLowerCase() === item.nombre_nomina.toLowerCase());
+                if (tipoIndex !== -1) {
+                    acc[tipoIndex] = {
+                        nombreArchivo: item.nombre_archivo || 'Vacío',
+                        tipoNomina: tipoNominaCap,
+                        paramTipoNomina: tipoNominaCap,
+                        archivoNombre: item.nombre_archivo || ''
+                    };
+                }
+                return acc;
+            }, [...tiposNomina]);
+
+            setTiposNomina(data);
         } catch (error) {
-            console.error('Error fetching archivos data', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos', life: 3000 });
+            console.error('Error fetching nomina data', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los datos de nómina', life: 3000 });
         }
+    };
+
+    const capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
 
     const removeFileExtension = (filename) => {
         return filename.replace(/\.[^/.]+$/, "");
+    };
+
+    const handleFileUpload = async (event, tipoNomina, extra = '') => {
+        if (!tipoNomina) {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Tipo de nómina no definido', life: 3000 });
+            console.error('Tipo de nómina no definido');
+            return;
+        }
+
+        const file = event.target.files[0];
+        if (!file) return;
+
+        setProgress(0);
+        setUploaded(false);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('extra', extra);
+
+        const capitalizedTipoNomina = capitalizeFirstLetter(tipoNomina);  // Capitalizar el tipo de nómina
+
+        try {
+            const response = await axios.post(`${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizedTipoNomina}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setProgress(progress);
+                },
+            });
+            setProgress(100);
+            setUploaded(true);
+            console.log('File uploaded successfully', response.data);
+            toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
+
+            fetchNominaData();
+        } catch (error) {
+            console.error('Error uploading file', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+        }
     };
 
     const handleFileDownload = async (tipoNomina, archivoNombre) => {
@@ -50,7 +103,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         const nombreSinExtension = removeFileExtension(archivoNombre);
 
         try {
-            const response = await axios.get(`${API_BASE_URL}/download?quincena=${quincena}&anio=${String(anio)}&tipo=${tipoNomina}&nombre=${nombreSinExtension}`, {
+            const response = await axios.get(`${API_BASE_URL}/download?quincena=${quincena}&anio=${String(anio)}&tipo=${capitalizeFirstLetter(tipoNomina)}&nombre=${nombreSinExtension}`, {
                 responseType: 'blob',
             });
 
@@ -68,43 +121,20 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         }
     };
 
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        setProgress(0);
-        setUploaded(false);
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('quincena', quincena);
-        formData.append('anio', anio);
-        formData.append('usuario', session?.user?.name || 'unknown');
-
-        try {
-            const response = await axios.post(`${API_BASE_URL}/uploads`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                onUploadProgress: (progressEvent) => {
-                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setProgress(progress);
-                },
-            });
-            setProgress(100);
-            setUploaded(true);
-            console.log('File uploaded successfully', response.data);
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
-
-            fetchArchivosData();  // Refrescar la tabla después de subir el archivo
-        } catch (error) {
-            console.error('Error uploading file', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
-        }
+    const uploadTemplate = (rowData) => {
+        return (
+            <div>
+                <Button variant="contained" component="label" className={styles.uploadButton}>
+                    Subir archivo
+                    <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoNomina, '')} accept=".xlsx" />
+                </Button>
+            </div>
+        );
     };
 
     const descargaTemplate = (rowData) => {
         return (
-            <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.tipoNomina, rowData.archivoNombre)}>
+            <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.paramTipoNomina, rowData.archivoNombre)}>
                 <i className="pi pi-download"></i>
             </button>
         );
@@ -113,18 +143,12 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
-            <DataTable value={archivos} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
-                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '40%' }}></Column>
+            <DataTable value={tiposNomina} sortMode="multiple" className={styles.dataTable}>
+                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
                 <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '30%' }}></Column>
-                <Column field="userCarga" header="USUARIO" sortable style={{ width: '20%' }}></Column>
-                <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
+                <Column body={uploadTemplate} header="SUBIR ARCHIVO" style={{ width: '20%' }}></Column>
+                <Column body={descargaTemplate} header="DESCARGA" style={{ width: '20%' }}></Column>
             </DataTable>
-            <div className={styles.uploadContainer}>
-                <Button variant="contained" component="label" className={styles.uploadButton}>
-                    Subir Nómina
-                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
-                </Button>
-            </div>
         </div>
     );
 }
