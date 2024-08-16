@@ -68,6 +68,40 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         }
     };
 
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        setProgress(0);
+        setUploaded(false);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('quincena', quincena);
+        formData.append('anio', anio);
+        formData.append('usuario', session?.user?.name || 'unknown');
+
+        try {
+            const response = await axios.post(`${API_BASE_URL}/uploads`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setProgress(progress);
+                },
+            });
+            setProgress(100);
+            setUploaded(true);
+            console.log('File uploaded successfully', response.data);
+            toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
+
+            fetchArchivosData();  // Refrescar la tabla después de subir el archivo
+        } catch (error) {
+            console.error('Error uploading file', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+        }
+    };
+
     const descargaTemplate = (rowData) => {
         return (
             <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.tipoNomina, rowData.archivoNombre)}>
@@ -85,6 +119,12 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                 <Column field="userCarga" header="USUARIO" sortable style={{ width: '20%' }}></Column>
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
             </DataTable>
+            <div className={styles.uploadContainer}>
+                <Button variant="contained" component="label" className={styles.uploadButton}>
+                    Subir Nómina
+                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
+                </Button>
+            </div>
         </div>
     );
 }
