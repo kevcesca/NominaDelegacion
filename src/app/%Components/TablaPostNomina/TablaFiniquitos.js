@@ -1,20 +1,18 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import styles from './TablaPostNomina.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
-import API_BASE_URL from '../../%Config/apiConfig'
+import { ProgressBar } from 'primereact/progressbar';  // Importa ProgressBar
+import API_BASE_URL from '../../%Config/apiConfig';
 
-export default function TablaFiniquitos({ quincena, anio, session, setProgress, setUploaded }) {
+export default function TablaFiniquitos({ quincena, anio, session }) {
     const toast = useRef(null);
-    const router = useRouter();
-    const [finiquitos, setFiniquitos] = useState([
-        { nombreArchivo: 'Vacío', tipoNomina: 'Finiquitos', paramTipoNomina: 'finiquitos', archivoNombre: '' },
-    ]);
+    const [finiquitos, setFiniquitos] = useState([]);
+    const [progress, setProgress] = useState(0);  // Estado para manejar el progreso de la carga
 
     useEffect(() => {
         fetchFiniquitosData();
@@ -22,57 +20,56 @@ export default function TablaFiniquitos({ quincena, anio, session, setProgress, 
 
     const fetchFiniquitosData = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&quincena=${quincena}`);
-            const data = response.data.reduce((acc, item) => {
-                if (item.nombre_nomina === 'finiquitos') {
-                    acc[0] = {
-                        nombreArchivo: item.nombre_archivo || 'Vacío', // Si no hay archivo, ponemos "Vacío"
-                        tipoNomina: 'Finiquitos',
-                        paramTipoNomina: 'finiquitos',
-                        archivoNombre: item.nombre_archivo || '' // Almacenamos el nombre del archivo recuperado
-                    };
-                }
-                return acc;
-            }, [...finiquitos]);
+            const response = await axios.get(`${API_BASE_URL}/listArchivos`, {
+                params: {
+                    anio: anio,
+                    quincena: quincena,
+                },
+            });
 
+            // Filtrando los datos para solo incluir los archivos de "Finiquitos"
+            const data = response.data
+                .filter(item => item.nombre_nomina === 'Finiquitos')
+                .map(item => ({
+                    idx: item.idx,
+                    nombreArchivo: item.nombre_archivo || 'Vacío',
+                    tipoNomina: 'Finiquitos',  // Fijo a "Finiquitos"
+                    archivoNombre: item.nombre_archivo,
+                    fechaCarga: item.fecha_carga,
+                    userCarga: item.user_carga,
+                }));
             setFiniquitos(data);
         } catch (error) {
             console.error('Error fetching finiquitos data', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los datos de finiquitos', life: 3000 });
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos de finiquitos', life: 3000 });
         }
-    };
-
-    const removeFileExtension = (filename) => {
-        return filename.replace(/\.[^/.]+$/, "");
     };
 
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
-        setProgress(0);
-        setUploaded(false);
+        setProgress(0);  // Reiniciar el progreso a 0 cuando comienza la carga
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('extra', ''); // Mandar el parámetro extra como string vacío
+        formData.append('extra', '');  // Mandar el parámetro extra como string vacío
+
+        const uploadURL = `${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&usuario=${session?.user?.name || 'unknown'}`;
 
         try {
-            const response = await axios.post(`${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(uploadURL, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
                 onUploadProgress: (progressEvent) => {
                     const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setProgress(progress);
+                    setProgress(progress);  // Actualizar el estado del progreso
                 },
             });
-            setProgress(100); // Asegurarse de que la barra de progreso se establece al 100%
-            setUploaded(true);
-            console.log('File uploaded successfully', response.data);
+            setProgress(100);  // Asegurarse de que la barra de progreso se establece al 100%
             toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
 
-            // Volver a cargar los archivos después de subir uno con éxito
-            fetchFiniquitosData();
+            fetchFiniquitosData();  // Refrescar la tabla después de subir el archivo
         } catch (error) {
             console.error('Error uploading file', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
@@ -86,18 +83,23 @@ export default function TablaFiniquitos({ quincena, anio, session, setProgress, 
             return;
         }
 
-        const nombreSinExtension = removeFileExtension(archivoNombre);
+        const nombreSinExtension = archivoNombre.replace(/\.[^/.]+$/, "");
 
         try {
-            const response = await axios.get(`${API_BASE_URL}/download?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&nombre=${nombreSinExtension}`, {
+            const response = await axios.get(`${API_BASE_URL}/download`, {
+                params: {
+                    quincena: quincena,
+                    anio: anio,
+                    tipo: 'Finiquitos',
+                    nombre: nombreSinExtension,
+                },
                 responseType: 'blob', // Indica que la respuesta será un blob para manejar archivos binarios
             });
 
-            // Crear una URL para el archivo descargado
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', archivoNombre || `reporte_finiquitos_${anio}_${quincena}.xlsx`); // Usa el nombre del archivo recuperado
+            link.setAttribute('download', archivoNombre || `reporte_finiquitos_${anio}_${quincena}.xlsx`);
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
@@ -108,34 +110,32 @@ export default function TablaFiniquitos({ quincena, anio, session, setProgress, 
         }
     };
 
-    const uploadTemplate = (rowData) => {
-        return (
-            <div>
-                <Button variant="contained" component="label" className={styles.uploadButton}>
-                    Subir archivo
-                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
-                </Button>
-            </div>
-        );
-    };
-
-    const descargaTemplate = (rowData) => {
-        return (
-            <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.archivoNombre)}>
-                <i className="pi pi-download"></i>
-            </button>
-        );
-    };
+    const descargaTemplate = (rowData) => (
+        <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.archivoNombre)}>
+            <i className="pi pi-download"></i>
+        </button>
+    );
 
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
-            <DataTable value={finiquitos} sortMode="multiple" className={styles.dataTable}>
-                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
+            {progress > 0 && (
+                <div className={styles.progressContainer}>
+                    <ProgressBar value={progress} className={styles.progressBar} />
+                </div>
+            )}
+            <DataTable value={finiquitos} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
+                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '40%' }}></Column>
                 <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '30%' }}></Column>
-                <Column body={uploadTemplate} header="SUBIR ARCHIVO" style={{ width: '20%' }}></Column>
-                <Column body={descargaTemplate} header="DESCARGA" style={{ width: '20%' }}></Column>
+                <Column field="userCarga" header="USUARIO" sortable style={{ width: '20%' }}></Column>
+                <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
             </DataTable>
+            <div className={styles.uploadContainer}>
+                <Button variant="contained" component="label" className={styles.uploadButton}>
+                    Subir Nómina de Finiquitos
+                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
+                </Button>
+            </div>
         </div>
     );
 }

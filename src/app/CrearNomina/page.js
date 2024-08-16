@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { Toast } from 'primereact/toast';
 import styles from './page.module.css';
 import TablaPostNomina from '../%Components/TablaPostNomina/TablaPostNomina';
+import TablaPostNominaHonorarios from '../%Components/TablaPostNomina/TablaPostNominaHonorarios'; // Importa el nuevo componente
 import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQuincenasExtraordinarias';
 import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
 import { ProgressBar } from 'primereact/progressbar';
@@ -11,14 +12,15 @@ import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormC
 import theme from '../$tema/theme';
 import Link from 'next/link';
 import withAdminRole from '../%Components/hoc/withAdminRole';  // Importa el HOC
-import API_BASE_URL from '../%Config/apiConfig'
 
 function CargarDatos() {
     const { data: session } = useSession();
     const [quincena, setQuincena] = useState('01');
     const [anio, setAnio] = useState('2024');
     const [progressPostNomina, setProgressPostNomina] = useState(0);
+    const [progressHonorarios, setProgressHonorarios] = useState(0); // Estado para el progreso de honorarios
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
+    const [honorariosUploaded, setHonorariosUploaded] = useState(false); // Estado para verificar si se subieron archivos de honorarios
     const [showExtraordinarias, setShowExtraordinarias] = useState(false);
     const [showFiniquitos, setShowFiniquitos] = useState(false);
     const toast = useRef(null);
@@ -75,6 +77,8 @@ function CargarDatos() {
                         ))}
                     </Select>
                 </Box>
+
+                {/* Sección de Post Nomina */}
                 <Typography variant="h5" className={styles.h2}>Post Nomina</Typography>
                 <Box className={styles.progressContainer}>
                     <Typography>Progreso de datos</Typography>
@@ -89,6 +93,21 @@ function CargarDatos() {
                     extra="" // Aquí extra es vacío
                 />
 
+                {/* Sección de Honorarios */}
+                <Typography variant="h5" className={styles.h2}>Nómina Honorarios</Typography>
+                <Box className={styles.progressContainer}>
+                    <Typography>Progreso de datos</Typography>
+                    <ProgressBar value={progressHonorarios} className={styles.progressBar} />
+                </Box>
+                <TablaPostNominaHonorarios
+                    quincena={quincena}
+                    anio={anio}
+                    session={session}
+                    setProgress={setProgressHonorarios}
+                    setUploaded={setHonorariosUploaded}
+                />
+
+                {/* Sección de Quincenas Extraordinarias */}
                 <FormControlLabel
                     control={<Switch checked={showExtraordinarias} onChange={() => setShowExtraordinarias(!showExtraordinarias)} />}
                     label="Mostrar Quincenas Extraordinarias"
@@ -106,6 +125,7 @@ function CargarDatos() {
                     </>
                 )}
 
+                {/* Sección de Finiquitos */}
                 <FormControlLabel
                     control={<Switch checked={showFiniquitos} onChange={() => setShowFiniquitos(!showFiniquitos)} />}
                     label="Mostrar Finiquitos"
@@ -125,7 +145,7 @@ function CargarDatos() {
                 )}
 
                 <Box className={styles.buttonContainer}>
-                    <Link href={`/CrearNomina/ProcesarDatos?anio=${anio}&quincena={quincena}`} passHref>
+                    <Link href={`/CrearNomina/ProcesarDatos?anio=${anio}&quincena=${quincena}`} passHref>
                         <Button variant="contained" color="primary" className={styles.exportButton}>
                             Validar Datos
                         </Button>

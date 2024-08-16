@@ -48,3 +48,14 @@
 .p-datatable-tbody > tr > td {
     border: 1px solid #ccc;
 }
+
+.Espacio{
+    margin-right: 2rem;
+}
+
+.uploadContainer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem;
+}

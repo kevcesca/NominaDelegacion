@@ -8,7 +8,7 @@ import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
 
-export default function TablaPostNomina({ quincena, anio, session, setProgress, setUploaded }) {
+export default function TablaPostNominaHonorarios({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
     const [archivos, setArchivos] = useState([]);
 
@@ -25,13 +25,13 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                 },
             });
 
-            // Filtrando los datos para solo incluir los archivos de "Compuesta"
+            // Filtrando los datos para solo incluir los archivos de "Honorarios"
             const data = response.data
-                .filter(item => item.nombre_nomina === 'Compuesta')
+                .filter(item => item.nombre_nomina === 'Honorarios')
                 .map(item => ({
                     idx: item.idx,
                     nombreArchivo: item.nombre_archivo || 'Vacío',
-                    tipoNomina: 'Compuesta',  // Fijo a "Compuesta"
+                    tipoNomina: 'Honorarios',  // Fijo a "Honorarios"
                     archivoNombre: item.nombre_archivo,
                     fechaCarga: item.fecha_carga,
                     userCarga: item.user_carga,
@@ -55,8 +55,8 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         formData.append('file', file);
         formData.append('extra', '');  // Incluyendo el campo `extra` aunque esté vacío
 
-        // URL para el POST, ahora el tipo de nómina es "Compuesta"
-        const uploadURL = `${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=Compuesta&usuario=${session?.user?.name || 'unknown'}`;
+        // URL para el POST, ahora el tipo de nómina es "Honorarios"
+        const uploadURL = `${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=Honorarios&usuario=${session?.user?.name || 'unknown'}`;
 
         try {
             // Realizando la solicitud POST
@@ -88,7 +88,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                 params: {
                     quincena: quincena,
                     anio: anio,
-                    tipo: tipoNomina,  // Aquí seguimos usando el tipo de nómina
+                    tipo: tipoNomina,  // Aquí seguimos usando el tipo de nómina "Honorarios"
                     nombre: nombreSinExtension,
                 },
                 responseType: 'blob',
@@ -125,7 +125,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             </DataTable>
             <div className={styles.uploadContainer}>
                 <Button variant="contained" component="label" className={styles.uploadButton}>
-                    Subir Nómina Compuesta
+                    Subir Nómina de Honorarios
                     <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
                 </Button>
             </div>
