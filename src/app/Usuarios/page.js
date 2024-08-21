@@ -32,18 +32,6 @@ export default function CrearNomina() {
                 {/* Tabla de usuarios */}
                 <TablaUsuarios />
 
-                {/* Iframe que muestra la consola de administración de Keycloak */}
-                {iframeUrl && (
-                    <Box mt={4} className={styles.iframeContainer}>
-                        <iframe
-                            src={iframeUrl}
-                            width="100%"
-                            height="600px"
-                            frameBorder="0"
-                            title="Keycloak Admin"
-                        ></iframe>
-                    </Box>
-                )}
             </main>
         </ThemeProvider>
     );

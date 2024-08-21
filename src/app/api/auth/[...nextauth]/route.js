@@ -1,6 +1,5 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import KeycloakProvider from 'next-auth/providers/keycloak';
 
 const handler = NextAuth({
   providers: [
@@ -29,15 +28,15 @@ const handler = NextAuth({
           const user = await res.json();
 
           if (res.ok && user) {
-            // Decodificar el access_token para obtener los roles del usuario
+            // Decodificar el token para extraer roles y otros datos
             const decodedToken = JSON.parse(Buffer.from(user.access_token.split('.')[1], 'base64').toString());
 
             return {
               accessToken: user.access_token,
               refreshToken: user.refresh_token,
               idToken: user.id_token,
-              roles: decodedToken.realm_access?.roles || [], // Extraer roles del token decodificado
-              name: user.name || credentials.email.split('@')[0],
+              roles: decodedToken.realm_access?.roles || [],
+              name: decodedToken.name || credentials.email.split('@')[0],
               email: credentials.email,
             };
           }
@@ -47,12 +46,7 @@ const handler = NextAuth({
           return null;
         }
       }
-    }),
-    KeycloakProvider({
-      clientId: process.env.KEYCLOAK_CLIENT_ID,
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
-      issuer: process.env.KEYCLOAK_ISSUER,
-    }),
+    })
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
@@ -63,7 +57,7 @@ const handler = NextAuth({
         token.idToken = user.idToken;
         token.name = user.name;
         token.email = user.email;
-        token.roles = user.roles || []; // Añadir roles al token JWT
+        token.roles = user.roles || [];
       }
       return token;
     },
@@ -73,7 +67,7 @@ const handler = NextAuth({
       session.idToken = token.idToken;
       session.user.name = token.name;
       session.user.email = token.email;
-      session.roles = token.roles || []; // Pasar los roles a la sesión
+      session.roles = token.roles || [];
       return session;
     }
   }

@@ -1,5 +1,3 @@
-// src/app/%Components/TablaAceptacion/ComparativaTable.js
-
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
@@ -11,7 +9,7 @@ import { Toast } from 'primereact/toast';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
-import API_BASE_URL from '../../%Config/apiConfig'
+import API_BASE_URL from '../../%Config/apiConfig';
 
 const ComparativaTable = ({ userRevision }) => {
     const [records, setRecords] = useState([]);
@@ -64,12 +62,13 @@ const ComparativaTable = ({ userRevision }) => {
                 cancelado: record.status === 'Cancelar',
                 aprobado: record.status === 'Aprobar',
                 user_revision: userRevision,  // Aquí se usa el usuario recibido
+                rol_user: 'Admin',  // Se añade el rol
                 pendiente_dem: false, // Pendiente ahora es false
                 idx: record.idx
             }).toString();
 
             try {
-                await axios.get(`${API_BASE_URL}/actualizarNominaCtrl?${params}`);
+                await axios.get(`${API_BASE_URL}/validarNominaCtrl1?${params}`);
                 toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Estado de la nómina ${record.idx} actualizado correctamente`, life: 3000 });
             } catch (error) {
                 console.error('Error updating record', error);

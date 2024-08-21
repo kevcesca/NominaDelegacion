@@ -1,29 +1,35 @@
-// src/app/CrearNomina/page.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { useSearchParams } from 'next/navigation';
-import { ThemeProvider, Button, Box, Typography } from '@mui/material';
+import { ThemeProvider, Button, Box, Typography, FormControlLabel, Switch } from '@mui/material';
 import styles from './page.module.css';
 import theme from '../../$tema/theme';
 import ChequesResumen from '../../%Components/TablasComparativasNomina/ChequesResumen';
 import DepositoResumen from '../../%Components/TablasComparativasNomina/DepositoResumen';
 import Totales from '../../%Components/TablasComparativasNomina/Totales';
-import ComparativaTable from '../../%Components/ComparativeTable/ComparativeTable'; // Importa la tabla de aprobación
+import PercepcionesTabla from '../../%Components/TablasComparativasNomina/PercepcionesTablas';
+import DeduccionesTabla from '../../%Components/TablasComparativasNomina/DeduccionesTabla';
+import ComparativaTable from '../../%Components/ComparativeTable/ComparativeTable';
+import ComparativaTable2 from '../../%Components/ComparativeTable/ComparativeTable2';
 import { useSession } from 'next-auth/react';
-import API_BASE_URL from '../../%Config/apiConfig'
+import API_BASE_URL from '../../%Config/apiConfig';
 
 const CargarDatos = () => {
     const searchParams = useSearchParams();
     const anio = searchParams.get('anio');
     const quincena = searchParams.get('quincena');
+    const nombreNomina = 'Compuesta'; // Este podría ser dinámico basado en la selección del usuario.
 
     const [chequesData, setChequesData] = useState([]);
     const [depositoData, setDepositoData] = useState([]);
     const [totalesData, setTotalesData] = useState([]);
-    const { data: session } = useSession(); // Obtén la sesión para pasar el usuario
+    const { data: session } = useSession();
+
+    const [showPercepciones, setShowPercepciones] = useState(false);
+    const [showDeducciones, setShowDeducciones] = useState(false);
 
     useEffect(() => {
         if (anio && quincena) {
@@ -35,7 +41,14 @@ const CargarDatos = () => {
 
     const fetchChequesData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/resumenCheques?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`${API_BASE_URL}/NominaCtrl/BancosNulos`, {
+                params: {
+                    anio,
+                    quincena,
+                    cancelado: false,
+                    completado: true,
+                },
+            });
             setChequesData(response.data);
         } catch (error) {
             console.error('Error fetching cheques data', error);
@@ -44,7 +57,14 @@ const CargarDatos = () => {
 
     const fetchDepositoData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/resumenTransferencia?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`${API_BASE_URL}/NominaCtrl/BancosNoNulos`, {
+                params: {
+                    anio,
+                    quincena,
+                    cancelado: false,
+                    completado: true,
+                },
+            });
             setDepositoData(response.data);
         } catch (error) {
             console.error('Error fetching deposito data', error);
@@ -53,7 +73,14 @@ const CargarDatos = () => {
 
     const fetchTotalesData = async (anio, quincena) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/resumenTotal?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`${API_BASE_URL}/NominaCtrl/Totales`, {
+                params: {
+                    anio,
+                    quincena,
+                    cancelado: false,
+                    completado: true,
+                },
+            });
             setTotalesData(response.data);
         } catch (error) {
             console.error('Error fetching totales data', error);
@@ -113,16 +140,49 @@ const CargarDatos = () => {
                     <div className={styles.gridItem1}>
                         <Totales resumenData={totalesData} anio={anio} quincena={quincena} />
                     </div>
+
+                    {/* Switch para mostrar/ocultar Percepciones */}
+                    <FormControlLabel
+                        control={<Switch checked={showPercepciones} onChange={() => setShowPercepciones(!showPercepciones)} />}
+                        label="Mostrar Percepciones"
+                    />
+                    {showPercepciones && (
+                        <div className={styles.gridItem1}>
+                            <PercepcionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
+                        </div>
+                    )}
+
+                    {/* Switch para mostrar/ocultar Deducciones */}
+                    <FormControlLabel
+                        control={<Switch checked={showDeducciones} onChange={() => setShowDeducciones(!showDeducciones)} />}
+                        label="Mostrar Deducciones"
+                    />
+                    {showDeducciones && (
+                        <div className={styles.gridItem1}>
+                            <DeduccionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
+                        </div>
+                    )}
                 </div>
                 <Box className={styles.buttonContainer}>
                     <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportExcel}>Exportar a Excel</Button>
                     <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportPDF}>Exportar a PDF</Button>
                 </Box>
-                {/* Aquí integras la tabla de aprobación */}
-                <Box mt={4}>
-                    <Typography variant="h6">Aprobación de Nóminas</Typography>
-                    {session && <ComparativaTable userRevision={session.user.name} />} {/* Pasas el usuario que aprueba */}
-                </Box>
+                
+                {/* Renderiza la tabla de aprobación 1 solo si el usuario tiene el rol 'Admin' */}
+                {session && session.roles && session.roles.includes('Admin') && (
+                    <Box mt={4}>
+                        <Typography variant="h6">Aprobación de Nóminas 1</Typography>
+                        <ComparativaTable userRevision={session.user.name} />
+                    </Box>
+                )}
+
+                {/* Renderiza la tabla de aprobación 2 solo si el usuario tiene el rol 'SuperAdmin' */}
+                {session && session.roles && session.roles.includes('SuperAdmin') && (
+                    <Box mt={4}>
+                        <Typography variant="h6">Aprobación de Nóminas 2</Typography>
+                        <ComparativaTable2 userRevision={session.user.name} />
+                    </Box>
+                )}
             </main>
         </ThemeProvider>
     );

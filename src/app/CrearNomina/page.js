@@ -79,7 +79,7 @@ function CargarDatos() {
                 </Box>
 
                 {/* Sección de Post Nomina */}
-                <Typography variant="h5" className={styles.h2}>Post Nomina</Typography>
+                <Typography variant="h5" className={styles.h2}>Nómina Compuesta</Typography>
                 <Box className={styles.progressContainer}>
                     <Typography>Progreso de datos</Typography>
                     <ProgressBar value={progressPostNomina} className={styles.progressBar} />

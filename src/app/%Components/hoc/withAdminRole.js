@@ -9,7 +9,7 @@ export default function withAdminRole(Component) {
             return <div>Loading...</div>;
         }
 
-        if (!session || !session.roles.includes('Admin')) {
+        if (!session || !session.roles.some(role => ['Admin', 'SuperAdmin'].includes(role))) {
             redirect('/unauthorized');  // Redirigir a la página de acceso denegado
             return null;
         }

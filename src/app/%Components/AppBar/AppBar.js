@@ -28,10 +28,11 @@ export default function AppBar() {
         { 
             label: 'Usuarios', 
             icon: <GroupIcon />, 
-            command: () => { 
-                // Redirige a la URL de administración de usuarios en Keycloak
-                window.location.href = 'http://localhost:8081/admin/master/console/#/reino-NominaAzcapo/users';
-            }
+            // command: () => { 
+            //     // Redirige a la URL de administración de usuarios en Keycloak
+            //     window.location.href = 'http://192.168.100.252:8081/admin/master/console/#/reino-NominaAzcapo/users';
+            // }
+            command: () => router.push('/Usuarios') 
         },
         { 
             label: 'Cerrar Sesión', 
