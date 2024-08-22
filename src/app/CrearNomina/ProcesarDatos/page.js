@@ -172,7 +172,7 @@ const CargarDatos = () => {
                 {session && session.roles && session.roles.includes('Admin') && (
                     <Box mt={4}>
                         <Typography variant="h6">Aprobación de Nóminas 1</Typography>
-                        <ComparativaTable userRevision={session.user.name} />
+                        <ComparativaTable userRevision={session.user.name} quincena={quincena} anio={anio} />
                     </Box>
                 )}
 
@@ -180,7 +180,7 @@ const CargarDatos = () => {
                 {session && session.roles && session.roles.includes('SuperAdmin') && (
                     <Box mt={4}>
                         <Typography variant="h6">Aprobación de Nóminas 2</Typography>
-                        <ComparativaTable2 userRevision={session.user.name} />
+                        <ComparativaTable2 userRevision={session.user.name} quincena={quincena} anio={anio} />
                     </Box>
                 )}
             </main>

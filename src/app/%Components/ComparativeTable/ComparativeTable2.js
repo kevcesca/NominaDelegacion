@@ -9,9 +9,8 @@ import { Toast } from 'primereact/toast';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
-import API_BASE_URL from '../../%Config/apiConfig';
 
-const ComparativaTableSuperAdmin = ({ userRevision }) => {
+const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
     const [records, setRecords] = useState([]);
     const toast = useRef(null);
     const dt = useRef(null);
@@ -19,7 +18,12 @@ const ComparativaTableSuperAdmin = ({ userRevision }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/filtrarNominaCtrl?pendiente=true&cancelado=false`);
+                const response = await axios.get(`http://192.168.100.252:7060/Nomina/NominaCtrl/PendientesAprobados`, {
+                    params: {
+                        quincena,
+                        anio
+                    }
+                });
                 setRecords(response.data);
             } catch (error) {
                 console.error('Error fetching data', error);
@@ -27,8 +31,10 @@ const ComparativaTableSuperAdmin = ({ userRevision }) => {
             }
         };
 
-        fetchData();
-    }, []);
+        if (quincena && anio) {
+            fetchData();
+        }
+    }, [quincena, anio]);
 
     const approveTemplate = (rowData) => {
         return (
@@ -68,7 +74,7 @@ const ComparativaTableSuperAdmin = ({ userRevision }) => {
             }).toString();
 
             try {
-                await axios.get(`${API_BASE_URL}/validarNominaCtrl2?${params}`);
+                await axios.get(`http://192.168.100.252:7060/Nomina/NominaCtrl/validarNominaCtrl2?${params}`);
                 toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Estado de la nómina ${record.idx} actualizado correctamente`, life: 3000 });
             } catch (error) {
                 console.error('Error updating record', error);

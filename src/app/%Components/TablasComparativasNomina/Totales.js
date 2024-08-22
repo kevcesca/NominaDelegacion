@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import 'primereact/resources/themes/saga-blue/theme.css';
@@ -9,6 +10,8 @@ import 'primeicons/primeicons.css';
 import styles from './Tablas.module.css';
 
 export default function Totales({ resumenData, anio, quincena }) {
+    const router = useRouter();
+
     // Limpieza de los datos
     const limpiarDatos = (data) => {
         return data.map(item => ({
@@ -36,6 +39,11 @@ export default function Totales({ resumenData, anio, quincena }) {
         return rowData[field].toLocaleString('en-US', { style: 'currency', currency: 'USD' });
     };
 
+    // Función para manejar el clic en una fila y redirigir
+    const onRowClick = (e) => {
+        router.push(`/CrearNomina/ProcesarDatos/DispersionesDeducciones?anio=${anio}&quincena=${quincena}&nomina=${e.data.NOMINA}`);
+    };
+
     return (
         <div className={`card ${styles.card}`}>
             <div className="flex justify-content-between align-items-center mb-4">
@@ -43,7 +51,7 @@ export default function Totales({ resumenData, anio, quincena }) {
             </div>
             
             {/* Tabla de datos normales */}
-            <DataTable value={datosNormales} paginator={false} rows={10} className="p-datatable-sm">
+            <DataTable value={datosNormales} paginator={false} rows={10} className="p-datatable-sm" onRowClick={onRowClick}>
                 <Column field="ANIO" header="AÑO" sortable></Column>
                 <Column field="QUINCENA" header="QUINCENA" sortable></Column>
                 <Column field="NOMINA" header="CHEQUES" sortable body={chequesTemplate}></Column>

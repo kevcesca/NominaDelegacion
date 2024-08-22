@@ -11,7 +11,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import API_BASE_URL from '../../%Config/apiConfig';
 
-const ComparativaTable = ({ userRevision }) => {
+const ComparativaTable = ({ userRevision, quincena, anio }) => {  // Recibe quincena y anio como props
     const [records, setRecords] = useState([]);
     const toast = useRef(null);
     const dt = useRef(null);
@@ -19,7 +19,13 @@ const ComparativaTable = ({ userRevision }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/filtrarNominaCtrl?pendiente=true&cancelado=false`);
+                // Pasar los parámetros quincena y anio al endpoint
+                const response = await axios.get(`${API_BASE_URL}/filtrarNominaCtrl`, {
+                    params: {
+                        quincena: quincena,
+                        anio: anio
+                    }
+                });
                 setRecords(response.data);
             } catch (error) {
                 console.error('Error fetching data', error);
@@ -27,8 +33,10 @@ const ComparativaTable = ({ userRevision }) => {
             }
         };
 
-        fetchData();
-    }, []);
+        if (quincena && anio) {
+            fetchData();
+        }
+    }, [quincena, anio]); // Actualiza si quincena o anio cambian
 
     const approveTemplate = (rowData) => {
         return (
@@ -63,7 +71,7 @@ const ComparativaTable = ({ userRevision }) => {
                 aprobado: record.status === 'Aprobar',
                 user_revision: userRevision,  // Aquí se usa el usuario recibido
                 rol_user: 'Admin',  // Se añade el rol
-                pendiente_dem: false, // Pendiente ahora es false
+                pendiente_dem: true, // Pendiente ahora es false
                 idx: record.idx
             }).toString();
 

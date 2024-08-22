@@ -1,4 +1,3 @@
-// src/app/%Components/TablasComparativasNomina/PercepcionesTabla.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -22,7 +21,7 @@ FilterService.register('custom_range', (value, filter) => {
     return from <= value && value <= to;
 });
 
-export default function PercepcionesTabla({ anio, quincena, nombreNomina }) {
+export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTipo }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -37,11 +36,11 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina }) {
 
     useEffect(() => {
         if (anio && quincena && nombreNomina) {
-            fetchData(anio, quincena, nombreNomina);
+            fetchData(anio, quincena, nombreNomina, subTipo);
         }
-    }, [anio, quincena, nombreNomina]);
+    }, [anio, quincena, nombreNomina, subTipo]);
 
-    const fetchData = async (anio, quincena, nombreNomina) => {
+    const fetchData = async (anio, quincena, nombreNomina, subTipo) => {
         setLoading(true);
         try {
             const response = await axios.get(`${API_BASE_URL}/NominaCtrl/PercepcionesSeparadas`, {
@@ -53,7 +52,13 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina }) {
                     completado: true,
                 },
             });
-            setData(response.data);
+
+            // Filtrar los datos basados en el subTipo si se proporciona
+            const filteredData = subTipo
+                ? response.data.filter(item => item.subTipo === subTipo)
+                : response.data;
+
+            setData(filteredData);
         } catch (error) {
             console.error('Error fetching data', error);
         }
