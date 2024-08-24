@@ -46,17 +46,6 @@ export default function NavBar() {
                     <button className={styles.botonNavbar} onClick={() => setCollapsed(!collapsed)}>
                         <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
                     </button>
-                    <SubMenu label="Configuración" icon={<SettingsIcon />} >
-                        <Link className={styles.tWhite} href="/Configuracion/Alertas" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Alertas</MenuItem>
-                        </Link>
-                        <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Conceptos</MenuItem>
-                        </Link>
-                        <Link className={styles.tWhite} href="/Configuracion/Universos" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Universos</MenuItem>
-                        </Link>
-                    </SubMenu>
                     <SubMenu label="Calendario de nómina" icon={<CalendarTodayIcon />} >
                         <Link className={styles.tWhite} href="/Calendario" passHref>
                             <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Editar</MenuItem>
@@ -65,12 +54,7 @@ export default function NavBar() {
                             <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Exportar</MenuItem>
                         </Link>
                     </SubMenu>
-                    <SubMenu label="Empleados" icon={<MoneyIcon />}>
-                        <Link className={styles.tWhite} href="/Empleados" passHref>
-                            <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Ver Empleados</MenuItem>
-                        </Link>
-                    </SubMenu>
-                    <SubMenu label="Nómina" icon={<SecurityIcon />}>
+                    <SubMenu label="Proceso de Nómina" icon={<SecurityIcon />}>
                         <Link className={styles.tWhite} href="/CrearNomina" passHref>
                             <MenuItem icon={<PeopleIcon />} className={styles.bgblack}>Cargar Nómina</MenuItem>
                         </Link>
@@ -79,6 +63,17 @@ export default function NavBar() {
                         </Link>
                         <Link className={styles.tWhite} href="/SubirEvidencia" passHref>
                             <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Subir Evidencia</MenuItem>
+                        </Link>
+                    </SubMenu>
+                    <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />} >
+                        {/* <Link className={styles.tWhite} href="/Configuracion/Alertas" passHref>
+                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Alertas</MenuItem>
+                        </Link> */}
+                        <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
+                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Conceptos</MenuItem>
+                        </Link>
+                        <Link className={styles.tWhite} href="/Configuracion/Universos" passHref>
+                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Universos</MenuItem>
                         </Link>
                     </SubMenu>
                     <SubMenu label="Reportes" icon={<AssessmentIcon />}>
@@ -91,6 +86,9 @@ export default function NavBar() {
                             <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Generar Cheque</MenuItem>
                         </Link>
                     </SubMenu>
+                    <Link className={styles.tWhite} href="/Empleados" passHref>
+                        <SubMenu label="Empleados" icon={<PeopleIcon />} />
+                    </Link>
                 </Menu>
             </Sidebar>
         </div>

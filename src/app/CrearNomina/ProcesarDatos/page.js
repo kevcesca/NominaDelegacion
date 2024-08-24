@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
-import { useSearchParams } from 'next/navigation';
-import { ThemeProvider, Button, Box, Typography, FormControlLabel, Switch } from '@mui/material';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { ThemeProvider, Button, Box, Typography, FormControlLabel, Switch, Select, MenuItem } from '@mui/material';
 import styles from './page.module.css';
 import theme from '../../$tema/theme';
 import ChequesResumen from '../../%Components/TablasComparativasNomina/ChequesResumen';
@@ -12,24 +12,51 @@ import DepositoResumen from '../../%Components/TablasComparativasNomina/Deposito
 import Totales from '../../%Components/TablasComparativasNomina/Totales';
 import PercepcionesTabla from '../../%Components/TablasComparativasNomina/PercepcionesTablas';
 import DeduccionesTabla from '../../%Components/TablasComparativasNomina/DeduccionesTabla';
-import ComparativaTable from '../../%Components/ComparativeTable/ComparativeTable';
-import ComparativaTable2 from '../../%Components/ComparativeTable/ComparativeTable2';
-import { useSession } from 'next-auth/react';
 import API_BASE_URL from '../../%Config/apiConfig';
 
 const CargarDatos = () => {
     const searchParams = useSearchParams();
-    const anio = searchParams.get('anio');
-    const quincena = searchParams.get('quincena');
-    const nombreNomina = 'Compuesta'; // Este podría ser dinámico basado en la selección del usuario.
+    const router = useRouter();
+    const anioParam = searchParams.get('anio');
+    const quincenaParam = searchParams.get('quincena');
+    const nombreNomina = 'Compuesta';
+
+    const [anio, setAnio] = useState(anioParam || '2024'); // Usar el valor de la URL o un valor por defecto
+    const [quincena, setQuincena] = useState(quincenaParam || '01');
 
     const [chequesData, setChequesData] = useState([]);
     const [depositoData, setDepositoData] = useState([]);
     const [totalesData, setTotalesData] = useState([]);
-    const { data: session } = useSession();
 
     const [showPercepciones, setShowPercepciones] = useState(false);
     const [showDeducciones, setShowDeducciones] = useState(false);
+
+    const quincenas = [
+        { label: '1ra ene', value: '01' },
+        { label: '2da ene', value: '02' },
+        { label: '1ra feb', value: '03' },
+        { label: '2da feb', value: '04' },
+        { label: '1ra mar', value: '05' },
+        { label: '2da mar', value: '06' },
+        { label: '1ra abr', value: '07' },
+        { label: '2da abr', value: '08' },
+        { label: '1ra may', value: '09' },
+        { label: '2da may', value: '10' },
+        { label: '1ra jun', value: '11' },
+        { label: '2da jun', value: '12' },
+        { label: '1ra jul', value: '13' },
+        { label: '2da jul', value: '14' },
+        { label: '1ra ago', value: '15' },
+        { label: '2da ago', value: '16' },
+        { label: '1ra sep', value: '17' },
+        { label: '2da sep', value: '18' },
+        { label: '1ra oct', value: '19' },
+        { label: '2da oct', value: '20' },
+        { label: '1ra nov', value: '21' },
+        { label: '2da nov', value: '22' },
+        { label: '1ra dic', value: '23' },
+        { label: '2da dic', value: '24' },
+    ];
 
     useEffect(() => {
         if (anio && quincena) {
@@ -124,14 +151,46 @@ const CargarDatos = () => {
         doc.save('resumen.pdf');
     };
 
+    const handleNavigateToAprobacion = () => {
+        router.push(`/AprobarCargaNomina?anio=${anio}&quincena=${quincena}`);
+    };
+
     return (
         <ThemeProvider theme={theme}>
             <main className={styles.main}>
-                <h1 className={styles.h1}>Procesar datos</h1>
-                <Typography variant="h6">Año: {anio}</Typography>
-                <Typography variant="h6">Quincena: {quincena}</Typography>
+                <h1 className={styles.h1}>Resumen de Nómina</h1>
+
+                {/* Dropdowns para seleccionar quincena y año */}
+                <Box className={styles.selectorContainer}>
+                    <Select
+                        value={quincena}
+                        onChange={(e) => setQuincena(e.target.value)}
+                        variant="outlined"
+                        displayEmpty
+                    >
+                        {quincenas.map((quin, index) => (
+                            <MenuItem key={index} value={quin.value}>
+                                {quin.label}
+                            </MenuItem>
+                        ))}
+                    </Select>
+
+                    <Select
+                        value={anio}
+                        onChange={(e) => setAnio(e.target.value)}
+                        variant="outlined"
+                        displayEmpty
+                    >
+                        {[...Array(21).keys()].map(n => (
+                            <MenuItem key={2024 + n} value={2024 + n}>
+                                Año {2024 + n}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </Box>
+
                 <div className={styles.grid}>
-                    <div className={styles.gridItem2}>
+                    <div className={styles.gridItem1}>
                         <DepositoResumen resumenData={depositoData} anio={anio} quincena={quincena} />
                     </div>
                     <div className={styles.gridItem1}>
@@ -141,7 +200,6 @@ const CargarDatos = () => {
                         <Totales resumenData={totalesData} anio={anio} quincena={quincena} />
                     </div>
 
-                    {/* Switch para mostrar/ocultar Percepciones */}
                     <FormControlLabel
                         control={<Switch checked={showPercepciones} onChange={() => setShowPercepciones(!showPercepciones)} />}
                         label="Mostrar Percepciones"
@@ -152,7 +210,6 @@ const CargarDatos = () => {
                         </div>
                     )}
 
-                    {/* Switch para mostrar/ocultar Deducciones */}
                     <FormControlLabel
                         control={<Switch checked={showDeducciones} onChange={() => setShowDeducciones(!showDeducciones)} />}
                         label="Mostrar Deducciones"
@@ -163,26 +220,22 @@ const CargarDatos = () => {
                         </div>
                     )}
                 </div>
-                <Box className={styles.buttonContainer}>
-                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportExcel}>Exportar a Excel</Button>
-                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportPDF}>Exportar a PDF</Button>
-                </Box>
-                
-                {/* Renderiza la tabla de aprobación 1 solo si el usuario tiene el rol 'Admin' */}
-                {session && session.roles && session.roles.includes('Admin') && (
-                    <Box mt={4}>
-                        <Typography variant="h6">Aprobación de Nóminas 1</Typography>
-                        <ComparativaTable userRevision={session.user.name} quincena={quincena} anio={anio} />
-                    </Box>
-                )}
 
-                {/* Renderiza la tabla de aprobación 2 solo si el usuario tiene el rol 'SuperAdmin' */}
-                {session && session.roles && session.roles.includes('SuperAdmin') && (
-                    <Box mt={4}>
-                        <Typography variant="h6">Aprobación de Nóminas 2</Typography>
-                        <ComparativaTable2 userRevision={session.user.name} quincena={quincena} anio={anio} />
-                    </Box>
-                )}
+                <Box className={styles.buttonContainer}>
+                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportExcel}>Exportar resumen a Excel</Button>
+                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportPDF}>Exportar resumen a PDF</Button>
+                </Box>
+
+                <Box className={styles.buttonContainer}>
+                    <Button
+                        className={styles.botonesExportar}
+                        variant="contained"
+                        color="primary"
+                        onClick={handleNavigateToAprobacion} // Navegar a la página de aprobación con parámetros
+                    >
+                        Ir a Aprobación de Nóminas
+                    </Button>
+                </Box>
             </main>
         </ThemeProvider>
     );

@@ -60,3 +60,25 @@
     align-items: center;
     margin: 2rem;
 }
+
+.downloadButton {
+    background-color: #004085; /* Color de fondo por defecto */
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.downloadButton:disabled {
+    background-color: #cccccc; /* Color de fondo cuando está deshabilitado */
+    color: #666666; /* Color del icono cuando está deshabilitado */
+    cursor: not-allowed; /* Cambia el cursor a not-allowed */
+}
+
+.downloadButton:disabled .pi {
+    color: #666666; /* Asegura que el icono también cambie de color */
+}

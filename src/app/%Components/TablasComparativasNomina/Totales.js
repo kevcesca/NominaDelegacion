@@ -31,7 +31,7 @@ export default function Totales({ resumenData, anio, quincena }) {
     const datosNormales = datosLimpios.filter(item => item.BANCO !== 'Total');
     const datosTotales = datosLimpios.filter(item => item.BANCO === 'Total');
 
-    const chequesTemplate = (rowData) => {
+    const tipoNominaTemplate = (rowData) => {
         return <span className={styles.boldText}>{rowData.NOMINA}</span>;
     };
 
@@ -39,9 +39,22 @@ export default function Totales({ resumenData, anio, quincena }) {
         return rowData[field].toLocaleString('en-US', { style: 'currency', currency: 'USD' });
     };
 
-    // Función para manejar el clic en una fila y redirigir
-    const onRowClick = (e) => {
-        router.push(`/CrearNomina/ProcesarDatos/DispersionesDeducciones?anio=${anio}&quincena=${quincena}&nomina=${e.data.NOMINA}`);
+    // Función para manejar clic en la columna de empleados y redirigir a la página de detalles
+    const handleEmpleadosClick = (rowData) => {
+        const { ANIO, QUINCENA, NOMINA, BANCO } = rowData;
+        router.push(`/CrearNomina/ProcesarDatos/DetalleEmpleados?anio=${ANIO}&quincena=${QUINCENA}&nomina=${NOMINA}&banco=${BANCO}`);
+    };
+
+    // Plantilla para la columna "EMPLEADOS" en los datos normales
+    const empleadosTemplate = (rowData) => {
+        return (
+            <span
+                className={styles.empleadosLink}
+                onClick={() => handleEmpleadosClick(rowData)}
+            >
+                {rowData.EMPLEADOS}
+            </span>
+        );
     };
 
     return (
@@ -51,30 +64,40 @@ export default function Totales({ resumenData, anio, quincena }) {
             </div>
             
             {/* Tabla de datos normales */}
-            <DataTable value={datosNormales} paginator={false} rows={10} className="p-datatable-sm" onRowClick={onRowClick}>
+            <DataTable
+                value={datosNormales}
+                paginator={false}
+                rows={10}
+                className="p-datatable-sm"
+            >
                 <Column field="ANIO" header="AÑO" sortable></Column>
                 <Column field="QUINCENA" header="QUINCENA" sortable></Column>
-                <Column field="NOMINA" header="CHEQUES" sortable body={chequesTemplate}></Column>
+                <Column field="NOMINA" header="NOMINA" sortable body={tipoNominaTemplate}></Column>
                 <Column field="BANCO" header="BANCO" sortable></Column>
                 <Column field="PERCEPCIONES" header="PERCEPCIONES" sortable body={(rowData) => currencyTemplate(rowData, 'PERCEPCIONES')}></Column>
                 <Column field="DEDUCCIONES" header="DEDUCCIONES" sortable body={(rowData) => currencyTemplate(rowData, 'DEDUCCIONES')}></Column>
-                <Column field="LIQUIDO" header="IMPORTE LÍQUIDO" sortable body={(rowData) => currencyTemplate(rowData, 'LIQUIDO')}></Column>
-                <Column field="EMPLEADOS" header="EMPLEADOS" sortable></Column>
+                <Column field="LIQUIDO" header="LIQUIDO" sortable body={(rowData) => currencyTemplate(rowData, 'LIQUIDO')}></Column>
+                <Column field="EMPLEADOS" header="EMPLEADOS" sortable body={empleadosTemplate}></Column>
             </DataTable>
-            
+
             {/* Separador */}
             <hr className={styles.separador} />
 
             {/* Tabla de datos totales */}
             <div className={styles.totalTable}>
-                <DataTable value={datosTotales} paginator={false} rows={10} className="p-datatable-sm">
+                <DataTable
+                    value={datosTotales}
+                    paginator={false}
+                    rows={10}
+                    className="p-datatable-sm"
+                >
                     <Column field="ANIO" header="AÑO" sortable></Column>
                     <Column field="QUINCENA" header="QUINCENA" sortable></Column>
-                    <Column field="NOMINA" header="CHEQUES" sortable body={chequesTemplate}></Column>
+                    <Column field="NOMINA" header="NOMINA" sortable body={tipoNominaTemplate}></Column>
                     <Column field="BANCO" header="BANCO" sortable></Column>
                     <Column field="PERCEPCIONES" header="PERCEPCIONES" sortable body={(rowData) => currencyTemplate(rowData, 'PERCEPCIONES')}></Column>
                     <Column field="DEDUCCIONES" header="DEDUCCIONES" sortable body={(rowData) => currencyTemplate(rowData, 'DEDUCCIONES')}></Column>
-                    <Column field="LIQUIDO" header="IMPORTE LÍQUIDO" sortable body={(rowData) => currencyTemplate(rowData, 'LIQUIDO')}></Column>
+                    <Column field="LIQUIDO" header="LIQUIDO" sortable body={(rowData) => currencyTemplate(rowData, 'LIQUIDO')}></Column>
                     <Column field="EMPLEADOS" header="EMPLEADOS" sortable></Column>
                 </DataTable>
             </div>

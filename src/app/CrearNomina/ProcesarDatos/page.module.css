@@ -1,10 +1,6 @@
 /* src/app/page.module.css */
 
 .main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
 }
 
 .h1 {
@@ -30,4 +26,18 @@
 
 .botonesExportar{
     margin: 2rem !important;
+}
+
+.selectorContainer {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.buttonContainer {
+    text-align: center;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
 }

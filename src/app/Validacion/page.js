@@ -4,6 +4,8 @@ import ComparativeTable from '../%Components/ComparativeTable/ComparativeTable';
 import ComparativeTable2 from '../%Components/ComparativeTable/ComparativeTable2';
 
 import styles from './page.module.css';
+import Link from 'next/link';
+import { Button } from '@mui/material';
 
 export default function Validacion() {
     return (
@@ -29,6 +31,11 @@ export default function Validacion() {
                     No se encuentran los registros completos
                 </div>
             </div>
+            <Link href={`/CrearNomina/ProcesarDatos`} passHref>
+                <Button variant="contained" color="primary" className={styles.exportButton}>
+                    Válidar datos
+                </Button>
+            </Link>
         </main>
     );
 }

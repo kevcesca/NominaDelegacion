@@ -1,0 +1,37 @@
+.title{
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+}
+
+.header {
+    color: #ffffff;
+    background-color: #235b4e;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    margin: 0;
+    width: 100%;
+}
+
+/* Aplicar el mismo estilo de ancho para todas las tablas */
+.main {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    width: 90%;
+}
+
+.header {
+    color: #ffffff;
+    background-color: #235b4e;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    margin: 0;
+}

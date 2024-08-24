@@ -60,7 +60,7 @@ function CargarDatos() {
         <ThemeProvider theme={theme}>
             <Toast ref={toast} />
             <Box className={styles.main}>
-                <Typography variant="h4" className={styles.h1}>Resumen de carga de datos</Typography>
+                <Typography variant="h4" className={styles.h1}>Carga de Nómina</Typography>
                 <Box className={styles.selectorContainer}>
                     <Select value={quincena} onChange={(e) => setQuincena(e.target.value)} variant="outlined">
                         {quincenas.map((quin, index) => (
@@ -145,9 +145,9 @@ function CargarDatos() {
                 )}
 
                 <Box className={styles.buttonContainer}>
-                    <Link href={`/CrearNomina/ProcesarDatos?anio=${anio}&quincena=${quincena}`} passHref>
+                    <Link href={`/Validacion?anio=${anio}&quincena=${quincena}`} passHref>
                         <Button variant="contained" color="primary" className={styles.exportButton}>
-                            Validar Datos
+                            Comprobar cambios
                         </Button>
                     </Link>
                 </Box>

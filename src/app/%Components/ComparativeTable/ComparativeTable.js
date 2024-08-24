@@ -10,6 +10,7 @@ import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import API_BASE_URL from '../../%Config/apiConfig';
+import styles from './ComparativeTable.module.css'
 
 const ComparativaTable = ({ userRevision, quincena, anio }) => {  // Recibe quincena y anio como props
     const [records, setRecords] = useState([]);
@@ -128,6 +129,7 @@ const ComparativaTable = ({ userRevision, quincena, anio }) => {  // Recibe quin
     return (
         <div>
             <Toast ref={toast} />
+            <h2 className={styles.header}>Aprobación 1</h2>
             <Toolbar className="mb-4" right={() => (
                 <div className="flex align-items-center justify-content-end gap-2">
                     <Button type="button" icon="pi pi-file" rounded onClick={() => exportCSV()} data-pr-tooltip="CSV" />
