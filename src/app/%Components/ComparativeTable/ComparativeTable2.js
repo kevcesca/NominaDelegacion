@@ -9,29 +9,34 @@ import { Toast } from 'primereact/toast';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
-import styles from './ComparativeTable.module.css'
+import styles from './ComparativeTable.module.css';
+import API_BASE_URL from '../../%Config/apiConfig';
 
 const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
     const [records, setRecords] = useState([]);
+    const [loading, setLoading] = useState(true); // Estado para controlar la recarga
     const toast = useRef(null);
     const dt = useRef(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(`http://192.168.100.252:7060/Nomina/NominaCtrl/PendientesAprobados`, {
-                    params: {
-                        quincena,
-                        anio
-                    }
-                });
-                setRecords(response.data);
-            } catch (error) {
-                console.error('Error fetching data', error);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error fetching data', life: 3000 });
-            }
-        };
+    const fetchData = async () => {
+        try {
+            setLoading(true); // Iniciar la carga
+            const response = await axios.get(`${API_BASE_URL}/NominaCtrl/PendientesAprobados`, {
+                params: {
+                    quincena,
+                    anio
+                }
+            });
+            setRecords(response.data);
+        } catch (error) {
+            console.error('Error fetching data', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error fetching data', life: 3000 });
+        } finally {
+            setLoading(false); // Finalizar la carga
+        }
+    };
 
+    useEffect(() => {
         if (quincena && anio) {
             fetchData();
         }
@@ -63,19 +68,19 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
 
         const updatePromises = records.map(async (record) => {
             if (!record.status) {
-                return; // No actualizar los registros que no tienen un estado seleccionado
+                return;
             }
             const params = new URLSearchParams({
                 cancelado: record.status === 'Cancelar',
                 aprobado: record.status === 'Aprobar',
-                user_revision: userRevision,  // Aquí se usa el usuario recibido
-                rol_user: 'SuperAdmin',  // Se añade el rol SuperAdmin
-                pendiente_dem: false, // Pendiente ahora es false
+                user_revision: userRevision,  
+                rol_user: 'SuperAdmin',  
+                pendiente_dem: false, 
                 idx: record.idx
             }).toString();
 
             try {
-                await axios.get(`http://192.168.100.252:7060/Nomina/NominaCtrl/validarNominaCtrl2?${params}`);
+                await axios.get(`${API_BASE_URL}/validarNominaCtrl2?${params}`);
                 toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Estado de la nómina ${record.idx} actualizado correctamente`, life: 3000 });
             } catch (error) {
                 console.error('Error updating record', error);
@@ -84,6 +89,8 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
         });
 
         await Promise.all(updatePromises.filter(Boolean)); // Filtrar las promesas nulas
+
+        fetchData(); // Recargar los datos después de confirmar
     };
 
     const exportCSV = () => {
@@ -135,17 +142,21 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
                     <Button type="button" icon="pi pi-file-pdf" severity="warning" rounded onClick={() => exportPdf()} data-pr-tooltip="PDF" />
                 </div>
             )} />
-            <DataTable ref={dt} value={records} responsiveLayout="scroll">
-                <Column field="idx" header="Idx" sortable />
-                <Column field="anio" header="Año" sortable />
-                <Column field="quincena" header="Quincena" sortable />
-                <Column field="nombre_nomina" header="Nombre Nómina" sortable />
-                <Column field="nombre_archivo" header="Nombre Archivo" sortable />
-                <Column field="fecha_carga" header="Fecha Carga" sortable />
-                <Column field="user_carga" header="Usuario Carga" sortable />
-                <Column body={approveTemplate} header="Acción" />
-            </DataTable>
-            <Button label='Confirmar' type="button" icon="pi pi-file-excel" severity="success" onClick={handleConfirm} />
+            {loading ? (
+                <p>Cargando...</p>
+            ) : (
+                <DataTable ref={dt} value={records} responsiveLayout="scroll">
+                    <Column field="idx" header="Idx" sortable />
+                    <Column field="anio" header="Año" sortable />
+                    <Column field="quincena" header="Quincena" sortable />
+                    <Column field="nombre_nomina" header="Nombre Nómina" sortable />
+                    <Column field="nombre_archivo" header="Nombre Archivo" sortable />
+                    <Column field="fecha_carga" header="Fecha Carga" sortable />
+                    <Column field="user_carga" header="Usuario Carga" sortable />
+                    <Column body={approveTemplate} header="Acción" />
+                </DataTable>
+            )}
+            <Button label='Confirmar' type="button" icon="pi pi-check" severity="success" onClick={handleConfirm} />
         </div>
     );
 };

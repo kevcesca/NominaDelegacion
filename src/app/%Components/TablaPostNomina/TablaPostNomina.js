@@ -19,7 +19,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
 
     const fetchArchivosData = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/listArchivos`, {
+            const response = await axios.get(`${API_BASE_URL}/consultaNominaCtrl/filtro`, {
                 params: {
                     anio: anio,
                     quincena: quincena,

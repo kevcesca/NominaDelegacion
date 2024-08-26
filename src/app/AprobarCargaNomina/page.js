@@ -79,7 +79,7 @@ const AprobarCargaNomina = () => {
 
                 {/* Texto de ayuda */}
                 <Typography variant="h5" color="textSecondary" className={styles.helpText}>
-                    Estás viendo únicamente los archivos que requieren aprobación.
+                    Estás viendo únicamente los archivos que requieren aprobación. La aprobación se completará cuando se haya hecho la doble validación.
                 </Typography>
 
                 {/* Renderiza la tabla de aprobación 1 solo si el usuario tiene el rol 'Admin' */}

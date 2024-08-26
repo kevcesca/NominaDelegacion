@@ -10,41 +10,56 @@ import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import API_BASE_URL from '../../%Config/apiConfig';
-import styles from './ComparativeTable.module.css'
+import styles from './ComparativeTable.module.css';
 
-const ComparativaTable = ({ userRevision, quincena, anio }) => {  // Recibe quincena y anio como props
+const ComparativaTable = ({ userRevision, quincena, anio }) => {  
     const [records, setRecords] = useState([]);
+    const [loading, setLoading] = useState(true); // Estado para controlar la recarga
     const toast = useRef(null);
     const dt = useRef(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Pasar los parámetros quincena y anio al endpoint
-                const response = await axios.get(`${API_BASE_URL}/filtrarNominaCtrl`, {
-                    params: {
-                        quincena: quincena,
-                        anio: anio
-                    }
-                });
-                setRecords(response.data);
-            } catch (error) {
-                console.error('Error fetching data', error);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error fetching data', life: 3000 });
-            }
-        };
+    const fetchData = async () => {
+        try {
+            setLoading(true); // Iniciar la carga
+            const response = await axios.get(`${API_BASE_URL}/filtrarNominaCtrl`, {
+                params: {
+                    quincena: quincena,
+                    anio: anio
+                }
+            });
+            setRecords(response.data);
+        } catch (error) {
+            console.error('Error fetching data', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error fetching data', life: 3000 });
+        } finally {
+            setLoading(false); // Finalizar la carga
+        }
+    };
 
+    useEffect(() => {
         if (quincena && anio) {
             fetchData();
         }
-    }, [quincena, anio]); // Actualiza si quincena o anio cambian
+    }, [quincena, anio]);
 
     const approveTemplate = (rowData) => {
         return (
             <div className="p-field-radiobutton">
-                <RadioButton inputId={`approve${rowData.idx}`} name={rowData.idx} value="Aprobar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Aprobar'} />
+                <RadioButton 
+                    inputId={`approve${rowData.idx}`} 
+                    name={rowData.idx} 
+                    value="Aprobar" 
+                    onChange={(e) => onRadioChange(e, rowData)} 
+                    checked={rowData.status === 'Aprobar'} 
+                />
                 <label htmlFor={`approve${rowData.idx}`}>Aprobar</label>
-                <RadioButton inputId={`cancel${rowData.idx}`} name={rowData.idx} value="Cancelar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Cancelar'} />
+                <RadioButton 
+                    inputId={`cancel${rowData.idx}`} 
+                    name={rowData.idx} 
+                    value="Cancelar" 
+                    onChange={(e) => onRadioChange(e, rowData)} 
+                    checked={rowData.status === 'Cancelar'} 
+                />
                 <label htmlFor={`cancel${rowData.idx}`}>Cancelar</label>
             </div>
         );
@@ -53,7 +68,13 @@ const ComparativaTable = ({ userRevision, quincena, anio }) => {  // Recibe quin
     const onRadioChange = (e, rowData) => {
         let updatedRecords = [...records];
         let recordIndex = updatedRecords.findIndex(record => record.idx === rowData.idx);
-        updatedRecords[recordIndex] = { ...rowData, status: e.value };
+        
+        // Si el usuario selecciona "Cancelar", pendiente_dem debe cambiar a false
+        updatedRecords[recordIndex] = { 
+            ...rowData, 
+            status: e.value, 
+            pendiente_dem: e.value === 'Cancelar' ? false : rowData.pendiente_dem 
+        };
         setRecords(updatedRecords);
     };
 
@@ -70,9 +91,9 @@ const ComparativaTable = ({ userRevision, quincena, anio }) => {  // Recibe quin
             const params = new URLSearchParams({
                 cancelado: record.status === 'Cancelar',
                 aprobado: record.status === 'Aprobar',
-                user_revision: userRevision,  // Aquí se usa el usuario recibido
-                rol_user: 'Admin',  // Se añade el rol
-                pendiente_dem: true, // Pendiente ahora es false
+                user_revision: userRevision,
+                rol_user: 'Admin',
+                pendiente_dem: record.pendiente_dem,  // Aquí se pasa el valor actualizado
                 idx: record.idx
             }).toString();
 
@@ -86,6 +107,8 @@ const ComparativaTable = ({ userRevision, quincena, anio }) => {  // Recibe quin
         });
 
         await Promise.all(updatePromises.filter(Boolean)); // Filtrar las promesas nulas
+
+        fetchData(); // Recargar los datos después de confirmar
     };
 
     const exportCSV = () => {
@@ -137,17 +160,21 @@ const ComparativaTable = ({ userRevision, quincena, anio }) => {  // Recibe quin
                     <Button type="button" icon="pi pi-file-pdf" severity="warning" rounded onClick={() => exportPdf()} data-pr-tooltip="PDF" />
                 </div>
             )} />
-            <DataTable ref={dt} value={records} responsiveLayout="scroll">
-                <Column field="idx" header="Idx" sortable />
-                <Column field="anio" header="Año" sortable />
-                <Column field="quincena" header="Quincena" sortable />
-                <Column field="nombre_nomina" header="Nombre Nómina" sortable />
-                <Column field="nombre_archivo" header="Nombre Archivo" sortable />
-                <Column field="fecha_carga" header="Fecha Carga" sortable />
-                <Column field="user_carga" header="Usuario Carga" sortable />
-                <Column body={approveTemplate} header="Acción" />
-            </DataTable>
-            <Button label='Confirmar' type="button" icon="pi pi-file-excel" severity="success" onClick={handleConfirm} />
+            {loading ? (
+                <p>Cargando...</p>
+            ) : (
+                <DataTable ref={dt} value={records} responsiveLayout="scroll">
+                    <Column field="idx" header="Idx" sortable />
+                    <Column field="anio" header="Año" sortable />
+                    <Column field="quincena" header="Quincena" sortable />
+                    <Column field="nombre_nomina" header="Nombre Nómina" sortable />
+                    <Column field="nombre_archivo" header="Nombre Archivo" sortable />
+                    <Column field="fecha_carga" header="Fecha Carga" sortable />
+                    <Column field="user_carga" header="Usuario Carga" sortable />
+                    <Column body={approveTemplate} header="Acción" />
+                </DataTable>
+            )}
+            <Button label='Confirmar' type="button" icon="pi pi-check" severity="success" onClick={handleConfirm} />
         </div>
     );
 };
