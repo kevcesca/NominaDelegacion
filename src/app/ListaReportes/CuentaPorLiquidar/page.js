@@ -8,106 +8,118 @@ import { ProgressBar } from 'primereact/progressbar';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Toast } from 'primereact/toast';
-import { Collapse } from '@mui/material';
-import { ThemeProvider, Typography, Box } from '@mui/material';
-import ColumnSelector from '../../%Components/ColumnSelector/ColumnSelector'; // Importa tu componente ColumnSelector
+import { Collapse, Box, Typography, Grid, ThemeProvider } from '@mui/material';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import ColumnSelector from '../../%Components/ColumnSelector/ColumnSelector';
 import API_BASE_URL from '../../%Config/apiConfig';
-import styles from '../page.module.css';
 import theme from '../../$tema/theme';
+import styles from '../page.module.css';
 
-export default function TablaMovimientos() {
+export default function TablaConsultaMovimientos() {
     const [data, setData] = useState([]);
     const [globalFilter, setGlobalFilter] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [anio, setAnio] = useState('2024');
-    const [codigo, setCodigo] = useState('548');
+    const [isLoading, setIsLoading] = useState(false);
+    const [visibleColumns, setVisibleColumns] = useState({});
     const [showTable, setShowTable] = useState(false);
     const [collapseOpen, setCollapseOpen] = useState(false);
-    const [selectedColumns, setSelectedColumns] = useState([
-        { key: 'anio', label: 'Año' },
-        { key: 'quincena', label: 'Quincena' },
-        { key: 'fecha_val', label: 'Fecha Valor' },
-        { key: 'movto', label: 'Movimiento' },
-        { key: 'concepto', label: 'Concepto' },
-        { key: 'abono', label: 'Abono' },
-    ]);
-    const [availableColumns, setAvailableColumns] = useState([
-        { key: 'anio', label: 'Año' },
-        { key: 'quincena', label: 'Quincena' },
-        { key: 'fecha_val', label: 'Fecha Valor' },
-        { key: 'movto', label: 'Movimiento' },
-        { key: 'concepto', label: 'Concepto' },
-        { key: 'abono', label: 'Abono' },
-    ]);
+    const [anio, setAnio] = useState('2024');
+    const [codigo, setCodigo] = useState('548');
     const dt = useRef(null);
     const toast = useRef(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(true);
-                const response = await fetch(`${API_BASE_URL}/consultaMovimientos?anio=${anio}&codigo=${codigo}`);
-                if (!response.ok) {
-                    throw new Error('Error al obtener los datos: ' + response.statusText);
-                }
-                const data = await response.json();
-                setData(data);
-                setShowTable(true);
-            } catch (error) {
-                console.error('Error al obtener los datos:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const availableColumns = [
+        { key: 'anio', label: 'Año', defaultSelected: true },
+        { key: 'quincena', label: 'Quincena', defaultSelected: true },
+        { key: 'fecha_val', label: 'Fecha de Valor', defaultSelected: true },
+        { key: 'movto', label: 'Movimiento', defaultSelected: true },
+        { key: 'concepto', label: 'Concepto', defaultSelected: true },
+        { key: 'abono', label: 'Abono', defaultSelected: true },
+    ];
 
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetch(`${API_BASE_URL}/consultaMovimientos?anio=${anio}&codigo=${codigo}`);
+            if (!response.ok) {
+                throw new Error('Error al obtener los datos: ' + response.statusText);
+            }
+            const data = await response.json();
+            setData(data);
+            setShowTable(true);
+        } catch (error) {
+            console.error('Error al obtener los datos:', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar la data.' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
     }, [anio, codigo]);
 
-    const handleSearch = () => {
-        setShowTable(false);
-        fetchData();
+    const handleColumnSelectionChange = (selectedColumns) => {
+        setVisibleColumns(selectedColumns);
+        setShowTable(true);
+        setCollapseOpen(false);
     };
 
     const exportCSV = () => {
-        dt.current.exportCSV();
+        const exportData = data.map(item => {
+            let filtered = {};
+            Object.keys(visibleColumns).forEach(key => {
+                if (visibleColumns[key]) {
+                    filtered[key] = item[key];
+                }
+            });
+            return filtered;
+        });
+
+        dt.current.exportCSV({ data: exportData });
     };
 
     const exportPdf = () => {
         import('jspdf').then((jsPDF) => {
             import('jspdf-autotable').then(() => {
                 const doc = new jsPDF.default();
-
-                const columns = selectedColumns.map(col => ({
-                    header: col.label,
-                    dataKey: col.key,
-                }));
-
+                const columns = availableColumns
+                    .filter(col => visibleColumns[col.key])
+                    .map(col => ({ header: col.label, dataKey: col.key }));
                 const rows = data.map(item => {
-                    const row = {};
-                    selectedColumns.forEach(col => row[col.key] = item[col.key]);
+                    let row = {};
+                    availableColumns.forEach(col => {
+                        if (visibleColumns[col.key]) {
+                            row[col.key] = item[col.key];
+                        }
+                    });
                     return row;
                 });
-
                 doc.autoTable({
                     columns,
                     body: rows,
                 });
-
-                doc.save('movimientos.pdf');
+                doc.save('consulta_movimientos.pdf');
             });
         });
     };
 
     const exportExcel = () => {
         import('xlsx').then((xlsx) => {
-            const worksheet = xlsx.utils.json_to_sheet(data);
+            const exportData = data.map(item => {
+                let filtered = {};
+                Object.keys(visibleColumns).forEach(key => {
+                    if (visibleColumns[key]) {
+                        filtered[key] = item[key];
+                    }
+                });
+                return filtered;
+            });
+            const worksheet = xlsx.utils.json_to_sheet(exportData);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-
-            saveAsExcelFile(excelBuffer, 'movimientos');
+            saveAsExcelFile(excelBuffer, 'consulta_movimientos');
         });
     };
 
@@ -124,7 +136,7 @@ export default function TablaMovimientos() {
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Movimientos</Typography>
+            <Typography variant="h4" className={styles.titulo}>Consulta de Movimientos</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText
@@ -139,29 +151,49 @@ export default function TablaMovimientos() {
 
     return (
         <ThemeProvider theme={theme}>
-            <div className="card">
+            <div className={styles.main}>
                 <Toast ref={toast} />
-
                 <Box className={styles.dropForm}>
-                    <Typography variant="h6" className={styles.exportText}>Filtrar por parámetros</Typography>
-                    <Box className="p-fluid">
-                        <Box className="p-field">
-                            <label htmlFor="anio">Año</label>
-                            <InputText id="anio" value={anio} onChange={(e) => setAnio(e.target.value)} />
-                        </Box>
-                        <Box className="p-field">
-                            <label htmlFor="codigo">Código</label>
-                            <InputText id="codigo" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
-                        </Box>
+                    <Typography variant="h6" className={styles.exportText}>Parametros de consulta</Typography>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            fetchData();
+                        }}
+                    >
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <InputText
+                                    value={anio}
+                                    onChange={(e) => setAnio(e.target.value)}
+                                    placeholder="Año"
+                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <InputText
+                                    value={codigo}
+                                    onChange={(e) => setCodigo(e.target.value)}
+                                    placeholder="Código"
+                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
+                                />
+                            </Grid>
+                        </Grid>
                         <Button
-                            type="button"
-                            label="Buscar"
-                            onClick={handleSearch}
-                            icon="pi pi-search"
-                            severity="primary"
-                            rounded
+                            type="submit"
+                            label="Consultar"
+                            className={styles.mainButton}
+                            style={{ marginTop: '1rem' }}
                         />
-                    </Box>
+                    </form>
+                    <Button
+                        type="button"
+                        icon={`pi ${collapseOpen ? 'pi-chevron-up' : 'pi-chevron-down'}`}
+                        severity="secondary"
+                        rounded
+                        onClick={() => setCollapseOpen(!collapseOpen)}
+                        data-pr-tooltip="Configurar columnas"
+                    />
                 </Box>
 
                 <Toolbar className="mb-4" right={() => (
@@ -170,7 +202,7 @@ export default function TablaMovimientos() {
                             type="button"
                             icon="pi pi-file"
                             rounded
-                            onClick={exportCSV}
+                            onClick={() => exportCSV()}
                             data-pr-tooltip="CSV"
                         />
                         <Button
@@ -178,7 +210,7 @@ export default function TablaMovimientos() {
                             icon="pi pi-file-excel"
                             severity="success"
                             rounded
-                            onClick={exportExcel}
+                            onClick={() => exportExcel()}
                             data-pr-tooltip="XLS"
                         />
                         <Button
@@ -186,50 +218,37 @@ export default function TablaMovimientos() {
                             icon="pi pi-file-pdf"
                             severity="warning"
                             rounded
-                            onClick={exportPdf}
+                            onClick={() => exportPdf()}
                             data-pr-tooltip="PDF"
-                        />
-                        <Button
-                            type="button"
-                            icon={`pi ${collapseOpen ? 'pi-chevron-up' : 'pi-chevron-down'}`}
-                            onClick={() => setCollapseOpen(!collapseOpen)}
-                            data-pr-tooltip="Seleccionar Columnas"
                         />
                     </div>
                 )} />
 
                 <Collapse in={collapseOpen}>
-                    <Box className={styles.columnSelector}>
+                    <Box className="p-3">
                         <ColumnSelector
                             availableColumns={availableColumns}
-                            selectedColumns={selectedColumns}
-                            onSelectionChange={setSelectedColumns}
+                            onSelectionChange={handleColumnSelectionChange}
                         />
                     </Box>
                 </Collapse>
 
                 {isLoading ? (
-                    <ProgressBar />
+                    <ProgressBar mode="indeterminate" style={{ height: '6px' }} />
                 ) : (
                     showTable && (
                         <DataTable
                             ref={dt}
                             value={data}
-                            globalFilter={globalFilter}
-                            header={header}
-                            responsiveLayout="scroll"
                             paginator
                             rows={10}
-                            className="p-datatable-sm"
+                            globalFilter={globalFilter}
+                            header={header}
+                            emptyMessage="No se encontraron registros."
+                            responsiveLayout="scroll"
                         >
-                            {selectedColumns.map(col => (
-                                <Column
-                                    key={col.key}
-                                    field={col.key}
-                                    header={col.label}
-                                    sortable
-                                    filter
-                                />
+                            {availableColumns.map((col) => visibleColumns[col.key] && (
+                                <Column key={col.key} field={col.key} header={col.label} />
                             ))}
                         </DataTable>
                     )
@@ -238,4 +257,3 @@ export default function TablaMovimientos() {
         </ThemeProvider>
     );
 }
-

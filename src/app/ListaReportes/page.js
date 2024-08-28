@@ -34,71 +34,71 @@ export default function Page() {
             description: "Reporte detallado de cuentas pendientes por liquidar.",
             link: "/ListaReportes/CuentaPorLiquidar"
         },
-        {
-            title: "REPORTE DE REINTEGROS POR CUENTA POR LIQUIDAR",
-            description: "Informe de reintegros relacionados con cuentas por liquidar.",
-            link: "/ListaReportes/ReintegrosCuentaPorLiquidar"
-        },
+        // {
+        //     title: "REPORTE DE REINTEGROS POR CUENTA POR LIQUIDAR",
+        //     description: "Informe de reintegros relacionados con cuentas por liquidar.",
+        //     link: "/ListaReportes/ReintegrosCuentaPorLiquidar"
+        // },
         {
             title: "REPORTE DE NÓMINA, CUENTA POR LIQUIDAR, DISPERSIÓN",
             description: "Reporte sobre la dispersión de nómina y cuentas por liquidar.",
             link: "/ListaReportes/NominaCuentaPorLiquidarDispersion"
         },
-        {
-            title: "REPORTE DE NÓMINA, CUENTA POR LIQUIDAR, PAGO POR CHEQUE",
-            description: "Detalles de nóminas y cuentas por liquidar pagadas mediante cheque.",
-            link: "/ListaReportes/NominaCuentaPorLiquidarPagoCheque"
-        },
-        {
-            title: "REPORTE POR CUENTA POR LIQUIDAR CHEQUES EN TRÁNSITO",
-            description: "Reporte de cheques en tránsito relacionados con cuentas por liquidar.",
-            link: "/ListaReportes/CuentaPorLiquidarChequesTransito"
-        },
-        {
-            title: "REPORTE DE NÓMINAS EXTRAORDINARIAS",
-            description: "Informe sobre nóminas extraordinarias emitidas.",
-            link: "/ListaReportes/NominasExtraordinarias"
-        },
-        {
-            title: "REPORTE DE ACTAS POR RETENCIÓN DE PAGOS",
-            description: "Registro de actas relacionadas con la retención de pagos.",
-            link: "/ListaReportes/ActasRetencionPagos"
-        },
-        {
-            title: "REPORTE DE CONCEPTOS NO COBRADOS Y MOTIVO DE REEMBOLSOS",
-            description: "Informe sobre conceptos no cobrados y las razones de los reembolsos.",
-            link: "/ListaReportes/ConceptosNoCobradosReembolsos"
-        },
-        {
-            title: "EMISIÓN DE CHEQUES",
-            description: "Reporte detallado de la emisión de cheques.",
-            link: "/ListaReportes/EmisionCheques"
-        },
-        {
-            title: "REPORTE DE LIBERACIONES",
-            description: "Informe sobre las liberaciones de fondos o nóminas.",
-            link: "/ListaReportes/Liberaciones"
-        },
-        {
-            title: "REPORTE DE DEFUNCIONES",
-            description: "Reporte de defunciones registradas.",
-            link: "/ListaReportes/Defunciones"
-        },
-        {
-            title: "REPORTE DE BAJAS",
-            description: "Registro de bajas de empleados.",
-            link: "/ListaReportes/Bajas"
-        },
-        {
-            title: "REPORTE DE ALTAS",
-            description: "Informe sobre altas de nuevos empleados.",
-            link: "/ListaReportes/Altas"
-        },
-        {
-            title: "SALDOS DIARIOS EN BANCOS",
-            description: "Consulta los saldos diarios disponibles en bancos.",
-            link: "/ListaReportes/SaldosDiariosBancos"
-        }
+        // {
+        //     title: "REPORTE DE NÓMINA, CUENTA POR LIQUIDAR, PAGO POR CHEQUE",
+        //     description: "Detalles de nóminas y cuentas por liquidar pagadas mediante cheque.",
+        //     link: "/ListaReportes/NominaCuentaPorLiquidarPagoCheque"
+        // },
+        // {
+        //     title: "REPORTE POR CUENTA POR LIQUIDAR CHEQUES EN TRÁNSITO",
+        //     description: "Reporte de cheques en tránsito relacionados con cuentas por liquidar.",
+        //     link: "/ListaReportes/CuentaPorLiquidarChequesTransito"
+        // },
+        // {
+        //     title: "REPORTE DE NÓMINAS EXTRAORDINARIAS",
+        //     description: "Informe sobre nóminas extraordinarias emitidas.",
+        //     link: "/ListaReportes/NominasExtraordinarias"
+        // },
+        // {
+        //     title: "REPORTE DE ACTAS POR RETENCIÓN DE PAGOS",
+        //     description: "Registro de actas relacionadas con la retención de pagos.",
+        //     link: "/ListaReportes/ActasRetencionPagos"
+        // },
+        // {
+        //     title: "REPORTE DE CONCEPTOS NO COBRADOS Y MOTIVO DE REEMBOLSOS",
+        //     description: "Informe sobre conceptos no cobrados y las razones de los reembolsos.",
+        //     link: "/ListaReportes/ConceptosNoCobradosReembolsos"
+        // },
+        // {
+        //     title: "EMISIÓN DE CHEQUES",
+        //     description: "Reporte detallado de la emisión de cheques.",
+        //     link: "/ListaReportes/EmisionCheques"
+        // },
+        // {
+        //     title: "REPORTE DE LIBERACIONES",
+        //     description: "Informe sobre las liberaciones de fondos o nóminas.",
+        //     link: "/ListaReportes/Liberaciones"
+        // },
+        // {
+        //     title: "REPORTE DE DEFUNCIONES",
+        //     description: "Reporte de defunciones registradas.",
+        //     link: "/ListaReportes/Defunciones"
+        // },
+        // {
+        //     title: "REPORTE DE BAJAS",
+        //     description: "Registro de bajas de empleados.",
+        //     link: "/ListaReportes/Bajas"
+        // },
+        // {
+        //     title: "REPORTE DE ALTAS",
+        //     description: "Informe sobre altas de nuevos empleados.",
+        //     link: "/ListaReportes/Altas"
+        // },
+        // {
+        //     title: "SALDOS DIARIOS EN BANCOS",
+        //     description: "Consulta los saldos diarios disponibles en bancos.",
+        //     link: "/ListaReportes/SaldosDiariosBancos"
+        // }
     ];
     
     const filteredReports = reportes.filter(report =>

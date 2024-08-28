@@ -154,6 +154,7 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
     return (
         <ThemeProvider theme={theme}>
             <div className={styles.main}>
+            <h1 className={styles.h1}>HISTÓRICO DE MOVIMIENTOS DE PERCEPCION DE PERSONAL</h1>
                 <Toast ref={toast} />
                 <Box className={styles.dropForm}>
                     <Typography variant="h6" className={styles.exportText}>Parametros de consulta</Typography>
@@ -169,7 +170,7 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
                                     value={anio}
                                     onChange={(e) => setAnio(e.target.value)}
                                     placeholder="Año"
-                                    style={{ width: '100%' }}
+                                    style={{ width: '80%', padding:"1rem", margin:"2rem"}}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -177,14 +178,14 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
                                     value={quincenas.join(', ')}
                                     onChange={(e) => setQuincenas(e.target.value.split(',').map(q => q.trim()))}
                                     placeholder="Quincenas (separadas por coma)"
-                                    style={{ width: '100%' }}
+                                    style={{ width: '80%', padding:"1rem", margin:"2rem"}}
                                 />
                             </Grid>
                         </Grid>
                         <Button
                             type="submit"
                             label="Consultar"
-                            className="p-button-primary"
+                            className={styles.mainButton}
                             style={{ marginTop: '1rem' }}
                         />
                     </form>

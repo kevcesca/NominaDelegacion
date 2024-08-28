@@ -8,68 +8,62 @@ import { ProgressBar } from 'primereact/progressbar';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Toast } from 'primereact/toast';
-import { Collapse } from '@mui/material';
-import { ThemeProvider, Typography, Box } from '@mui/material';
+import { Collapse, Box, Typography, Grid, ThemeProvider } from '@mui/material';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
-import ColumnSelector from '../../%Components/ColumnSelector/ColumnSelector';
+import ColumnSelector from '../../%Components/ColumnSelector/ColumnSelector'; // Asegúrate de tener este componente
 import API_BASE_URL from '../../%Config/apiConfig';
 import styles from '../page.module.css';
 import theme from '../../$tema/theme';
 
-export default function TablaComparacionCampos() {
+export default function TablaConsultaMovimientosBitacora() {
     const [data, setData] = useState([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState({});
     const [showTable, setShowTable] = useState(false);
     const [collapseOpen, setCollapseOpen] = useState(false);
-    const [formValues, setFormValues] = useState({
-        anio: '',
-        quincenas: ['', '', ''],
-    });
-
+    const [anio, setAnio] = useState('2024');
+    const [quincenas, setQuincenas] = useState(['02', '04', '06']);
+    const [campo, setCampo] = useState('curp');
     const dt = useRef(null);
     const toast = useRef(null);
 
     const availableColumns = [
-        { key: 'id_empleado', label: 'ID Empleado', defaultSelected: true },
-        { key: 'nombre', label: 'Nombre', defaultSelected: true },
-        { key: 'apellido_1', label: 'Apellido 1', defaultSelected: true },
-        { key: 'apellido_2', label: 'Apellido 2', defaultSelected: true },
         { key: 'anio', label: 'Año', defaultSelected: true },
         { key: 'quincena', label: 'Quincena', defaultSelected: true },
         { key: 'nomina', label: 'Nómina', defaultSelected: true },
-        { key: 'desc_extraor', label: 'Descripción Extra', defaultSelected: false },
-        { key: 'liquido', label: 'Líquido', defaultSelected: true },
-        { key: 'transferencia', label: 'Transferencia', defaultSelected: false },
-        { key: 'num_cuenta', label: 'Número de Cuenta', defaultSelected: false },
-        { key: 'fec_pago', label: 'Fecha de Pago', defaultSelected: true },
+        { key: 'campo', label: 'Campo', defaultSelected: true },
+        { key: 'nombre', label: 'Nombre', defaultSelected: true },
+        { key: 'apellido_1', label: 'Apellido Paterno', defaultSelected: true },
+        { key: 'apellido_2', label: 'Apellido Materno', defaultSelected: true },
+        { key: 'valor_inicial', label: 'Valor Inicial', defaultSelected: true },
+        { key: 'valor_final', label: 'Valor Final', defaultSelected: true }
     ];
 
-    useEffect(() => {
-        if (formValues.anio && formValues.quincenas.length > 0) {
-            const fetchData = async () => {
-                try {
-                    setIsLoading(true);
-                    const quincenasString = formValues.quincenas.join('&quincena=');
-                    const response = await fetch(`${API_BASE_URL}/consultaMovimientosVariasQuincenas?anio=${formValues.anio}&quincena=${quincenasString}`);
-                    if (!response.ok) {
-                        throw new Error('Error al obtener los datos: ' + response.statusText);
-                    }
-                    const data = await response.json();
-                    setData(data);
-                } catch (error) {
-                    console.error('Error al obtener los datos:', error);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-
-            fetchData();
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            const queryParams = quincenas.map(q => `quincena=${q}`).join('&');
+            const response = await fetch(`${API_BASE_URL}/consultaMovimientosBitacora?anio=${anio}&${queryParams}&campo=${campo}`);
+            if (!response.ok) {
+                throw new Error('Error al obtener los datos: ' + response.statusText);
+            }
+            const data = await response.json();
+            setData(data);
+            setShowTable(true);
+        } catch (error) {
+            console.error('Error al obtener los datos:', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar la data.' });
+        } finally {
+            setIsLoading(false);
         }
-    }, [formValues]);
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [anio, quincenas, campo]);
 
     const handleColumnSelectionChange = (selectedColumns) => {
         setVisibleColumns(selectedColumns);
@@ -95,11 +89,9 @@ export default function TablaComparacionCampos() {
         import('jspdf').then((jsPDF) => {
             import('jspdf-autotable').then(() => {
                 const doc = new jsPDF.default();
-
                 const columns = availableColumns
                     .filter(col => visibleColumns[col.key])
                     .map(col => ({ header: col.label, dataKey: col.key }));
-
                 const rows = data.map(item => {
                     let row = {};
                     availableColumns.forEach(col => {
@@ -109,13 +101,11 @@ export default function TablaComparacionCampos() {
                     });
                     return row;
                 });
-
                 doc.autoTable({
                     columns,
                     body: rows,
                 });
-
-                doc.save('comparacion_campos.pdf');
+                doc.save('consulta_movimientos_bitacora.pdf');
             });
         });
     };
@@ -131,20 +121,18 @@ export default function TablaComparacionCampos() {
                 });
                 return filtered;
             });
-
             const worksheet = xlsx.utils.json_to_sheet(exportData);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-
-            saveAsExcelFile(excelBuffer, 'comparacion_campos');
+            saveAsExcelFile(excelBuffer, 'consulta_movimientos_bitacora');
         });
     };
 
     const saveAsExcelFile = (buffer, fileName) => {
         import('file-saver').then((module) => {
             if (module && module.default) {
-                let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-                let EXCEL_EXTENSION = '.xlsx';
+                const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+                const EXCEL_EXTENSION = '.xlsx';
                 const data = new Blob([buffer], { type: EXCEL_TYPE });
                 module.default.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
             }
@@ -153,7 +141,7 @@ export default function TablaComparacionCampos() {
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Cambios por quincena</Typography>
+            <Typography variant="h4" className={styles.titulo}>Consulta de Movimientos de Bitácora</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText
@@ -166,59 +154,51 @@ export default function TablaComparacionCampos() {
         </div>
     );
 
-    const handleFormChange = (e) => {
-        const { name, value } = e.target;
-        setFormValues(prevValues => {
-            const newValues = { ...prevValues };
-            if (name === 'anio') {
-                newValues.anio = value;
-            } else if (name.startsWith('quincena')) {
-                const index = parseInt(name.split('_')[1], 10);
-                newValues.quincenas[index] = value;
-            }
-            return newValues;
-        });
-    };
-
     return (
         <ThemeProvider theme={theme}>
-            <div className="card">
+            <div className={styles.main}>
                 <Toast ref={toast} />
-                
-                <Box className={styles.dropForm} mb={3}>
-                    <Typography variant="h6" className={styles.exportText}>Parametros de consulta</Typography>
-                    <form>
-                        <div>
-                            <InputText
-                                name="anio"
-                                value={formValues.anio}
-                                onChange={handleFormChange}
-                                placeholder="Año"
-                                style={{ marginRight: '1rem' }}
-                            />
-                            {[0, 1, 2].map(i => (
-                                <InputText
-                                    key={i}
-                                    name={`quincena_${i}`}
-                                    value={formValues.quincenas[i]}
-                                    onChange={handleFormChange}
-                                    placeholder={`Quincena ${i + 1}`}
-                                    style={{ marginRight: '1rem' }}
-                                />
-                            ))}
-                            <Button
-                                label="Consultar"
-                                icon="pi pi-search"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setShowTable(true);
-                                }}
-                            />
-                        </div>
-                    </form>
-                </Box>
-
                 <Box className={styles.dropForm}>
+                    <Typography variant="h6" className={styles.exportText}>Parametros de consulta</Typography>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            fetchData();
+                        }}
+                    >
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={4}>
+                                <InputText
+                                    value={anio}
+                                    onChange={(e) => setAnio(e.target.value)}
+                                    placeholder="Año"
+                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                <InputText
+                                    value={quincenas.join(', ')}
+                                    onChange={(e) => setQuincenas(e.target.value.split(',').map(q => q.trim()))}
+                                    placeholder="Quincenas (separadas por coma)"
+                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                <InputText
+                                    value={campo}
+                                    onChange={(e) => setCampo(e.target.value)}
+                                    placeholder="Campo"
+                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
+                                />
+                            </Grid>
+                        </Grid>
+                        <Button
+                            type="submit"
+                            label="Consultar"
+                            className={styles.mainButton}
+                            style={{ marginTop: '1rem' }}
+                        />
+                    </form>
                     <Button
                         type="button"
                         icon={`pi ${collapseOpen ? 'pi-chevron-up' : 'pi-chevron-down'}`}
@@ -240,63 +220,50 @@ export default function TablaComparacionCampos() {
                         />
                         <Button
                             type="button"
+                            icon="pi pi-file-excel"
+                            severity="success"
+                            rounded
+                            onClick={() => exportExcel()}
+                            data-pr-tooltip="XLS"
+                        />
+                        <Button
+                            type="button"
                             icon="pi pi-file-pdf"
+                            severity="warning"
                             rounded
                             onClick={() => exportPdf()}
                             data-pr-tooltip="PDF"
                         />
-                        <Button
-                            type="button"
-                            icon="pi pi-file-excel"
-                            rounded
-                            onClick={() => exportExcel()}
-                            data-pr-tooltip="Excel"
-                        />
                     </div>
-                )}
-                />
+                )} />
 
                 <Collapse in={collapseOpen}>
-                    <Box>
+                    <Box className="p-3">
                         <ColumnSelector
                             availableColumns={availableColumns}
-                            selectedColumns={visibleColumns}
-                            onChange={handleColumnSelectionChange}
+                            onSelectionChange={handleColumnSelectionChange}
                         />
                     </Box>
                 </Collapse>
 
                 {isLoading ? (
-                    <div className="p-d-flex p-ai-center p-jc-center" style={{ height: '200px' }}>
-                        <ProgressBar mode="indeterminate" />
-                    </div>
+                    <ProgressBar mode="indeterminate" style={{ height: '6px' }} />
                 ) : (
                     showTable && (
-                        <div className="datatable-doc-demo">
-                            <DataTable
-                                ref={dt}
-                                value={data}
-                                globalFilter={globalFilter}
-                                header={header}
-                                className="datatable-responsive"
-                            >
-                                {availableColumns.map((col) => {
-                                    if (visibleColumns[col.key]) {
-                                        return (
-                                            <Column
-                                                key={col.key}
-                                                field={col.key}
-                                                header={col.label}
-                                                sortable
-                                                filter
-                                                style={{ minWidth: '12rem' }}
-                                            />
-                                        );
-                                    }
-                                    return null;
-                                })}
-                            </DataTable>
-                        </div>
+                        <DataTable
+                            ref={dt}
+                            value={data}
+                            paginator
+                            rows={10}
+                            globalFilter={globalFilter}
+                            header={header}
+                            emptyMessage="No se encontraron registros."
+                            responsiveLayout="scroll"
+                        >
+                            {availableColumns.map((col) => visibleColumns[col.key] && (
+                                <Column key={col.key} field={col.key} header={col.label} />
+                            ))}
+                        </DataTable>
                     )
                 )}
             </div>

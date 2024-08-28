@@ -1,17 +1,22 @@
-.image{
+.image {
     width: 200px;
     height: auto;
     display: none;
 }
 
-.card{
+.card {
     display: flex;
     flex-direction: row;
     margin: 1rem;
     width: 35vw;
+    transition: transform 0.3s ease-in-out; /* Añade la transición */
 }
 
-.button{
+.card:hover {
+    transform: scale(1.05); /* Aumenta el tamaño en un 5% */
+}
+
+.button {
     color: white !important;
     background-color: #9f2241 !important;
     margin-top: 3rem !important;

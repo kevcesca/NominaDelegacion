@@ -156,6 +156,7 @@ export default function TablaConsultaCLCPorEmpleado() {
     return (
         <ThemeProvider theme={theme}>
             <div className={styles.main}>
+            <h1 className={styles.h1}>HISTÓRICO DE MOVIMIENTOS DE PERCEPCION DE PERSONAL POR TIPO DE NÓMINA</h1>
                 <Toast ref={toast} />
                 <Box className={styles.dropForm}>
                     <Typography variant="h6" className={styles.exportText}>Parametros de consulta</Typography>
@@ -171,7 +172,7 @@ export default function TablaConsultaCLCPorEmpleado() {
                                     value={anio}
                                     onChange={(e) => setAnio(e.target.value)}
                                     placeholder="Año"
-                                    style={{ width: '100%' }}
+                                    style={{ width: '80%', padding:"1rem", margin:"2rem"}}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -179,7 +180,7 @@ export default function TablaConsultaCLCPorEmpleado() {
                                     value={idEmpleado}
                                     onChange={(e) => setIdEmpleado(e.target.value)}
                                     placeholder="ID Empleado"
-                                    style={{ width: '100%' }}
+                                    style={{ width: '80%', padding:"1rem", margin:"2rem"}}
                                 />
                             </Grid>
                         </Grid>
@@ -187,7 +188,7 @@ export default function TablaConsultaCLCPorEmpleado() {
                             type="submit"
                             label="Consultar"
                             className="p-button-primary"
-                            style={{ marginTop: '1rem' }}
+                            style={{ marginTop: '1rem', display:"none" }}
                         />
                     </form>
                     <Button
