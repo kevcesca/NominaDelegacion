@@ -58,7 +58,7 @@ export default function NavBar() {
                         <Link className={styles.tWhite} href="/Calendario/Exportar" passHref>
                             <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Exportar</MenuItem>
                         </Link>
-                    </SubMenu>
+                    </SubMenu> 
                     <SubMenu label="Proceso de Nómina" icon={<SecurityIcon />}>
                         <Link className={styles.tWhite} href="/CrearNomina" passHref>
                             <MenuItem icon={<UploadFileIcon />} className={styles.bgblack}>Cargar Nómina</MenuItem>
@@ -85,8 +85,8 @@ export default function NavBar() {
                         </Link>
                     </SubMenu>
                     <SubMenu label="Reportes" icon={<AssessmentIcon />}>
-                        <Link className={styles.tWhite} href="/Reportes" passHref>
-                            <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Generar Reporte</MenuItem>
+                        <Link className={styles.tWhite} href="/ListaReportes" passHref>
+                            <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Lista Reportes</MenuItem>
                         </Link>
                     </SubMenu>
                     <SubMenu label="Cheques" icon={<MoneyIcon />}>

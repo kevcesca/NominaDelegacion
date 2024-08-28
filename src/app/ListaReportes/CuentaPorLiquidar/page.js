@@ -10,6 +10,7 @@ import { Toolbar } from 'primereact/toolbar';
 import { Toast } from 'primereact/toast';
 import { Collapse } from '@mui/material';
 import { ThemeProvider, Typography, Box } from '@mui/material';
+import ColumnSelector from '../../%Components/ColumnSelector/ColumnSelector'; // Importa tu componente ColumnSelector
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -25,6 +26,22 @@ export default function TablaMovimientos() {
     const [codigo, setCodigo] = useState('548');
     const [showTable, setShowTable] = useState(false);
     const [collapseOpen, setCollapseOpen] = useState(false);
+    const [selectedColumns, setSelectedColumns] = useState([
+        { key: 'anio', label: 'Año' },
+        { key: 'quincena', label: 'Quincena' },
+        { key: 'fecha_val', label: 'Fecha Valor' },
+        { key: 'movto', label: 'Movimiento' },
+        { key: 'concepto', label: 'Concepto' },
+        { key: 'abono', label: 'Abono' },
+    ]);
+    const [availableColumns, setAvailableColumns] = useState([
+        { key: 'anio', label: 'Año' },
+        { key: 'quincena', label: 'Quincena' },
+        { key: 'fecha_val', label: 'Fecha Valor' },
+        { key: 'movto', label: 'Movimiento' },
+        { key: 'concepto', label: 'Concepto' },
+        { key: 'abono', label: 'Abono' },
+    ]);
     const dt = useRef(null);
     const toast = useRef(null);
 
@@ -63,23 +80,16 @@ export default function TablaMovimientos() {
             import('jspdf-autotable').then(() => {
                 const doc = new jsPDF.default();
 
-                const columns = [
-                    { header: 'Año', dataKey: 'anio' },
-                    { header: 'Quincena', dataKey: 'quincena' },
-                    { header: 'Fecha Valor', dataKey: 'fecha_val' },
-                    { header: 'Movimiento', dataKey: 'movto' },
-                    { header: 'Concepto', dataKey: 'concepto' },
-                    { header: 'Abono', dataKey: 'abono' },
-                ];
-
-                const rows = data.map(item => ({
-                    anio: item.anio,
-                    quincena: item.quincena,
-                    fecha_val: item.fecha_val,
-                    movto: item.movto,
-                    concepto: item.concepto,
-                    abono: item.abono,
+                const columns = selectedColumns.map(col => ({
+                    header: col.label,
+                    dataKey: col.key,
                 }));
+
+                const rows = data.map(item => {
+                    const row = {};
+                    selectedColumns.forEach(col => row[col.key] = item[col.key]);
+                    return row;
+                });
 
                 doc.autoTable({
                     columns,
@@ -179,30 +189,48 @@ export default function TablaMovimientos() {
                             onClick={exportPdf}
                             data-pr-tooltip="PDF"
                         />
+                        <Button
+                            type="button"
+                            icon={`pi ${collapseOpen ? 'pi-chevron-up' : 'pi-chevron-down'}`}
+                            onClick={() => setCollapseOpen(!collapseOpen)}
+                            data-pr-tooltip="Seleccionar Columnas"
+                        />
                     </div>
                 )} />
 
+                <Collapse in={collapseOpen}>
+                    <Box className={styles.columnSelector}>
+                        <ColumnSelector
+                            availableColumns={availableColumns}
+                            selectedColumns={selectedColumns}
+                            onSelectionChange={setSelectedColumns}
+                        />
+                    </Box>
+                </Collapse>
+
                 {isLoading ? (
-                    <ProgressBar mode="indeterminate" style={{ height: '6px' }} />
+                    <ProgressBar />
                 ) : (
                     showTable && (
                         <DataTable
                             ref={dt}
                             value={data}
-                            paginator
-                            rows={10}
-                            rowsPerPageOptions={[5, 10, 25]}
                             globalFilter={globalFilter}
                             header={header}
                             responsiveLayout="scroll"
-                            className="p-datatable-sm p-datatable-gridlines"
+                            paginator
+                            rows={10}
+                            className="p-datatable-sm"
                         >
-                            <Column field="anio" header="Año" sortable style={{ minWidth: '150px' }} />
-                            <Column field="quincena" header="Quincena" sortable style={{ minWidth: '150px' }} />
-                            <Column field="fecha_val" header="Fecha Valor" sortable style={{ minWidth: '150px' }} />
-                            <Column field="movto" header="Movimiento" sortable style={{ minWidth: '150px' }} />
-                            <Column field="concepto" header="Concepto" sortable style={{ minWidth: '150px' }} />
-                            <Column field="abono" header="Abono" sortable style={{ minWidth: '150px' }} />
+                            {selectedColumns.map(col => (
+                                <Column
+                                    key={col.key}
+                                    field={col.key}
+                                    header={col.label}
+                                    sortable
+                                    filter
+                                />
+                            ))}
                         </DataTable>
                     )
                 )}
@@ -210,3 +238,4 @@ export default function TablaMovimientos() {
         </ThemeProvider>
     );
 }
+
