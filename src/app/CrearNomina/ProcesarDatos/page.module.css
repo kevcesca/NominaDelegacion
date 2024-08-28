@@ -1,6 +1,7 @@
 /* src/app/page.module.css */
 
 .main {
+    min-height: 100vh;
 }
 
 .h1 {
@@ -39,5 +40,9 @@
     margin-top: 20px;
     display: flex;
     justify-content: space-around;
-    align-items: stretch;
+    align-items: center;
+}
+
+.backButton{
+    color: white !important;
 }

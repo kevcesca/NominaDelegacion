@@ -156,7 +156,7 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
                     <Column body={approveTemplate} header="Acción" />
                 </DataTable>
             )}
-            <Button label='Confirmar' type="button" icon="pi pi-check" severity="success" onClick={handleConfirm} />
+            <Button className={styles.button} label='Confirmar' type="button" icon="pi pi-check" severity="success" onClick={handleConfirm} />
         </div>
     );
 };

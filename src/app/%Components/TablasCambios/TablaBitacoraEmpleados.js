@@ -18,7 +18,7 @@ import theme from '../../$tema/theme';
 import styles from './TablasCambios.module.css';
 import API_BASE_URL from '../../%Config/apiConfig';
 
-export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomina }) {
+export default function TablaBitacoraEmpleados({ anio, quincena, tipoNomina }) {
     const [data, setData] = useState([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -29,22 +29,22 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
     const toast = useRef(null);
 
     const availableColumns = [
+        { key: 'anio', label: 'Año', defaultSelected: true },
+        { key: 'quincena', label: 'Quincena', defaultSelected: true },
+        { key: 'nombre_nomina', label: 'Nombre Nómina', defaultSelected: true },
         { key: 'id_empleado', label: 'ID Empleado', defaultSelected: true },
         { key: 'nombre', label: 'Nombre', defaultSelected: true },
-        { key: 'apellido_1', label: 'Apellido Paterno', defaultSelected: true },
-        { key: 'campo', label: 'Campo Modificado', defaultSelected: true },
+        { key: 'apellido_1', label: 'Apellido', defaultSelected: true },
+        { key: 'campo', label: 'Campo', defaultSelected: true },
         { key: 'valor_inicial', label: 'Valor Inicial', defaultSelected: true },
         { key: 'valor_final', label: 'Valor Final', defaultSelected: true },
-        { key: 'anio', label: 'Año', defaultSelected: false },
-        { key: 'quincena', label: 'Quincena', defaultSelected: false },
-        { key: 'nombre_nomina', label: 'Nombre Nómina', defaultSelected: false },
     ];
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const response = await fetch(`${API_BASE_URL}/consultaDetallesBitacora?anio=${anio}&quincena=${quincena}&tipoNomina=${tipoNomina}`);
+                const response = await fetch(`${API_BASE_URL}/consultaBitacoraEmpleados?anio=${anio}`);
                 if (!response.ok) {
                     throw new Error('Error al obtener los datos: ' + response.statusText);
                 }
@@ -52,7 +52,6 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                 setData(data);
             } catch (error) {
                 console.error('Error al obtener los datos:', error);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al obtener los datos', life: 3000 });
             } finally {
                 setIsLoading(false);
             }
@@ -105,7 +104,7 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                     body: rows,
                 });
 
-                doc.save('consulta_detalles_bitacora.pdf');
+                doc.save('bitacora_empleados.pdf');
             });
         });
     };
@@ -126,7 +125,7 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
 
-            saveAsExcelFile(excelBuffer, 'consulta_detalles_bitacora');
+            saveAsExcelFile(excelBuffer, 'bitacora_empleados');
         });
     };
 
@@ -143,7 +142,7 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Cambios a detalle por empleado y quincena</Typography>
+            <Typography variant="h4" className={styles.titulo}>Cambios a detalle por campo y quincena</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText

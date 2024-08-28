@@ -8,7 +8,7 @@ import TablaPostNominaHonorarios from '../%Components/TablaPostNomina/TablaPostN
 import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQuincenasExtraordinarias';
 import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
 import { ProgressBar } from 'primereact/progressbar';
-import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormControlLabel } from '@mui/material';
+import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormControlLabel, Alert } from '@mui/material';
 import theme from '../$tema/theme';
 import Link from 'next/link';
 import withAdminRole from '../%Components/hoc/withAdminRole';  // Importa el HOC
@@ -61,6 +61,7 @@ function CargarDatos() {
             <Toast ref={toast} />
             <Box className={styles.main}>
                 <Typography variant="h4" className={styles.h1}>Carga de Nómina</Typography>
+
                 <Box className={styles.selectorContainer}>
                     <Select value={quincena} onChange={(e) => setQuincena(e.target.value)} variant="outlined">
                         {quincenas.map((quin, index) => (
@@ -79,6 +80,9 @@ function CargarDatos() {
                 </Box>
 
                 {/* Sección de Post Nomina */}
+                <Alert severity="info" className={styles.alert} sx={{margin: '1rem'}}>
+                    En esta ventana podrás subir los archivos de nómina
+                </Alert>
                 <Typography variant="h5" className={styles.h2}>Nómina Compuesta</Typography>
                 <Box className={styles.progressContainer}>
                     <Typography>Progreso de datos</Typography>

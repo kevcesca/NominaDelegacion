@@ -60,10 +60,35 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: stretch;
+    margin-top: 3rem;
+    border-bottom: 1px solid black;
 }
 
 .selectorContainer {
     display: flex;
     justify-content: space-around;
     margin-bottom: 20px;
+}
+
+.buttonContainer{
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.backButton{
+    color: white !important;
+}
+
+.alert{
+    margin: 2rem;
+}
+
+.tableSelector{
+    width: 60vw;
+    background-color: white;
+    align-self: center;
+    border: 2px solid #9f2241;
 }

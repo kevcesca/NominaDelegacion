@@ -141,7 +141,7 @@ export default function TablaComparacionCampos({ anio, quincena, tipoNomina }) {
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Comparación de Campos</Typography>
+            <Typography variant="h4" className={styles.titulo}>Cambios por quincena y nómina</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText

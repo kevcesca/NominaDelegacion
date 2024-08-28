@@ -13,72 +13,49 @@ import { ThemeProvider, Typography, Box } from '@mui/material';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
-import ColumnSelector from '../ColumnSelector/ColumnSelector';
-import theme from '../../$tema/theme';
-import styles from './TablasCambios.module.css';
 import API_BASE_URL from '../../%Config/apiConfig';
+import styles from '../page.module.css';
+import theme from '../../$tema/theme';
 
-export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomina }) {
+export default function TablaMovimientos() {
     const [data, setData] = useState([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [visibleColumns, setVisibleColumns] = useState({});
+    const [anio, setAnio] = useState('2024');
+    const [codigo, setCodigo] = useState('548');
     const [showTable, setShowTable] = useState(false);
     const [collapseOpen, setCollapseOpen] = useState(false);
     const dt = useRef(null);
     const toast = useRef(null);
 
-    const availableColumns = [
-        { key: 'id_empleado', label: 'ID Empleado', defaultSelected: true },
-        { key: 'nombre', label: 'Nombre', defaultSelected: true },
-        { key: 'apellido_1', label: 'Apellido Paterno', defaultSelected: true },
-        { key: 'campo', label: 'Campo Modificado', defaultSelected: true },
-        { key: 'valor_inicial', label: 'Valor Inicial', defaultSelected: true },
-        { key: 'valor_final', label: 'Valor Final', defaultSelected: true },
-        { key: 'anio', label: 'Año', defaultSelected: false },
-        { key: 'quincena', label: 'Quincena', defaultSelected: false },
-        { key: 'nombre_nomina', label: 'Nombre Nómina', defaultSelected: false },
-    ];
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const response = await fetch(`${API_BASE_URL}/consultaDetallesBitacora?anio=${anio}&quincena=${quincena}&tipoNomina=${tipoNomina}`);
+                const response = await fetch(`${API_BASE_URL}/consultaMovimientos?anio=${anio}&codigo=${codigo}`);
                 if (!response.ok) {
                     throw new Error('Error al obtener los datos: ' + response.statusText);
                 }
                 const data = await response.json();
                 setData(data);
+                setShowTable(true);
             } catch (error) {
                 console.error('Error al obtener los datos:', error);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al obtener los datos', life: 3000 });
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchData();
-    }, [anio, quincena, tipoNomina]);
+    }, [anio, codigo]);
 
-    const handleColumnSelectionChange = (selectedColumns) => {
-        setVisibleColumns(selectedColumns);
-        setShowTable(true);
-        setCollapseOpen(false);
+    const handleSearch = () => {
+        setShowTable(false);
+        fetchData();
     };
 
     const exportCSV = () => {
-        const exportData = data.map(item => {
-            let filtered = {};
-            Object.keys(visibleColumns).forEach(key => {
-                if (visibleColumns[key]) {
-                    filtered[key] = item[key];
-                }
-            });
-            return filtered;
-        });
-
-        dt.current.exportCSV({ data: exportData });
+        dt.current.exportCSV();
     };
 
     const exportPdf = () => {
@@ -86,55 +63,49 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
             import('jspdf-autotable').then(() => {
                 const doc = new jsPDF.default();
 
-                const columns = availableColumns
-                    .filter(col => visibleColumns[col.key])
-                    .map(col => ({ header: col.label, dataKey: col.key }));
+                const columns = [
+                    { header: 'Año', dataKey: 'anio' },
+                    { header: 'Quincena', dataKey: 'quincena' },
+                    { header: 'Fecha Valor', dataKey: 'fecha_val' },
+                    { header: 'Movimiento', dataKey: 'movto' },
+                    { header: 'Concepto', dataKey: 'concepto' },
+                    { header: 'Abono', dataKey: 'abono' },
+                ];
 
-                const rows = data.map(item => {
-                    let row = {};
-                    availableColumns.forEach(col => {
-                        if (visibleColumns[col.key]) {
-                            row[col.key] = item[col.key];
-                        }
-                    });
-                    return row;
-                });
+                const rows = data.map(item => ({
+                    anio: item.anio,
+                    quincena: item.quincena,
+                    fecha_val: item.fecha_val,
+                    movto: item.movto,
+                    concepto: item.concepto,
+                    abono: item.abono,
+                }));
 
                 doc.autoTable({
                     columns,
                     body: rows,
                 });
 
-                doc.save('consulta_detalles_bitacora.pdf');
+                doc.save('movimientos.pdf');
             });
         });
     };
 
     const exportExcel = () => {
         import('xlsx').then((xlsx) => {
-            const exportData = data.map(item => {
-                let filtered = {};
-                Object.keys(visibleColumns).forEach(key => {
-                    if (visibleColumns[key]) {
-                        filtered[key] = item[key];
-                    }
-                });
-                return filtered;
-            });
-
-            const worksheet = xlsx.utils.json_to_sheet(exportData);
+            const worksheet = xlsx.utils.json_to_sheet(data);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
 
-            saveAsExcelFile(excelBuffer, 'consulta_detalles_bitacora');
+            saveAsExcelFile(excelBuffer, 'movimientos');
         });
     };
 
     const saveAsExcelFile = (buffer, fileName) => {
         import('file-saver').then((module) => {
             if (module && module.default) {
-                let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-                let EXCEL_EXTENSION = '.xlsx';
+                const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+                const EXCEL_EXTENSION = '.xlsx';
                 const data = new Blob([buffer], { type: EXCEL_TYPE });
                 module.default.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
             }
@@ -143,7 +114,7 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Cambios a detalle por empleado y quincena</Typography>
+            <Typography variant="h4" className={styles.titulo}>Movimientos</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText
@@ -160,16 +131,27 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
         <ThemeProvider theme={theme}>
             <div className="card">
                 <Toast ref={toast} />
+
                 <Box className={styles.dropForm}>
-                    <Typography variant="h6" className={styles.exportText}>Campos para generar tabla</Typography>
-                    <Button
-                        type="button"
-                        icon={`pi ${collapseOpen ? 'pi-chevron-up' : 'pi-chevron-down'}`}
-                        severity="secondary"
-                        rounded
-                        onClick={() => setCollapseOpen(!collapseOpen)}
-                        data-pr-tooltip="Configurar columnas"
-                    />
+                    <Typography variant="h6" className={styles.exportText}>Filtrar por parámetros</Typography>
+                    <Box className="p-fluid">
+                        <Box className="p-field">
+                            <label htmlFor="anio">Año</label>
+                            <InputText id="anio" value={anio} onChange={(e) => setAnio(e.target.value)} />
+                        </Box>
+                        <Box className="p-field">
+                            <label htmlFor="codigo">Código</label>
+                            <InputText id="codigo" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
+                        </Box>
+                        <Button
+                            type="button"
+                            label="Buscar"
+                            onClick={handleSearch}
+                            icon="pi pi-search"
+                            severity="primary"
+                            rounded
+                        />
+                    </Box>
                 </Box>
 
                 <Toolbar className="mb-4" right={() => (
@@ -178,7 +160,7 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                             type="button"
                             icon="pi pi-file"
                             rounded
-                            onClick={() => exportCSV()}
+                            onClick={exportCSV}
                             data-pr-tooltip="CSV"
                         />
                         <Button
@@ -186,7 +168,7 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                             icon="pi pi-file-excel"
                             severity="success"
                             rounded
-                            onClick={() => exportExcel()}
+                            onClick={exportExcel}
                             data-pr-tooltip="XLS"
                         />
                         <Button
@@ -194,20 +176,11 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                             icon="pi pi-file-pdf"
                             severity="warning"
                             rounded
-                            onClick={() => exportPdf()}
+                            onClick={exportPdf}
                             data-pr-tooltip="PDF"
                         />
                     </div>
                 )} />
-
-                <Collapse in={collapseOpen}>
-                    <Box className="p-3">
-                        <ColumnSelector
-                            availableColumns={availableColumns}
-                            onSelectionChange={handleColumnSelectionChange}
-                        />
-                    </Box>
-                </Collapse>
 
                 {isLoading ? (
                     <ProgressBar mode="indeterminate" style={{ height: '6px' }} />
@@ -224,18 +197,12 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                             responsiveLayout="scroll"
                             className="p-datatable-sm p-datatable-gridlines"
                         >
-                            {availableColumns.map(
-                                (column) =>
-                                    visibleColumns[column.key] && (
-                                        <Column
-                                            key={column.key}
-                                            field={column.key}
-                                            header={column.label}
-                                            sortable
-                                            style={{ minWidth: '150px' }}
-                                        />
-                                    )
-                            )}
+                            <Column field="anio" header="Año" sortable style={{ minWidth: '150px' }} />
+                            <Column field="quincena" header="Quincena" sortable style={{ minWidth: '150px' }} />
+                            <Column field="fecha_val" header="Fecha Valor" sortable style={{ minWidth: '150px' }} />
+                            <Column field="movto" header="Movimiento" sortable style={{ minWidth: '150px' }} />
+                            <Column field="concepto" header="Concepto" sortable style={{ minWidth: '150px' }} />
+                            <Column field="abono" header="Abono" sortable style={{ minWidth: '150px' }} />
                         </DataTable>
                     )
                 )}

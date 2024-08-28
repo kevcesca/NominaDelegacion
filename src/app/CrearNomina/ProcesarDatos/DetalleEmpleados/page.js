@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Button, Alert } from '@mui/material';
 import { useSearchParams } from 'next/navigation'; // Para obtener parámetros de la URL
 import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
@@ -10,8 +11,11 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './page.module.css';
 import API_BASE_URL from '../../../%Config/apiConfig';
+import { useRouter } from 'next/navigation';
 
 export default function DetalleEmpleados() {
+    const router = useRouter();
+
     const searchParams = useSearchParams();
     const anio = searchParams.get('anio');
     const quincena = searchParams.get('quincena');
@@ -51,7 +55,10 @@ export default function DetalleEmpleados() {
                 <p>Cargando...</p>
             ) : (
                 <div className={`card ${styles.card}`}>
-                <h2 className={styles.header}>DETALLE DE EMPLEADOS (QNA {quincena}/{anio})</h2>
+                    <Alert severity="info" className={styles.alert} sx={{ margin: '2rem' }}>
+                        Aquí puedes ver a detalle el resúmen de nómina desglosado por empleados
+                    </Alert>
+                    <h2 className={styles.header}>DETALLE DE EMPLEADOS (QNA {quincena}/{anio})</h2>
                     <DataTable value={empleados} paginator rows={10} className="p-datatable-sm">
                         <Column field="ANIO" header="AÑO" sortable></Column>
                         <Column field="QUINCENA" header="QUINCENA" sortable></Column>
@@ -67,6 +74,16 @@ export default function DetalleEmpleados() {
                     </DataTable>
                 </div>
             )}
+
+
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => router.back()} // Regresa a la página anterior
+                className={styles.backButton}
+            >
+                Regresar
+            </Button>
         </main>
     );
 }

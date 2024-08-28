@@ -2,18 +2,24 @@
 import React, { useState } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
-import { Button, Box, Select, MenuItem, Typography } from '@mui/material';
+import { Button, Box, Select, MenuItem, Typography, Alert } from '@mui/material';
 import TablaComparacionCampos from '../%Components/TablasCambios/TablaComparacionCampos';
 import TablaConsultaBitacora from '../%Components/TablasCambios/TablaConsultaBitacora';
-import TablaConsultaDetallesBitacora from '../%Components/TablasCambios/TablaConsultaDetallesBitacora'; // Importa la nueva tabla
+import TablaConsultaDetallesBitacora from '../%Components/TablasCambios/TablaConsultaDetallesBitacora';
+import TablaBitacoraEmpleados from '../%Components/TablasCambios/TablaBitacoraEmpleados';
 import { ThemeProvider } from '@mui/material';
 import theme from '../$tema/theme';
+import { useRouter } from 'next/navigation';
 
 export default function Validacion() {
+
+    // Hook para el router con el  App Router
+    const router = useRouter();
     // Estados para los valores seleccionados en las listas desplegables
     const [anio, setAnio] = useState('2024');
     const [quincena, setQuincena] = useState('01');
     const [tipoNomina, setTipoNomina] = useState('BASE');
+    const [tablaSeleccionada, setTablaSeleccionada] = useState('comparacion'); // Estado para la tabla seleccionada
 
     const quincenas = [
         { label: '1ra ene', value: '01' },
@@ -48,12 +54,24 @@ export default function Validacion() {
         { label: 'Extraordinarios', value: 'EXTRAORDINARIOS' },
     ];
 
+    const tablas = [
+        { label: 'Comparación de Campos', value: 'comparacion' },
+        { label: 'Consulta de Bitácora', value: 'bitacora' },
+        { label: 'Consulta de Detalles de Bitácora', value: 'detallesBitacora' },
+        { label: 'Bitácora de Empleados', value: 'bitacoraEmpleados' },
+    ];
+
     return (
         <ThemeProvider theme={theme}>
             <main className={styles.main}>
                 <h1 className={styles.h1}>Validación de registros base vs post base y consulta de bitácora</h1>
 
-                {/* Drop-down lists para Año, Quincena y Tipo de Nómina */}
+                {/* Mensaje explicativo para el usuario */}
+                <Alert severity="info" className={styles.alert}>
+                    Esta es la ventana para visualizar los cambios en comparación con la nómina anterior. Aquí podrás ver las diferencias por quincena, tipo de nómina y detalle por empleado.
+                </Alert>
+
+                {/* Drop-down lists para Año, Quincena, Tipo de Nómina y Tabla a Mostrar */}
                 <Box className={styles.selectorContainer}>
                     <Select value={anio} onChange={(e) => setAnio(e.target.value)} variant="outlined">
                         {[...Array(21).keys()].map(n => (
@@ -78,46 +96,64 @@ export default function Validacion() {
                     </Select>
                 </Box>
 
-                {/* Tabla de Comparación de Campos */}
-                <div className={styles.tableContainer}>
-                    <Typography variant="h5" className={styles.tableHeader}>Comparación de Campos</Typography>
-                    <TablaComparacionCampos anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
-                </div>
+                <Box className={styles.selectorContainer}>
+                    <p>Selecciona la tabla que quieras generar:</p>
+                    <Select className={styles.tableSelector} value={tablaSeleccionada} onChange={(e) => setTablaSeleccionada(e.target.value)} variant="outlined">
+                        {tablas.map((tabla, index) => (
+                            <MenuItem key={index} value={tabla.value} >
+                                {tabla.label}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </Box>
 
-                {/* Tabla de Consulta de Bitácora */}
-                <div className={styles.tableContainer}>
-                    <Typography variant="h5" className={styles.tableHeader}>Consulta de Bitácora</Typography>
-                    <TablaConsultaBitacora anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
-                </div>
-
-                {/* Tabla de Consulta de Detalles de Bitácora */}
-                <div className={styles.tableContainer}>
-                    <Typography variant="h5" className={styles.tableHeader}>Consulta de Detalles de Bitácora</Typography>
-                    <TablaConsultaDetallesBitacora anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
-                </div>
-
-                {/* Leyenda de Colores */}
-                <div className={styles.legend}>
-                    <div className={styles.legendItem}>
-                        <span className={`${styles.legendColor} ${styles.noCoinciden}`}></span>
-                        No coinciden los valores de líquido VS post
+                {/* Renderizado condicional de las tablas según la selección */}
+                {tablaSeleccionada === 'comparacion' && (
+                    <div className={styles.tableContainer}>
+                        <TablaComparacionCampos anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
+                        <hr />
                     </div>
-                    <div className={styles.legendItem}>
-                        <span className={`${styles.legendColor} ${styles.cambioCuenta}`}></span>
-                        Cambió el número de cuenta
-                    </div>
-                    <div className={styles.legendItem}>
-                        <span className={`${styles.legendColor} ${styles.incompleto}`}></span>
-                        No se encuentran los registros completos
-                    </div>
-                </div>
+                )}
 
-                {/* Botón para Procesar Datos */}
-                <Link href={`/CrearNomina/ProcesarDatos`} passHref>
-                    <Button variant="contained" color="primary" className={styles.exportButton}>
-                        Validar datos
+                {tablaSeleccionada === 'bitacora' && (
+                    <div className={styles.tableContainer}>
+                        <TablaConsultaBitacora anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
+                        <hr />
+                    </div>
+                )}
+
+                {tablaSeleccionada === 'detallesBitacora' && (
+                    <div className={styles.tableContainer}>
+                        <TablaConsultaDetallesBitacora anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
+                        <hr />
+                    </div>
+                )}
+
+                {tablaSeleccionada === 'bitacoraEmpleados' && (
+                    <div className={styles.tableContainer}>
+                        <TablaBitacoraEmpleados anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
+                        <hr />
+                    </div>
+                )}
+
+                <div className={styles.buttonContainer}>
+                    {/* Botón para Procesar Datos */}
+                    <Link href={`/CrearNomina/ProcesarDatos`} passHref>
+                        <Button variant="contained" color="primary" className={styles.exportButton}>
+                            Resumen de Nómina
+                        </Button>
+                    </Link>
+                    {/* Botón para regresar a la página anterior */}
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => router.back()} // Regresa a la página anterior
+                        className={styles.backButton}
+                    >
+                        Regresar
                     </Button>
-                </Link>
+                </div>
+
             </main>
         </ThemeProvider>
     );

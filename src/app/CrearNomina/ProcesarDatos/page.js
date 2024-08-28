@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ThemeProvider, Button, Box, Typography, FormControlLabel, Switch, Select, MenuItem } from '@mui/material';
+import { ThemeProvider, Button, Box, Typography, FormControlLabel, Switch, Select, MenuItem, Alert } from '@mui/material';
 import styles from './page.module.css';
 import theme from '../../$tema/theme';
 import ChequesResumen from '../../%Components/TablasComparativasNomina/ChequesResumen';
@@ -160,6 +160,10 @@ const CargarDatos = () => {
             <main className={styles.main}>
                 <h1 className={styles.h1}>Resumen de Nómina</h1>
 
+                <Alert severity="info" className={styles.alert} sx={{margin: '2rem'}}>
+                    Aquí podrás ver los resumenes nómina para comprobar que sean correctos
+                </Alert>
+
                 {/* Dropdowns para seleccionar quincena y año */}
                 <Box className={styles.selectorContainer}>
                     <Select
@@ -189,6 +193,10 @@ const CargarDatos = () => {
                     </Select>
                 </Box>
 
+                <Box className={styles.buttonContainer}>
+                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportExcel}>Exportar resumen a Excel</Button>
+                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportPDF}>Exportar resumen a PDF</Button>
+                </Box>
                 <div className={styles.grid}>
                     <div className={styles.gridItem1}>
                         <DepositoResumen resumenData={depositoData} anio={anio} quincena={quincena} />
@@ -222,11 +230,15 @@ const CargarDatos = () => {
                 </div>
 
                 <Box className={styles.buttonContainer}>
-                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportExcel}>Exportar resumen a Excel</Button>
-                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportPDF}>Exportar resumen a PDF</Button>
-                </Box>
-
-                <Box className={styles.buttonContainer}>
+                    {/* Botón para regresar a la página anterior */}
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => router.back()} // Regresa a la página anterior
+                        className={styles.backButton}
+                    >
+                        Regresar
+                    </Button>
                     <Button
                         className={styles.botonesExportar}
                         variant="contained"

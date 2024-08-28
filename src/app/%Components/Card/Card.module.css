@@ -1,0 +1,18 @@
+.image{
+    width: 200px;
+    height: auto;
+    display: none;
+}
+
+.card{
+    display: flex;
+    flex-direction: row;
+    margin: 1rem;
+    width: 35vw;
+}
+
+.button{
+    color: white !important;
+    background-color: #9f2241 !important;
+    margin-top: 3rem !important;
+}

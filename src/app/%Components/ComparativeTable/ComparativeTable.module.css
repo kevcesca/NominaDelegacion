@@ -33,3 +33,9 @@
     text-align: center;
     margin: 0;
 }
+
+.button{
+    color: white;
+    background-color: #9f2241;
+    margin-top: 2rem;
+}

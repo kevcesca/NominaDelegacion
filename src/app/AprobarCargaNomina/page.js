@@ -2,14 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { ThemeProvider, Box, Typography, Select, MenuItem } from '@mui/material';
+import { ThemeProvider, Box, Typography, Select, MenuItem, Button, Alert } from '@mui/material';
 import styles from './page.module.css';
 import theme from '../$tema/theme';
 import ComparativaTable from '../%Components/ComparativeTable/ComparativeTable';
 import ComparativaTable2 from '../%Components/ComparativeTable/ComparativeTable2';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+
 
 const AprobarCargaNomina = () => {
+
+    const router = useRouter();
     const { data: session } = useSession();
     const searchParams = useSearchParams();
     const anioParam = searchParams.get('anio');
@@ -78,10 +81,9 @@ const AprobarCargaNomina = () => {
                 </Box>
 
                 {/* Texto de ayuda */}
-                <Typography variant="h5" color="textSecondary" className={styles.helpText}>
+                <Alert severity="info" className={styles.alert} sx={{ margin: '1rem' }}>
                     Estás viendo únicamente los archivos que requieren aprobación. La aprobación se completará cuando se haya hecho la doble validación.
-                </Typography>
-
+                </Alert>
                 {/* Renderiza la tabla de aprobación 1 solo si el usuario tiene el rol 'Admin' */}
                 {session && session.roles && session.roles.includes('Admin') && (
                     <Box mt={4}>
@@ -95,6 +97,16 @@ const AprobarCargaNomina = () => {
                         <ComparativaTable2 userRevision={session.user.name} quincena={quincena} anio={anio} />
                     </Box>
                 )}
+
+                {/* Botón para regresar a la página anterior */}
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => router.back()} // Regresa a la página anterior
+                    className={styles.backButton}
+                >
+                    Regresar
+                </Button>
             </main>
         </ThemeProvider>
     );

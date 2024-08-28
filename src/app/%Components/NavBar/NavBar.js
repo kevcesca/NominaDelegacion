@@ -13,6 +13,11 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import MoneyIcon from '@mui/icons-material/Money';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import ListIcon from '@mui/icons-material/List';
+import ViewListIcon from '@mui/icons-material/ViewList';
 
 export default function NavBar() {
     const [collapsed, setCollapsed] = React.useState(false);
@@ -56,24 +61,27 @@ export default function NavBar() {
                     </SubMenu>
                     <SubMenu label="Proceso de Nómina" icon={<SecurityIcon />}>
                         <Link className={styles.tWhite} href="/CrearNomina" passHref>
-                            <MenuItem icon={<PeopleIcon />} className={styles.bgblack}>Cargar Nómina</MenuItem>
+                            <MenuItem icon={<UploadFileIcon />} className={styles.bgblack}>Cargar Nómina</MenuItem>
+                        </Link>
+                        <Link className={styles.tWhite} href="/AprobarCargaNomina" passHref>
+                            <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack}>Aprobar nómina</MenuItem>
+                        </Link>
+                        <Link className={styles.tWhite} href="/CrearNomina/ProcesarDatos" passHref>
+                            <MenuItem icon={<AssessmentIcon />} className={styles.bgblack}>Resumen de Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/Validacion" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Cambios en la Nómina</MenuItem>
+                            <MenuItem icon={<EditIcon />} className={styles.bgblack}>Cambios en la Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/SubirEvidencia" passHref>
-                            <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Subir Evidencia</MenuItem>
+                            <MenuItem icon={<UploadFileIcon />} className={styles.bgblack}>Subir Evidencia</MenuItem>
                         </Link>
                     </SubMenu>
                     <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />} >
-                        {/* <Link className={styles.tWhite} href="/Configuracion/Alertas" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Alertas</MenuItem>
-                        </Link> */}
                         <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Conceptos</MenuItem>
+                            <MenuItem icon={<ListIcon />} className={styles.bgblack}>Conceptos</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/Configuracion/Universos" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Universos</MenuItem>
+                            <MenuItem icon={<ViewListIcon />} className={styles.bgblack}>Universos</MenuItem>
                         </Link>
                     </SubMenu>
                     <SubMenu label="Reportes" icon={<AssessmentIcon />}>

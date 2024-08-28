@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Checkbox, FormControlLabel, FormGroup, Button, Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import styles from './ColumnSelector.module.css'
+import styles from './ColumnSelector.module.css';
 
 const ColumnSelector = ({ availableColumns, onSelectionChange }) => {
-    const theme = useTheme(); // Accede al tema configurado
+    const theme = useTheme();
     const initialSelection = availableColumns.reduce((acc, column) => {
         acc[column.key] = column.defaultSelected || false;
         return acc;
@@ -37,7 +37,15 @@ const ColumnSelector = ({ availableColumns, onSelectionChange }) => {
             <Typography variant="h6" color="primary">
                 Campos para generar tabla
             </Typography>
-            <FormGroup row sx={{ color: theme.palette.text.primary }}>
+            {/* Usamos CSS Grid en lugar de Flexbox */}
+            <FormGroup 
+                sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)', // 4 columnas de igual ancho
+                    gap: '1rem', // Espacio entre cada checkbox
+                    color: theme.palette.text.primary,
+                }}
+            >
                 {availableColumns.map((column) => (
                     <FormControlLabel
                         key={column.key}
@@ -62,6 +70,7 @@ const ColumnSelector = ({ availableColumns, onSelectionChange }) => {
                 variant="contained"
                 onClick={handleSubmit}
                 sx={{
+                    marginTop: '1rem',
                     backgroundColor: theme.palette.primary.main,
                     '&:hover': {
                         backgroundColor: theme.palette.primary.dark,

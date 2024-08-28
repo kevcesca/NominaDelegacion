@@ -35,3 +35,9 @@
     text-align: center;
     margin: 0;
 }
+
+.backButton{
+    color: white !important;
+    background-color: #bc955c !important;
+    margin-top: 3rem !important;
+}
