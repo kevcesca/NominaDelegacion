@@ -83,7 +83,22 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             fetchArchivosData(); // Refrescar la tabla después de subir el archivo
         } catch (error) {
             console.error('Error uploading file', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+
+            // Captura detallada del error
+            const errorCode = error.response?.status || 'Desconocido';
+            const errorDetails = error.response?.data || 'Error desconocido al subir el archivo.';
+
+            const errorMessage = `Error al subir archivo. Código de error: ${errorCode}. Detalle: ${errorDetails}`;
+
+            // Log completo del error para depuración
+            console.log('Full error response:', error.response);
+
+            toast.current.show({ 
+                severity: 'error', 
+                summary: 'Error al Subir Archivo', 
+                detail: errorMessage, 
+                life: 5000 
+            });
         }
     };
 

@@ -1,3 +1,4 @@
+// /consultaMovimientosBitacora
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -12,12 +13,12 @@ import { Collapse, Box, Typography, Grid, ThemeProvider } from '@mui/material';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
-import ColumnSelector from '../../%Components/ColumnSelector/ColumnSelector';
+import ColumnSelector from '../../%Components/ColumnSelector/ColumnSelector'; // Asegúrate de tener este componente
 import API_BASE_URL from '../../%Config/apiConfig';
-import theme from '../../$tema/theme';
 import styles from '../page.module.css';
+import theme from '../../$tema/theme';
 
-export default function TablaConsultaMovimientos() {
+export default function TablaConsultaMovimientosBitacora() {
     const [data, setData] = useState([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -25,23 +26,28 @@ export default function TablaConsultaMovimientos() {
     const [showTable, setShowTable] = useState(false);
     const [collapseOpen, setCollapseOpen] = useState(false);
     const [anio, setAnio] = useState('2024');
-    const [codigo, setCodigo] = useState('548');
+    const [quincenas, setQuincenas] = useState(['02', '04', '06']);
+    const [campo, setCampo] = useState('curp');
     const dt = useRef(null);
     const toast = useRef(null);
 
     const availableColumns = [
         { key: 'anio', label: 'Año', defaultSelected: true },
         { key: 'quincena', label: 'Quincena', defaultSelected: true },
-        { key: 'fecha_val', label: 'Fecha de Valor', defaultSelected: true },
-        { key: 'movto', label: 'Movimiento', defaultSelected: true },
-        { key: 'concepto', label: 'Concepto', defaultSelected: true },
-        { key: 'abono', label: 'Abono', defaultSelected: true },
+        { key: 'nomina', label: 'Nómina', defaultSelected: true },
+        { key: 'campo', label: 'Campo', defaultSelected: true },
+        { key: 'nombre', label: 'Nombre', defaultSelected: true },
+        { key: 'apellido_1', label: 'Apellido Paterno', defaultSelected: true },
+        { key: 'apellido_2', label: 'Apellido Materno', defaultSelected: true },
+        { key: 'valor_inicial', label: 'Valor Inicial', defaultSelected: true },
+        { key: 'valor_final', label: 'Valor Final', defaultSelected: true }
     ];
 
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch(`${API_BASE_URL}/consultaMovimientos?anio=${anio}&codigo=${codigo}`);
+            const queryParams = quincenas.map(q => `quincena=${q}`).join('&');
+            const response = await fetch(`${API_BASE_URL}/consultaMovimientosBitacora?anio=${anio}&${queryParams}&campo=${campo}`);
             if (!response.ok) {
                 throw new Error('Error al obtener los datos: ' + response.statusText);
             }
@@ -58,7 +64,7 @@ export default function TablaConsultaMovimientos() {
 
     useEffect(() => {
         fetchData();
-    }, [anio, codigo]);
+    }, [anio, quincenas, campo]);
 
     const handleColumnSelectionChange = (selectedColumns) => {
         setVisibleColumns(selectedColumns);
@@ -100,7 +106,7 @@ export default function TablaConsultaMovimientos() {
                     columns,
                     body: rows,
                 });
-                doc.save('consulta_movimientos.pdf');
+                doc.save('consulta_movimientos_bitacora.pdf');
             });
         });
     };
@@ -119,7 +125,7 @@ export default function TablaConsultaMovimientos() {
             const worksheet = xlsx.utils.json_to_sheet(exportData);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-            saveAsExcelFile(excelBuffer, 'consulta_movimientos');
+            saveAsExcelFile(excelBuffer, 'consulta_movimientos_bitacora');
         });
     };
 
@@ -136,7 +142,7 @@ export default function TablaConsultaMovimientos() {
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Consulta de Movimientos</Typography>
+            <Typography variant="h4" className={styles.titulo}>Consulta de Movimientos de Bitácora</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText
@@ -162,7 +168,7 @@ export default function TablaConsultaMovimientos() {
                         }}
                     >
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12} sm={4}>
                                 <InputText
                                     value={anio}
                                     onChange={(e) => setAnio(e.target.value)}
@@ -170,11 +176,19 @@ export default function TablaConsultaMovimientos() {
                                     style={{ width: '80%', padding: "1rem", margin: "2rem" }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12} sm={4}>
                                 <InputText
-                                    value={codigo}
-                                    onChange={(e) => setCodigo(e.target.value)}
-                                    placeholder="Código"
+                                    value={quincenas.join(', ')}
+                                    onChange={(e) => setQuincenas(e.target.value.split(',').map(q => q.trim()))}
+                                    placeholder="Quincenas (separadas por coma)"
+                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                <InputText
+                                    value={campo}
+                                    onChange={(e) => setCampo(e.target.value)}
+                                    placeholder="Campo"
                                     style={{ width: '80%', padding: "1rem", margin: "2rem" }}
                                 />
                             </Grid>

@@ -1,3 +1,4 @@
+// /consultaCLCMovimientoConcepto
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -18,7 +19,7 @@ import API_BASE_URL from '../../%Config/apiConfig';
 import styles from '../page.module.css';
 import theme from '../../$tema/theme';
 
-export default function TablaConsultaCLCVaraiasQuincenas() {
+export default function TablaConsultaCLCMovimientoConcepto() {
     const [data, setData] = useState([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -26,25 +27,23 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
     const [showTable, setShowTable] = useState(false);
     const [collapseOpen, setCollapseOpen] = useState(false);
     const [anio, setAnio] = useState('2024');
-    const [quincenas, setQuincenas] = useState(['01', '02', '03', '04']);
+    const [codigo, setCodigo] = useState('548');
     const dt = useRef(null);
     const toast = useRef(null);
 
     const availableColumns = [
-        { key: 'ANIO', label: 'Año', defaultSelected: true },
-        { key: 'QUINCENA', label: 'Quincena', defaultSelected: true },
-        { key: 'nomina', label: 'Nomina', defaultSelected: true },
-        { key: 'desc_extraor', label: 'Descripción Extraordinaria', defaultSelected: true },
-        { key: 'liquido', label: 'Liquido', defaultSelected: true },
+        { key: 'anio', label: 'Año', defaultSelected: true },
+        { key: 'quincena', label: 'Quincena', defaultSelected: true },
+        { key: 'fecha_val', label: 'Fecha de Valor', defaultSelected: true },
+        { key: 'movto', label: 'Movimiento', defaultSelected: true },
         { key: 'concepto', label: 'Concepto', defaultSelected: true },
-        { key: 'lpad', label: 'LPAD', defaultSelected: true }
+        { key: 'abono', label: 'Abono', defaultSelected: true },
     ];
 
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const queryParams = quincenas.map(q => `quincena=${q}`).join('&');
-            const response = await fetch(`${API_BASE_URL}/consultaCLCVaraiasQuincenas?anio=${anio}&${queryParams}`);
+            const response = await fetch(`${API_BASE_URL}/consultaCLCMovimientoConcepto?anio=${anio}&codigo=${codigo}`);
             if (!response.ok) {
                 throw new Error('Error al obtener los datos: ' + response.statusText);
             }
@@ -60,7 +59,7 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
 
     useEffect(() => {
         fetchData();
-    }, [anio, quincenas]);
+    }, [anio, codigo]);
 
     const handleColumnSelectionChange = (selectedColumns) => {
         setVisibleColumns(selectedColumns);
@@ -102,7 +101,7 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
                     columns,
                     body: rows,
                 });
-                doc.save('consulta_clc_varias_quincenas.pdf');
+                doc.save('consulta_clc_movimiento_concepto.pdf');
             });
         });
     };
@@ -121,7 +120,7 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
             const worksheet = xlsx.utils.json_to_sheet(exportData);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-            saveAsExcelFile(excelBuffer, 'consulta_clc_varias_quincenas');
+            saveAsExcelFile(excelBuffer, 'consulta_clc_movimiento_concepto');
         });
     };
 
@@ -138,7 +137,7 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Consulta de Datos por Varias Quincenas</Typography>
+            <Typography variant="h4" className={styles.titulo}>Consulta de Movimiento de Concepto</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText
@@ -154,7 +153,7 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
     return (
         <ThemeProvider theme={theme}>
             <div className={styles.main}>
-            <h1 className={styles.h1}>HISTÓRICO DE MOVIMIENTOS DE PERCEPCION DE PERSONAL</h1>
+            <h1 className={styles.h1}>REPORTE DE NÓMINA HISTÓRICO POR MONTO, TIPO DE NÓMINA Y EJERCIDO</h1>
                 <Toast ref={toast} />
                 <Box className={styles.dropForm}>
                     <Typography variant="h6" className={styles.exportText}>Parametros de consulta</Typography>
@@ -175,9 +174,9 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <InputText
-                                    value={quincenas.join(', ')}
-                                    onChange={(e) => setQuincenas(e.target.value.split(',').map(q => q.trim()))}
-                                    placeholder="Quincenas (separadas por coma)"
+                                    value={codigo}
+                                    onChange={(e) => setCodigo(e.target.value)}
+                                    placeholder="Código"
                                     style={{ width: '80%', padding:"1rem", margin:"2rem"}}
                                 />
                             </Grid>
@@ -185,8 +184,8 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
                         <Button
                             type="submit"
                             label="Consultar"
-                            className={styles.mainButton}
-                            style={{ marginTop: '1rem' }}
+                            className="p-button-primary"
+                            style={{ marginTop: '1rem', display:"none" }}
                         />
                     </form>
                     <Button
@@ -245,14 +244,23 @@ export default function TablaConsultaCLCVaraiasQuincenas() {
                             value={data}
                             paginator
                             rows={10}
+                            rowsPerPageOptions={[5, 10, 25]}
                             globalFilter={globalFilter}
                             header={header}
-                            emptyMessage="No se encontraron registros."
                             responsiveLayout="scroll"
+                            className="p-datatable-sm p-datatable-gridlines"
                         >
-                            {availableColumns.map((col) => visibleColumns[col.key] && (
-                                <Column key={col.key} field={col.key} header={col.label} />
-                            ))}
+                            {availableColumns.map(
+                                (column) =>
+                                    visibleColumns[column.key] && (
+                                        <Column
+                                            key={column.key}
+                                            field={column.key}
+                                            header={column.label}
+                                            sortable
+                                        />
+                                    )
+                            )}
                         </DataTable>
                     )
                 )}

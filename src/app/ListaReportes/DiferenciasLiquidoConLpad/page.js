@@ -1,3 +1,4 @@
+// /consultaCLCVaraiasQuincenas
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -8,7 +9,8 @@ import { ProgressBar } from 'primereact/progressbar';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Toast } from 'primereact/toast';
-import { Collapse, Box, Typography, Grid, ThemeProvider } from '@mui/material';
+import { Collapse } from '@mui/material';
+import { ThemeProvider, Typography, Box, Grid } from '@mui/material';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -17,7 +19,7 @@ import API_BASE_URL from '../../%Config/apiConfig';
 import styles from '../page.module.css';
 import theme from '../../$tema/theme';
 
-export default function TablaConsultaMovimientosBitacora() {
+export default function TablaConsultaCLCVaraiasQuincenas() {
     const [data, setData] = useState([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -25,34 +27,30 @@ export default function TablaConsultaMovimientosBitacora() {
     const [showTable, setShowTable] = useState(false);
     const [collapseOpen, setCollapseOpen] = useState(false);
     const [anio, setAnio] = useState('2024');
-    const [quincenas, setQuincenas] = useState(['02', '04', '06']);
-    const [campo, setCampo] = useState('curp');
+    const [quincenas, setQuincenas] = useState(['01', '02', '03', '04']);
     const dt = useRef(null);
     const toast = useRef(null);
 
     const availableColumns = [
-        { key: 'anio', label: 'Año', defaultSelected: true },
-        { key: 'quincena', label: 'Quincena', defaultSelected: true },
-        { key: 'nomina', label: 'Nómina', defaultSelected: true },
-        { key: 'campo', label: 'Campo', defaultSelected: true },
-        { key: 'nombre', label: 'Nombre', defaultSelected: true },
-        { key: 'apellido_1', label: 'Apellido Paterno', defaultSelected: true },
-        { key: 'apellido_2', label: 'Apellido Materno', defaultSelected: true },
-        { key: 'valor_inicial', label: 'Valor Inicial', defaultSelected: true },
-        { key: 'valor_final', label: 'Valor Final', defaultSelected: true }
+        { key: 'ANIO', label: 'Año', defaultSelected: true },
+        { key: 'QUINCENA', label: 'Quincena', defaultSelected: true },
+        { key: 'nomina', label: 'Nomina', defaultSelected: true },
+        { key: 'desc_extraor', label: 'Descripción Extraordinaria', defaultSelected: true },
+        { key: 'liquido', label: 'Liquido', defaultSelected: true },
+        { key: 'concepto', label: 'Concepto', defaultSelected: true },
+        { key: 'lpad', label: 'LPAD', defaultSelected: true }
     ];
 
     const fetchData = async () => {
         try {
             setIsLoading(true);
             const queryParams = quincenas.map(q => `quincena=${q}`).join('&');
-            const response = await fetch(`${API_BASE_URL}/consultaMovimientosBitacora?anio=${anio}&${queryParams}&campo=${campo}`);
+            const response = await fetch(`${API_BASE_URL}/consultaCLCVaraiasQuincenas?anio=${anio}&${queryParams}`);
             if (!response.ok) {
                 throw new Error('Error al obtener los datos: ' + response.statusText);
             }
             const data = await response.json();
             setData(data);
-            setShowTable(true);
         } catch (error) {
             console.error('Error al obtener los datos:', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar la data.' });
@@ -63,7 +61,7 @@ export default function TablaConsultaMovimientosBitacora() {
 
     useEffect(() => {
         fetchData();
-    }, [anio, quincenas, campo]);
+    }, [anio, quincenas]);
 
     const handleColumnSelectionChange = (selectedColumns) => {
         setVisibleColumns(selectedColumns);
@@ -105,7 +103,7 @@ export default function TablaConsultaMovimientosBitacora() {
                     columns,
                     body: rows,
                 });
-                doc.save('consulta_movimientos_bitacora.pdf');
+                doc.save('consulta_clc_varias_quincenas.pdf');
             });
         });
     };
@@ -124,7 +122,7 @@ export default function TablaConsultaMovimientosBitacora() {
             const worksheet = xlsx.utils.json_to_sheet(exportData);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-            saveAsExcelFile(excelBuffer, 'consulta_movimientos_bitacora');
+            saveAsExcelFile(excelBuffer, 'consulta_clc_varias_quincenas');
         });
     };
 
@@ -141,7 +139,7 @@ export default function TablaConsultaMovimientosBitacora() {
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Consulta de Movimientos de Bitácora</Typography>
+            <Typography variant="h4" className={styles.titulo}>Consulta de Datos por Varias Quincenas</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText
@@ -157,6 +155,7 @@ export default function TablaConsultaMovimientosBitacora() {
     return (
         <ThemeProvider theme={theme}>
             <div className={styles.main}>
+            <h1 className={styles.h1}>HISTÓRICO DE MOVIMIENTOS DE PERCEPCION DE PERSONAL</h1>
                 <Toast ref={toast} />
                 <Box className={styles.dropForm}>
                     <Typography variant="h6" className={styles.exportText}>Parametros de consulta</Typography>
@@ -167,28 +166,20 @@ export default function TablaConsultaMovimientosBitacora() {
                         }}
                     >
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={4}>
+                            <Grid item xs={12} sm={6}>
                                 <InputText
                                     value={anio}
                                     onChange={(e) => setAnio(e.target.value)}
                                     placeholder="Año"
-                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
+                                    style={{ width: '80%', padding:"1rem", margin:"2rem"}}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={4}>
+                            <Grid item xs={12} sm={6}>
                                 <InputText
                                     value={quincenas.join(', ')}
                                     onChange={(e) => setQuincenas(e.target.value.split(',').map(q => q.trim()))}
                                     placeholder="Quincenas (separadas por coma)"
-                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={4}>
-                                <InputText
-                                    value={campo}
-                                    onChange={(e) => setCampo(e.target.value)}
-                                    placeholder="Campo"
-                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
+                                    style={{ width: '80%', padding:"1rem", margin:"2rem"}}
                                 />
                             </Grid>
                         </Grid>

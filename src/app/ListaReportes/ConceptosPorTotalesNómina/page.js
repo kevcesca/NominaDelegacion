@@ -9,7 +9,7 @@ import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Toast } from 'primereact/toast';
 import { Collapse } from '@mui/material';
-import { ThemeProvider, Typography, Box, Grid } from '@mui/material';
+import { ThemeProvider, Typography, Box, Grid, TextField, InputLabel } from '@mui/material';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -18,7 +18,7 @@ import API_BASE_URL from '../../%Config/apiConfig';
 import styles from '../page.module.css';
 import theme from '../../$tema/theme';
 
-export default function TablaConsultaCLCPorEmpleado() {
+export default function TablaCLCQuincenaTotales() {
     const [data, setData] = useState([]);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -26,27 +26,26 @@ export default function TablaConsultaCLCPorEmpleado() {
     const [showTable, setShowTable] = useState(false);
     const [collapseOpen, setCollapseOpen] = useState(false);
     const [anio, setAnio] = useState('2024');
-    const [idEmpleado, setIdEmpleado] = useState('1046058');
+    const [quincenas, setQuincenas] = useState(['01']); // Array de quincenas seleccionadas
     const dt = useRef(null);
     const toast = useRef(null);
 
     const availableColumns = [
-        { key: 'anio', label: 'Año', defaultSelected: true },
-        { key: 'quincena', label: 'Quincena', defaultSelected: true },
-        { key: 'nombre', label: 'Nombre', defaultSelected: true },
-        { key: 'apellido_1', label: 'Primer Apellido', defaultSelected: true },
-        { key: 'apellido_2', label: 'Segundo Apellido', defaultSelected: true },
-        { key: 'nomina', label: 'Nomina', defaultSelected: true },
-        { key: 'desc_extraor', label: 'Descripción Extraordinaria', defaultSelected: true },
-        { key: 'tipopago', label: 'Tipo de Pago', defaultSelected: true },
-        { key: 'liquido', label: 'Liquido', defaultSelected: true },
-        { key: 'fec_pago', label: 'Fecha de Pago', defaultSelected: true }
+        { key: 'ANIO', label: 'Año', defaultSelected: true },
+        { key: 'QUINCENA', label: 'Quincena', defaultSelected: true },
+        { key: 'nomina', label: 'Nómina', defaultSelected: true },
+        { key: 'percepciones', label: 'Percepciones', defaultSelected: true },
+        { key: 'deducciones', label: 'Deducciones', defaultSelected: true },
+        { key: 'liquido', label: 'Líquido', defaultSelected: true },
+        { key: 'EMPLEADOS', label: 'Empleados', defaultSelected: true },
+        { key: 'concepto', label: 'Concepto', defaultSelected: true },
     ];
 
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch(`${API_BASE_URL}/consultaCLCPorEmpleado?anio=${anio}&idEmpleado=${idEmpleado}`);
+            const queryParams = quincenas.map(q => `quincena=${q}`).join('&');
+            const response = await fetch(`${API_BASE_URL}/consultaCLCQuincenaTotales?anio=${anio}&${queryParams}`);
             if (!response.ok) {
                 throw new Error('Error al obtener los datos: ' + response.statusText);
             }
@@ -62,7 +61,7 @@ export default function TablaConsultaCLCPorEmpleado() {
 
     useEffect(() => {
         fetchData();
-    }, [anio, idEmpleado]);
+    }, [anio, quincenas]);
 
     const handleColumnSelectionChange = (selectedColumns) => {
         setVisibleColumns(selectedColumns);
@@ -104,7 +103,7 @@ export default function TablaConsultaCLCPorEmpleado() {
                     columns,
                     body: rows,
                 });
-                doc.save('consulta_clc_por_empleado.pdf');
+                doc.save('consulta_clc_quincena_totales.pdf');
             });
         });
     };
@@ -123,7 +122,7 @@ export default function TablaConsultaCLCPorEmpleado() {
             const worksheet = xlsx.utils.json_to_sheet(exportData);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-            saveAsExcelFile(excelBuffer, 'consulta_clc_por_empleado');
+            saveAsExcelFile(excelBuffer, 'consulta_clc_quincena_totales');
         });
     };
 
@@ -140,7 +139,7 @@ export default function TablaConsultaCLCPorEmpleado() {
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Consulta de Datos por Empleado</Typography>
+            <Typography variant="h4" className={styles.titulo}>Consulta de Totales por Quincena</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText
@@ -156,10 +155,10 @@ export default function TablaConsultaCLCPorEmpleado() {
     return (
         <ThemeProvider theme={theme}>
             <div className={styles.main}>
-            <h1 className={styles.h1}>HISTÓRICO DE MOVIMIENTOS DE PERCEPCION DE PERSONAL POR TIPO DE NÓMINA</h1>
+                <h1 className={styles.h1}>Reporte de Totales por Quincena</h1>
                 <Toast ref={toast} />
                 <Box className={styles.dropForm}>
-                    <Typography variant="h6" className={styles.exportText}>Parametros de consulta</Typography>
+                    <Typography variant="h6" className={styles.exportText}>Parámetros de Consulta</Typography>
                     <form
                         onSubmit={(e) => {
                             e.preventDefault();
@@ -168,19 +167,21 @@ export default function TablaConsultaCLCPorEmpleado() {
                     >
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
-                                <InputText
+                                <TextField
+                                    label="Año"
                                     value={anio}
                                     onChange={(e) => setAnio(e.target.value)}
-                                    placeholder="Año"
-                                    style={{ width: '80%', padding:"1rem", margin:"2rem"}}
+                                    fullWidth
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
+                                <InputLabel htmlFor="quincenas">Quincenas (separadas por comas)</InputLabel>
                                 <InputText
-                                    value={idEmpleado}
-                                    onChange={(e) => setIdEmpleado(e.target.value)}
-                                    placeholder="ID Empleado"
-                                    style={{ width: '80%', padding:"1rem", margin:"2rem"}}
+                                    id="quincenas"
+                                    value={quincenas.join(',')}
+                                    onChange={(e) => setQuincenas(e.target.value.split(','))}
+                                    placeholder="01,02,03"
+                                    style={{ width: '100%' }}
                                 />
                             </Grid>
                         </Grid>
@@ -188,7 +189,7 @@ export default function TablaConsultaCLCPorEmpleado() {
                             type="submit"
                             label="Consultar"
                             className="p-button-primary"
-                            style={{ marginTop: '1rem', display:"none" }}
+                            style={{ marginTop: '1rem' }}
                         />
                     </form>
                     <Button
@@ -247,18 +248,23 @@ export default function TablaConsultaCLCPorEmpleado() {
                             value={data}
                             paginator
                             rows={10}
+                            rowsPerPageOptions={[5, 10, 25]}
                             globalFilter={globalFilter}
                             header={header}
-                            className="p-datatable-customers"
+                            responsiveLayout="scroll"
+                            className="p-datatable-sm p-datatable-gridlines"
                         >
-                            {availableColumns.map(col => visibleColumns[col.key] && (
-                                <Column
-                                    key={col.key}
-                                    field={col.key}
-                                    header={col.label}
-                                    sortable
-                                />
-                            ))}
+                            {availableColumns.map(
+                                (column) =>
+                                    visibleColumns[column.key] && (
+                                        <Column
+                                            key={column.key}
+                                            field={column.key}
+                                            header={column.label}
+                                            sortable
+                                        />
+                                    )
+                            )}
                         </DataTable>
                     )
                 )}

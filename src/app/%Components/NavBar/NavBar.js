@@ -18,9 +18,15 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import ListIcon from '@mui/icons-material/List';
 import ViewListIcon from '@mui/icons-material/ViewList';
+import { useMediaQuery } from '@mui/material';
 
 export default function NavBar() {
-    const [collapsed, setCollapsed] = React.useState(false);
+    const isSmallScreen = useMediaQuery('(max-width: 600px)');
+    const [collapsed, setCollapsed] = React.useState(isSmallScreen);
+
+    React.useEffect(() => {
+        setCollapsed(isSmallScreen);
+    }, [isSmallScreen]);
 
     return (
         <div className={styles.NavbarContainer}>
@@ -29,12 +35,12 @@ export default function NavBar() {
                 transitionDuration={1000}
                 rootStyles={{
                     [`.${sidebarClasses.container}`]: {
-                        backgroundColor: 'transparent',
-                        border: '2px solid transparent', // Esto se puede ajustar según sea necesario
+                        backgroundColor: '#f4f4f47a',
+                        border: '2px solid transparent',
                     },
                     [`.${sidebarClasses.MenuItem}`]: {
                         backgroundColor: 'black',
-                        color: 'black'
+                        color: 'black',
                     },
                 }}
             >
@@ -51,7 +57,7 @@ export default function NavBar() {
                     <button className={styles.botonNavbar} onClick={() => setCollapsed(!collapsed)}>
                         <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
                     </button>
-                    <SubMenu label="Calendario de nómina" icon={<CalendarTodayIcon />} >
+                    <SubMenu label="Calendario de nómina" icon={<CalendarTodayIcon />}>
                         <Link className={styles.tWhite} href="/Calendario" passHref>
                             <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Editar</MenuItem>
                         </Link>
@@ -76,7 +82,7 @@ export default function NavBar() {
                             <MenuItem icon={<UploadFileIcon />} className={styles.bgblack}>Subir Evidencia</MenuItem>
                         </Link>
                     </SubMenu>
-                    <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />} >
+                    <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />}>
                         <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
                             <MenuItem icon={<ListIcon />} className={styles.bgblack}>Conceptos</MenuItem>
                         </Link>
