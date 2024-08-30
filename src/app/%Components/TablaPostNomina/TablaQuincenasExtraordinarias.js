@@ -44,14 +44,18 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                 },
             });
 
-            const data = response.data.map(item => ({
-                idx: item.idx,
-                nombreArchivo: item.nombre_archivo || 'Vacío',
-                tipoNomina: 'Extraordinarios',
-                archivoNombre: item.nombre_archivo,
-                tipoExtraordinario: item.extra_desc || '', // Utilizando `extra_desc`
-                userCarga: item.user_carga || 'Desconocido' // Añadiendo el usuario que cargó el archivo
-            }));
+            const data = response.data
+                .filter(item => item.nombre_nomina === 'Extraordinarios' && 
+                    item.extra_desc && item.extra_desc.split(',').some(tipo => tiposExtraordinarios.includes(tipo.trim())))
+                .map(item => ({
+                    idx: item.idx,
+                    nombreArchivo: item.nombre_archivo || 'Vacío',
+                    tipoNomina: 'Extraordinarios',
+                    archivoNombre: item.nombre_archivo,
+                    tipoExtraordinario: item.extra_desc || '', // Utilizando `extra_desc`
+                    userCarga: item.user_carga || 'Desconocido' // Añadiendo el usuario que cargó el archivo
+                }));
+
             setExtraordinarios(data);
         } catch (error) {
             console.error('Error fetching extraordinarios data', error);
