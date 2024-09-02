@@ -30,3 +30,10 @@
 .footer {
     /* Ajustes opcionales para el footer */
 }
+
+.loaderContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}

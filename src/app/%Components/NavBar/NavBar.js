@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Sidebar, Menu, MenuItem, SubMenu, sidebarClasses } from 'react-pro-sidebar';
+import CircularProgress from '@mui/material/CircularProgress';
 import styles from './NavBar.module.css';
 import SettingsIcon from '@mui/icons-material/Settings';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -20,16 +21,44 @@ import ListIcon from '@mui/icons-material/List';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { useMediaQuery } from '@mui/material';
 
-export default function NavBar() {
+export default function NavBar({ children }) {
     const isSmallScreen = useMediaQuery('(max-width: 600px)');
-    const [collapsed, setCollapsed] = React.useState(isSmallScreen);
+    const [collapsed, setCollapsed] = useState(isSmallScreen);
+    const [loading, setLoading] = useState(true);  // Estado de carga
 
-    React.useEffect(() => {
+    useEffect(() => {
         setCollapsed(isSmallScreen);
     }, [isSmallScreen]);
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                setCollapsed(true);  // Contraer la barra de navegación si se hace clic fuera
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleLinkClick = () => {
+        setCollapsed(true);  // Contraer la barra de navegación al hacer clic en un enlace
+    };
+
+    useEffect(() => {
+        // Simular carga de contenido
+        setTimeout(() => {
+            setLoading(false);
+        }, 2000);  // Simulación de carga de 2 segundos
+    }, []);
+
+    const sidebarRef = React.useRef(null);
+
     return (
-        <div className={styles.NavbarContainer}>
+        <div className={styles.NavbarContainer} ref={sidebarRef}>
             <Sidebar
                 collapsed={collapsed}
                 transitionDuration={1000}
@@ -59,45 +88,45 @@ export default function NavBar() {
                     </button>
                     <SubMenu label="Calendario de nómina" icon={<CalendarTodayIcon />}>
                         <Link className={styles.tWhite} href="/Calendario" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack}>Editar</MenuItem>
+                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack} onClick={handleLinkClick}>Editar</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/Calendario/Exportar" passHref>
-                            <MenuItem icon={<CloudIcon />} className={styles.bgblack}>Exportar</MenuItem>
+                            <MenuItem icon={<CloudIcon />} className={styles.bgblack} onClick={handleLinkClick}>Exportar</MenuItem>
                         </Link>
-                    </SubMenu> 
+                    </SubMenu>
                     <SubMenu label="Proceso de Nómina" icon={<SecurityIcon />}>
                         <Link className={styles.tWhite} href="/CrearNomina" passHref>
-                            <MenuItem icon={<UploadFileIcon />} className={styles.bgblack}>Cargar Nómina</MenuItem>
+                            <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cargar Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/AprobarCargaNomina" passHref>
-                            <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack}>Aprobar nómina</MenuItem>
+                            <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Aprobar nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/CrearNomina/ProcesarDatos" passHref>
-                            <MenuItem icon={<AssessmentIcon />} className={styles.bgblack}>Resumen de Nómina</MenuItem>
+                            <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Resumen de Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/Validacion" passHref>
-                            <MenuItem icon={<EditIcon />} className={styles.bgblack}>Cambios en la Nómina</MenuItem>
+                            <MenuItem icon={<EditIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cambios en la Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/SubirEvidencia" passHref>
-                            <MenuItem icon={<UploadFileIcon />} className={styles.bgblack}>Subir Evidencia</MenuItem>
+                            <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Subir Evidencia</MenuItem>
                         </Link>
                     </SubMenu>
                     <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />}>
                         <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
-                            <MenuItem icon={<ListIcon />} className={styles.bgblack}>Conceptos</MenuItem>
+                            <MenuItem icon={<ListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Conceptos</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/Configuracion/Universos" passHref>
-                            <MenuItem icon={<ViewListIcon />} className={styles.bgblack}>Universos</MenuItem>
+                            <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Universos</MenuItem>
                         </Link>
                     </SubMenu>
                     <SubMenu label="Reportes" icon={<AssessmentIcon />}>
                         <Link className={styles.tWhite} href="/ListaReportes" passHref>
-                            <MenuItem icon={<DescriptionIcon />} className={styles.bgblack}>Lista Reportes</MenuItem>
+                            <MenuItem icon={<DescriptionIcon />} className={styles.bgblack} onClick={handleLinkClick}>Lista Reportes</MenuItem>
                         </Link>
                     </SubMenu>
                     <SubMenu label="Cheques" icon={<MoneyIcon />}>
                         <Link className={styles.tWhite} href="/ListaCheques" passHref>
-                            <MenuItem icon={<AttachFileIcon />} className={styles.bgblack}>Generar Cheque</MenuItem>
+                            <MenuItem icon={<AttachFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Generar Cheque</MenuItem>
                         </Link>
                     </SubMenu>
                     <Link className={styles.tWhite} href="/Empleados" passHref>
@@ -105,6 +134,16 @@ export default function NavBar() {
                     </Link>
                 </Menu>
             </Sidebar>
+            {/* Mostrar el círculo de carga mientras se carga el contenido */}
+            <div className={styles.contentContainer}>
+                {loading ? (
+                    <div className={styles.loaderContainer}>
+                        <CircularProgress />
+                    </div>
+                ) : (
+                    children
+                )}
+            </div>
         </div>
     );
 }

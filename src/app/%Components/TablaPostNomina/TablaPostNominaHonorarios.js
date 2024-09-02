@@ -11,6 +11,7 @@ import API_BASE_URL from '../../%Config/apiConfig';
 export default function TablaPostNominaHonorarios({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
     const [archivos, setArchivos] = useState([]);
+    const [isUploadDisabled, setIsUploadDisabled] = useState(false); // Nuevo estado para deshabilitar la carga
 
     useEffect(() => {
         fetchArchivosData();
@@ -25,7 +26,7 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
                 },
             });
 
-            // Filtrando los datos para solo incluir los archivos de "Honorarios"
+            // Filtrar los datos para incluir solo los archivos de "Honorarios"
             const data = response.data
                 .filter(item => item.nombre_nomina === 'Honorarios')
                 .map(item => ({
@@ -35,8 +36,12 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
                     archivoNombre: item.nombre_archivo,
                     fechaCarga: item.fecha_carga,
                     userCarga: item.user_carga,
+                    aprobado: item.aprobado,
+                    aprobado2: item.aprobado2,
                 }));
+
             setArchivos(data);
+            setIsUploadDisabled(data.length >= 2); // Desactivar botón de carga si hay 2 o más archivos
         } catch (error) {
             console.error('Error fetching archivos data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos', life: 3000 });
@@ -76,7 +81,7 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
             fetchArchivosData();  // Refrescar la tabla después de subir el archivo
         } catch (error) {
             console.error('Error uploading file', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 5000 });
         }
     };
 
@@ -108,11 +113,21 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
         }
     };
 
-    const descargaTemplate = (rowData) => (
-        <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.tipoNomina, rowData.archivoNombre)}>
-            <i className="pi pi-download"></i>
-        </button>
-    );
+    const descargaTemplate = (rowData) => {
+        // Deshabilitar la descarga si el archivo no está aprobado
+        const isDisabled = rowData.aprobado !== true || rowData.aprobado2 !== true;
+
+        return (
+            <button
+                className={styles.downloadButton}
+                onClick={() => handleFileDownload(rowData.tipoNomina, rowData.archivoNombre)}
+                disabled={isDisabled}
+                title={isDisabled ? 'No se puede descargar, aún no está aprobado' : ''}
+            >
+                <i className="pi pi-download"></i>
+            </button>
+        );
+    };
 
     return (
         <div className={`card ${styles.card}`}>
@@ -124,7 +139,12 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
             </DataTable>
             <div className={styles.uploadContainer}>
-                <Button variant="contained" component="label" className={styles.uploadButton}>
+                <Button
+                    variant="contained"
+                    component="label"
+                    className={styles.uploadButton}
+                    disabled={isUploadDisabled} // Deshabilitar el botón de carga si ya hay 2 archivos
+                >
                     Subir Nómina de Honorarios
                     <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
                 </Button>

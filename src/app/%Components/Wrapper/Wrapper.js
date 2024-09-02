@@ -1,7 +1,7 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "../../globals.css";
-import { Grid, useMediaQuery } from "@mui/material";
+import { Grid, useMediaQuery, CircularProgress } from "@mui/material";
 import styles from './Wrapper.module.css';
 
 import NavBar from "../NavBar/NavBar";
@@ -11,6 +11,15 @@ import Footer from "../Footer/Footer";
 export default function Wrapper({ children, session }) {
     const isSmallScreen = useMediaQuery('(max-width: 600px)');
     const [collapsed, setCollapsed] = useState(isSmallScreen);
+    const [loading, setLoading] = useState(true);  // Estado para controlar la carga
+
+    // Simulación de carga
+    useEffect(() => {
+        // Simular una carga de contenido, puedes reemplazarlo con lógica real
+        setTimeout(() => {
+            setLoading(false);
+        }, 2000); // 2 segundos de simulación de carga
+    }, []);
 
     return (
         <div className={`${styles.wrapperContainer} ${collapsed ? styles.collapsed : ''}`}>
@@ -32,8 +41,14 @@ export default function Wrapper({ children, session }) {
                 >
                     <AppBar className={styles.AppBar} />
                     <div className={styles.content}>
-                        {React.Children.map(children, child =>
-                            React.cloneElement(child, { session })
+                        {loading ? (
+                            <div className={styles.loaderContainer}>
+                                <CircularProgress />
+                            </div>
+                        ) : (
+                            React.Children.map(children, child =>
+                                React.cloneElement(child, { session })
+                            )
                         )}
                     </div>
                 </Grid>
