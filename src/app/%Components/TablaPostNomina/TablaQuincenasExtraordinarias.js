@@ -36,7 +36,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
 
     const fetchExtraordinariosData = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/listArchivos`, {
+            const response = await axios.get(`${API_BASE_URL}/consultaNominaCtrl/filtro`, {
                 params: {
                     anio: anio,
                     quincena: quincena,

@@ -54,7 +54,7 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
         formData.append('file', file);
         formData.append('extra', '');  // Mandar el parámetro extra como string vacío
 
-        const uploadURL = `${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&usuario=${session?.user?.name || 'unknown'}`;
+        const uploadURL = `${API_BASE_URL}/validarYSubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&usuario=${session?.user?.name || 'unknown'}`;
 
         try {
             const response = await axios.post(uploadURL, formData, {

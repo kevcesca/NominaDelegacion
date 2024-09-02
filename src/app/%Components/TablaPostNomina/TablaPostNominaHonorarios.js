@@ -18,7 +18,7 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
 
     const fetchArchivosData = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/listArchivos`, {
+            const response = await axios.get(`${API_BASE_URL}/consultaNominaCtrl/filtro`, {
                 params: {
                     anio: anio,
                     quincena: quincena,
@@ -56,7 +56,7 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
         formData.append('extra', '');  // Incluyendo el campo `extra` aunque esté vacío
 
         // URL para el POST, ahora el tipo de nómina es "Honorarios"
-        const uploadURL = `${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=Honorarios&usuario=${session?.user?.name || 'unknown'}`;
+        const uploadURL = `${API_BASE_URL}/validarYSubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Honorarios&usuario=${session?.user?.name || 'unknown'}`;
 
         try {
             // Realizando la solicitud POST
