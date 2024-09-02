@@ -29,6 +29,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
     const [progress, setProgress] = useState(0);
     const [selectedTipo, setSelectedTipo] = useState('');
     const [file, setFile] = useState(null);
+    const [isUploadDisabled, setIsUploadDisabled] = useState(false);  // Estado para deshabilitar la carga
 
     useEffect(() => {
         fetchExtraordinariosData();
@@ -53,10 +54,13 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     tipoNomina: 'Extraordinarios',
                     archivoNombre: item.nombre_archivo,
                     tipoExtraordinario: item.extra_desc || '', // Utilizando `extra_desc`
-                    userCarga: item.user_carga || 'Desconocido' // Añadiendo el usuario que cargó el archivo
+                    userCarga: item.user_carga || 'Desconocido', // Añadiendo el usuario que cargó el archivo
+                    aprobado: item.aprobado,  // Nueva columna para aprobación
+                    aprobado2: item.aprobado2,  // Nueva columna para segunda aprobación
                 }));
 
             setExtraordinarios(data);
+            setIsUploadDisabled(data.length >= 2); // Desactivar botón de carga si hay 2 o más archivos
         } catch (error) {
             console.error('Error fetching extraordinarios data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos', life: 3000 });
@@ -94,7 +98,8 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             setFile(null);
         } catch (error) {
             console.error('Error uploading file', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+            const errorMessage = `Error al subir el archivo: ${error.response?.data?.message || error.message}`;
+            toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
         }
     };
 
@@ -127,11 +132,20 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
         }
     };
 
-    const descargaTemplate = (rowData) => (
-        <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.archivoNombre, rowData.tipoExtraordinario)}>
-            <i className="pi pi-download"></i>
-        </button>
-    );
+    const descargaTemplate = (rowData) => {
+        const isDisabled = rowData.aprobado !== true || rowData.aprobado2 !== true;
+
+        return (
+            <button
+                className={styles.downloadButton}
+                onClick={() => handleFileDownload(rowData.archivoNombre, rowData.tipoExtraordinario)}
+                disabled={isDisabled}
+                title={isDisabled ? 'No se puede descargar, aún no está aprobado' : ''}
+            >
+                <i className="pi pi-download"></i>
+            </button>
+        );
+    };
 
     const tipoExtraordinarioTemplate = (rowData) => (
         <span>{rowData.tipoExtraordinario}</span>
@@ -151,9 +165,9 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             )}
             <DataTable value={extraordinarios} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
                 <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
-                <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '25%' }}></Column>
+                <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '20%' }}></Column>
                 <Column body={tipoExtraordinarioTemplate} header="TIPO EXTRAORDINARIO" style={{ width: '25%' }}></Column>
-                <Column body={userCargaTemplate} header="USUARIO" style={{ width: '10%' }}></Column>
+                <Column body={userCargaTemplate} header="USUARIO" style={{ width: '15%' }}></Column>
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
             </DataTable>
             <div className={styles.uploadContainer}>
@@ -161,7 +175,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     variant="contained"
                     component="label"
                     className={styles.uploadButton}
-                    disabled={!selectedTipo}
+                    disabled={isUploadDisabled || !selectedTipo} // Deshabilitar si hay 2 archivos o no se ha seleccionado un tipo
                 >
                     Subir Nómina Extraordinaria
                     <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
