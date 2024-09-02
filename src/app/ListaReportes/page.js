@@ -10,29 +10,29 @@ export default function Page() {
     const [searchTerm, setSearchTerm] = useState('');
     const reportes = [
         {
-            title: "HISTÓRICO DE MOVIMIENTOS DE PERCEPCIÓN DE PERSONAL",
+            title: "AbonoPorConceptoMovimientoQuincenas",
             description: "Este reporte muestra un historial detallado de los movimientos de percepción personal durante el último año.",
-            link: "/ListaReportes/HistorialPercepcionPersonal"
+            link: "/ListaReportes/AbonoPorConceptoMovimientoQuincenas"
         },
         {
-            title: "HISTÓRICO DE MOVIMIENTOS DE PERCEPCIÓN DE PERSONAL POR TIPO DE NÓMINA",
+            title: "ConceptosPorTotalesNomina",
             description: "Este reporte detalla los movimientos de percepción personal clasificados por tipo de nómina.",
-            link: "/ListaReportes/HistorialPercepcionPorTipo"
+            link: "/ListaReportes/ConceptosPorTotalesNomina"
         },
         {
-            title: "REPORTE DE NÓMINA HISTÓRICO POR MONTO, TIPO DE NÓMINA",
+            title: "DiferenciasLiquidoConLpad",
             description: "Visualiza un reporte histórico de nóminas organizadas por monto y tipo de nómina.",
-            link: "/ListaReportes/HistoricoNominaMontoTipo"
+            link: "/ListaReportes/DiferenciasLiquidoConLpad"
         },
         {
-            title: "REPORTE DE NÓMINA HISTÓRICO POR MONTO, TIPO DE NÓMINA Y EJERCIDO",
+            title: "NominaNumerosCuentaEmpleados",
             description: "Consulta el histórico de nóminas por monto, tipo de nómina y cantidad ejercida.",
-            link: "/ListaReportes/HistoricoNominaMontoTipoEjercido"
+            link: "/ListaReportes/NominaNumerosCuentaEmpleados"
         },
         {
-            title: "REPORTE POR CUENTA POR LIQUIDAR",
+            title: "ReporteAltasBajas",
             description: "Reporte detallado de cuentas pendientes por liquidar.",
-            link: "/ListaReportes/CuentaPorLiquidar"
+            link: "/ListaReportes/ReporteAltasBajas"
         },
         // {
         //     title: "REPORTE DE REINTEGROS POR CUENTA POR LIQUIDAR",
@@ -40,9 +40,9 @@ export default function Page() {
         //     link: "/ListaReportes/ReintegrosCuentaPorLiquidar"
         // },
         {
-            title: "REPORTE DE NÓMINA, CUENTA POR LIQUIDAR, DISPERSIÓN",
+            title: "TipoPagoTipoNominaPorEmpleadoQuincena",
             description: "Reporte sobre la dispersión de nómina y cuentas por liquidar.",
-            link: "/ListaReportes/NominaCuentaPorLiquidarDispersion"
+            link: "/TipoPagoTipoNominaPorEmpleadoQuincena"
         },
         // {
         //     title: "REPORTE DE NÓMINA, CUENTA POR LIQUIDAR, PAGO POR CHEQUE",
