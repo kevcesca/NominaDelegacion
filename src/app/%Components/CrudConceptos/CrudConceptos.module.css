@@ -19,3 +19,15 @@
 .button-margin {
     margin-right: 0.5rem;
 }
+
+.barra{
+    width: 80vw ;
+
+}
+
+.flex{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+}

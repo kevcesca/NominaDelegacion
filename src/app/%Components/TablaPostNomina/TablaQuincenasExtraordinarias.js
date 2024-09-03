@@ -29,7 +29,6 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
     const [progress, setProgress] = useState(0);
     const [selectedTipo, setSelectedTipo] = useState('');
     const [file, setFile] = useState(null);
-    const [isUploadDisabled, setIsUploadDisabled] = useState(false);  // Estado para deshabilitar la carga
 
     useEffect(() => {
         fetchExtraordinariosData();
@@ -60,7 +59,6 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                 }));
 
             setExtraordinarios(data);
-            setIsUploadDisabled(data.length >= 2); // Desactivar botón de carga si hay 2 o más archivos
         } catch (error) {
             console.error('Error fetching extraordinarios data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos', life: 3000 });
@@ -175,7 +173,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     variant="contained"
                     component="label"
                     className={styles.uploadButton}
-                    disabled={isUploadDisabled || !selectedTipo} // Deshabilitar si hay 2 archivos o no se ha seleccionado un tipo
+                    disabled={!selectedTipo} // Deshabilitar solo si no se ha seleccionado un tipo
                 >
                     Subir Nómina Extraordinaria
                     <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
@@ -198,3 +196,6 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
         </div>
     );
 }
+
+
+// 1000191

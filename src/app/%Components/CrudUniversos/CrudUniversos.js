@@ -221,11 +221,10 @@ const CrudUniversos = () => {
     };
 
     const header = (
-        <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-            <h4 className="m-0">Manage Universos</h4>
-            <span className="p-input-icon-left">
+        <div>
+            <span className={styles.flex}>
                 <i className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
+                <InputText className={styles.barra} type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
             </span>
         </div>
     );

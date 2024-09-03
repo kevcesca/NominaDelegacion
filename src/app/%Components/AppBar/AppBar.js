@@ -9,6 +9,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GroupIcon from '@mui/icons-material/Group';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import Assessment from '@mui/icons-material/Assessment';
 
 export default function AppBar() {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -21,18 +22,14 @@ export default function AppBar() {
             command: () => router.push('/') 
         },
         { 
-            label: 'Mi Cuenta', 
-            icon: <AccountCircleIcon />, 
-            command: () => router.push('/Perfil') 
+            label: 'Nómina', 
+            icon: <Assessment />, 
+            command: () => router.push('/CrearNomina') 
         },
         { 
-            label: 'Usuarios', 
+            label: 'Empleados', 
             icon: <GroupIcon />, 
-            // command: () => { 
-            //     // Redirige a la URL de administración de usuarios en Keycloak
-            //     window.location.href = 'http://192.168.100.252:8081/admin/master/console/#/reino-NominaAzcapo/users';
-            // }
-            command: () => router.push('/Usuarios') 
+            command: () => router.push('/Empleados') 
         },
         { 
             label: 'Cerrar Sesión', 

@@ -4,23 +4,24 @@ import { useSession } from 'next-auth/react';
 import { Toast } from 'primereact/toast';
 import styles from './page.module.css';
 import TablaPostNomina from '../%Components/TablaPostNomina/TablaPostNomina';
-import TablaPostNominaHonorarios from '../%Components/TablaPostNomina/TablaPostNominaHonorarios'; // Importa el nuevo componente
+import TablaPostNominaHonorarios from '../%Components/TablaPostNomina/TablaPostNominaHonorarios';
 import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQuincenasExtraordinarias';
 import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
 import { ProgressBar } from 'primereact/progressbar';
-import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormControlLabel, Alert } from '@mui/material';
+import { ThemeProvider, Box, Typography, Button, FormControlLabel, Switch, Alert } from '@mui/material';
 import theme from '../$tema/theme';
 import Link from 'next/link';
-import withAdminRole from '../%Components/hoc/withAdminRole';  // Importa el HOC
+import withAdminRole from '../%Components/hoc/withAdminRole';
+import DateSelector from '../%Components/DateSelector2/DateSelector';  // Importa el componente DateSelector
 
 function CargarDatos() {
     const { data: session } = useSession();
     const [quincena, setQuincena] = useState('01');
     const [anio, setAnio] = useState('2024');
     const [progressPostNomina, setProgressPostNomina] = useState(0);
-    const [progressHonorarios, setProgressHonorarios] = useState(0); // Estado para el progreso de honorarios
+    const [progressHonorarios, setProgressHonorarios] = useState(0);
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
-    const [honorariosUploaded, setHonorariosUploaded] = useState(false); // Estado para verificar si se subieron archivos de honorarios
+    const [honorariosUploaded, setHonorariosUploaded] = useState(false);
     const [showExtraordinarias, setShowExtraordinarias] = useState(false);
     const [showFiniquitos, setShowFiniquitos] = useState(false);
     const toast = useRef(null);
@@ -29,55 +30,14 @@ function CargarDatos() {
         console.log("Session:", session);
     }, [session]);
 
-    const quincenas = [
-        { label: '1ra ene', value: '01' },
-        { label: '2da ene', value: '02' },
-        { label: '1ra feb', value: '03' },
-        { label: '2da feb', value: '04' },
-        { label: '1ra mar', value: '05' },
-        { label: '2da mar', value: '06' },
-        { label: '1ra abr', value: '07' },
-        { label: '2da abr', value: '08' },
-        { label: '1ra may', value: '09' },
-        { label: '2da may', value: '10' },
-        { label: '1ra jun', value: '11' },
-        { label: '2da jun', value: '12' },
-        { label: '1ra jul', value: '13' },
-        { label: '2da jul', value: '14' },
-        { label: '1ra ago', value: '15' },
-        { label: '2da ago', value: '16' },
-        { label: '1ra sep', value: '17' },
-        { label: '2da sep', value: '18' },
-        { label: '1ra oct', value: '19' },
-        { label: '2da oct', value: '20' },
-        { label: '1ra nov', value: '21' },
-        { label: '2da nov', value: '22' },
-        { label: '1ra dic', value: '23' },
-        { label: '2da dic', value: '24' },
-    ];
-
     return (
         <ThemeProvider theme={theme}>
             <Toast ref={toast} />
             <Box className={styles.main}>
                 <Typography variant="h4" className={styles.h1}>Carga de Nómina</Typography>
 
-                <Box className={styles.selectorContainer}>
-                    <Select value={quincena} onChange={(e) => setQuincena(e.target.value)} variant="outlined">
-                        {quincenas.map((quin, index) => (
-                            <MenuItem key={index} value={quin.value}>
-                                {quin.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                    <Select value={anio} onChange={(e) => setAnio(e.target.value)} variant="outlined">
-                        {[...Array(21).keys()].map(n => (
-                            <MenuItem key={2024 + n} value={2024 + n}>
-                                Año {2024 + n}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </Box>
+                {/* Reemplazar la lógica de los Selects de quincena y año con DateSelector */}
+                <DateSelector setMes={() => {}} setAnio={setAnio} setQuincena={setQuincena} />
 
                 {/* Sección de Post Nomina */}
                 <Alert severity="info" className={styles.alert} sx={{margin: '1rem'}}>
@@ -149,7 +109,7 @@ function CargarDatos() {
                 )}
 
                 <Box className={styles.buttonContainer}>
-                    <Link href={`/Validacion?anio=${anio}&quincena=${quincena}`} passHref>
+                    <Link href={`/Validacion?anio={anio}&quincena={quincena}`} passHref>
                         <Button variant="contained" color="primary" className={styles.exportButton}>
                             Comprobar cambios
                         </Button>

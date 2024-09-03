@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Sidebar, Menu, MenuItem, SubMenu, sidebarClasses } from 'react-pro-sidebar';
-import CircularProgress from '@mui/material/CircularProgress';
 import styles from './NavBar.module.css';
 import SettingsIcon from '@mui/icons-material/Settings';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -21,10 +20,10 @@ import ListIcon from '@mui/icons-material/List';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { useMediaQuery } from '@mui/material';
 
-export default function NavBar({ children }) {
+export default function NavBar() {
     const isSmallScreen = useMediaQuery('(max-width: 600px)');
-    const [collapsed, setCollapsed] = useState(isSmallScreen);
-    const [loading, setLoading] = useState(true);  // Estado de carga
+    const [collapsed, setCollapsed] = React.useState(isSmallScreen);
+    const sidebarRef = useRef(null);
 
     useEffect(() => {
         setCollapsed(isSmallScreen);
@@ -47,15 +46,6 @@ export default function NavBar({ children }) {
     const handleLinkClick = () => {
         setCollapsed(true);  // Contraer la barra de navegación al hacer clic en un enlace
     };
-
-    useEffect(() => {
-        // Simular carga de contenido
-        setTimeout(() => {
-            setLoading(false);
-        }, 2000);  // Simulación de carga de 2 segundos
-    }, []);
-
-    const sidebarRef = React.useRef(null);
 
     return (
         <div className={styles.NavbarContainer} ref={sidebarRef}>
@@ -98,14 +88,14 @@ export default function NavBar({ children }) {
                         <Link className={styles.tWhite} href="/CrearNomina" passHref>
                             <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cargar Nómina</MenuItem>
                         </Link>
-                        <Link className={styles.tWhite} href="/AprobarCargaNomina" passHref>
-                            <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Aprobar nómina</MenuItem>
+                        <Link className={styles.tWhite} href="/Validacion" passHref>
+                            <MenuItem icon={<EditIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cambios en la Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/CrearNomina/ProcesarDatos" passHref>
                             <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Resumen de Nómina</MenuItem>
                         </Link>
-                        <Link className={styles.tWhite} href="/Validacion" passHref>
-                            <MenuItem icon={<EditIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cambios en la Nómina</MenuItem>
+                        <Link className={styles.tWhite} href="/AprobarCargaNomina" passHref>
+                            <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Aprobar nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/SubirEvidencia" passHref>
                             <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Subir Evidencia</MenuItem>
@@ -129,21 +119,8 @@ export default function NavBar({ children }) {
                             <MenuItem icon={<AttachFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Generar Cheque</MenuItem>
                         </Link>
                     </SubMenu>
-                    <Link className={styles.tWhite} href="/Empleados" passHref>
-                        <SubMenu label="Empleados" icon={<PeopleIcon />} />
-                    </Link>
                 </Menu>
             </Sidebar>
-            {/* Mostrar el círculo de carga mientras se carga el contenido */}
-            <div className={styles.contentContainer}>
-                {loading ? (
-                    <div className={styles.loaderContainer}>
-                        <CircularProgress />
-                    </div>
-                ) : (
-                    children
-                )}
-            </div>
         </div>
     );
 }
