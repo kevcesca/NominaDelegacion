@@ -13,6 +13,7 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
     const toast = useRef(null);
     const [finiquitos, setFiniquitos] = useState([]);
     const [progress, setProgress] = useState(0);  // Estado para manejar el progreso de la carga
+    const [isUploadDisabled, setIsUploadDisabled] = useState(false);  // Estado para deshabilitar el botón de carga
 
     useEffect(() => {
         fetchFiniquitosData();
@@ -37,8 +38,12 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
                     archivoNombre: item.nombre_archivo,
                     fechaCarga: item.fecha_carga,
                     userCarga: item.user_carga,
+                    aprobado: item.aprobado,  // Nueva columna para aprobación
+                    aprobado2: item.aprobado2,  // Nueva columna para segunda aprobación
                 }));
+
             setFiniquitos(data);
+            setIsUploadDisabled(data.length >= 2); // Desactivar botón de carga si hay 2 o más archivos
         } catch (error) {
             console.error('Error fetching finiquitos data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos de finiquitos', life: 3000 });
@@ -110,11 +115,20 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
         }
     };
 
-    const descargaTemplate = (rowData) => (
-        <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.archivoNombre)}>
-            <i className="pi pi-download"></i>
-        </button>
-    );
+    const descargaTemplate = (rowData) => {
+        const isDisabled = rowData.aprobado !== true || rowData.aprobado2 !== true;
+
+        return (
+            <button
+                className={styles.downloadButton}
+                onClick={() => handleFileDownload(rowData.archivoNombre)}
+                disabled={isDisabled}  // Deshabilitar el botón si no hay doble aprobación
+                title={isDisabled ? 'No se puede descargar, aún no está aprobado' : ''}
+            >
+                <i className="pi pi-download"></i>
+            </button>
+        );
+    };
 
     return (
         <div className={`card ${styles.card}`}>
@@ -131,7 +145,12 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
             </DataTable>
             <div className={styles.uploadContainer}>
-                <Button variant="contained" component="label" className={styles.uploadButton}>
+                <Button
+                    variant="contained"
+                    component="label"
+                    className={styles.uploadButton}
+                    disabled={isUploadDisabled}  // Deshabilitar si hay 2 o más archivos
+                >
                     Subir Nómina de Finiquitos
                     <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
                 </Button>

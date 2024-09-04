@@ -12,12 +12,12 @@ import { ThemeProvider, Box, Typography, Button, FormControlLabel, Switch, Alert
 import theme from '../$tema/theme';
 import Link from 'next/link';
 import withAdminRole from '../%Components/hoc/withAdminRole';
-import DateSelector from '../%Components/DateSelector2/DateSelector';  // Importa el componente DateSelector
+import DateSelector from '../%Components/DateSelector2/DateSelector';
 
 function CargarDatos() {
     const { data: session } = useSession();
-    const [quincena, setQuincena] = useState('01');
-    const [anio, setAnio] = useState('2024');
+    const [quincena, setQuincena] = useState('');
+    const [anio, setAnio] = useState('');
     const [progressPostNomina, setProgressPostNomina] = useState(0);
     const [progressHonorarios, setProgressHonorarios] = useState(0);
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
@@ -36,11 +36,11 @@ function CargarDatos() {
             <Box className={styles.main}>
                 <Typography variant="h4" className={styles.h1}>Carga de Nómina</Typography>
 
-                {/* Reemplazar la lógica de los Selects de quincena y año con DateSelector */}
+                {/* Uso del DateSelector para seleccionar mes, quincena y año */}
                 <DateSelector setMes={() => {}} setAnio={setAnio} setQuincena={setQuincena} />
 
                 {/* Sección de Post Nomina */}
-                <Alert severity="info" className={styles.alert} sx={{margin: '1rem'}}>
+                <Alert severity="info" className={styles.alert} sx={{ margin: '1rem' }}>
                     En esta ventana podrás subir los archivos de nómina
                 </Alert>
                 <Typography variant="h5" className={styles.h2}>Nómina Compuesta</Typography>
@@ -54,7 +54,7 @@ function CargarDatos() {
                     session={session}
                     setProgress={setProgressPostNomina}
                     setUploaded={setPostNominaUploaded}
-                    extra="" // Aquí extra es vacío
+                    extra="" 
                 />
 
                 {/* Sección de Honorarios */}
@@ -103,13 +103,13 @@ function CargarDatos() {
                             session={session}
                             setProgress={setProgressPostNomina}
                             setUploaded={setPostNominaUploaded}
-                            extra="" // Aquí extra es vacío
+                            extra=""
                         />
                     </>
                 )}
 
                 <Box className={styles.buttonContainer}>
-                    <Link href={`/Validacion?anio={anio}&quincena={quincena}`} passHref>
+                    <Link href={`/Validacion?anio=${anio}&quincena=${quincena}`} passHref>
                         <Button variant="contained" color="primary" className={styles.exportButton}>
                             Comprobar cambios
                         </Button>

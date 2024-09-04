@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Select, MenuItem } from '@mui/material';
 import styles from './DateSelector.module.css'
 
-const DateSelector = ({ setMes, setAnio, setQuincena }) => {
-    const [mes, setMesState] = useState('');
+const QuincenaAnioSelector = ({ setAnio, setQuincena }) => {
     const [anio, setAnioState] = useState('');
     const [quincena, setQuincenaState] = useState('');
 
@@ -11,40 +10,32 @@ const DateSelector = ({ setMes, setAnio, setQuincena }) => {
         const now = new Date();
 
         const currentYear = now.getFullYear().toString();
-        const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0'); // Mes actual, ajustado a 2 dígitos
-
-        // Calcular la quincena actual
         const day = now.getDate();
         const quincenaValue = (day <= 15) 
             ? ((now.getMonth() * 2) + 1).toString().padStart(2, '0') // Primera quincena del mes actual
             : ((now.getMonth() * 2) + 2).toString().padStart(2, '0'); // Segunda quincena del mes actual
 
+        // Establecer los valores iniciales en los estados locales y principales
         setAnioState(currentYear);
-        setMesState(currentMonth);
         setQuincenaState(quincenaValue);
 
-        // Establecer los valores en los estados principales
-        setMes(currentMonth);
         setAnio(currentYear);
         setQuincena(quincenaValue);
 
-    }, [setMes, setAnio, setQuincena]);
+    }, [setAnio, setQuincena]);
 
-    // Definición de meses
-    const meses = [
-        { label: 'Enero', value: '01' },
-        { label: 'Febrero', value: '02' },
-        { label: 'Marzo', value: '03' },
-        { label: 'Abril', value: '04' },
-        { label: 'Mayo', value: '05' },
-        { label: 'Junio', value: '06' },
-        { label: 'Julio', value: '07' },
-        { label: 'Agosto', value: '08' },
-        { label: 'Septiembre', value: '09' },
-        { label: 'Octubre', value: '10' },
-        { label: 'Noviembre', value: '11' },
-        { label: 'Diciembre', value: '12' },
-    ];
+    // Manejar cambios de año y quincena
+    const handleAnioChange = (event) => {
+        const newAnio = event.target.value;
+        setAnioState(newAnio);
+        setAnio(newAnio);
+    };
+
+    const handleQuincenaChange = (event) => {
+        const newQuincena = event.target.value;
+        setQuincenaState(newQuincena);
+        setQuincena(newQuincena);
+    };
 
     // Definición de quincenas
     const quincenas = [
@@ -76,14 +67,14 @@ const DateSelector = ({ setMes, setAnio, setQuincena }) => {
 
     return (
         <Box className={styles.selectorContainer}>
-            <Select value={quincena} onChange={(e) => setQuincena(e.target.value)} variant="outlined">
+            <Select value={quincena} onChange={handleQuincenaChange} variant="outlined">
                 {quincenas.map((q, index) => (
                     <MenuItem key={index} value={q.value}>
                         {q.label}
                     </MenuItem>
                 ))}
             </Select>
-            <Select value={anio} onChange={(e) => setAnio(e.target.value)} variant="outlined">
+            <Select value={anio} onChange={handleAnioChange} variant="outlined">
                 {[...Array(21).keys()].map(n => (
                     <MenuItem key={2024 + n} value={2024 + n}>
                         Año {2024 + n}
@@ -94,4 +85,4 @@ const DateSelector = ({ setMes, setAnio, setQuincena }) => {
     );
 };
 
-export default DateSelector;
+export default QuincenaAnioSelector;

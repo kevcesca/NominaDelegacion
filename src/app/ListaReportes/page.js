@@ -15,9 +15,9 @@ export default function Page() {
             link: "/ListaReportes/AbonoPorConceptoMovimientoQuincenas"
         },
         {
-            title: "ConceptosPorTotalesNomina",
-            description: "Este reporte detalla los movimientos de percepción personal clasificados por tipo de nómina.",
-            link: "/ListaReportes/ConceptosPorTotalesNomina"
+            title: "REPORTE DE NÓMINA HISTÓRICO POR MONTO, TIPO DE NÓMINA Y EJERCIDO",
+            description: "",
+            link: "/ListaReportes/04"
         },
         {
             title: "DiferenciasLiquidoConLpad",
@@ -25,7 +25,7 @@ export default function Page() {
             link: "/ListaReportes/DiferenciasLiquidoConLpad"
         },
         {
-            title: "NominaNumerosCuentaEmpleados",
+            title: "01 NominaNumerosCuentaEmpleados",
             description: "Consulta el histórico de nóminas por monto, tipo de nómina y cantidad ejercida.",
             link: "/ListaReportes/NominaNumerosCuentaEmpleados"
         },
@@ -40,9 +40,9 @@ export default function Page() {
         //     link: "/ListaReportes/ReintegrosCuentaPorLiquidar"
         // },
         {
-            title: "TipoPagoTipoNominaPorEmpleadoQuincena",
+            title: "01 TipoPagoTipoNominaPorEmpleadoQuincena",
             description: "Reporte sobre la dispersión de nómina y cuentas por liquidar.",
-            link: "/TipoPagoTipoNominaPorEmpleadoQuincena"
+            link: "/ListaReportes/TipoPagoTipoNominaPorEmpleadoQuincena"
         },
         // {
         //     title: "REPORTE DE NÓMINA, CUENTA POR LIQUIDAR, PAGO POR CHEQUE",

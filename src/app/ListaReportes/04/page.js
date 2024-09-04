@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { InputText } from 'primereact/inputtext';
 import { ProgressBar } from 'primereact/progressbar';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
@@ -142,7 +141,7 @@ export default function TablaCLCQuincenaTotales() {
             <Typography variant="h4" className={styles.titulo}>Consulta de Totales por Quincena</Typography>
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
-                <InputText
+                <TextField
                     type="search"
                     onInput={(e) => setGlobalFilter(e.target.value)}
                     placeholder="Buscar..."
@@ -155,43 +154,29 @@ export default function TablaCLCQuincenaTotales() {
     return (
         <ThemeProvider theme={theme}>
             <div className={styles.main}>
-                <h1 className={styles.h1}>Reporte de Totales por Quincena</h1>
+                <h1 className={styles.h1}>04 REPORTE DE NÓMINA HISTÓRICO POR MONTO, TIPO DE NÓMINA Y EJERCIDO</h1>
                 <Toast ref={toast} />
                 <Box className={styles.dropForm}>
                     <Typography variant="h6" className={styles.exportText}>Parámetros de Consulta</Typography>
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            fetchData();
-                        }}
-                    >
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="Año"
-                                    value={anio}
-                                    onChange={(e) => setAnio(e.target.value)}
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <InputLabel htmlFor="quincenas">Quincenas (separadas por comas)</InputLabel>
-                                <InputText
-                                    id="quincenas"
-                                    value={quincenas.join(',')}
-                                    onChange={(e) => setQuincenas(e.target.value.split(','))}
-                                    placeholder="01,02,03"
-                                    style={{ width: '100%' }}
-                                />
-                            </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Año"
+                                value={anio}
+                                onChange={(e) => setAnio(e.target.value)}
+                                fullWidth
+                            />
                         </Grid>
-                        <Button
-                            type="submit"
-                            label="Consultar"
-                            className="p-button-primary"
-                            style={{ marginTop: '1rem' }}
-                        />
-                    </form>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Quincenas (separadas por comas)"
+                                value={quincenas.join(',')}
+                                onChange={(e) => setQuincenas(e.target.value.split(','))}
+                                placeholder="01,02,03"
+                                fullWidth
+                            />
+                        </Grid>
+                    </Grid>
                     <Button
                         type="button"
                         icon={`pi ${collapseOpen ? 'pi-chevron-up' : 'pi-chevron-down'}`}
@@ -199,6 +184,7 @@ export default function TablaCLCQuincenaTotales() {
                         rounded
                         onClick={() => setCollapseOpen(!collapseOpen)}
                         data-pr-tooltip="Configurar columnas"
+                        style={{ marginTop: '1rem' }}
                     />
                 </Box>
 
