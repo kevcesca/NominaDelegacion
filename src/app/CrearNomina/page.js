@@ -12,12 +12,12 @@ import { ThemeProvider, Box, Typography, Button, FormControlLabel, Switch, Alert
 import theme from '../$tema/theme';
 import Link from 'next/link';
 import withAdminRole from '../%Components/hoc/withAdminRole';
-import DateSelector from '../%Components/DateSelector2/DateSelector';
+import QuincenaAnioSelector from '../%Components/DateSelector2/DateSelector';
 
 function CargarDatos() {
     const { data: session } = useSession();
-    const [quincena, setQuincena] = useState('');
-    const [anio, setAnio] = useState('');
+    const [quincena, setQuincena] = useState(null); // Inicializar como null
+    const [anio, setAnio] = useState(null); // Inicializar como null
     const [progressPostNomina, setProgressPostNomina] = useState(0);
     const [progressHonorarios, setProgressHonorarios] = useState(0);
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
@@ -28,7 +28,9 @@ function CargarDatos() {
 
     useEffect(() => {
         console.log("Session:", session);
-    }, [session]);
+        console.log("Año seleccionado:", anio);
+        console.log("Quincena seleccionada:", quincena);
+    }, [session, anio, quincena]);
 
     return (
         <ThemeProvider theme={theme}>
@@ -36,68 +38,21 @@ function CargarDatos() {
             <Box className={styles.main}>
                 <Typography variant="h4" className={styles.h1}>Carga de Nómina</Typography>
 
-                {/* Uso del DateSelector para seleccionar mes, quincena y año */}
-                <DateSelector setMes={() => {}} setAnio={setAnio} setQuincena={setQuincena} />
+                {/* Uso del QuincenaAnioSelector para seleccionar quincena y año */}
+                <QuincenaAnioSelector setAnio={setAnio} setQuincena={setQuincena} />
 
-                {/* Sección de Post Nomina */}
-                <Alert severity="info" className={styles.alert} sx={{ margin: '1rem' }}>
-                    En esta ventana podrás subir los archivos de nómina
-                </Alert>
-                <Typography variant="h5" className={styles.h2}>Nómina Compuesta</Typography>
-                <Box className={styles.progressContainer}>
-                    <Typography>Progreso de datos</Typography>
-                    <ProgressBar value={progressPostNomina} className={styles.progressBar} />
-                </Box>
-                <TablaPostNomina
-                    quincena={quincena}
-                    anio={anio}
-                    session={session}
-                    setProgress={setProgressPostNomina}
-                    setUploaded={setPostNominaUploaded}
-                    extra="" 
-                />
-
-                {/* Sección de Honorarios */}
-                <Typography variant="h5" className={styles.h2}>Nómina Honorarios</Typography>
-                <Box className={styles.progressContainer}>
-                    <Typography>Progreso de datos</Typography>
-                    <ProgressBar value={progressHonorarios} className={styles.progressBar} />
-                </Box>
-                <TablaPostNominaHonorarios
-                    quincena={quincena}
-                    anio={anio}
-                    session={session}
-                    setProgress={setProgressHonorarios}
-                    setUploaded={setHonorariosUploaded}
-                />
-
-                {/* Sección de Quincenas Extraordinarias */}
-                <FormControlLabel
-                    control={<Switch checked={showExtraordinarias} onChange={() => setShowExtraordinarias(!showExtraordinarias)} />}
-                    label="Mostrar Quincenas Extraordinarias"
-                />
-                {showExtraordinarias && (
+                {anio && quincena && (
                     <>
-                        <Typography variant="h5" className={styles.h2}>Quincenas Extraordinarias</Typography>
-                        <TablaQuincenasExtraordinarias
-                            quincena={quincena}
-                            anio={anio}
-                            session={session}
-                            setProgress={setProgressPostNomina}
-                            setUploaded={setPostNominaUploaded}
-                        />
-                    </>
-                )}
-
-                {/* Sección de Finiquitos */}
-                <FormControlLabel
-                    control={<Switch checked={showFiniquitos} onChange={() => setShowFiniquitos(!showFiniquitos)} />}
-                    label="Mostrar Finiquitos"
-                />
-                {showFiniquitos && (
-                    <>
-                        <Typography variant="h5" className={styles.h2}>Finiquitos</Typography>
-                        <TablaFiniquitos
+                        {/* Sección de Post Nomina */}
+                        <Alert severity="info" className={styles.alert} sx={{ margin: '1rem' }}>
+                            En esta ventana podrás subir los archivos de nómina
+                        </Alert>
+                        <Typography variant="h5" className={styles.h2}>Nómina Compuesta</Typography>
+                        <Box className={styles.progressContainer}>
+                            <Typography>Progreso de datos</Typography>
+                            <ProgressBar value={progressPostNomina} className={styles.progressBar} />
+                        </Box>
+                        <TablaPostNomina
                             quincena={quincena}
                             anio={anio}
                             session={session}
@@ -105,16 +60,67 @@ function CargarDatos() {
                             setUploaded={setPostNominaUploaded}
                             extra=""
                         />
+
+                        {/* Sección de Honorarios */}
+                        <Typography variant="h5" className={styles.h2}>Nómina Honorarios</Typography>
+                        <Box className={styles.progressContainer}>
+                            <Typography>Progreso de datos</Typography>
+                            <ProgressBar value={progressHonorarios} className={styles.progressBar} />
+                        </Box>
+                        <TablaPostNominaHonorarios
+                            quincena={quincena}
+                            anio={anio}
+                            session={session}
+                            setProgress={setProgressHonorarios}
+                            setUploaded={setHonorariosUploaded}
+                        />
+
+                        {/* Sección de Quincenas Extraordinarias */}
+                        <FormControlLabel
+                            control={<Switch checked={showExtraordinarias} onChange={() => setShowExtraordinarias(!showExtraordinarias)} />}
+                            label="Mostrar Quincenas Extraordinarias"
+                        />
+                        {showExtraordinarias && (
+                            <>
+                                <Typography variant="h5" className={styles.h2}>Quincenas Extraordinarias</Typography>
+                                <TablaQuincenasExtraordinarias
+                                    quincena={quincena}
+                                    anio={anio}
+                                    session={session}
+                                    setProgress={setProgressPostNomina}
+                                    setUploaded={setPostNominaUploaded}
+                                />
+                            </>
+                        )}
+
+                        {/* Sección de Finiquitos */}
+                        <FormControlLabel
+                            control={<Switch checked={showFiniquitos} onChange={() => setShowFiniquitos(!showFiniquitos)} />}
+                            label="Mostrar Finiquitos"
+                        />
+                        {showFiniquitos && (
+                            <>
+                                <Typography variant="h5" className={styles.h2}>Finiquitos</Typography>
+                                <TablaFiniquitos
+                                    quincena={quincena}
+                                    anio={anio}
+                                    session={session}
+                                    setProgress={setProgressPostNomina}
+                                    setUploaded={setPostNominaUploaded}
+                                    extra=""
+                                />
+                            </>
+                        )}
+
+                        <Box className={styles.buttonContainer}>
+                            <Link href={`/Validacion?anio=${anio}&quincena=${quincena}`} passHref>
+                                <Button variant="contained" color="primary" className={styles.exportButton}>
+                                    Comprobar cambios
+                                </Button>
+                            </Link>
+                        </Box>
                     </>
                 )}
-
-                <Box className={styles.buttonContainer}>
-                    <Link href={`/Validacion?anio=${anio}&quincena=${quincena}`} passHref>
-                        <Button variant="contained" color="primary" className={styles.exportButton}>
-                            Comprobar cambios
-                        </Button>
-                    </Link>
-                </Box>
             </Box>
         </ThemeProvider>
     );
