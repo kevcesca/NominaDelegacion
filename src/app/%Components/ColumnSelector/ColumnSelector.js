@@ -43,7 +43,7 @@ const ColumnSelector = ({ availableColumns, onSelectionChange }) => {
                     display: 'grid',
                     gridTemplateColumns: 'repeat(4, 1fr)', // 4 columnas de igual ancho
                     gap: '1rem', // Espacio entre cada checkbox
-                    color: theme.palette.text.primary,
+                    color: theme.palette.text.primary
                 }}
             >
                 {availableColumns.map((column) => (

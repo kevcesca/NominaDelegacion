@@ -8,19 +8,20 @@ import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
 
-export default function TablaRetenciones({ anio, mes, session, setProgress, setUploaded }) {
+export default function TablaDispersiones({ anio, quincena, session, setProgress, setUploaded }) {  // Cambié mes por quincena
     const toast = useRef(null);
-    const [retenciones, setRetenciones] = useState([
-        { nombreArchivo: 'Vacío', paramTipoEstado: 'retencion', archivoNombre: '', mes: '' }
+    const [dispersiones, setDispersiones] = useState([
+        { nombreArchivo: 'Vacío', paramTipoEstado: 'dispersión', archivoNombre: '', quincena: '' }
     ]);
+    const [canProcess, setCanProcess] = useState(false); // Controla si se muestra el botón "Procesar Dispersiones"
 
     useEffect(() => {
-        fetchRetencionesData();
-    }, [anio, mes]);
+        fetchDispersionesData();
+    }, [anio, quincena]);  // Ahora usamos quincena en lugar de mes
 
-    const fetchRetencionesData = async () => {
+    const fetchDispersionesData = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&mes=${mes}&tipo=Retencion`);
+            const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&quincena=${quincena}&tipo=Dispersión`);  // Cambié el query param de mes a quincena
             const data = response.data.reduce((acc, item) => {
                 const tipoIndex = acc.findIndex(row => row.paramTipoEstado === item.nombre_estado);
                 if (tipoIndex !== -1) {
@@ -28,23 +29,24 @@ export default function TablaRetenciones({ anio, mes, session, setProgress, setU
                         nombreArchivo: item.nombre_archivo || 'Vacío',
                         paramTipoEstado: item.nombre_estado,
                         archivoNombre: item.nombre_archivo || '',
-                        mes: item.mes || ''
+                        quincena: item.quincena || ''
                     };
                 }
                 return acc;
-            }, [...retenciones]);
+            }, [...dispersiones]);
 
-            setRetenciones(data);
+            setDispersiones(data);
+            setCanProcess(data.some(item => item.archivoNombre !== 'Vacío')); // Habilitar el botón solo si hay archivos subidos
         } catch (error) {
-            console.error('Error fetching retenciones data', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar las retenciones', life: 3000 });
+            console.error('Error fetching dispersiones data', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar las dispersiones', life: 3000 });
         }
     };
 
     const handleFileUpload = async (event, tipoEstado) => {
-        if (!tipoEstado || !mes) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Debe seleccionar un mes y tipo de estado', life: 3000 });
-            console.error('Mes o tipo de estado no definidos');
+        if (!tipoEstado || !quincena) {  // Cambié mes por quincena
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Debe seleccionar una quincena y tipo de estado', life: 3000 });
+            console.error('Quincena o tipo de estado no definidos');
             return;
         }
 
@@ -58,7 +60,7 @@ export default function TablaRetenciones({ anio, mes, session, setProgress, setU
         formData.append('extra', '');  // Siempre enviar el parámetro extra
 
         try {
-            const response = await axios.post(`${API_BASE_URL}/uploads?anio=${String(anio)}&mes=${mes}&tipo=${capitalizeFirstLetter(tipoEstado)}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/SubirEdoCuenta?mes=${quincena}&anio=${anio}&vuser=${session?.user?.name || 'unknown'}&tipo_carga=Dispersion`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -72,45 +74,36 @@ export default function TablaRetenciones({ anio, mes, session, setProgress, setU
             console.log('File uploaded successfully', response.data);
             toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
 
-            fetchRetencionesData();
+            fetchDispersionesData();
         } catch (error) {
             console.error('Error uploading file', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
         }
     };
 
-    const handleFileDownload = async (tipoEstado, archivoNombre) => {
-        if (!tipoEstado || !mes) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Debe seleccionar un mes y tipo de estado', life: 3000 });
-            console.error('Mes o tipo de estado no definidos');
-            return;
-        }
-
-        const nombreSinExtension = removeFileExtension(archivoNombre);
-
+    const handleProcesarDispersiones = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/download?anio=${String(anio)}&mes=${mes}&tipo=${capitalizeFirstLetter(tipoEstado)}&nombre=${nombreSinExtension}`, {
-                responseType: 'blob',
-            });
+            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
+            const endpoint = `${API_BASE_URL}/SubirEdoCuenta/dataBase?mes=${quincena}&anio=${anio}&vuser=${usuario}&tipo_carga=Dispersion&varchivo1=dispersión_012024`; // Cambié mes por quincena en el endpoint
 
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', archivoNombre || `reporte_${tipoEstado}_${anio}_${mes}.xlsx`);
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Archivo descargado correctamente', life: 3000 });
+            // Hacer la solicitud al endpoint para procesar
+            const response = await axios.get(endpoint);
+
+            if (response.status === 200) {
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Dispersiones procesadas correctamente.', life: 3000 });
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al procesar las dispersiones.', life: 3000 });
+            }
         } catch (error) {
-            console.error('Error downloading file', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+            console.error('Error al procesar las dispersiones:', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un error al procesar las dispersiones.', life: 3000 });
         }
     };
 
     const uploadTemplate = (rowData) => {
         return (
             <div>
-                <Button variant="contained" component="label" className={styles.uploadButton} disabled={!mes}>
+                <Button variant="contained" component="label" className={styles.uploadButton} disabled={!quincena}>  {/* Cambié la validación de mes a quincena */}
                     Subir archivo
                     <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoEstado)} accept=".xlsx" />
                 </Button>
@@ -118,22 +111,26 @@ export default function TablaRetenciones({ anio, mes, session, setProgress, setU
         );
     };
 
-    const descargaTemplate = (rowData) => {
-        return (
-            <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.paramTipoEstado, rowData.archivoNombre)} disabled={!mes}>
-                <i className="pi pi-download"></i>
-            </button>
-        );
-    };
-
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
-            <DataTable value={retenciones} sortMode="multiple" className={styles.dataTable}>
+            <DataTable value={dispersiones} sortMode="multiple" className={styles.dataTable}>
                 <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '50%' }}></Column>
                 <Column body={uploadTemplate} header="SUBIR ARCHIVO" style={{ width: '25%' }}></Column>
-                <Column body={descargaTemplate} header="DESCARGA" style={{ width: '25%' }}></Column>
             </DataTable>
+
+            {/* Botón para procesar las Dispersiones */}
+            {canProcess && (
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleProcesarDispersiones}
+                    className={styles.procesarButton}
+                    style={{ marginTop: '1rem' }}
+                >
+                    Procesar Dispersiones
+                </Button>
+            )}
         </div>
     );
 }

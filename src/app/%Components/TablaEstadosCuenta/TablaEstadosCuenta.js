@@ -13,6 +13,7 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
     const [estadosCuenta, setEstadosCuenta] = useState([
         { nombreArchivo: 'Vacío', paramTipoEstado: 'cuenta', archivoNombre: '', mes: '' }
     ]);
+    const [canProcess, setCanProcess] = useState(false); // Controla si se muestra el botón "Procesar Estados de Cuenta"
 
     useEffect(() => {
         fetchEstadosCuentaData();
@@ -35,6 +36,7 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
             }, [...estadosCuenta]);
 
             setEstadosCuenta(data);
+            setCanProcess(data.some(item => item.archivoNombre !== 'Vacío')); // Habilitar el botón solo si hay archivos subidos
         } catch (error) {
             console.error('Error fetching estados de cuenta data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los estados de cuenta', life: 3000 });
@@ -58,7 +60,7 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
         formData.append('extra', '');  // Siempre enviar el parámetro extra
 
         try {
-            const response = await axios.post(`${API_BASE_URL}/uploads?anio=${String(anio)}&mes=${mes}&tipo=${capitalizeFirstLetter(tipoEstado)}&usuario=${session?.user?.name || 'unknown'}`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/SubirEdoCuenta?mes=${mes}&anio=${anio}&vuser=${session?.user?.name || 'unknown'}&tipo_carga=EstadosCuenta`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -79,31 +81,22 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
         }
     };
 
-    const handleFileDownload = async (tipoEstado, archivoNombre) => {
-        if (!tipoEstado || !mes) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Debe seleccionar un mes y tipo de estado', life: 3000 });
-            console.error('Mes o tipo de estado no definidos');
-            return;
-        }
-
-        const nombreSinExtension = removeFileExtension(archivoNombre);
-
+    const handleProcesarEstadosCuenta = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/download?anio=${String(anio)}&mes=${mes}&tipo=${capitalizeFirstLetter(tipoEstado)}&nombre={nombreSinExtension}`, {
-                responseType: 'blob',
-            });
+            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
+            const endpoint = `${API_BASE_URL}/SubirEdoCuenta/dataBase?mes=${mes}&anio=${anio}&vuser=${usuario}&tipo_carga=EstadosCuenta&varchivo1=edoCuenta_01720122252006_012024`; // Ajustar el endpoint con parámetros
 
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', archivoNombre || `reporte_${tipoEstado}_${anio}_${mes}.xlsx`);
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Archivo descargado correctamente', life: 3000 });
+            // Hacer la solicitud al endpoint para procesar
+            const response = await axios.get(endpoint);
+
+            if (response.status === 200) {
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Estados de Cuenta procesados correctamente.', life: 3000 });
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al procesar los estados de cuenta.', life: 3000 });
+            }
         } catch (error) {
-            console.error('Error downloading file', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+            console.error('Error al procesar los estados de cuenta:', error);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un error al procesar los estados de cuenta.', life: 3000 });
         }
     };
 
@@ -112,17 +105,9 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
             <div>
                 <Button variant="contained" component="label" className={styles.uploadButton} disabled={!mes}>
                     Subir archivo
-                    <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoEstado)} accept=".xlsx" />
+                    <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoEstado)} accept=".txt" />
                 </Button>
             </div>
-        );
-    };
-
-    const descargaTemplate = (rowData) => {
-        return (
-            <button className={styles.downloadButton} onClick={() => handleFileDownload(rowData.paramTipoEstado, rowData.archivoNombre)} disabled={!mes}>
-                <i className="pi pi-download"></i>
-            </button>
         );
     };
 
@@ -132,8 +117,19 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
             <DataTable value={estadosCuenta} sortMode="multiple" className={styles.dataTable}>
                 <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '50%' }}></Column>
                 <Column body={uploadTemplate} header="SUBIR ARCHIVO" style={{ width: '25%' }}></Column>
-                <Column body={descargaTemplate} header="DESCARGA" style={{ width: '25%' }}></Column>
             </DataTable>
+
+            {/* Botón para procesar los Estados de Cuenta */}
+
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={handleProcesarEstadosCuenta}
+                className={styles.procesarButton}
+                style={{ marginTop: '1rem' }}
+            >
+                Procesar Estados de Cuenta
+            </Button>
         </div>
     );
 }

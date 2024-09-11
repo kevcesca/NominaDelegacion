@@ -22,11 +22,12 @@ import { useMediaQuery } from '@mui/material';
 
 export default function NavBar() {
     const isSmallScreen = useMediaQuery('(max-width: 600px)');
-    const [collapsed, setCollapsed] = React.useState(isSmallScreen);
+    // Inicializa collapsed como true para que esté contraída por defecto
+    const [collapsed, setCollapsed] = React.useState(true); 
     const sidebarRef = useRef(null);
 
     useEffect(() => {
-        setCollapsed(isSmallScreen);
+        setCollapsed(isSmallScreen); // Contraer la barra en pantallas pequeñas
     }, [isSmallScreen]);
 
     useEffect(() => {

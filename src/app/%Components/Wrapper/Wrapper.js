@@ -25,7 +25,7 @@ export default function Wrapper({ children, session }) {
         <div className={`${styles.wrapperContainer} ${collapsed ? styles.collapsed : ''}`}>
             <Grid container spacing={0} style={{ flex: 1 }}>
                 {/* Sidebar */}
-                <Grid 
+                <Grid
                     item 
                     xs={collapsed ? 1 : 'auto'} 
                     className={styles.sidebarFixed} /* Aquí se aplica la clase sidebarFixed */

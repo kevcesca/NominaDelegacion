@@ -15,7 +15,7 @@ const Banner = () => {
                     <Typography variant="h3" className={styles.title}>
                         Procesos de Gestión de Nómina en Azcapotzalco
                     </Typography>
-                    <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
+                    <Link className={styles.tWhite} href="/CrearNomina" passHref>
                         <Button variant="contained" color="primary" endIcon={<ArrowForwardIcon />} className={styles.button}>
                             Más Información
                         </Button>

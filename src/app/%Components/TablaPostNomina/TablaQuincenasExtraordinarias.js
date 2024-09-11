@@ -28,7 +28,8 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
     const [extraordinarios, setExtraordinarios] = useState([]);
     const [progress, setProgress] = useState(0);
     const [selectedTipo, setSelectedTipo] = useState('');
-    const [file, setFile] = useState(null);
+    const [files, setFiles] = useState([]); // Almacena múltiples archivos
+    const [canProcess, setCanProcess] = useState(false); // Controla si se puede procesar la nómina extraordinaria
 
     useEffect(() => {
         fetchExtraordinariosData();
@@ -52,13 +53,14 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     nombreArchivo: item.nombre_archivo || 'Vacío',
                     tipoNomina: 'Extraordinarios',
                     archivoNombre: item.nombre_archivo,
-                    tipoExtraordinario: item.extra_desc || '', // Utilizando `extra_desc`
-                    userCarga: item.user_carga || 'Desconocido', // Añadiendo el usuario que cargó el archivo
-                    aprobado: item.aprobado,  // Nueva columna para aprobación
-                    aprobado2: item.aprobado2,  // Nueva columna para segunda aprobación
+                    tipoExtraordinario: item.extra_desc || '', 
+                    userCarga: item.user_carga || 'Desconocido', 
+                    aprobado: item.aprobado, 
+                    aprobado2: item.aprobado2, 
                 }));
 
             setExtraordinarios(data);
+            setCanProcess(data.length > 0); // Habilita el botón "Procesar" si hay archivos subidos
         } catch (error) {
             console.error('Error fetching extraordinarios data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos', life: 3000 });
@@ -66,38 +68,40 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
     };
 
     const handleFileUpload = async (event) => {
-        const selectedFile = event.target.files[0];
-        setFile(selectedFile);
+        const selectedFiles = event.target.files; // Permite múltiples archivos
+        setFiles(selectedFiles);
 
-        if (!selectedFile || !selectedTipo) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Debes seleccionar un archivo y un tipo de extraordinario', life: 3000 });
+        if (selectedFiles.length === 0 || !selectedTipo) {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Debes seleccionar al menos un archivo y un tipo de extraordinario', life: 3000 });
             return;
         }
 
-        setProgress(0);
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        formData.append('extra', selectedTipo);
+        for (const file of selectedFiles) { // Iterar y subir cada archivo
+            setProgress(0);
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('extra', selectedTipo);
 
-        try {
-            const response = await axios.post(`${API_BASE_URL}/uploads?quincena=${quincena}&anio=${String(anio)}&tipo=Extraordinarios&usuario=${session?.user?.name || 'unknown'}&extra=${selectedTipo}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                onUploadProgress: (progressEvent) => {
-                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setProgress(progress);
-                },
-            });
+            try {
+                const response = await axios.post(`${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Extraordinarios&usuario=${session?.user?.name || 'unknown'}&extra=${selectedTipo}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    onUploadProgress: (progressEvent) => {
+                        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        setProgress(progress);
+                    },
+                });
 
-            setProgress(100);
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
-            fetchExtraordinariosData();
-            setFile(null);
-        } catch (error) {
-            console.error('Error uploading file', error);
-            const errorMessage = `Error al subir el archivo: ${error.response?.data?.message || error.message}`;
-            toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+                setProgress(100);
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
+                fetchExtraordinariosData();
+                setFiles([]);
+            } catch (error) {
+                console.error('Error uploading file', error);
+                const errorMessage = `Error al subir el archivo: ${error.response?.data?.message || error.message}`;
+                toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+            }
         }
     };
 
@@ -127,6 +131,27 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
         } catch (error) {
             console.error('Error downloading file', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+        }
+    };
+
+    const handleProcesarNomina = async () => {
+        try {
+            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
+            const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Extraordinarios&usuario=${usuario}&extra=${selectedTipo}`; // Ajustar endpoint y parámetros
+
+            // Hacer la solicitud al endpoint de procesar nómina
+            const response = await axios.get(endpoint);
+
+            if (response.status === 200) {
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Nómina extraordinaria procesada correctamente.', life: 3000 });
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al procesar la nómina extraordinaria.', life: 3000 });
+            }
+        } catch (error) {
+            // Aquí manejamos el error específico y lo mostramos al usuario en un toast
+            const errorMessage = error.response?.data || 'Error desconocido al procesar la nómina extraordinaria.';
+            console.error('Error al procesar la nómina extraordinaria:', errorMessage);
+            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al procesar la nómina extraordinaria: ${errorMessage}`, life: 5000 });
         }
     };
 
@@ -173,10 +198,10 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     variant="contained"
                     component="label"
                     className={styles.uploadButton}
-                    disabled={!selectedTipo} // Deshabilitar solo si no se ha seleccionado un tipo
+                    disabled={!selectedTipo}
                 >
                     Subir Nómina Extraordinaria
-                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" />
+                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple /> {/* Soporte para múltiples archivos */}
                 </Button>
                 <Select
                     value={selectedTipo}
@@ -192,10 +217,19 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                         <MenuItem key={index} value={tipo}>{tipo}</MenuItem>
                     ))}
                 </Select>
+
+                {canProcess && (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleProcesarNomina}
+                        className={styles.procesarButton}
+                        style={{ marginTop: '1rem' }}
+                    >
+                        Procesar Nómina Extraordinaria
+                    </Button>
+                )}
             </div>
         </div>
     );
 }
-
-
-// 1000191

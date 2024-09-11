@@ -1,26 +1,27 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
-import Link from 'next/link';
-import { Button, Box, Select, MenuItem, Typography, Alert } from '@mui/material';
-import TablaComparacionCampos from '../%Components/TablasCambios/TablaComparacionCampos';
-import TablaConsultaBitacora from '../%Components/TablasCambios/TablaConsultaBitacora';
+import { Button, Box, Select, MenuItem, Alert } from '@mui/material';
 import TablaConsultaDetallesBitacora from '../%Components/TablasCambios/TablaConsultaDetallesBitacora';
-import TablaBitacoraEmpleados from '../%Components/TablasCambios/TablaBitacoraEmpleados';
 import { ThemeProvider } from '@mui/material';
 import theme from '../$tema/theme';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Validacion() {
-
-    // Hook para el router con el  App Router
+    const searchParams = useSearchParams(); // Hook para obtener los parámetros de la URL
     const router = useRouter();
-    // Estados para los valores seleccionados en las listas desplegables
-    const [anio, setAnio] = useState('2024');
-    const [quincena, setQuincena] = useState('01');
-    const [tipoNomina, setTipoNomina] = useState('BASE');
-    const [tablaSeleccionada, setTablaSeleccionada] = useState('comparacion'); // Estado para la tabla seleccionada
 
+    // Obtener anio y quincena de los parámetros de la URL
+    const anioParam = searchParams.get('anio');
+    const quincenaParam = searchParams.get('quincena');
+
+    // Estados para los valores seleccionados en las listas desplegables
+    const [anio, setAnio] = useState(anioParam || '2024'); // Usar el valor de la URL o un valor por defecto
+    const [quincena, setQuincena] = useState(quincenaParam || '01'); // Usar el valor de la URL o un valor por defecto
+    const [tipoNomina, setTipoNomina] = useState('BASE');
+
+    // Definición de las quincenas completas
     const quincenas = [
         { label: '1ra ene', value: '01' },
         { label: '2da ene', value: '02' },
@@ -48,18 +49,17 @@ export default function Validacion() {
         { label: '2da dic', value: '24' },
     ];
 
+    // Definición de los tipos de nómina
     const tiposNomina = [
         { label: 'Base', value: 'BASE' },
         { label: 'Honorarios', value: 'HONORARIOS' },
         { label: 'Extraordinarios', value: 'EXTRAORDINARIOS' },
     ];
 
-    const tablas = [
-        { label: 'Comparación de Campos', value: 'comparacion' },
-        { label: 'Consulta de Bitácora', value: 'bitacora' },
-        { label: 'Consulta de Detalles de Bitácora', value: 'detallesBitacora' },
-        { label: 'Bitácora de Empleados', value: 'bitacoraEmpleados' },
-    ];
+    // Función para navegar al Resumen de Nómina con los parámetros seleccionados
+    const handleNavigateToResumen = () => {
+        router.push(`/CrearNomina/ProcesarDatos?anio=${anio}&quincena=${quincena}`);
+    };
 
     return (
         <ThemeProvider theme={theme}>
@@ -71,8 +71,9 @@ export default function Validacion() {
                     Esta es la ventana para visualizar los cambios en comparación con la nómina anterior. Aquí podrás ver las diferencias por quincena, tipo de nómina y detalle por empleado.
                 </Alert>
 
-                {/* Drop-down lists para Año, Quincena, Tipo de Nómina y Tabla a Mostrar */}
+                {/* Selectores para Año, Quincena y Tipo de Nómina */}
                 <Box className={styles.selectorContainer}>
+                    {/* Selector para Año */}
                     <Select value={anio} onChange={(e) => setAnio(e.target.value)} variant="outlined">
                         {[...Array(21).keys()].map(n => (
                             <MenuItem key={2024 + n} value={2024 + n}>
@@ -80,6 +81,8 @@ export default function Validacion() {
                             </MenuItem>
                         ))}
                     </Select>
+
+                    {/* Selector para Quincena */}
                     <Select value={quincena} onChange={(e) => setQuincena(e.target.value)} variant="outlined">
                         {quincenas.map((quin, index) => (
                             <MenuItem key={index} value={quin.value}>
@@ -87,6 +90,8 @@ export default function Validacion() {
                             </MenuItem>
                         ))}
                     </Select>
+
+                    {/* Selector para Tipo de Nómina */}
                     <Select value={tipoNomina} onChange={(e) => setTipoNomina(e.target.value)} variant="outlined">
                         {tiposNomina.map((tipo, index) => (
                             <MenuItem key={index} value={tipo.value}>
@@ -96,54 +101,25 @@ export default function Validacion() {
                     </Select>
                 </Box>
 
-                <Box className={styles.selectorContainer}>
-                    <p>Selecciona la tabla que quieras generar:</p>
-                    <Select className={styles.tableSelector} value={tablaSeleccionada} onChange={(e) => setTablaSeleccionada(e.target.value)} variant="outlined">
-                        {tablas.map((tabla, index) => (
-                            <MenuItem key={index} value={tabla.value} >
-                                {tabla.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </Box>
+                {/* Tabla de consulta */}
+                <div className={styles.tableContainer}>
+                    <TablaConsultaDetallesBitacora anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
+                    <hr />
+                </div>
 
-                {/* Renderizado condicional de las tablas según la selección */}
-                {tablaSeleccionada === 'comparacion' && (
-                    <div className={styles.tableContainer}>
-                        <TablaComparacionCampos anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
-                        <hr />
-                    </div>
-                )}
-
-                {tablaSeleccionada === 'bitacora' && (
-                    <div className={styles.tableContainer}>
-                        <TablaConsultaBitacora anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
-                        <hr />
-                    </div>
-                )}
-
-                {tablaSeleccionada === 'detallesBitacora' && (
-                    <div className={styles.tableContainer}>
-                        <TablaConsultaDetallesBitacora anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
-                        <hr />
-                    </div>
-                )}
-
-                {tablaSeleccionada === 'bitacoraEmpleados' && (
-                    <div className={styles.tableContainer}>
-                        <TablaBitacoraEmpleados anio={anio} quincena={quincena} tipoNomina={tipoNomina} />
-                        <hr />
-                    </div>
-                )}
-
+                {/* Botones de navegación */}
                 <div className={styles.buttonContainer}>
-                    {/* Botón para Procesar Datos */}
-                    <Link href={`/CrearNomina/ProcesarDatos`} passHref>
-                        <Button variant="contained" color="primary" className={styles.exportButton}>
-                            Resumen de Nómina
-                        </Button>
-                    </Link>
-                    {/* Botón para regresar a la página anterior */}
+                    {/* Botón para ir al Resumen de Nómina con parámetros en la URL */}
+                    <Button 
+                        variant="contained" 
+                        color="primary" 
+                        className={styles.exportButton} 
+                        onClick={handleNavigateToResumen}
+                    >
+                        Resumen de Nómina
+                    </Button>
+                    
+                    {/* Botón para regresar */}
                     <Button
                         variant="contained"
                         color="secondary"
@@ -153,7 +129,6 @@ export default function Validacion() {
                         Regresar
                     </Button>
                 </div>
-
             </main>
         </ThemeProvider>
     );

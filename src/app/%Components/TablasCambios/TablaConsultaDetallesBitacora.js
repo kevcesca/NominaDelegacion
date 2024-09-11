@@ -12,7 +12,7 @@ import { Collapse } from '@mui/material';
 import { ThemeProvider, Typography, Box } from '@mui/material';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
+import 'primeicons/primeicons.css'; // Asegúrate de que PrimeIcons esté cargado
 import ColumnSelector from '../ColumnSelector/ColumnSelector';
 import theme from '../../$tema/theme';
 import styles from './TablasCambios.module.css';
@@ -23,7 +23,7 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [visibleColumns, setVisibleColumns] = useState({});
-    const [showTable, setShowTable] = useState(false);
+    const [showTable, setShowTable] = useState(true); // Mostrar la tabla por defecto
     const [collapseOpen, setCollapseOpen] = useState(false);
     const dt = useRef(null);
     const toast = useRef(null);
@@ -61,9 +61,20 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
         fetchData();
     }, [anio, quincena, tipoNomina]);
 
+    useEffect(() => {
+        // Inicializar las columnas visibles con las columnas predeterminadas
+        const defaultColumns = availableColumns.reduce((acc, column) => {
+            if (column.defaultSelected) {
+                acc[column.key] = true;
+            }
+            return acc;
+        }, {});
+        setVisibleColumns(defaultColumns);
+    }, []);
+
     const handleColumnSelectionChange = (selectedColumns) => {
         setVisibleColumns(selectedColumns);
-        setShowTable(true);
+        setShowTable(true); // Mostrar la tabla cuando se cambien las columnas
         setCollapseOpen(false);
     };
 
@@ -160,15 +171,15 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
         <ThemeProvider theme={theme}>
             <div className="card">
                 <Toast ref={toast} />
-                <Box className={styles.dropForm}>
-                    <Typography variant="h6" className={styles.exportText}>Campos para generar tabla</Typography>
+                <Box className={styles.ColumnSelector}>
                     <Button
                         type="button"
-                        icon={`pi ${collapseOpen ? 'pi-chevron-up' : 'pi-chevron-down'}`}
+                        icon="pi pi-filter" // Cambiar el icono a un icono de filtro
                         severity="secondary"
                         rounded
                         onClick={() => setCollapseOpen(!collapseOpen)}
                         data-pr-tooltip="Configurar columnas"
+                        className={styles.botonFiltro}
                     />
                 </Box>
 
@@ -201,7 +212,7 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                 )} />
 
                 <Collapse in={collapseOpen}>
-                    <Box className="p-3">
+                    <Box>
                         <ColumnSelector
                             availableColumns={availableColumns}
                             onSelectionChange={handleColumnSelectionChange}
@@ -212,32 +223,30 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                 {isLoading ? (
                     <ProgressBar mode="indeterminate" style={{ height: '6px' }} />
                 ) : (
-                    showTable && (
-                        <DataTable
-                            ref={dt}
-                            value={data}
-                            paginator
-                            rows={10}
-                            rowsPerPageOptions={[5, 10, 25]}
-                            globalFilter={globalFilter}
-                            header={header}
-                            responsiveLayout="scroll"
-                            className="p-datatable-sm p-datatable-gridlines"
-                        >
-                            {availableColumns.map(
-                                (column) =>
-                                    visibleColumns[column.key] && (
-                                        <Column
-                                            key={column.key}
-                                            field={column.key}
-                                            header={column.label}
-                                            sortable
-                                            style={{ minWidth: '150px' }}
-                                        />
-                                    )
-                            )}
-                        </DataTable>
-                    )
+                    <DataTable
+                        ref={dt}
+                        value={data}
+                        paginator
+                        rows={10}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        globalFilter={globalFilter}
+                        header={header}
+                        responsiveLayout="scroll"
+                        className="p-datatable-sm p-datatable-gridlines"
+                    >
+                        {availableColumns.map(
+                            (column) =>
+                                visibleColumns[column.key] && (
+                                    <Column
+                                        key={column.key}
+                                        field={column.key}
+                                        header={column.label}
+                                        sortable
+                                        style={{ minWidth: '150px' }}
+                                    />
+                                )
+                        )}
+                    </DataTable>
                 )}
             </div>
         </ThemeProvider>
