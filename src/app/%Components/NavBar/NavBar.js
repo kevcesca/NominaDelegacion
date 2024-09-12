@@ -110,6 +110,11 @@ export default function NavBar() {
                             <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Universos</MenuItem>
                         </Link>
                     </SubMenu>
+                    <SubMenu label="Estados de cuenta" icon={<DescriptionIcon />}>
+                        <Link className={styles.tWhite} href="/CargarEstadosCuenta" passHref>
+                            <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cargar Estados</MenuItem>
+                        </Link>
+                    </SubMenu>
                     <SubMenu label="Reportes" icon={<AssessmentIcon />}>
                         <Link className={styles.tWhite} href="/ListaReportes" passHref>
                             <MenuItem icon={<DescriptionIcon />} className={styles.bgblack} onClick={handleLinkClick}>Lista Reportes</MenuItem>

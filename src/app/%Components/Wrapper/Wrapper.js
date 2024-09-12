@@ -26,18 +26,18 @@ export default function Wrapper({ children, session }) {
             <Grid container spacing={0} style={{ flex: 1 }}>
                 {/* Sidebar */}
                 <Grid
-                    item 
-                    xs={collapsed ? 1 : 'auto'} 
+                    item
+                    xs={collapsed ? 1 : 'auto'}
                     className={styles.sidebarFixed} /* Aquí se aplica la clase sidebarFixed */
                 >
                     <NavBar collapsed={collapsed} setCollapsed={setCollapsed} />
                 </Grid>
 
                 {/* Contenido main */}
-                <Grid 
-                    item 
-                    xs 
-                    style={{ display: 'flex', flexDirection: 'column', marginLeft: collapsed ? 0 : '10px', flex: 1, marginLeft:'5rem' }}
+                <Grid
+                    item
+                    xs
+                    style={{ display: 'flex', flexDirection: 'column', marginLeft: collapsed ? 0 : '10px', flex: 1, marginLeft: '5rem' }}
                 >
                     <AppBar className={styles.AppBar} />
                     <div className={styles.content}>
