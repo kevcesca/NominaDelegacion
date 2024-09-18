@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
@@ -6,47 +5,37 @@ import { Column } from 'primereact/column';
 import styles from './TablaEstadosCuenta.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
+import { ProgressBar } from 'primereact/progressbar'; // Importamos ProgressBar para mostrar progreso
 import API_BASE_URL from '../../%Config/apiConfig';
 
-export default function TablaEstadosCuenta({ anio, mes, session, setProgress, setUploaded }) {
+export default function TablaEstadosCuenta({ anio, quincena, session, setProgress, setUploaded }) {
     const toast = useRef(null);
-    const [estadosCuenta, setEstadosCuenta] = useState([
-        { nombreArchivo: 'Vacío', paramTipoEstado: 'cuenta', archivoNombre: '', mes: '' }
-    ]);
-    const [canProcess, setCanProcess] = useState(false); // Controla si se muestra el botón "Procesar Estados de Cuenta"
+    const [estadosCuenta, setEstadosCuenta] = useState([]); // Almacenará los datos obtenidos del servicio
+    const [isUploadDisabled, setIsUploadDisabled] = useState(false); // Deshabilita el botón de carga si es necesario
+    const [localProgress, setLocalProgress] = useState(0); // Para manejar el progreso de la carga localmente
+    const [refresh, setRefresh] = useState(false); // Estado para forzar refresco del componente
 
+    // Efecto para obtener los datos al cambiar el año o la quincena o cuando se refresca
     useEffect(() => {
-        fetchEstadosCuentaData();
-    }, [anio, mes]);
+        if (anio && quincena) {
+            fetchEstadosCuentaData();
+        }
+    }, [anio, quincena, refresh]);
 
+    // Función para obtener los datos desde el servicio
     const fetchEstadosCuentaData = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&mes=${mes}&tipo=Cuenta`);
-            const data = response.data.reduce((acc, item) => {
-                const tipoIndex = acc.findIndex(row => row.paramTipoEstado === item.nombre_estado);
-                if (tipoIndex !== -1) {
-                    acc[tipoIndex] = {
-                        nombreArchivo: item.nombre_archivo || 'Vacío',
-                        paramTipoEstado: item.nombre_estado,
-                        archivoNombre: item.nombre_archivo || '',
-                        mes: item.mes || ''
-                    };
-                }
-                return acc;
-            }, [...estadosCuenta]);
-
-            setEstadosCuenta(data);
-            setCanProcess(data.some(item => item.archivoNombre !== 'Vacío')); // Habilitar el botón solo si hay archivos subidos
+            const response = await axios.get(`${API_BASE_URL}/consultaEdoCta?anio=${anio}&quincena=${quincena}`);
+            setEstadosCuenta(response.data); // Asume que la respuesta contiene el array esperado
         } catch (error) {
-            console.error('Error fetching estados de cuenta data', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los estados de cuenta', life: 3000 });
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los datos', life: 3000 });
         }
     };
 
+    // Función para subir archivo
     const handleFileUpload = async (event, tipoEstado) => {
-        if (!tipoEstado || !mes) {
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Debe seleccionar un mes y tipo de estado', life: 3000 });
-            console.error('Mes o tipo de estado no definidos');
+        if (!tipoEstado || !quincena) {
+            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Debe seleccionar una quincena y tipo de estado', life: 3000 });
             return;
         }
 
@@ -60,7 +49,7 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
         formData.append('extra', '');  // Siempre enviar el parámetro extra
 
         try {
-            const response = await axios.post(`${API_BASE_URL}/SubirEdoCuenta?mes=${mes}&anio=${anio}&vuser=${session?.user?.name || 'unknown'}&tipo_carga=EstadosCuenta`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/SubirEdoCuenta?quincena=${quincena}&anio=${anio}&vuser=${session?.user?.name || 'unknown'}&tipo_carga=EstadosCuenta`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -71,43 +60,43 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
             });
             setProgress(100);
             setUploaded(true);
-            console.log('File uploaded successfully', response.data);
             toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
-
-            fetchEstadosCuentaData();
+            
+            // Forzar el refresco de la tabla de estados de cuenta
+            setRefresh(prev => !prev); // Cambia el estado de refresh para forzar el re-render
         } catch (error) {
-            console.error('Error uploading file', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
         }
     };
 
-    const handleProcesarEstadosCuenta = async () => {
+    // Función para procesar el archivo de un registro específico
+    const handleProcesarArchivo = async (archivoNombre) => {
         try {
-            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
-            const endpoint = `${API_BASE_URL}/SubirEdoCuenta/dataBase?mes=${mes}&anio=${anio}&vuser=${usuario}&tipo_carga=EstadosCuenta&varchivo1=edoCuenta_01720122252006_012024`; // Ajustar el endpoint con parámetros
-
-            // Hacer la solicitud al endpoint para procesar
+            const usuario = session?.user?.name || 'unknown'; // Obtener el nombre del usuario
+            const endpoint = `${API_BASE_URL}/SubirEdoCuenta/dataBase?anio=${anio}&quincena=${quincena}&vuser=${usuario}&tipo_carga=EstadosCuenta&varchivo1=${archivoNombre}`;
             const response = await axios.get(endpoint);
 
             if (response.status === 200) {
-                toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Estados de Cuenta procesados correctamente.', life: 3000 });
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo ${archivoNombre} procesado correctamente.`, life: 3000 });
             } else {
-                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al procesar los estados de cuenta.', life: 3000 });
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al procesar el archivo.', life: 3000 });
             }
         } catch (error) {
-            console.error('Error al procesar los estados de cuenta:', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un error al procesar los estados de cuenta.', life: 3000 });
+            toast.current.show({ severity: 'error', summary: 'Error', detail: `Hubo un error al procesar el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
         }
     };
 
-    const uploadTemplate = (rowData) => {
+    // Renderiza el botón de "Procesar" en cada fila de la tabla
+    const procesarArchivoTemplate = (rowData) => {
         return (
-            <div>
-                <Button variant="contained" component="label" className={styles.uploadButton} disabled={!mes}>
-                    Subir archivo
-                    <input type="file" hidden onChange={(e) => handleFileUpload(e, rowData.paramTipoEstado)} accept=".txt" />
-                </Button>
-            </div>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleProcesarArchivo(rowData.nombre_archivo)} // Procesar este archivo específico
+                className={styles.procesarButton}
+            >
+                Procesar
+            </Button>
         );
     };
 
@@ -115,21 +104,24 @@ export default function TablaEstadosCuenta({ anio, mes, session, setProgress, se
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
             <DataTable value={estadosCuenta} sortMode="multiple" className={styles.dataTable}>
-                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '50%' }}></Column>
-                <Column body={uploadTemplate} header="SUBIR ARCHIVO" style={{ width: '25%' }}></Column>
+                <Column field="nombre_archivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '40%' }}></Column>
+                <Column field="user_carga" header="USUARIO" sortable style={{ width: '20%' }}></Column>
+                <Column body={procesarArchivoTemplate} header="PROCESAR ARCHIVO" style={{ width: '20%' }}></Column>
             </DataTable>
-
-            {/* Botón para procesar los Estados de Cuenta */}
 
             <Button
                 variant="contained"
-                color="primary"
-                onClick={handleProcesarEstadosCuenta}
-                className={styles.procesarButton}
-                style={{ marginTop: '1rem' }}
+                component="label"
+                className={styles.uploadButton}
+                disabled={isUploadDisabled}
             >
-                Procesar Estados de Cuenta
+                Subir Estados de Cuenta
+                <input type="file" hidden onChange={(e) => handleFileUpload(e, 'estadoCuenta')} />
             </Button>
+
+            {localProgress > 0 && (
+                <ProgressBar value={localProgress} className={styles.progressBar} />
+            )}
         </div>
     );
 }
