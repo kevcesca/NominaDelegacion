@@ -2,6 +2,7 @@
     padding: 20px;
     font-family: Arial, sans-serif;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .h1 {
@@ -23,10 +24,6 @@
     padding: 5px;
     border: 1px solid var(--color-primary);
     border-radius: 4px;
-}
-
-.progressContainer {
-    margin-bottom: 20px;
 }
 
 .h2 {
@@ -76,6 +73,3 @@
     background-color: var(--color-secondary-dark);
 }
 
-.margin{
-    margin-bottom: 2rem;
-}

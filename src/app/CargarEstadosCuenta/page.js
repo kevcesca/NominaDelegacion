@@ -32,10 +32,6 @@ function CargarEstadosCuenta() {
 
                 {/* Sección de Estados de Cuenta */}
                 <Typography variant="h5" className={styles.h2}>Estados de Cuenta</Typography>
-                <Box className={styles.progressContainer}>
-                    <Typography>Progreso de datos</Typography>
-                    <ProgressBar value={progressEstadosCuenta} className={styles.progressBar} />
-                </Box>
                 <TablaEstadosCuenta
                     anio={anio}
                     mes={mes}
@@ -44,7 +40,6 @@ function CargarEstadosCuenta() {
                     setProgress={setProgressEstadosCuenta}
                     setUploaded={() => {}}
                 />
-                <DataTableExample className={styles.margin} />
 
                 {/* Sección de Retenciones */}
                 <Typography variant="h5" className={styles.h2}>Dispersiones</Typography>

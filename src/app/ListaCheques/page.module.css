@@ -1,15 +1,60 @@
-/* src/app/comparative/page.module.css */
 .main {
     padding: 20px;
-    overflow-x: auto;
-    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .h1 {
-    text-align: center;
     margin-bottom: 20px;
-    color: white;
-    background-color: #bc955c;
-    padding: 1rem;
-    border-radius: 10px;
+}
+
+.dropdownContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 20px; /* Aumentamos el espacio entre el label y el dropdown */
+}
+
+.label {
+    font-weight: bold;
+}
+
+.dropdown {
+    width: 200px;
+}
+
+.relatedInfo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Aumentamos el espacio entre las cajas */
+    margin-top: 20px;
+    justify-content: center; /* Mantener las cajas centradas */
+    width: 100%;
+}
+
+.infoBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #e0f7fa;
+    padding: 15px;
+    border-radius: 5px;
+    min-width: 150px;
+    max-width: 200px;
+    flex: 1 1 150px;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px; /* Añadir espacio debajo de cada caja para evitar que se encimen verticalmente */
+}
+
+.infoBox span:first-child {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.infoBox span:last-child {
+    font-size: 1.1rem;
 }
