@@ -26,7 +26,7 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 export default function NavBar() {
     const isSmallScreen = useMediaQuery('(max-width: 600px)');
     // Inicializa collapsed como true para que esté contraída por defecto
-    const [collapsed, setCollapsed] = React.useState(true); 
+    const [collapsed, setCollapsed] = React.useState(true);
     const sidebarRef = useRef(null);
 
     useEffect(() => {
@@ -57,18 +57,22 @@ export default function NavBar() {
                 collapsed={collapsed}
                 transitionDuration={1000}
                 rootStyles={{
+                    width: '25vw',
                     [`.${sidebarClasses.container}`]: {
                         backgroundColor: '#f4f4f47a',
                         border: '2px solid transparent',
                     },
                     [`.${sidebarClasses.MenuItem}`]: {
                         backgroundColor: 'black',
-                        color: 'black',
-                    },
+                        color: 'black'
+                    }
                 }}
             >
                 <Menu
                     menuItemStyles={{
+                        subMenuContent: {
+                            width: '30vw',  // Ajusta el ancho deseado aquí 
+                        },
                         button: ({ level, active, disabled }) => ({
                             '&:hover': {
                                 backgroundColor: '#9f2241',
@@ -80,12 +84,12 @@ export default function NavBar() {
                     <button className={styles.botonNavbar} onClick={() => setCollapsed(!collapsed)}>
                         <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
                     </button>
-                    <SubMenu label="Calendario de nómina" icon={<CalendarTodayIcon />}>
+                    <SubMenu className={styles.subMenu} label="Calendario de nómina" icon={<CalendarTodayIcon />}>
                         <Link className={styles.tWhite} href="/Calendario" passHref>
                             <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack} onClick={handleLinkClick}>Editar</MenuItem>
                         </Link>
                     </SubMenu>
-                    
+
 
                     <SubMenu label="Usuarios" icon={<PeopleIcon />}>
                         <Link className={styles.tWhite} href="/GestionUsuarios" passHref>

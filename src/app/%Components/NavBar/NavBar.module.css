@@ -17,13 +17,13 @@
     color: white;
 }
 
-
-
 .bgblack:hover{
     background-color: #9f2241 !important; 
 }
 
-
+.subMenu{
+    width: 80vw;
+}
 
 .botonNavbar {
     border: none;
