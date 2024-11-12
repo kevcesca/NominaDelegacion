@@ -19,7 +19,6 @@ html, body {
   --color-secondary-contrastText: #000;
 }
 
-
 body {
   background: linear-gradient(to bottom, #F6F1F1 80%, #bc955c 100%); /* Degradado de blanco a #bc955c */
   font-family: 'Montserrat', sans-serif;
@@ -30,7 +29,6 @@ body {
   width: 12px; /* Ancho de la barra de desplazamiento vertical */
   height: 12px; /* Ancho de la barra de desplazamiento horizontal */
 }
-
 
 ::-webkit-scrollbar-thumb {
   background-color: #9f2241; /* Color del "pulgar" */

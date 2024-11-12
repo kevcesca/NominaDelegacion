@@ -1,0 +1,44 @@
+/* src/app/roles/CrudRoles.module.css */
+
+.button-gold {
+    background-color: #bc955c !important;
+    border-color: #bc955c !important;
+    color: #fff !important;
+}
+
+.button-red {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+.button-teal {
+    background-color: #358874 !important;
+    border-color: #358874 !important;
+    color: #fff !important;
+}
+
+.button-margin {
+    margin-right: 0.5rem;
+}
+
+.barra {
+    width: 80vw;
+}
+
+.flex {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+}
+
+.pageContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card{
+    width: 50vw;
+}

@@ -1,94 +1,187 @@
-'use client'
+"use client"
+import { useState } from 'react'
+import styles from './page.module.css'
+import Link from 'next/link';
 
-import React, { useState } from 'react';
-import Cheque from '../%Components/Cheque/Cheque';
-import { Button, TextField, Box } from '@mui/material';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
-export default function GeneradorCheques() {
-    const [numCheques, setNumCheques] = useState(1);
-    const [cheques, setCheques] = useState([
-        {
-            polizaNo: "5360",
-            noDe: "108345",
-            noEmpleado: "1168954",
-            nombreBeneficiario: "Juan Pérez",
-            importeLetra: "DOS MIL NOVECIENTOS CINCUENTA Y OCHO PESOS 35/100 M.N.",
-            conceptoPago: "2da. Qna. Abril 2024",
-            rfc: "VALP",
-            tipoNomina: "1",
-            percepciones: "3463.93",
-            deducciones: "505.58",
-            liquido: "2958.35",
-            nombre: "Juan Pérez",
-            fecha: "15/04/2024"
-        }
-    ]);
 
-    const handleNumChequesChange = (event) => {
-        const num = parseInt(event.target.value);
-        setNumCheques(num);
+const empleados = [
+  { id: "1", nombre: "Juan Pérez", tipoNomina: "Base", monto: "$5000", estadoCheque: "Creado", clc: "CLC1234", tipoPago: "Cheque" },
+  { id: "2", nombre: "Ana Gómez", tipoNomina: "Nomina 8", monto: "$4500", estadoCheque: "Creado", clc: "CLC2345", tipoPago: "Cheque" },
+  { id: "3", nombre: "Luis Martínez", tipoNomina: "Nómina 8", monto: "$6200", estadoCheque: "Creado", clc: "CLC3456", tipoPago: "Cheque" },
+  { id: "4", nombre: "Maria Fernández", tipoNomina: "Estructura", monto: "$5600", estadoCheque: "Creado", clc: "CLC4567", tipoPago: "Cheque" },
+  { id: "5", nombre: "Pedro López", tipoNomina: "Base", monto: "$5000", estadoCheque: "Creado", clc: "CLC5678", tipoPago: "Cheque" },
+  { id: "6", nombre: "Armando Paredes", tipoNomina: "Extraordinario", monto: "$2000", estadoCheque: "Creado", clc: "CLC5671", tipoPago: "Cheque" },
+]
 
-        if (num > cheques.length) {
-            const newCheques = [...cheques];
-            for (let i = cheques.length; i < num; i++) {
-                newCheques.push({ ...cheques[0], nombre: `Empleado ${i + 1}` });
-            }
-            setCheques(newCheques);
-        } else {
-            setCheques(cheques.slice(0, num));
-        }
-    };
+export default function ChequeManager() {
+  const [chequesGenerados, setChequesGenerados] = useState(false)
+  const [folios, setFolios] = useState(0)
+  const [numCheques, setNumCheques] = useState(0)
+  const [quincena, setQuincena] = useState('')
+  const [empleadosGenerados, setEmpleadosGenerados] = useState([])
+  const [tipoPago, setTipoPago] = useState("Cheque")
 
-    const exportToPDF = async () => {
-        const pdf = new jsPDF('p', 'mm', 'letter');
-        const chequesContainer = document.getElementById('cheques-container');
+  const generarFolios = () => {
+    if (!folios || numCheques <= 0) {
+      alert("Por favor, ingresa un número de folio y cheques válidos.")
+      return
+    }
 
-        if (chequesContainer) {
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = 15; // Increased margin for better spacing
-            const chequeWidth = pageWidth - 2 * margin;
-            const chequeHeight = (pageHeight - 3 * margin) / 2;
+    let nuevosEmpleados = []
+    for (let i = 0; i < numCheques && i < empleados.length; i++) {
+      nuevosEmpleados.push({
+        ...empleados[i],
+        folio: folios + i,
+        quincena,
+        fecha: new Date().toLocaleDateString(),
+        tipoPago: tipoPago
+      })
+    }
 
-            for (let i = 0; i < cheques.length; i++) {
-                const chequeElement = chequesContainer.children[i];
-                const canvas = await html2canvas(chequeElement);
-                const imgData = canvas.toDataURL('image/png');
+    setEmpleadosGenerados(nuevosEmpleados)
+    setChequesGenerados(true)
+  }
 
-                if (i % 2 === 0 && i !== 0) {
-                    pdf.addPage();
-                }
+  const reiniciarTabla = () => {
+    setEmpleadosGenerados([])
+    setChequesGenerados(false)
+    setFolios(0)
+    setNumCheques(0)
+    setQuincena('')
+  }
 
-                const y = margin + (i % 2) * (chequeHeight + margin);
+  const actualizarQuincena = (fecha) => {
+    const fechaActual = new Date(fecha)
+    const dia = fechaActual.getDate()
+    const mes = fechaActual.toLocaleString('es-ES', { month: 'long' })
 
-                pdf.addImage(imgData, 'PNG', margin, y, chequeWidth, chequeHeight);
-            }
+    if (dia >= 1 && dia <= 14) {
+      setQuincena(`1ra quincena de ${mes}`)
+    } else if (dia >= 15 && dia <= 31) {
+      setQuincena(`2da quincena de ${mes}`)
+    } else {
+      setQuincena("Fecha no válida")
+    }
+  }
 
-            pdf.save('cheques.pdf');
-        }
-    };
+  // Función para manejar el clic en el botón de "Cambio de Tipo de Pago"
+  const cambiarTipoPago = () => {
+    if (empleadosGenerados.length === 0) {
+      alert("No hay empleados generados para cambiar el tipo de pago.")
+      return
+    }
 
-    return (
-        <Box sx={{ padding: 2 }}>
-            <h1>Generador de Cheques</h1>
-            <TextField
-                type="number"
-                label="Número de cheques"
-                value={numCheques}
-                onChange={handleNumChequesChange}
-                inputProps={{ min: 1 }}
-                sx={{ marginBottom: 2 }}
-            />
-            <Button variant="contained" onClick={exportToPDF} sx={{ marginLeft: 2, marginBottom: 2 }}>
-                Exportar a PDF
-            </Button>
-            <Box id="cheques-container">
-                {cheques.map((cheque, index) => (
-                    <Cheque key={index} {...cheque} />
-                ))}
-            </Box>
-        </Box>
-    );
+    let empleadosActualizados = empleadosGenerados.map((empleado) => ({
+      ...empleado,
+      tipoPago: tipoPago
+    }))
+
+    setEmpleadosGenerados(empleadosActualizados)
+  }
+
+  return (
+    <div className={styles.container}>
+      <h1>Gestor de Cheques</h1>
+
+      <div className={styles.section}>
+        <div>
+          <label>Tipo de Nómina</label>
+          <select id="nomina">
+            <option value="0">Selecciona el tipo de nómina</option>
+            <option value="compuesta">Compuesta</option>
+            <option value="base">Base</option>
+            <option value="nomina8">Nómina 8</option>
+            <option value="estructura">Estructura</option>
+            <option value="extraordinario">Extraordinario</option>
+          </select>
+        </div>
+        <div>
+          <label>Fecha Actual:</label>
+          <input
+            type="date"
+            id="fechaActual"
+            onChange={(e) => actualizarQuincena(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Quincena:</label>
+          <input type="text" value={quincena} placeholder="Quincena automática" readOnly />
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <div>
+          <label>Folio Inicial:</label>
+          <input
+            type="number"
+            value={folios}
+            onChange={(e) => setFolios(parseInt(e.target.value))}
+          />
+        </div>
+        <div>
+          <label>Número de Cheques:</label>
+          <input
+            type="number"
+            value={numCheques}
+            onChange={(e) => setNumCheques(parseInt(e.target.value))}
+          />
+        </div>
+      </div>
+
+
+      <div className={styles.tableSection}>
+        <h2>PAGO A EMPLEADOS CON CHEQUE</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Id Empleado</th>
+              <th>Nombre</th>
+              <th>Tipo Nómina</th>
+              <th>F. Cheque</th>
+              <th>Monto</th>
+              <th>Estado Cheque</th>
+              <th>Fecha</th>
+              <th>Quincena</th>
+              <th>CLC</th>
+              <th>Tipo de Pago</th>
+            </tr>
+          </thead>
+          <tbody>
+            {empleadosGenerados.map((empleado, index) => (
+              <tr key={index}>
+                <td>{empleado.id}</td>
+                <td>{empleado.nombre}</td>
+                <td>{empleado.tipoNomina}</td>
+                <td>{empleado.folio}</td>
+                <td>{empleado.monto}</td>
+                <td>{empleado.estadoCheque}</td>
+                <td>{empleado.fecha}</td>
+                <td>{empleado.quincena}</td>
+                <td>{empleado.clc}</td>
+                <td>{empleado.tipoPago}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className={styles.actions}>
+        {chequesGenerados ? (
+          <button className={styles.new} onClick={reiniciarTabla}>Generar Nuevos Cheques</button>
+        ) : (
+          <button className={styles.generate} onClick={generarFolios}>Generar</button>
+        )}
+      </div>
+
+      <div className={styles.extraButtons}>
+      <Link href="./Cheques/CambioPago">
+        <button onClick={cambiarTipoPago} className={styles.cambiarTipoPago}>Cambio de Tipo de Pago</button>
+        </Link>
+        <Link href="./Cheques/Poliza">
+        <button className={styles.generarPoliza}>Generar Póliza</button>
+        </Link>
+      </div>
+    </div>
+  )
 }

@@ -1,12 +1,93 @@
-/* src/app/comparative/page.module.css */
-.main {
-    padding: 20px;
-    overflow-x: auto;
+/* Aquí va todo el CSS adaptado a las clases que usas en los componentes */
+.container {
+  max-width: 1600px;
+  margin: 20px auto;
+  background-color: white;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-radius: 10px;
 }
-.h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: white;
-    background-color: black;
-    padding: 1rem;
+.imgEncabezado {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+.section {
+  margin-bottom: 30px;
+}
+.tableSection {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+.tableSection table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+.tableSection th, .tableSection td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+.tableSection th {
+  background-color: #8d1409;
+  color: #ddd;
+}
+.actions {
+  margin-top: 20px;
+}
+.actions button {
+  padding: 10px 20px;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.actions button:hover {
+  background-color: #005bb5;
+}
+
+.extraButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.extraButtons button {
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.actions .new {
+  background-color: #8d1409;
+  color: #ddd; 
+  position: relative;
+  right: 00.8%;/* Naranja para el botón de cambio de tipo de pago */
+}
+
+.actions .generate {
+  background-color: #8d1409;
+  color: #ddd; /* Naranja para el botón de cambio de tipo de pago */
+}
+.extraButtons .cambiarTipoPago {
+  background-color: #8d1409;
+  color: #ddd; /* Naranja para el botón de cambio de tipo de pago */
+}
+
+.extraButtons .cambiarTipoPago:hover {
+  background-color: #8d1409; /* Hover naranja más oscuro */
+}
+
+.extraButtons .generarPoliza {
+  background-color: #8d1409;
+  color: #ddd; 
+  /* Verde para el botón de Generar Póliza */
+
+}
+
+.extraButtons .generarPoliza:hover {
+  background-color: #8d1409; /* Hover verde más oscuro */
+  
 }

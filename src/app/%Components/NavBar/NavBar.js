@@ -17,8 +17,11 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import ListIcon from '@mui/icons-material/List';
+import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { useMediaQuery } from '@mui/material';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+
 
 export default function NavBar() {
     const isSmallScreen = useMediaQuery('(max-width: 600px)');
@@ -81,10 +84,18 @@ export default function NavBar() {
                         <Link className={styles.tWhite} href="/Calendario" passHref>
                             <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack} onClick={handleLinkClick}>Editar</MenuItem>
                         </Link>
-                        <Link className={styles.tWhite} href="/Calendario/Exportar" passHref>
-                            <MenuItem icon={<CloudIcon />} className={styles.bgblack} onClick={handleLinkClick}>Exportar</MenuItem>
+                    </SubMenu>
+                    
+
+                    <SubMenu label="Usuarios" icon={<PeopleIcon />}>
+                        <Link className={styles.tWhite} href="/GestionUsuarios" passHref>
+                            <MenuItem icon={<GroupAddIcon />} className={styles.bgblack} onClick={handleLinkClick}>Gestionar usuarios</MenuItem>
+                        </Link>
+                        <Link className={styles.tWhite} href="/GestionUsuarios/Roles" passHref>
+                            <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Modificar Roles</MenuItem>
                         </Link>
                     </SubMenu>
+
                     <SubMenu label="Proceso de Nómina" icon={<SecurityIcon />}>
                         <Link className={styles.tWhite} href="/CrearNomina" passHref>
                             <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cargar Nómina</MenuItem>
@@ -108,6 +119,9 @@ export default function NavBar() {
                         </Link>
                         <Link className={styles.tWhite} href="/Configuracion/Universos" passHref>
                             <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Universos</MenuItem>
+                        </Link>
+                        <Link className={styles.tWhite} href="/Configuracion/CLC" passHref>
+                            <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>CLC</MenuItem>
                         </Link>
                     </SubMenu>
                     <SubMenu label="Estados de cuenta" icon={<DescriptionIcon />}>

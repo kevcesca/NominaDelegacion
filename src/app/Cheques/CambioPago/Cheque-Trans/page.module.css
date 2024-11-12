@@ -1,0 +1,185 @@
+.body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(white, #d46a6a);
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px auto;
+}
+
+.mainTitle,
+.subtitle {
+  text-align: center;
+  margin: 15px 0;
+}
+
+.mainTitle {
+  text-align: center;
+  color: #ffffff;
+  background-color: #bc955c;
+  padding: 10px 0;
+  margin: 0;
+}
+
+.subtitle {
+  color: #333;
+}
+
+/* Contenedor de búsqueda de ID centrado */
+.searchContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.formGroup {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Ajustes para el formulario principal en 2 columnas */
+.formRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.formGroup {
+  flex: 1 1 48%;
+  max-width: 45%;
+}
+
+.formButtons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+/* Centrar mensaje y botón de historial debajo de los botones */
+.message,
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  font-weight: bold;
+  color: #9f2241;
+  margin-top: 15px;
+}
+
+/* Botones */
+.styledButton,
+.styledButton1,
+.styledButton2,
+.styledButton3 {
+  padding: 10px 15px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+  margin: 5px;
+}
+
+.styledButton {
+  background-color: #9f2241;
+}
+.styledButton:hover {
+  background-color: #ab9144;
+}
+.styledButton1 {
+  background-color: #bb0000;
+}
+.styledButton1:hover {
+  background-color: #a04545;
+}
+.styledButton2 {
+  background-color: #45a049;
+}
+.styledButton2:hover {
+  background-color: #336335;
+}
+.styledButton3 {
+  background-color: #ab9144;
+}
+.styledButton3:hover {
+  background-color: #635e33;
+}
+
+/* Modal */
+.modal {
+  display: flex;
+  position: fixed;
+  z-index: 1001;
+  padding-top: 100px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+}
+
+.modalContent {
+  background-color: #fefefe;
+  padding: 20px;
+  border: 1px solid #888;
+  max-width: 500px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.closeButton {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  color: black;
+}
+
+/* Tabla */
+.table {
+  width: 100%;
+  margin-top: 15px;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.table th {
+  background-color: #ab9144;
+  color: white;
+}

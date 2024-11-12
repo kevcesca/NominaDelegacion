@@ -37,6 +37,11 @@ export default function AppBar() {
             command: () => { 
                 signOut({ callbackUrl: '/' }); // Cambiado a una ruta relativa
             } 
+        },
+        { 
+            label: 'PJMX', 
+            icon: <GroupIcon />, 
+            command: () => router.push('/Galilea') 
         }
     ];
 

@@ -1,0 +1,105 @@
+/* clc.module.css */
+
+.body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(180deg, #fff, #F6F1F1, #D8C1A3);
+    flex-direction: column;
+    margin: 0;
+}
+.container {
+    width: 100%;
+    max-width: 1200px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.h2 {
+    background-color: #AB9144;
+    color: white;
+    padding: 1em;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.th, .td {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+.th {
+    background-color: #1f5841;
+    color: #fff;
+}
+
+.btn {
+    background-color: #9f2241;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: center;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    margin-bottom: 12px;
+}
+
+.btn:hover {
+    background-color: #711c31;
+}
+
+.formGroup {
+    margin: 15px 0;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.formGroup input[type="text"], .formGroup input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.detalleClc {
+    margin-top: 20px;
+}
+
+.iconosExportacion {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.iconoExportacion img {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.iconoExportacion img:hover {
+    transform: scale(1.1);
+}
+
+.accionBoton {
+    text-align: center;
+}

@@ -1,12 +1,184 @@
-.main {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+/* General Body Styling */
+.body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  background: linear-gradient(white, #ffcccc);
 }
 
-.tableContainer{
-    width: 80vw;
-    height: 100vh;
+.container {
+  width: 90%;
+  max-width: 1600px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.title {
+  text-align: center;
+  color: #ffffff;
+  background-color: #bc955c;
+  padding: 15px 0;
+  margin: 0;
+}
+
+.containerContent {
+  flex: 1;
+  padding: 30px;
+  text-align: center;
+  color: #333;
+  overflow-y: auto;
+}
+
+.calendarContainer {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+  gap: 20px;
+}
+
+.calendar {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 60%;
+}
+
+.calendarTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.calendarTable th,
+.calendarTable td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.calendarTable th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  color: #666;
+}
+
+.event {
+  background-color: #e2b673;
+  color: #711c31;
+  font-weight: bold;
+}
+
+.holiday {
+  background-color: #000000;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.selected {
+  border: 2px solid #1f5841;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.button {
+  padding: 8px 15px;
+  font-size: 0.9em;
+  border: none;
+  border-radius: 5px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.btn-prev,
+.btn-next {
+  background-color: #b9274b;
+}
+
+.btn-add {
+  background-color: #1f5841;
+}
+
+.btn-delete {
+  background-color: #d9534f;
+}
+
+.btn-ex {
+  background-color: #987849;
+}
+
+.eventForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  text-align: left;
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.eventForm input,
+.eventForm textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.exportButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.extraContainer {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 96%;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dataTableWrapper {
+  width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 20px;
+}
+
+.dataTableWrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dataTableWrapper th,
+.dataTableWrapper td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.dataTableWrapper th {
+  background-color: #f4f4f4;
+  font-weight: bold;
 }

@@ -1,0 +1,158 @@
+.body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(white, #d46a6a);
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px auto;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.backButton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.h3,
+.h2 {
+  text-align: center;
+  margin: 15px 0;
+}
+
+.h2 {
+  color: #ffffff;
+  background-color: #1f5841;
+}
+
+.searchContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.formGroup {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.mainTitle,
+.subtitle {
+  text-align: center;
+  margin: 15px 0;
+}
+
+.mainTitle {
+  text-align: center;
+  color: #ffffff;
+  background-color: #bc955c;
+  padding: 10px 0;
+  margin: 0;
+}
+
+.formRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.formGroup {
+  flex: 1 1 48%;
+  max-width: 45%;
+}
+
+.formButtons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.message {
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
+  color: #9f2241;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.styledButton,
+.styledButton1,
+.styledButton2,
+.styledButton3 {
+  padding: 10px 15px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+  margin: 5px;
+}
+
+.styledButton {
+  background-color: #9f2241;
+}
+.styledButton:hover {
+  background-color: #ab9144;
+}
+
+.styledButton1 {
+  background-color: #bb0000;
+}
+.styledButton1:hover {
+  background-color: #a04545;
+}
+
+.styledButton2 {
+  background-color: #45a049;
+}
+.styledButton2:hover {
+  background-color: #336335;
+}
+
+.styledButton3 {
+  background-color: #ab9144;
+}
+.styledButton3:hover {
+  background-color: #635e33;
+}

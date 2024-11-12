@@ -1,0 +1,159 @@
+.body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #fff, #F6F1F1, #D8C1A3);
+    flex-direction: column;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 77vw;
+    position: relative;
+}
+
+.h1, .h2 {
+    text-align: center;
+    color: #8B2635;
+    font-weight: bolder;
+    margin-bottom: 20px;
+}
+
+.label {
+    font-weight: bold;
+    color: #8B2635;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.input, .select, .textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.actions {
+    background-color: #8B2635 !important;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.tableSection {
+    margin-top: 30px;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.9em;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.th, .td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.th {
+    background-color: #8B2635;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.td {
+    background-color: #F6F1F1;
+    color: #333;
+}
+
+.tr:nth-child(even) .td {
+    background-color: #EFE8E8;
+}
+
+.tr:hover .td {
+    background-color: #DED2D2;
+}
+
+.a {
+    color: #8B2635;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.a:hover {
+    color: #BB905B;
+    text-decoration: none;
+}
+
+.modal {
+    display: block;
+    position: relative;
+    top: -400px;
+    left: 280px;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    width: 80%;
+}
+
+.modalButtons {
+    margin-top: 20px;
+}
+
+.modalBtn {
+    padding: 10px 20px;
+    margin: 10px;
+    background-color: #8B2635;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modalBtn:hover {
+    background-color: #BB905B;
+}
+
+.modalBtnGreen {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.modalBtnGreen:hover {
+    background-color: #45a049;
+}

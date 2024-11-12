@@ -1,0 +1,143 @@
+.container {
+    max-width: 1400px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    margin: 20px auto;
+  }
+  
+  .imgEncabezado {
+    display: block;
+    margin: 0 auto 20px auto;
+  }
+  
+  .h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .generateReset {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .label {
+    font-weight: bold;
+  }
+
+
+  .filtersAndActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  .filtersAndActions div {
+    margin-right: 15px;
+  }
+  
+  .buttons button {
+    background-color:  #8B2635; 
+    color:#fdfbfb;
+    padding: 2px;
+    margin-left: 20px;
+    position: relative;
+    right: 230px;
+    top: 10px;
+  }
+  
+  .recordCount {
+    font-weight: bold;
+  }
+
+  .recordCount {
+    font-size: 14px;
+    font-weight: normal;
+    color: #333;
+    
+  }
+  
+  
+  
+  .button {
+    padding: 8px 16px;
+    margin-left: 10px;
+    background-color:  #8B2635; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .button:hover {
+    background-color:  #8B2635; 
+  }
+  
+  .input[type="date"],
+  .select {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .chequeTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .chequeTable th,
+  .chequeTable td {
+    border: 1px solid #dedede;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .chequeTable th {
+    background-color:  #8B2635; 
+    font-weight: bold;
+    color: #f1f1f1;
+  }
+  
+  .chequeTable tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .pagination button {
+    padding: 8px 16px;
+    background-color:  #8B2635; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .pagination button:hover {
+    background-color: #0f9236;
+  }
+  
+  #selectedCountDisplay {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  #noRecordsMessage {
+    display: none;
+    color: red;
+    font-weight: bold;
+  }
+  
