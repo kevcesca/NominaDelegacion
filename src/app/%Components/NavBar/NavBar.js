@@ -21,6 +21,7 @@ import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { useMediaQuery } from '@mui/material';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import KeySharpIcon from '@mui/icons-material/KeySharp';
 
 
 export default function NavBar() {
@@ -57,7 +58,8 @@ export default function NavBar() {
                 collapsed={collapsed}
                 transitionDuration={1000}
                 rootStyles={{
-                    width: '25vw',
+                    width: '15vw',
+                    fontSize: '.9rem',
                     [`.${sidebarClasses.container}`]: {
                         backgroundColor: '#f4f4f47a',
                         border: '2px solid transparent',
@@ -71,7 +73,7 @@ export default function NavBar() {
                 <Menu
                     menuItemStyles={{
                         subMenuContent: {
-                            width: '30vw',  // Ajusta el ancho deseado aquí 
+                            width: '15vw',  // Ajusta el ancho deseado aquí 
                         },
                         button: ({ level, active, disabled }) => ({
                             '&:hover': {
@@ -84,21 +86,48 @@ export default function NavBar() {
                     <button className={styles.botonNavbar} onClick={() => setCollapsed(!collapsed)}>
                         <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
                     </button>
-                    <SubMenu className={styles.subMenu} label="Calendario de nómina" icon={<CalendarTodayIcon />}>
-                        <Link className={styles.tWhite} href="/Calendario" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack} onClick={handleLinkClick}>Editar</MenuItem>
-                        </Link>
-                    </SubMenu>
 
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Calendario" icon={<CalendarTodayIcon />}>
+                            <Link className={styles.tWhite} href="/Calendario" passHref>
+                                <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack} onClick={handleLinkClick}>Calendario</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false
+                        <Link className={styles.textAlone} href="/Calendario" passHref>
+                            <MenuItem icon={<EventAvailableIcon />} onClick={handleLinkClick}>Calendario</MenuItem>
+                        </Link>
+                    )}
 
-                    <SubMenu label="Usuarios" icon={<PeopleIcon />}>
-                        <Link className={styles.tWhite} href="/GestionUsuarios" passHref>
-                            <MenuItem icon={<GroupAddIcon />} className={styles.bgblack} onClick={handleLinkClick}>Gestionar usuarios</MenuItem>
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Usuarios" icon={<PeopleIcon />}>
+                            <Link className={styles.tWhite} href="/GestionUsuarios" passHref>
+                                <MenuItem icon={<PeopleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Usuarios</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false1
+                        <Link className={styles.textAlone} href="/GestionUsuarios" passHref>
+                            <MenuItem icon={<PeopleIcon />} onClick={handleLinkClick}>Usuarios</MenuItem>
                         </Link>
-                        <Link className={styles.tWhite} href="/GestionUsuarios/Roles" passHref>
-                            <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Modificar Roles</MenuItem>
+                    )}
+
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Roles" icon={<KeySharpIcon />}>
+                            <Link className={styles.tWhite} href="/Roles" passHref>
+                                <MenuItem icon={<KeySharpIcon />} className={styles.bgblack} onClick={handleLinkClick}>Roles</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false
+                        <Link className={styles.textAlone} href="/Roles" passHref>
+                            <MenuItem icon={<KeySharpIcon />} onClick={handleLinkClick}>Roles</MenuItem>
                         </Link>
-                    </SubMenu>
+                    )}
 
                     <SubMenu label="Proceso de Nómina" icon={<SecurityIcon />}>
                         <Link className={styles.tWhite} href="/CrearNomina" passHref>

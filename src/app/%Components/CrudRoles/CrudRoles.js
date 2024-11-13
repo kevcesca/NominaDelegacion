@@ -2,7 +2,6 @@
 
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { classNames } from 'primereact/utils';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Toast } from 'primereact/toast';
@@ -12,6 +11,11 @@ import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
 import { Checkbox } from 'primereact/checkbox';
 import styles from './CrudRoles.module.css';
+
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const CrudRoles = () => {
     const emptyRole = { id: '', name: '', permissions: [] };
@@ -40,6 +44,48 @@ const CrudRoles = () => {
         ];
         setRoles(hardcodedRoles);
     }, []);
+
+    // Funciones de exportación
+    const exportCSV = () => {
+        if (dt.current) {
+            dt.current.exportCSV();
+        }
+    };
+
+    const exportPdf = () => {
+        const doc = new jsPDF();
+        doc.text("Roles", 14, 10);
+        doc.autoTable({
+            head: [['ID', 'Role Name', 'Permissions']],
+            body: roles.map(role => [
+                role.id,
+                role.name,
+                role.permissions.join(", ")
+            ]),
+        });
+        doc.save('roles.pdf');
+    };
+
+    const exportExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(roles.map(role => ({
+            'ID': role.id,
+            'Role Name': role.name,
+            'Permissions': role.permissions.join(", ")
+        })));
+        const workbook = { Sheets: { 'Roles': worksheet }, SheetNames: ['Roles'] };
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), 'roles.xlsx');
+    };
+
+    // Plantilla de botones para la toolbar
+    const leftToolbarTemplate = () => (
+        <div className={styles.buttonContainer }>
+            <Button label="Nuevo Rol" icon="pi pi-plus" className={`${styles['button-gold']} ${styles['button-margin']}`} onClick={openNew} />
+            <Button type="button" rounded icon="pi pi-file" className={`${styles['button-margin']}`} onClick={exportCSV} data-pr-tooltip="CSV" />
+            <Button type="button" rounded icon="pi pi-file-excel" severity="success" className={`${styles['button-margin']}`} onClick={exportExcel} data-pr-tooltip="XLS" />
+            <Button type="button" rounded icon="pi pi-file-pdf" severity="warning" className={`${styles['button-margin']}`} onClick={exportPdf} data-pr-tooltip="PDF" />
+        </div>
+    );
 
     const openNew = () => {
         setRole(emptyRole);
@@ -138,9 +184,7 @@ const CrudRoles = () => {
         <div className={styles.pageContainer}>
             <Toast ref={toast} />
             <div className={styles.card}>
-                <Toolbar className="mb-4" left={() => (
-                    <Button label="New Role" icon="pi pi-plus" className={`${styles['button-gold']} ${styles['button-margin']}`} onClick={openNew} />
-                )}></Toolbar>
+                <Toolbar className="mb-4" left={leftToolbarTemplate} />
                 <DataTable ref={dt} value={roles} selection={selectedRoles} onSelectionChange={(e) => setSelectedRoles(e.value)}
                     dataKey="id" paginator rows={10} globalFilter={globalFilter}>
                     <Column field="id" header="ID" sortable></Column>

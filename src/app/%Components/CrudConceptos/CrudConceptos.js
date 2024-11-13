@@ -33,15 +33,9 @@ const CrudConceptos = () => {
     const dt = useRef(null);
 
     useEffect(() => {
-        axios.get(`${API_BASE_URL}/cat/conceptos`)
-            .then(response => {
-                setConceptos(response.data);
-            })
-            .catch(error => {
-                console.error("Error fetching data: ", error);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error fetching data', life: 3000 });
-            });
+        fetchConceptos(); // Llama a fetchConceptos al montar el componente para cargar los datos inicialmente
     }, []);
+    
 
     const openNew = () => {
         setConcepto(emptyConcepto);
@@ -54,6 +48,19 @@ const CrudConceptos = () => {
         setConceptoDialog(false);
         setEditConceptoDialog(false);
     };
+
+    // Función para obtener conceptos de la API y actualizar el estado
+    const fetchConceptos = () => {
+        axios.get(`${API_BASE_URL}/cat/conceptos`)
+            .then(response => {
+                setConceptos(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching data: ", error);
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error fetching data', life: 3000 });
+            });
+    };
+
 
     const hideDeleteConceptoDialog = () => {
         setDeleteConceptoDialog(false);
@@ -79,39 +86,48 @@ const CrudConceptos = () => {
                 setConcepto(emptyConcepto);
                 toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Created', life: 3000 });
             }).catch(error => {
-                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error creating concepto', life: 3000 });
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error creando concepto. Verifique que el concepto no existe.', life: 3000 });
             });
         }
     };
 
     const updateConcepto = () => {
         setSubmitted(true);
-
-        if (concepto.nombre_concepto.trim() && concepto.id_concepto.trim()) {
-            let _conceptos = [...conceptos];
-            let _concepto = { ...concepto };
-
-            // Método GET para actualizar concepto
+    
+        // Forzar `id_concepto` y `nombre_concepto` a ser cadenas antes de hacer `trim()`
+        const conceptoId = String(concepto.id_concepto || '').trim();
+        const conceptoNombre = String(concepto.nombre_concepto || '').trim();
+    
+        // Verifica que ambos campos no estén vacíos antes de enviar la solicitud
+        if (conceptoId && conceptoNombre) {
+            let _concepto = { ...concepto, id_concepto: conceptoId, nombre_concepto: conceptoNombre };
+    
             axios.get(`${API_BASE_URL}/actualizarConcepto`, {
                 params: {
                     id_concepto: _concepto.id_concepto,
                     nombre_concepto: _concepto.nombre_concepto
                 }
             }).then(response => {
-                const index = findIndexById(concepto.id_concepto);
-                _conceptos[index] = _concepto;
-                setConceptos(_conceptos);
                 setEditConceptoDialog(false);
                 setConcepto(emptyConcepto);
                 toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Concepto Updated', life: 3000 });
+                
+                fetchConceptos(); // Refresca la tabla después de la actualización
             }).catch(error => {
                 toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error updating concepto', life: 3000 });
             });
+        } else {
+            toast.current.show({ severity: 'warn', summary: 'Warning', detail: 'Please provide a valid Concepto ID and Nombre Concepto', life: 3000 });
         }
     };
+    
 
     const editConcepto = (concepto) => {
-        setConcepto({ ...concepto });
+        // Establece el concepto a editar y asegura que `id_concepto` sea una cadena.
+        setConcepto({
+            ...concepto,
+            id_concepto: concepto.id_concepto ? String(concepto.id_concepto) : '', // Asegura que sea una cadena
+        });
         setEditConceptoDialog(true);
     };
 
@@ -282,12 +298,24 @@ const CrudConceptos = () => {
             <Dialog visible={editConceptoDialog} style={{ width: '450px' }} header="Concepto Details" modal className="p-fluid" footer={editConceptoDialogFooter} onHide={hideDialog}>
                 <div className="field">
                     <label htmlFor="id_concepto">ID Concepto</label>
-                    <InputText id="id_concepto" value={concepto.id_concepto} onChange={(e) => onInputChange(e, 'id_concepto')} required autoFocus className={classNames({ 'p-invalid': submitted && !concepto.id_concepto })} />
+                    <InputText
+                        id="id_concepto"
+                        value={concepto.id_concepto}
+                        readOnly // Esto hace que el campo sea de solo lectura
+                        required
+                        className={classNames({ 'p-invalid': submitted && !concepto.id_concepto })}
+                    />
                     {submitted && !concepto.id_concepto && <small className="p-error">ID Concepto is required.</small>}
                 </div>
                 <div className="field">
                     <label htmlFor="nombre_concepto">Nombre Concepto</label>
-                    <InputText id="nombre_concepto" value={concepto.nombre_concepto} onChange={(e) => onInputChange(e, 'nombre_concepto')} required className={classNames({ 'p-invalid': submitted && !concepto.nombre_concepto })} />
+                    <InputText
+                        id="nombre_concepto"
+                        value={concepto.nombre_concepto}
+                        onChange={(e) => onInputChange(e, 'nombre_concepto')}
+                        required
+                        className={classNames({ 'p-invalid': submitted && !concepto.nombre_concepto })}
+                    />
                     {submitted && !concepto.nombre_concepto && <small className="p-error">Nombre Concepto is required.</small>}
                 </div>
             </Dialog>
