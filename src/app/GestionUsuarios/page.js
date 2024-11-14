@@ -1,8 +1,12 @@
+// pages/AsignacionRoles.js
 "use client";
 
 import { useState } from 'react';
 import CambioRolModal from '../%Components/CambioRolModal/CambioRolModal';
+import CambioContra from '../%Components/CambioContra/CambioContra'; // Importar el modal de contraseña
 import styles from './page.module.css';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 export default function AsignacionRoles() {
     const [menus, setMenus] = useState({});
@@ -14,6 +18,10 @@ export default function AsignacionRoles() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUser, setSelectedUser] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false); // Estado para el modal de contraseña
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [isAddingUser, setIsAddingUser] = useState(false);
+    const [newUser, setNewUser] = useState({ nombre: '', email: '', rol: '', fechaAlta: '', asigno: '' });
 
     const toggleMenu = (event, id) => {
         event.stopPropagation();
@@ -50,6 +58,48 @@ export default function AsignacionRoles() {
         }));
     };
 
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedUsers(usuariosFiltrados.map(([id]) => id));
+        } else {
+            setSelectedUsers([]);
+        }
+    };
+
+    const handleSelectUser = (id) => {
+        setSelectedUsers((prevSelectedUsers) =>
+            prevSelectedUsers.includes(id)
+                ? prevSelectedUsers.filter((userId) => userId !== id)
+                : [...prevSelectedUsers, id]
+        );
+    };
+
+    const handleDisableUsers = () => {
+        setUsuarios((prevUsuarios) => {
+            const updatedUsuarios = { ...prevUsuarios };
+            selectedUsers.forEach((userId) => {
+                if (updatedUsuarios[userId]) {
+                    updatedUsuarios[userId].habilitado = false;
+                }
+            });
+            return updatedUsuarios;
+        });
+        setSelectedUsers([]);
+    };
+
+    const handleEnableUsers = () => {
+        setUsuarios((prevUsuarios) => {
+            const updatedUsuarios = { ...prevUsuarios };
+            selectedUsers.forEach((userId) => {
+                if (updatedUsuarios[userId]) {
+                    updatedUsuarios[userId].habilitado = true;
+                }
+            });
+            return updatedUsuarios;
+        });
+        setSelectedUsers([]);
+    };
+
     const usuariosFiltrados = Object.entries(usuarios).filter(([id, usuario]) => {
         const search = searchTerm.toLowerCase();
         return (
@@ -62,11 +112,50 @@ export default function AsignacionRoles() {
         );
     });
 
+    const selectedEnabledUsersCount = selectedUsers.filter(
+        (userId) => usuarios[userId] && usuarios[userId].habilitado
+    ).length;
+
+    const selectedDisabledUsersCount = selectedUsers.filter(
+        (userId) => usuarios[userId] && !usuarios[userId].habilitado
+    ).length;
+
+    const handleAddUser = () => {
+        setIsAddingUser(true);
+    };
+
+    const handleNewUserChange = (e) => {
+        const { name, value } = e.target;
+        setNewUser((prevUser) => ({
+            ...prevUser,
+            [name]: value,
+        }));
+    };
+
+    const handleNewUserSubmit = (e) => {
+        if (e.key === 'Enter') {
+            const emptyFields = Object.keys(newUser).filter((field) => !newUser[field]);
+            
+            if (emptyFields.length > 0) {
+                alert(`Por favor llena los siguientes campos: ${emptyFields.join(', ')}`);
+                return;
+            }
+
+            const newId = String(Object.keys(usuarios).length + 1).padStart(3, '0');
+            setUsuarios((prevUsuarios) => ({
+                ...prevUsuarios,
+                [newId]: { ...newUser, habilitado: true },
+            }));
+            setIsAddingUser(false);
+            setNewUser({ nombre: '', email: '', rol: '', fechaAlta: '', asigno: '' });
+        }
+    };
+
     return (
         <div className={styles.pageContainer}>
             <div className={styles.container}>
-                <h1>Asignación de Roles a Usuarios</h1>
-                <a className={styles.button} href="/GestionUsuarios/Roles">Gestionar Roles</a>
+                <h1>Gestión de Usuarios</h1>
+
                 <div className={styles.searchBar}>
                     <input
                         type="text"
@@ -75,9 +164,28 @@ export default function AsignacionRoles() {
                         onChange={handleSearchInput}
                     />
                 </div>
+
+                <div className={styles.buttonContainer}>
+                    <button className={styles.uploadButton}>
+                        <UploadFileIcon className={styles.uploadIcon} /> Cargar
+                    </button>
+                    <button className={styles.addButton} onClick={handleAddUser}>
+                        <PersonAddIcon className={styles.addIcon} /> Añadir Usuario
+                    </button>
+                </div>
+
                 <table className={styles.table}>
                     <thead>
                         <tr>
+                            <th>
+                                <input
+                                    type="checkbox"
+                                    onChange={handleSelectAll}
+                                    checked={
+                                        selectedUsers.length === usuariosFiltrados.length && usuariosFiltrados.length > 0
+                                    }
+                                />
+                            </th>
                             <th>ID Empleado</th>
                             <th>Nombre Empleado</th>
                             <th>Email</th>
@@ -91,6 +199,13 @@ export default function AsignacionRoles() {
                         {usuariosFiltrados.length > 0 ? (
                             usuariosFiltrados.map(([id, usuario]) => (
                                 <tr key={id}>
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedUsers.includes(id)}
+                                            onChange={() => handleSelectUser(id)}
+                                        />
+                                    </td>
                                     <td className={!usuario.habilitado ? styles.disabledCell : ''}>{id}</td>
                                     <td className={!usuario.habilitado ? styles.disabledCell : ''}>{usuario.nombre}</td>
                                     <td className={!usuario.habilitado ? styles.disabledCell : ''}>{usuario.email}</td>
@@ -118,7 +233,12 @@ export default function AsignacionRoles() {
                                                     Cambiar Rol
                                                 </a>
                                                 <a
-                                                    href="/GestionUsuarios/CambioContra"
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setPasswordModalOpen(true); // Abre el modal de nueva contraseña
+                                                        setMenus({});
+                                                    }}
                                                 >
                                                     Cambiar contraseña
                                                 </a>
@@ -139,19 +259,96 @@ export default function AsignacionRoles() {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
                                     No se encontraron resultados
                                 </td>
                             </tr>
                         )}
+                        {isAddingUser && (
+                            <tr>
+                                <td></td>
+                                <td className={styles.newUserField}>{String(Object.keys(usuarios).length + 1).padStart(3, '0')}</td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        name="nombre"
+                                        value={newUser.nombre}
+                                        onChange={handleNewUserChange}
+                                        onKeyDown={handleNewUserSubmit}
+                                        placeholder="Nombre"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        name="email"
+                                        value={newUser.email}
+                                        onChange={handleNewUserChange}
+                                        onKeyDown={handleNewUserSubmit}
+                                        placeholder="Email"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        name="rol"
+                                        value={newUser.rol}
+                                        onChange={handleNewUserChange}
+                                        onKeyDown={handleNewUserSubmit}
+                                        placeholder="Rol"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        name="fechaAlta"
+                                        value={newUser.fechaAlta}
+                                        onChange={handleNewUserChange}
+                                        onKeyDown={handleNewUserSubmit}
+                                        placeholder="Fecha de Alta"
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        name="asigno"
+                                        value={newUser.asigno}
+                                        onChange={handleNewUserChange}
+                                        onKeyDown={handleNewUserSubmit}
+                                        placeholder="Asignó"
+                                    />
+                                </td>
+                                <td></td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
+
+                <div className={styles.buttonDeshabilitar}>
+                    {selectedEnabledUsersCount >= 2 && (
+                        <button className={styles.disableButton} onClick={handleDisableUsers}>
+                            Deshabilitar usuarios
+                        </button>
+                    )}
+                    {selectedDisabledUsersCount >= 2 && (
+                        <button className={styles.enableButton} onClick={handleEnableUsers}>
+                            Habilitar usuarios
+                        </button>
+                    )}
+                </div>
             </div>
+
             <CambioRolModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 usuario={usuarios[selectedUser]}
                 onRoleChange={handleRoleChange}
+            />
+
+            {/* Modal de Nueva Contraseña */}
+            <CambioContra
+                isOpen={passwordModalOpen} 
+                onClose={() => setPasswordModalOpen(false)} 
             />
         </div>
     );

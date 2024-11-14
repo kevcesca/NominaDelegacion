@@ -1,11 +1,11 @@
-// pages/NuevaContrasena.js
+// components/NuevaContrasenaModal.js
 "use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
-export default function NuevaContrasena() {
+export default function NuevaContrasenaModal({ isOpen, onClose }) {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
@@ -24,13 +24,17 @@ export default function NuevaContrasena() {
         } else {
             setPasswordError('');
             alert('Contraseña cambiada con éxito');
-            router.push('/GestionUsuarios'); // Redirige después del cambio de contraseña
+            router.push('/GestionUsuarios');
+            onClose(); // Cierra el modal después de cambiar la contraseña
         }
     };
 
+    if (!isOpen) return null;
+
     return (
-        <div className={styles.body}>
-            <div className={styles.container}>
+        <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+                <button className={styles.closeButton} onClick={onClose}>×</button>
                 <h2>Establecer Nueva Contraseña</h2>
                 <form onSubmit={setNewPasswordHandler}>
                     <div className={styles.passwordField}>
@@ -73,4 +77,3 @@ export default function NuevaContrasena() {
         </div>
     );
 }
-

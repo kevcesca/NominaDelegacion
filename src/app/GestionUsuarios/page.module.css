@@ -1,11 +1,4 @@
-.pageContainer {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(180deg, #fff, #F6F1F1, #D8C1A3, #D8C1A3);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+
 
 .container {
     margin: auto;
@@ -13,6 +6,7 @@
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
 }
 
 .h1 {
@@ -137,3 +131,105 @@
 .button:hover {
     background-color: #BB905B;
 }
+
+.buttonDeshabilitar{
+display: flex;
+justify-content: flex-end;
+
+
+
+}
+
+
+.disableButton {
+    margin-top: 20px;
+    bottom: 20px;
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #8B2635;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+
+}
+
+.disableButton:hover {
+    background-color: #BB905B;
+}
+
+.enableButton{
+    margin-top: 20px;
+    bottom: 20px;
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #8B2635;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.enableButton:hover {
+    background-color: #BB905B;
+}
+
+.uploadButtonContainer {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+}
+
+.uploadButton {
+    margin-top: 20px;
+    bottom: 20px;
+    padding: 7px 15px;
+    font-size: 16px;
+    background-color: #8B2635;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.uploadButton:hover {
+    background-color: #BB905B;
+}
+
+.uploadIcon {
+    font-size: 10px;
+    margin-right: 3px;
+}
+
+.buttonContainer {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+ .addButton {
+    margin-top: 20px;
+    bottom: 20px;
+    padding: 7px 15px;
+    font-size: 16px;
+    background-color: #8B2635;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.addButton:hover{
+     background-color: #BB905B;
+}
+
+.uploadIcon, .addIcon {
+    font-size: 10px;
+}
+
+
+
