@@ -16,6 +16,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import ColumnSelector from '../ColumnSelector/ColumnSelector';
 import styles from './TablaCancelados.module.css';
+import Link from 'next/link';
 
 export default function TablaChequesCancelados({ cancelados }) {  // Aquí usamos "cancelados"
     const [selectedCheque, setSelectedCheque] = useState(null);
@@ -242,6 +243,10 @@ export default function TablaChequesCancelados({ cancelados }) {  // Aquí usamo
                     </div>
                 )}
             </Dialog>
+
+            <Link href="/Cheques/Reposicion">
+                <Button variant="contained" color="primary" className={styles.buttons}>Reponer Cheque</Button>
+            </Link>
         </div>
     );
 }

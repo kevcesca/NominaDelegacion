@@ -129,30 +129,27 @@
   margin: 5px;
 }
 
-.styledButton {
+.styledButton2 {
   background-color: #9f2241;
 }
 .styledButton:hover {
-  background-color: #ab9144;
+  background-color: #987849;
 }
-
-.styledButton1 {
-  background-color: #bb0000;
+.styledButton2:hover {
+  background-color: #a04545;
 }
 .styledButton1:hover {
   background-color: #a04545;
 }
-
-.styledButton2 {
-  background-color: #45a049;
+.styledButton1 {
+  background-color: #235b4e;
 }
-.styledButton2:hover {
-  background-color: #336335;
+.styledButton1:hover {
+  background-color: #1b473d;
 }
-
 .styledButton3 {
-  background-color: #ab9144;
+  background-color: #bc955c;
 }
 .styledButton3:hover {
-  background-color: #635e33;
+  background-color: #987849;
 }

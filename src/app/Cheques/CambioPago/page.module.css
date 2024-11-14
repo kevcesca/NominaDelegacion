@@ -1,7 +1,7 @@
 /* Fondo con degradado y estilo del contenedor */
 .container {
   width: 90%;
-  max-width: 1600px;
+  max-width: 80vw;
   height: 70vh;
   background: #ffffff;
   border-radius: 12px;
@@ -10,7 +10,6 @@
   flex-direction: column;
   overflow: hidden;
   margin: auto;
-  background: linear-gradient(white, #ffcccc);
 }
 
 /* Encabezado del contenedor con imagen */
@@ -65,5 +64,6 @@
 
 .optionButton:hover {
   background-color: #e2b673;
-  transform: scale(1.05);
+  transform: scale(1.04);
+  transition: transform 0.2s;
 }

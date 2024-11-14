@@ -2,7 +2,9 @@
 import { useState } from 'react';
 import styles from '../Reposicion/page.module.css';
 import Link from 'next/link';
-
+import { Box, Typography, TextField, Button, Paper, Grid, ThemeProvider } from '@mui/material';
+import { FileUpload } from 'primereact/fileupload';
+import theme from '../../$tema/theme';
 
 export default function RepositionCheque() {
   const [employeeData] = useState({
@@ -82,79 +84,165 @@ export default function RepositionCheque() {
   };
 
   return (
-    <div className={styles.container}>
-      <h2>Reposición de Cheques</h2>
-      <form id="repositionForm" onSubmit={handleSubmit}>
-        <div className={styles.formColumns}>
-          {/* Columna de Información del Empleado */}
-          <div className={styles.formColumn}>
-            <label htmlFor="employeeId">ID Empleado:</label>
-            <input
-              type="text"
-              id="employeeId"
-              placeholder="Ingrese el ID del empleado"
-              value={formState.employeeId}
-              onChange={(e) => setFormState({ ...formState, employeeId: e.target.value })}
-              onInput={fetchEmployeeData}
-              required
+    <ThemeProvider theme={theme}>
+
+      <Paper elevation={3} className={styles.container}>
+        <Typography variant="h4" gutterBottom>Reposición de Cheques</Typography>
+        <form id="repositionForm" onSubmit={handleSubmit}>
+          <Grid container spacing={3}>
+            {/* Columna de Información del Empleado */}
+            <Grid className={styles.inputContainer} item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="ID Empleado"
+                variant="outlined"
+                className={styles.textField}
+                size="small"
+                placeholder="Ingrese el ID del empleado"
+                value={formState.employeeId}
+                onChange={(e) => setFormState({ ...formState, employeeId: e.target.value })}
+                onInput={fetchEmployeeData}
+                required
+              />
+              <TextField
+                fullWidth
+                label="Nombre"
+                variant="outlined"
+                className={styles.textField}
+                size="small"
+                value={displayData.firstName}
+                InputProps={{ readOnly: true }}
+                sx={{ marginTop: '1rem' }}
+              />
+              <TextField
+                fullWidth
+                label="Apellido"
+                variant="outlined"
+                className={styles.textField}
+                size="small"
+                value={displayData.lastName}
+                InputProps={{ readOnly: true }}
+                sx={{ marginTop: '1rem' }}
+              />
+              <TextField
+                fullWidth
+                label="Monto"
+                variant="outlined"
+                className={styles.textField}
+                size="small"
+                value={displayData.amount}
+                InputProps={{ readOnly: true }}
+                sx={{ marginTop: '1rem' }}
+              />
+              <TextField
+                fullWidth
+                label="Tipo de Nómina"
+                variant="outlined"
+                className={styles.textField}
+                size="small"
+                value={displayData.payrollType}
+                InputProps={{ readOnly: true }}
+                sx={{ marginTop: '1rem' }}
+              />
+            </Grid>
+
+            {/* Columna de Información del Cheque */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Folio de Cheque"
+                variant="outlined"
+                className={styles.textField}
+                size="small"
+                type="number"
+                placeholder="Ingrese el folio del cheque"
+                value={formState.checkFolio}
+                onChange={(e) => setFormState({ ...formState, checkFolio: e.target.value })}
+                onInput={fetchCheckData}
+                required
+              />
+              <TextField
+                fullWidth
+                label="Folio de Póliza"
+                variant="outlined"
+                className={styles.textField}
+                size="small"
+                value={displayData.policyFolio}
+                InputProps={{ readOnly: true }}
+                sx={{ marginTop: '1rem' }}
+              />
+              <TextField
+                fullWidth
+                label="Quincena"
+                variant="outlined"
+                className={styles.textField}
+                size="small"
+                value={displayData.fortnight}
+                InputProps={{ readOnly: true }}
+                sx={{ marginTop: '1rem' }}
+              />
+              <TextField
+                fullWidth
+                label="Año"
+                variant="outlined"
+                className={styles.textField}
+                size="small"
+                value={displayData.year}
+                InputProps={{ readOnly: true }}
+                sx={{ marginTop: '1rem' }}
+              />
+            </Grid>
+          </Grid>
+
+          <TextField
+            fullWidth
+            label="Motivo de Reposición"
+            variant="outlined"
+            className={styles.textField}
+            size="small"
+            placeholder="Describa el motivo de la reposición"
+            value={formState.reason}
+            onChange={(e) => setFormState({ ...formState, reason: e.target.value })}
+            required
+            multiline
+            rows={4}
+            sx={{ marginTop: '1.5rem' }}
+          />
+
+          <Box className={styles.buttonContainer2}>
+            <Typography variant="body1" sx={{ marginTop: '1rem' }}>Subir Evidencia (Obligatorio):</Typography>
+            <FileUpload
+              mode="basic"
+              name="evidence"
+              accept="image/*,application/pdf"
+              customUpload
+              auto
+              uploadHandler={(e) => setFormState({ ...formState, evidence: e.files[0] })}
+              chooseLabel="Seleccionar Archivo"
+              className={styles.uploadButton}
             />
-            <label>Nombre:</label>
-            <span className={styles.dataLabel}>{displayData.firstName}</span>
-            <label>Apellido:</label>
-            <span className={styles.dataLabel}>{displayData.lastName}</span>
-            <label>Monto:</label>
-            <span className={styles.dataLabel}>{displayData.amount}</span>
-            <label>Tipo de Nómina:</label>
-            <span className={styles.dataLabel}>{displayData.payrollType}</span>
-          </div>
-          
-          {/* Columna de Información del Cheque */}
-          <div className={styles.formColumn}>
-            <label htmlFor="checkFolio">Folio de Cheque:</label>
-            <input
-              type="number"
-              id="checkFolio"
-              placeholder="Ingrese el folio del cheque"
-              value={formState.checkFolio}
-              onChange={(e) => setFormState({ ...formState, checkFolio: e.target.value })}
-              onInput={fetchCheckData}
-              required
-            />
-            <label>Folio de Póliza:</label>
-            <span className={styles.dataLabel}>{displayData.policyFolio}</span>
-            <label>Quincena:</label>
-            <span className={styles.dataLabel}>{displayData.fortnight}</span>
-            <label>Año:</label>
-            <span className={styles.dataLabel}>{displayData.year}</span>
-          </div>
-        </div>
+          </Box>
 
-        <label htmlFor="reason">Motivo de Reposición:</label>
-        <textarea
-          id="reason"
-          placeholder="Describa el motivo de la reposición"
-          value={formState.reason}
-          onChange={(e) => setFormState({ ...formState, reason: e.target.value })}
-          required
-        />
-
-        <label htmlFor="evidence">Subir Evidencia (Obligatorio):</label>
-        <input
-          type="file"
-          id="evidence"
-          onChange={(e) => setFormState({ ...formState, evidence: e.target.files[0] })}
-          required
-        />
-
-        <div className={styles.buttonContainer}>
+          <Box className={styles.buttonContainer}>
             <Link href="/Antonio">
-          <button type="submit">Reponer Cheque</button>
-          </Link>
-          <button type="reset" className={styles.cancelar}>Cancelar</button>
-        </div>
-      </form>
+              <Button type="submit" variant="contained" color="primary">Reponer Cheque</Button>
+            </Link>
+            <Button
+              type="reset"
+              color="secondary"
+              onClick={() => setFormState({ employeeId: '', checkFolio: '', reason: '', evidence: null })}
+            >
+              Cancelar
+            </Button>
+          </Box>
+        </form>
+      </Paper>
 
-      {successMessage && <div className={styles.successMessage}>¡Cheque repuesto exitosamente!</div>}
-    </div>
+      {successMessage && (
+        <Box className={styles.successMessage}>
+          <Typography variant="body1" color="success">¡Cheque repuesto exitosamente!</Typography>
+        </Box>
+      )}
+    </ThemeProvider>
   );
 }

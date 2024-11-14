@@ -22,6 +22,7 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import { useMediaQuery } from '@mui/material';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import KeySharpIcon from '@mui/icons-material/KeySharp';
+import CancelPresentationSharpIcon from '@mui/icons-material/CancelPresentationSharp';
 
 
 export default function NavBar() {
@@ -157,21 +158,58 @@ export default function NavBar() {
                             <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>CLC</MenuItem>
                         </Link>
                     </SubMenu>
-                    <SubMenu label="Estados de cuenta" icon={<DescriptionIcon />}>
-                        <Link className={styles.tWhite} href="/CargarEstadosCuenta" passHref>
-                            <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cargar Estados</MenuItem>
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Estados de cuenta" icon={<DescriptionIcon />}>
+                            <Link className={styles.tWhite} href="/CargarEstadosCuenta" passHref>
+                                <MenuItem icon={<DescriptionIcon />} className={styles.bgblack} onClick={handleLinkClick}>Estados de cuenta</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false1
+                        <Link className={styles.textAlone} href="/CargarEstadosCuenta" passHref>
+                            <MenuItem icon={<DescriptionIcon />} onClick={handleLinkClick}>Estados de cuenta</MenuItem>
                         </Link>
-                    </SubMenu>
-                    <SubMenu label="Reportes" icon={<AssessmentIcon />}>
-                        <Link className={styles.tWhite} href="/ListaReportes" passHref>
-                            <MenuItem icon={<DescriptionIcon />} className={styles.bgblack} onClick={handleLinkClick}>Lista Reportes</MenuItem>
+                    )}
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Gestión de Cheques" icon={<MoneyIcon />}>
+                            <Link className={styles.tWhite} href="/Cheques" passHref>
+                                <MenuItem icon={<MoneyIcon />} className={styles.bgblack} onClick={handleLinkClick}>Gestión de Cheques</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false1
+                        <Link className={styles.textAlone} href="/Cheques" passHref>
+                            <MenuItem icon={<MoneyIcon />} onClick={handleLinkClick}>Gestión de Cheques</MenuItem>
                         </Link>
-                    </SubMenu>
-                    <SubMenu label="Cheques" icon={<MoneyIcon />}>
-                        <Link className={styles.tWhite} href="/ListaCheques/Cheques" passHref>
-                            <MenuItem icon={<AttachFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Generar Cheque</MenuItem>
+                    )}
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Cancelacion de Cheques" icon={<CancelPresentationSharpIcon />}>
+                            <Link className={styles.tWhite} href="/Cheques/Cancelacion" passHref>
+                                <MenuItem icon={<CancelPresentationSharpIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cancelacion de Cheques</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false1
+                        <Link className={styles.textAlone} href="/Cheques/Cancelacion" passHref>
+                            <MenuItem icon={<CancelPresentationSharpIcon />} onClick={handleLinkClick}>Cancelacion de Cheques</MenuItem>
                         </Link>
-                    </SubMenu>
+                    )}
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Reportes" icon={<AssessmentIcon />}>
+                            <Link className={styles.tWhite} href="/ListaReportes" passHref>
+                                <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Reportes</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false1
+                        <Link className={styles.textAlone} href="/ListaReportes" passHref>
+                            <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Reportes</MenuItem>
+                        </Link>
+                    )}
                 </Menu>
             </Sidebar>
         </div>

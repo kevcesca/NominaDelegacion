@@ -2,8 +2,9 @@
 import { useState } from 'react'
 import styles from './page.module.css'
 import Link from 'next/link';
-
-
+import { Box, Typography, Button, TextField, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, InputLabel, FormControl, ThemeProvider } from '@mui/material';
+import { Calendar } from 'primereact/calendar';
+import theme from '../$tema/theme';
 
 const empleados = [
   { id: "1", nombre: "Juan Pérez", tipoNomina: "Base", monto: "$5000", estadoCheque: "Creado", clc: "CLC1234", tipoPago: "Cheque" },
@@ -65,7 +66,6 @@ export default function ChequeManager() {
     }
   }
 
-  // Función para manejar el clic en el botón de "Cambio de Tipo de Pago"
   const cambiarTipoPago = () => {
     if (empleadosGenerados.length === 0) {
       alert("No hay empleados generados para cambiar el tipo de pago.")
@@ -81,107 +81,115 @@ export default function ChequeManager() {
   }
 
   return (
-    <div className={styles.container}>
-      <h1>Gestor de Cheques</h1>
+    <ThemeProvider theme={theme}>
+      <Box className={styles.container}>
+        <Typography variant="h4">Gestor de Cheques</Typography>
 
-      <div className={styles.section}>
-        <div>
-          <label>Tipo de Nómina</label>
-          <select id="nomina">
-            <option value="0">Selecciona el tipo de nómina</option>
-            <option value="compuesta">Compuesta</option>
-            <option value="base">Base</option>
-            <option value="nomina8">Nómina 8</option>
-            <option value="estructura">Estructura</option>
-            <option value="extraordinario">Extraordinario</option>
-          </select>
-        </div>
-        <div>
-          <label>Fecha Actual:</label>
-          <input
-            type="date"
-            id="fechaActual"
-            onChange={(e) => actualizarQuincena(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Quincena:</label>
-          <input type="text" value={quincena} placeholder="Quincena automática" readOnly />
-        </div>
-      </div>
+        <Box className={styles.section}>
+          <FormControl className={styles.labels}>
+            <InputLabel>Tipo de Nómina</InputLabel>
+            <Select id="nomina" label="Tipo de Nómina" defaultValue="">
+              <MenuItem value="compuesta">Compuesta</MenuItem>
+              <MenuItem value="base">Base</MenuItem>
+              <MenuItem value="nomina8">Nómina 8</MenuItem>
+              <MenuItem value="estructura">Estructura</MenuItem>
+              <MenuItem value="extraordinario">Extraordinario</MenuItem>
+            </Select>
+          </FormControl>
 
-      <div className={styles.section}>
-        <div>
-          <label>Folio Inicial:</label>
-          <input
+          <FormControl>
+            <Calendar
+              dateFormat="yy-mm-dd"
+              id="fechaActual"
+              onChange={(e) => actualizarQuincena(e.value)}
+              placeholder="Seleccione una fecha"
+              className={styles.labels}
+            />
+          </FormControl>
+
+          <TextField label="Quincena" value={quincena} placeholder="Quincena automática" InputProps={{ readOnly: true }} className={styles.labels} />
+        </Box>
+
+        <Box className={styles.section}>
+          <TextField
+            label="Folio Inicial"
             type="number"
             value={folios}
             onChange={(e) => setFolios(parseInt(e.target.value))}
+            className={styles.labels}
           />
-        </div>
-        <div>
-          <label>Número de Cheques:</label>
-          <input
+          <TextField
+            label="Número de Cheques"
             type="number"
             value={numCheques}
             onChange={(e) => setNumCheques(parseInt(e.target.value))}
+            className={styles.labels}
           />
-        </div>
-      </div>
+        </Box>
 
+        <Box className={styles.tableSection}>
+          <Typography variant="h5">PAGO A EMPLEADOS CON CHEQUE</Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Id Empleado</TableCell>
+                  <TableCell>Nombre</TableCell>
+                  <TableCell>Tipo Nómina</TableCell>
+                  <TableCell>F. Cheque</TableCell>
+                  <TableCell>Monto</TableCell>
+                  <TableCell>Estado Cheque</TableCell>
+                  <TableCell>Fecha</TableCell>
+                  <TableCell>Quincena</TableCell>
+                  <TableCell>CLC</TableCell>
+                  <TableCell>Tipo de Pago</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {empleadosGenerados.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} align="center">
+                      No hay cheques generados
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  empleadosGenerados.map((empleado, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{empleado.id}</TableCell>
+                      <TableCell>{empleado.nombre}</TableCell>
+                      <TableCell>{empleado.tipoNomina}</TableCell>
+                      <TableCell>{empleado.folio}</TableCell>
+                      <TableCell>{empleado.monto}</TableCell>
+                      <TableCell>{empleado.estadoCheque}</TableCell>
+                      <TableCell>{empleado.fecha}</TableCell>
+                      <TableCell>{empleado.quincena}</TableCell>
+                      <TableCell>{empleado.clc}</TableCell>
+                      <TableCell>{empleado.tipoPago}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
 
-      <div className={styles.tableSection}>
-        <h2>PAGO A EMPLEADOS CON CHEQUE</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Id Empleado</th>
-              <th>Nombre</th>
-              <th>Tipo Nómina</th>
-              <th>F. Cheque</th>
-              <th>Monto</th>
-              <th>Estado Cheque</th>
-              <th>Fecha</th>
-              <th>Quincena</th>
-              <th>CLC</th>
-              <th>Tipo de Pago</th>
-            </tr>
-          </thead>
-          <tbody>
-            {empleadosGenerados.map((empleado, index) => (
-              <tr key={index}>
-                <td>{empleado.id}</td>
-                <td>{empleado.nombre}</td>
-                <td>{empleado.tipoNomina}</td>
-                <td>{empleado.folio}</td>
-                <td>{empleado.monto}</td>
-                <td>{empleado.estadoCheque}</td>
-                <td>{empleado.fecha}</td>
-                <td>{empleado.quincena}</td>
-                <td>{empleado.clc}</td>
-                <td>{empleado.tipoPago}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        <Box className={styles.actions}>
+          {chequesGenerados ? (
+            <Button variant="contained" color="secondary" className={styles.buttons} onClick={reiniciarTabla}>Generar Nuevos Cheques</Button>
+          ) : (
+            <Button variant="contained" color="primary" className={styles.buttons} onClick={generarFolios}>Generar</Button>
+          )}
+        </Box>
 
-      <div className={styles.actions}>
-        {chequesGenerados ? (
-          <button className={styles.new} onClick={reiniciarTabla}>Generar Nuevos Cheques</button>
-        ) : (
-          <button className={styles.generate} onClick={generarFolios}>Generar</button>
-        )}
-      </div>
-
-      <div className={styles.extraButtons}>
-      <Link href="./Cheques/CambioPago">
-        <button onClick={cambiarTipoPago} className={styles.cambiarTipoPago}>Cambio de Tipo de Pago</button>
-        </Link>
-        <Link href="./Cheques/Poliza">
-        <button className={styles.generarPoliza}>Generar Póliza</button>
-        </Link>
-      </div>
-    </div>
+        <Box className={styles.extraButtons}>
+          <Link href="./Cheques/CambioPago">
+            <Button variant="outlined" className={styles.buttonsOut} onClick={cambiarTipoPago}>Cambio de Tipo de Pago</Button>
+          </Link>
+          <Link href="./Cheques/Poliza">
+            <Button variant="contained" color="primary" className={styles.buttons} >Generar Póliza</Button>
+          </Link>
+        </Box>
+      </Box>
+    </ThemeProvider>
   )
 }

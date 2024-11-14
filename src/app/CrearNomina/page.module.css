@@ -35,6 +35,22 @@
     padding: 10px;
     text-align: center;
     border-radius: 10px;
+    width: 100%;
+}
+
+.buttonPlus {
+    border: none;
+    color: #bc955c;
+    font-size: 1.5rem !important;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.sectionContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
 }
 
 .buttonContainer {
@@ -53,7 +69,7 @@
     font-size: 16px;
     cursor: pointer;
     border-radius: 4px;
-    margin: 2rem;
+    margin-right: 4rem !important;
 }
 
 .exportButton:hover {

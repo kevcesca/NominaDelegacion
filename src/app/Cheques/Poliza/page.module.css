@@ -7,6 +7,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     width: 90%;
+    color: #9f2241;
 }
 
 .imgEncabezado {
@@ -16,12 +17,14 @@
     height: auto;
 }
 
-.h1, .h2 {
+.h1,
+.h2 {
     text-align: center;
     color: #b9274b;
 }
 
-.inputGroup, .tableSection {
+.inputGroup,
+.tableSection {
     margin-bottom: 20px;
 }
 
@@ -30,7 +33,8 @@
     color: #9f2241;
 }
 
-.input, .button {
+.input,
+.button {
     padding: 10px;
     margin-top: 5px;
     width: 100%;
@@ -60,7 +64,8 @@
     overflow: hidden;
 }
 
-.table th, .table td {
+.table th,
+.table td {
     padding: 15px;
     text-align: center;
     border: 1px solid #ddd;
@@ -83,4 +88,27 @@
 
 .table tr:hover td {
     background-color: #f0e0e0;
+}
+
+.labels {
+    width: 20vw;
+    height: 6vh;
+    margin: 2rem;
+}
+
+.buttons {
+    background-color: #8d1409 !important;
+    color: white !important;
+}
+
+.buttonsOut {
+    border-color: #8d1409 !important;
+    color: #8d1409 !important;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }

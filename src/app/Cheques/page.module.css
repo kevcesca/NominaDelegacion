@@ -14,7 +14,11 @@
   height: auto;
 }
 .section {
-  margin-bottom: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
 }
 .tableSection {
   margin-top: 20px;
@@ -90,4 +94,19 @@
 .extraButtons .generarPoliza:hover {
   background-color: #8d1409; /* Hover verde más oscuro */
   
+}
+
+.labels {
+  width: 20vw;
+  height: 6vh;
+  margin: 2rem;
+}
+
+.buttons{
+  background-color: #8d1409 !important;
+}
+
+.buttonsOut{
+  border-color: #8d1409 !important;
+  color: #8d1409 !important;
 }

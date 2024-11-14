@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react';
-import styles from '../Poliza/page.module.css'; // Asegúrate de crear este archivo de estilos
+import styles from '../Poliza/page.module.css';
+import { Box, Typography, Button, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 const empleados = [
     { id: 13515, nombre: "Juan Pérez", tipoNomina: "Estructura", percepciones: "$5200", deducciones: "$200", liquido: "$5000", clc: "CLC1234", estadoCheque: "Creado" },
@@ -41,114 +42,117 @@ export default function GestorPolizas() {
         setMostrarConsolidacion(true);
     };
 
-    const exportToPDF = (tableId) => {
-        alert(`Exportar tabla ${tableId} a PDF (simulación)`);
-    };
-
-    const exportToExcel = (tableId) => {
-        alert(`Exportar tabla ${tableId} a Excel (simulación)`);
-    };
-
-    const exportToCSV = (tableId) => {
-        alert(`Exportar tabla ${tableId} a CSV (simulación)`);
-    };
-
     return (
-        <div className={styles.container}>
-            <h1>Gestor de Pólizas</h1>
+        <Box className={styles.container}>
+            <Typography variant="h4" gutterBottom>Gestor de Pólizas</Typography>
 
-            <div className={styles.inputGroup}>
-                <label htmlFor="inicioFolioCheque">Folio de Cheque Inicial:</label>
-                <input
+            <Box className={styles.inputGroup}>
+                <TextField
+                    label="Folio de Cheque Inicial"
                     type="number"
-                    id="inicioFolioCheque"
                     value={inicioFolioCheque}
                     onChange={(e) => setInicioFolioCheque(e.target.value)}
                     placeholder="Ejemplo: 135468"
+                    className={styles.labels}
                 />
-                <label htmlFor="finalFolioCheque">Folio de Cheque Final:</label>
-                <input
+                <TextField
+                    label="Folio de Cheque Final"
                     type="number"
-                    id="finalFolioCheque"
                     value={finalFolioCheque}
                     onChange={(e) => setFinalFolioCheque(e.target.value)}
                     placeholder="Ejemplo: 135471"
+                    className={styles.labels}
                 />
-                <button onClick={generarPolizas}>Generar</button>
-            </div>
+                <Button variant="contained" color="primary" onClick={generarPolizas} className={styles.buttons}>Generar</Button>
+            </Box>
 
-            <div className={styles.tableSection}>
-                <h2>Pólizas Generadas</h2>
-              
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>ID Empleado</th>
-                            <th>Nombre</th>
-                            <th>Folio Cheque</th>
-                            <th>Folio Póliza</th>
-                            <th>Concepto de Pago</th>
-                            <th>Percepciones</th>
-                            <th>Deducciones</th>
-                            <th>Líquido</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaPolizas">
-                        {polizasGeneradas.map((poliza, index) => (
-                            <tr key={index}>
-                                <td>{poliza.id}</td>
-                                <td>{poliza.nombre}</td>
-                                <td>{poliza.folioCheque}</td>
-                                <td>{poliza.folioPoliza}</td>
-                                <td>{poliza.conceptoPago}</td>
-                                <td>{poliza.percepciones}</td>
-                                <td>{poliza.deducciones}</td>
-                                <td>{poliza.liquido}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <Box className={styles.tableSection}>
+                <Typography variant="h5" gutterBottom>Pólizas Generadas</Typography>
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow className={styles.table}>
+                                <TableCell>ID Empleado</TableCell>
+                                <TableCell>Nombre</TableCell>
+                                <TableCell>Folio Cheque</TableCell>
+                                <TableCell>Folio Póliza</TableCell>
+                                <TableCell>Concepto de Pago</TableCell>
+                                <TableCell>Percepciones</TableCell>
+                                <TableCell>Deducciones</TableCell>
+                                <TableCell>Líquido</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {polizasGeneradas.length > 0 ? (
+                                polizasGeneradas.map((poliza, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{poliza.id}</TableCell>
+                                        <TableCell>{poliza.nombre}</TableCell>
+                                        <TableCell>{poliza.folioCheque}</TableCell>
+                                        <TableCell>{poliza.folioPoliza}</TableCell>
+                                        <TableCell>{poliza.conceptoPago}</TableCell>
+                                        <TableCell>{poliza.percepciones}</TableCell>
+                                        <TableCell>{poliza.deducciones}</TableCell>
+                                        <TableCell>{poliza.liquido}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={8} align="center">
+                                        <Typography variant="body1" color="textSecondary">
+                                            Actualmente no existen pólizas
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
 
-            <button onClick={consolidarInformacion}>Consolidar Información</button>
+            <Button variant="contained" color="secondary" onClick={consolidarInformacion} className={styles.buttons} style={{ marginTop: '20px' }}>
+                Consolidar Información
+            </Button>
 
             {mostrarConsolidacion && (
-                <div className={styles.tableSection}>
-                    <h2>Consolidación de Información Cheque-Poliza</h2>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>ID Empleado</th>
-                                <th>Nombre</th>
-                                <th>Concepto de Pago</th>
-                                <th>Folio Cheque</th>
-                                <th>Folio Póliza</th>
-                                <th>Percepciones</th>
-                                <th>Deducciones</th>
-                                <th>Líquido</th>
-                                <th>CLC</th>
-                                <th>Estado Cheque</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaConsolidadaBody">
-                            {empleados.map((empleado, index) => (
-                                <tr key={index}>
-                                    <td>{empleado.id}</td>
-                                    <td>{empleado.nombre}</td>
-                                    <td>Quincena 2da - {empleado.tipoNomina}</td>
-                                    <td>{parseInt(inicioFolioCheque) + index}</td>
-                                    <td>{2000 + index}</td>
-                                    <td>{empleado.percepciones}</td>
-                                    <td>{empleado.deducciones}</td>
-                                    <td>{empleado.liquido}</td>
-                                    <td>{empleado.clc}</td>
-                                    <td>{empleado.estadoCheque}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <Box className={styles.tableSection} style={{ marginTop: '30px' }}>
+                    <Typography variant="h5" gutterBottom>Consolidación de Información Cheque-Poliza</Typography>
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>ID Empleado</TableCell>
+                                    <TableCell>Nombre</TableCell>
+                                    <TableCell>Concepto de Pago</TableCell>
+                                    <TableCell>Folio Cheque</TableCell>
+                                    <TableCell>Folio Póliza</TableCell>
+                                    <TableCell>Percepciones</TableCell>
+                                    <TableCell>Deducciones</TableCell>
+                                    <TableCell>Líquido</TableCell>
+                                    <TableCell>CLC</TableCell>
+                                    <TableCell>Estado Cheque</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {empleados.map((empleado, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{empleado.id}</TableCell>
+                                        <TableCell>{empleado.nombre}</TableCell>
+                                        <TableCell>Quincena 2da - {empleado.tipoNomina}</TableCell>
+                                        <TableCell>{parseInt(inicioFolioCheque) + index}</TableCell>
+                                        <TableCell>{2000 + index}</TableCell>
+                                        <TableCell>{empleado.percepciones}</TableCell>
+                                        <TableCell>{empleado.deducciones}</TableCell>
+                                        <TableCell>{empleado.liquido}</TableCell>
+                                        <TableCell>{empleado.clc}</TableCell>
+                                        <TableCell>{empleado.estadoCheque}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Box>
             )}
-        </div>
+        </Box>
     );
 }
