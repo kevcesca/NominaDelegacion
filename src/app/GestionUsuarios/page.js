@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import CambioRolModal from '../%Components/CambioRolModal/CambioRolModal';
+import CambioContra from '../%Components/CambioContra/CambioContra'; // Importar el modal de contraseña
 import styles from './page.module.css';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -17,9 +18,10 @@ export default function AsignacionRoles() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUser, setSelectedUser] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false); // Estado para el modal de contraseña
     const [selectedUsers, setSelectedUsers] = useState([]);
-    const [isAddingUser, setIsAddingUser] = useState(false); // Estado para saber si se está agregando un usuario
-    const [newUser, setNewUser] = useState({ nombre: '', email: '', rol: '', fechaAlta: '', asigno: '' }); // Estado del nuevo usuario
+    const [isAddingUser, setIsAddingUser] = useState(false);
+    const [newUser, setNewUser] = useState({ nombre: '', email: '', rol: '', fechaAlta: '', asigno: '' });
 
     const toggleMenu = (event, id) => {
         event.stopPropagation();
@@ -118,7 +120,6 @@ export default function AsignacionRoles() {
         (userId) => usuarios[userId] && !usuarios[userId].habilitado
     ).length;
 
-    // Función para agregar un nuevo usuario a la tabla
     const handleAddUser = () => {
         setIsAddingUser(true);
     };
@@ -133,6 +134,13 @@ export default function AsignacionRoles() {
 
     const handleNewUserSubmit = (e) => {
         if (e.key === 'Enter') {
+            const emptyFields = Object.keys(newUser).filter((field) => !newUser[field]);
+            
+            if (emptyFields.length > 0) {
+                alert(`Por favor llena los siguientes campos: ${emptyFields.join(', ')}`);
+                return;
+            }
+
             const newId = String(Object.keys(usuarios).length + 1).padStart(3, '0');
             setUsuarios((prevUsuarios) => ({
                 ...prevUsuarios,
@@ -157,7 +165,6 @@ export default function AsignacionRoles() {
                     />
                 </div>
 
-                {/* Contenedor para los botones de "Cargar" y "Añadir Usuario" */}
                 <div className={styles.buttonContainer}>
                     <button className={styles.uploadButton}>
                         <UploadFileIcon className={styles.uploadIcon} /> Cargar
@@ -225,7 +232,14 @@ export default function AsignacionRoles() {
                                                 >
                                                     Cambiar Rol
                                                 </a>
-                                                <a href="/GestionUsuarios/CambioContra">
+                                                <a
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setPasswordModalOpen(true); // Abre el modal de nueva contraseña
+                                                        setMenus({});
+                                                    }}
+                                                >
                                                     Cambiar contraseña
                                                 </a>
                                                 <a
@@ -329,6 +343,12 @@ export default function AsignacionRoles() {
                 onClose={() => setModalOpen(false)}
                 usuario={usuarios[selectedUser]}
                 onRoleChange={handleRoleChange}
+            />
+
+            {/* Modal de Nueva Contraseña */}
+            <CambioContra
+                isOpen={passwordModalOpen} 
+                onClose={() => setPasswordModalOpen(false)} 
             />
         </div>
     );

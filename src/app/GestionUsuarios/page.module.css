@@ -1,11 +1,4 @@
-.pageContainer {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(180deg, #fff, #F6F1F1, #D8C1A3, #D8C1A3);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+
 
 .container {
     margin: auto;
@@ -237,3 +230,6 @@ justify-content: flex-end;
 .uploadIcon, .addIcon {
     font-size: 10px;
 }
+
+
+
