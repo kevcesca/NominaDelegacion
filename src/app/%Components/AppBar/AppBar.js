@@ -1,10 +1,11 @@
+// src/app/%Components/Wrapper/AppBar.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';  // Importa el contexto de autenticación
 import { TabMenu } from 'primereact/tabmenu';
 import styles from './AppBar.module.css';
 import Image from 'next/image';
-import { signOut } from 'next-auth/react';
 import HomeIcon from '@mui/icons-material/Home';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GroupIcon from '@mui/icons-material/Group';
@@ -14,6 +15,7 @@ import Assessment from '@mui/icons-material/Assessment';
 export default function AppBar() {
     const [activeIndex, setActiveIndex] = useState(0);
     const router = useRouter();
+    const { logout } = useAuth();  // Usa la función logout del contexto
 
     const items = [
         { 
@@ -34,28 +36,22 @@ export default function AppBar() {
         { 
             label: 'Cerrar Sesión', 
             icon: <ExitToAppIcon />, 
-            command: () => { 
-                signOut({ callbackUrl: '/' }); // Cambiado a una ruta relativa
-            } 
-        },
-        { 
-            label: 'PJMX', 
-            icon: <GroupIcon />, 
-            command: () => router.push('/Galilea') 
+            command: () => logout()  // Llama a la función logout del contexto
         }
     ];
 
     useEffect(() => {
         if (!router.isReady) return;
+
         // Establecer el índice activo basado en la ruta actual
         switch (router.pathname) {
             case '/':
                 setActiveIndex(0);
                 break;
-            case '/Perfil':
+            case '/CrearNomina':
                 setActiveIndex(1);
                 break;
-            case '/Usuarios':
+            case '/Empleados':
                 setActiveIndex(2);
                 break;
             case '/logout':
