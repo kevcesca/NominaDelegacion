@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { ThemeProvider, Button, Box, Typography, FormControlLabel, Switch, Select, MenuItem, Alert } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { ThemeProvider, Button, Box, Typography, FormControlLabel, Switch, Alert } from '@mui/material';
 import styles from './page.module.css';
 import theme from '../../$tema/theme';
 import ChequesResumen from '../../%Components/TablasComparativasNomina/ChequesResumen';
@@ -13,16 +13,13 @@ import Totales from '../../%Components/TablasComparativasNomina/Totales';
 import PercepcionesTabla from '../../%Components/TablasComparativasNomina/PercepcionesTablas';
 import DeduccionesTabla from '../../%Components/TablasComparativasNomina/DeduccionesTabla';
 import API_BASE_URL from '../../%Config/apiConfig';
+import DateFilter from '../../%Components/DateFilter/DateFilter'; // Importa el componente DateFilter
 
 const CargarDatos = () => {
-    const searchParams = useSearchParams();
     const router = useRouter();
-    const anioParam = searchParams.get('anio');
-    const quincenaParam = searchParams.get('quincena');
-    const nombreNomina = 'Compuesta';
 
-    const [anio, setAnio] = useState(anioParam || '2024'); // Usar el valor de la URL o un valor por defecto
-    const [quincena, setQuincena] = useState(quincenaParam || '01');
+    const [anio, setAnio] = useState('2024'); // Valor por defecto
+    const [quincena, setQuincena] = useState('01'); // Valor por defecto
 
     const [chequesData, setChequesData] = useState([]);
     const [depositoData, setDepositoData] = useState([]);
@@ -31,32 +28,11 @@ const CargarDatos = () => {
     const [showPercepciones, setShowPercepciones] = useState(false);
     const [showDeducciones, setShowDeducciones] = useState(false);
 
-    const quincenas = [
-        { label: '1ra ene', value: '01' },
-        { label: '2da ene', value: '02' },
-        { label: '1ra feb', value: '03' },
-        { label: '2da feb', value: '04' },
-        { label: '1ra mar', value: '05' },
-        { label: '2da mar', value: '06' },
-        { label: '1ra abr', value: '07' },
-        { label: '2da abr', value: '08' },
-        { label: '1ra may', value: '09' },
-        { label: '2da may', value: '10' },
-        { label: '1ra jun', value: '11' },
-        { label: '2da jun', value: '12' },
-        { label: '1ra jul', value: '13' },
-        { label: '2da jul', value: '14' },
-        { label: '1ra ago', value: '15' },
-        { label: '2da ago', value: '16' },
-        { label: '1ra sep', value: '17' },
-        { label: '2da sep', value: '18' },
-        { label: '1ra oct', value: '19' },
-        { label: '2da oct', value: '20' },
-        { label: '1ra nov', value: '21' },
-        { label: '2da nov', value: '22' },
-        { label: '1ra dic', value: '23' },
-        { label: '2da dic', value: '24' },
-    ];
+    // Función que se ejecutará al seleccionar una fecha en el DateFilter
+    const handleDateChange = ({ anio, quincena }) => {
+        setAnio(anio);
+        setQuincena(quincena);
+    };
 
     useEffect(() => {
         if (anio && quincena) {
@@ -160,43 +136,34 @@ const CargarDatos = () => {
             <main className={styles.main}>
                 <h1 className={styles.h1}>Resumen de Nómina</h1>
 
-                <Alert severity="info" className={styles.alert} sx={{margin: '2rem'}}>
-                    Aquí podrás ver los resumenes nómina para comprobar que sean correctos
+                <Alert severity="info" className={styles.alert} sx={{ margin: '2rem' }}>
+                    Aquí podrás ver los resúmenes de nómina para comprobar que sean correctos.
                 </Alert>
 
-                {/* Dropdowns para seleccionar quincena y año */}
+                {/* Integración del DateFilter */}
                 <Box className={styles.selectorContainer}>
-                    <Select
-                        value={quincena}
-                        onChange={(e) => setQuincena(e.target.value)}
-                        variant="outlined"
-                        displayEmpty
-                    >
-                        {quincenas.map((quin, index) => (
-                            <MenuItem key={index} value={quin.value}>
-                                {quin.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-
-                    <Select
-                        value={anio}
-                        onChange={(e) => setAnio(e.target.value)}
-                        variant="outlined"
-                        displayEmpty
-                    >
-                        {[...Array(21).keys()].map(n => (
-                            <MenuItem key={2024 + n} value={2024 + n}>
-                                Año {2024 + n}
-                            </MenuItem>
-                        ))}
-                    </Select>
+                    <DateFilter onDateChange={handleDateChange} />
                 </Box>
 
                 <Box className={styles.buttonContainer}>
-                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportExcel}>Exportar resumen a Excel</Button>
-                    <Button className={styles.botonesExportar} variant="contained" color="primary" onClick={exportPDF}>Exportar resumen a PDF</Button>
+                    <Button
+                        className={styles.botonesExportar}
+                        variant="contained"
+                        color="primary"
+                        onClick={exportExcel}
+                    >
+                        Exportar resumen a Excel
+                    </Button>
+                    <Button
+                        className={styles.botonesExportar}
+                        variant="contained"
+                        color="primary"
+                        onClick={exportPDF}
+                    >
+                        Exportar resumen a PDF
+                    </Button>
                 </Box>
+
                 <div className={styles.grid}>
                     <div className={styles.gridItem1}>
                         <DepositoResumen resumenData={depositoData} anio={anio} quincena={quincena} />
@@ -209,7 +176,9 @@ const CargarDatos = () => {
                     </div>
 
                     <FormControlLabel
-                        control={<Switch checked={showPercepciones} onChange={() => setShowPercepciones(!showPercepciones)} />}
+                        control={
+                            <Switch checked={showPercepciones} onChange={() => setShowPercepciones(!showPercepciones)} />
+                        }
                         label="Mostrar Percepciones"
                     />
                     {showPercepciones && (
@@ -219,7 +188,9 @@ const CargarDatos = () => {
                     )}
 
                     <FormControlLabel
-                        control={<Switch checked={showDeducciones} onChange={() => setShowDeducciones(!showDeducciones)} />}
+                        control={
+                            <Switch checked={showDeducciones} onChange={() => setShowDeducciones(!showDeducciones)} />
+                        }
                         label="Mostrar Deducciones"
                     />
                     {showDeducciones && (
@@ -230,7 +201,6 @@ const CargarDatos = () => {
                 </div>
 
                 <Box className={styles.buttonContainer}>
-                    {/* Botón para regresar a la página anterior */}
                     <Button
                         variant="contained"
                         color="secondary"
@@ -243,7 +213,7 @@ const CargarDatos = () => {
                         className={styles.botonesExportar}
                         variant="contained"
                         color="primary"
-                        onClick={handleNavigateToAprobacion} // Navegar a la página de aprobación con parámetros
+                        onClick={handleNavigateToAprobacion}
                     >
                         Ir a Aprobación de Nóminas
                     </Button>

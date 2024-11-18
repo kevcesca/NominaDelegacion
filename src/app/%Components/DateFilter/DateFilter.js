@@ -5,7 +5,7 @@ import { Calendar } from 'primereact/calendar';
 import styles from './DateFilter.module.css';
 
 export default function DateFilter({ onDateChange }) {
-    const [quincena, setQuincena] = useState('');
+    const [quincenaTexto, setQuincenaTexto] = useState('');
     const [anio, setAnio] = useState('');
     const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
 
@@ -14,24 +14,32 @@ export default function DateFilter({ onDateChange }) {
 
         const fechaActual = new Date(fecha);
         const dia = fechaActual.getDate();
-        const mes = fechaActual.toLocaleString('es-ES', { month: 'long' });
+        const mes = fechaActual.toLocaleString('es-ES', { month: 'long' }); // Mes como texto (ej. "noviembre")
+        const mesNumero = fechaActual.getMonth() + 1; // Mes como número (1-12)
         const anioSeleccionado = fechaActual.getFullYear();
 
-        let nuevaQuincena = '';
+        let numeroQuincena = null;
+        let textoQuincena = '';
+
         if (dia >= 1 && dia <= 14) {
-            nuevaQuincena = `1ra quincena de ${mes}`;
+            numeroQuincena = (mesNumero * 2) - 1; // Quincena impar
+            textoQuincena = `1ra quincena de ${mes}`;
         } else if (dia >= 15 && dia <= 31) {
-            nuevaQuincena = `2da quincena de ${mes}`;
-        } else {
-            nuevaQuincena = 'Fecha no válida';
+            numeroQuincena = mesNumero * 2; // Quincena par
+            textoQuincena = `2da quincena de ${mes}`;
         }
 
-        setQuincena(nuevaQuincena);
-        setAnio(anioSeleccionado);
+        if (numeroQuincena) {
+            setQuincenaTexto(textoQuincena);
+            setAnio(anioSeleccionado);
 
-        // Notificar al componente padre el año y la quincena
-        if (onDateChange) {
-            onDateChange({ anio: anioSeleccionado, quincena: nuevaQuincena });
+            // Notificar al componente padre el año y el número de la quincena
+            if (onDateChange) {
+                onDateChange({ anio: anioSeleccionado, quincena: numeroQuincena });
+            }
+        } else {
+            setQuincenaTexto('Fecha no válida');
+            setAnio('');
         }
     };
 
@@ -45,11 +53,11 @@ export default function DateFilter({ onDateChange }) {
                     actualizarFecha(e.value);
                 }}
                 placeholder="Seleccione una fecha"
-                className={styles.calendar} // Cambiado a .calendar para personalización
+                className={styles.calendar}
             />
             <TextField
                 label="Quincena"
-                value={quincena}
+                value={quincenaTexto}
                 placeholder="Quincena automática"
                 InputProps={{ readOnly: true }}
                 className={styles.textField}
