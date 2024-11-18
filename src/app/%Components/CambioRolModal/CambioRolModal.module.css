@@ -1,0 +1,72 @@
+.gridContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas */
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.modalTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.titleText {
+    color: #8B2635;
+}
+
+.iconButton {
+    width: 40px;
+    height: 40px;
+    background-color: #DAB78D;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+    margin-right: 0.5rem;
+}
+
+.iconButton:hover {
+    background-color: #B18A68;
+}
+
+.closeButton {
+    background-color: #E74C3C;
+}
+
+.closeButton:hover {
+    background-color: #C0392B;
+}
+
+.content {
+    padding: 24px;
+    min-width: 500px;
+}
+
+.accessControl {
+    color: #8B2635;
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+.permissionsList {
+    margin-left: 1rem;
+    list-style-type: disc;
+}
+
+.changeButton {
+    background-color: #8B2635;
+    color: white;
+    padding: 10px 20px;
+    text-transform: none;
+    font-weight: bold;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.changeButton:hover {
+    background-color: #6D1E2A;
+}

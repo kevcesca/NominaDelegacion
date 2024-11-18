@@ -1,31 +1,117 @@
-/* src/app/%Components/CrudUniversos/CrudUniversos.module.css */
-.button-gold {
-    background-color: #bc955c;
-    border-color: #bc955c;
-    color: #fff;
-}
-
-
-.button-red {
-    background-color: #c0392b;
-    border-color: #c0392b;
-    color: #fff;
-}
-
-
-.button-teal {
-    background-color: #1abc9c;
-    border-color: #1abc9c;
-    color: #fff;
-}
-
-
-.button-margin {
-    margin-right: 0.5rem;
-    margin-left: 0.5rem;
-}
-
-
-.main{
+/* Estilos generales */
+.body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f4f4f9;
+    background: linear-gradient(to bottom, white 0%, #D8C1A3 50%);
     min-height: 100vh;
+}
+
+.container {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.subHeader {
+    text-align: center;
+    background-color: #AB9144;
+    color: white;
+    padding: 1.5em;
+    font-size: 1.5em;
+    font-weight: bold;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.inputField {
+    width: 70%;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.styledButton {
+    background-color: #9f2241;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.styledButton:hover {
+    background-color: #711c31;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table th,
+.table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #dcdcdc;
+}
+
+.table th {
+    background-color: #1f5841;
+    color: white;
+}
+
+.iconButton {
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.pagination button {
+    background-color: #9f2241;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 0 5px;
+    border-radius: 5px;
+}
+
+.pagination button:hover {
+    background-color: #711c31;
+}
+
+.selectField {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.inputField:focus,
+.selectField:focus {
+    outline: none;
+    border-color: #9f2241;
 }

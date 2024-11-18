@@ -1,14 +1,5 @@
 /* clc.module.css */
 
-.body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(180deg, #fff, #F6F1F1, #D8C1A3);
-    flex-direction: column;
-    margin: 0;
-}
 .container {
     width: 100%;
     max-width: 1200px;

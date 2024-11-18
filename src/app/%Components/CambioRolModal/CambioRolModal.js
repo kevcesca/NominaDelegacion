@@ -8,10 +8,15 @@ import {
     Button,
     Typography,
     IconButton,
-    Select,
+    Checkbox,
+    FormControlLabel,
+    Menu,
     MenuItem
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
+import styles from './CambioRolModal.module.css'; // Importar el archivo CSS
 
 const rolesDisponibles = ['Administrador', 'Revisor', 'Usuario', 'Gerente'];
 const permisosPorRol = {
@@ -22,63 +27,127 @@ const permisosPorRol = {
 };
 
 export default function CambioRolModal({ open, onClose, usuario, onRoleChange }) {
-    const [nuevoRol, setNuevoRol] = useState(usuario?.rol || '');
-    const [permisos, setPermisos] = useState(permisosPorRol[usuario?.rol] || []);
+    const [rolesSeleccionados, setRolesSeleccionados] = useState(usuario?.roles || []);
+    const [permisos, setPermisos] = useState(
+        usuario?.roles?.flatMap((rol) => permisosPorRol[rol]) || []
+    );
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+    const [rolSeleccionado, setRolSeleccionado] = useState(null);
+
+    const actualizarPermisos = (roles) => {
+        const nuevosPermisos = roles.flatMap((rol) => permisosPorRol[rol] || []);
+        setPermisos([...new Set(nuevosPermisos)]);
+    };
+
+    const handleRoleToggle = (rol) => {
+        if (rolesSeleccionados.includes(rol)) {
+            if (window.confirm(`¿Deseas eliminar el rol de ${rol}?`)) {
+                const nuevosRoles = rolesSeleccionados.filter((r) => r !== rol);
+                setRolesSeleccionados(nuevosRoles);
+                actualizarPermisos(nuevosRoles);
+            }
+        } else {
+            const nuevosRoles = [...rolesSeleccionados, rol];
+            setRolesSeleccionados(nuevosRoles);
+            actualizarPermisos(nuevosRoles);
+        }
+    };
 
     const handleRoleChange = () => {
-        onRoleChange(nuevoRol);
+        onRoleChange(rolesSeleccionados);
         onClose();
     };
 
-    const handleAgregarRol = () => {
-        setPermisos(permisosPorRol[nuevoRol] || []);
+    const handleOpenMenu = (event, rol) => {
+        setMenuAnchorEl(event.currentTarget);
+        setRolSeleccionado(rol);
+    };
+
+    const handleCloseMenu = () => {
+        setMenuAnchorEl(null);
+        setRolSeleccionado(null);
+    };
+
+    const handleModifyPermissions = () => {
+        alert(`Modificar permisos para el rol: ${rolSeleccionado}`);
+        handleCloseMenu();
+    };
+
+    const handleSettingsClick = () => {
+        alert("Configuración de roles y permisos");
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="xs">
-            <DialogTitle>
-                <Typography variant="h6" style={{ color: '#8B2635' }}>Cambio de Rol de Empleado</Typography>
-                <IconButton onClick={onClose} style={{ position: 'absolute', right: 8, top: 8, color: '#8B2635' }}>
-                    <CloseIcon />
-                </IconButton>
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth> {/* maxWidth sm para tamaño medio */}
+            <DialogTitle className={styles.modalTitle}>
+                <Typography variant="h6" className={styles.titleText}>Cambio de Rol de Empleado</Typography>
+                
+                <div>
+                    <IconButton onClick={handleSettingsClick} className={styles.iconButton}>
+                        <SettingsSuggestIcon fontSize="medium" />
+                    </IconButton>
+                    <IconButton onClick={onClose} className={`${styles.iconButton} ${styles.closeButton}`}>
+                        <CloseIcon />
+                    </IconButton>
+                </div>
             </DialogTitle>
-            <DialogContent>
+            <DialogContent className={styles.content}>
                 <Typography variant="body1" style={{ marginBottom: '0.5rem' }}>
                     Nombre del Empleado: <strong>{usuario?.nombre || 'N/A'}</strong>
                 </Typography>
                 <Typography variant="body2" color="textSecondary" style={{ marginBottom: '1rem' }}>
-                    Rol Actual: <strong>{usuario?.rol || 'N/A'}</strong>
+                    Roles Actuales: <strong>{rolesSeleccionados.join(', ') || 'N/A'}</strong>
                 </Typography>
                 
                 <Typography variant="body2" style={{ marginBottom: '0.5rem' }}>
-                    Cambiar Rol:
+                    Cambiar Roles:
                 </Typography>
-                <Select
-                    fullWidth
-                    value={nuevoRol}
-                    onChange={(e) => {
-                        setNuevoRol(e.target.value);
-                        setPermisos(permisosPorRol[e.target.value] || []);
-                    }}
-                    style={{ marginBottom: '1rem' }}
-                >
+
+                <div className={styles.gridContainer}> {/* Aplica la clase para la cuadrícula */}
                     {rolesDisponibles.map((rol) => (
-                        <MenuItem key={rol} value={rol}>
-                            {rol}
-                        </MenuItem>
+                        <div key={rol} style={{ display: 'flex', alignItems: 'center' }}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={rolesSeleccionados.includes(rol)}
+                                        onChange={() => handleRoleToggle(rol)}
+                                        color="primary"
+                                    />
+                                }
+                                label={rol}
+                                style={{ marginRight: '0.5rem' }}
+                            />
+                            <IconButton
+                                onClick={(event) => handleOpenMenu(event, rol)}
+                                edge="end"
+                                aria-label="more-options"
+                            >
+                                <MoreVertIcon />
+                            </IconButton>
+                        </div>
                     ))}
-                </Select>
+                </div>
                 
-                <Typography variant="subtitle1" style={{ color: '#8B2635' }}>Control de Acceso</Typography>
-                <ul>
+                <Menu
+                    anchorEl={menuAnchorEl}
+                    open={Boolean(menuAnchorEl)}
+                    onClose={handleCloseMenu}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                    <MenuItem onClick={handleModifyPermissions}>Modificar permisos</MenuItem>
+                </Menu>
+
+                <Typography className={styles.accessControl}>Control de Acceso</Typography>
+                <ul className={styles.permissionsList}>
                     {permisos.map((permiso, index) => (
-                        <li key={index} style={{ marginLeft: '1rem', listStyleType: 'disc' }}>{permiso}</li>
+                        <li key={index}>{permiso}</li>
                     ))}
                 </ul>
             </DialogContent>
             <DialogActions style={{ justifyContent: 'center' }}>
-                <Button onClick={handleRoleChange} variant="contained" style={{ backgroundColor: '#8B2635', color: 'white', marginRight: '1rem' }}>
-                    Cambiar
+                <Button onClick={handleRoleChange} className={styles.changeButton}>
+                    Guardar
                 </Button>
             </DialogActions>
         </Dialog>
