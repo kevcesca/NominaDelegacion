@@ -135,7 +135,7 @@ export default function NavBar() {
                             <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cargar Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/Validacion" passHref>
-                            <MenuItem icon={<EditIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cambios en la Nómina</MenuItem>
+                            <MenuItem icon={<EditIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cambios de la Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/CrearNomina/ProcesarDatos" passHref>
                             <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Resumen de Nómina</MenuItem>
@@ -143,9 +143,7 @@ export default function NavBar() {
                         <Link className={styles.tWhite} href="/AprobarCargaNomina" passHref>
                             <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Aprobar nómina</MenuItem>
                         </Link>
-                        <Link className={styles.tWhite} href="/SubirEvidencia" passHref>
-                            <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Subir Evidencia</MenuItem>
-                        </Link>
+                        
                     </SubMenu>
                     <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />}>
                         <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>

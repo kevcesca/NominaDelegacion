@@ -3,10 +3,12 @@
 
 import { useState } from 'react';
 import CambioRolModal from '../%Components/CambioRolModal/CambioRolModal';
-import CambioContra from '../%Components/CambioContra/CambioContra'; // Importar el modal de contraseña
+import CambioContra from '../%Components/CambioContra/CambioContra'; // Modal para cambiar la contraseña
 import styles from './page.module.css';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CheckIcon from '@mui/icons-material/Check'; // Icono de palomita para guardar
+import CloseIcon from '@mui/icons-material/Close'; // Icono de X para cancelar
 
 export default function AsignacionRoles() {
     const [menus, setMenus] = useState({});
@@ -18,10 +20,11 @@ export default function AsignacionRoles() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUser, setSelectedUser] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
-    const [passwordModalOpen, setPasswordModalOpen] = useState(false); // Estado para el modal de contraseña
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false); // Modal de contraseña
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [isAddingUser, setIsAddingUser] = useState(false);
-    const [newUser, setNewUser] = useState({ nombre: '', email: '', rol: '', fechaAlta: '', asigno: '' });
+    const [newUser, setNewUser] = useState({ id: '', nombre: '', email: '', rol: '', fechaAlta: '', asigno: '' });
+    const [editMode, setEditMode] = useState(null); // ID del usuario en edición
 
     const toggleMenu = (event, id) => {
         event.stopPropagation();
@@ -132,25 +135,21 @@ export default function AsignacionRoles() {
         }));
     };
 
+    // Función para asignar nombre cuando se introduce el ID del nuevo usuario
     const handleNewUserSubmit = (e) => {
-        if (e.key === 'Enter') {
-            const emptyFields = Object.keys(newUser).filter((field) => !newUser[field]);
-            
-            if (emptyFields.length > 0) {
-                alert(`Por favor llena los siguientes campos: ${emptyFields.join(', ')}`);
-                return;
+        if (e.key === 'Enter' && newUser.id) {
+            const newId = newUser.id;
+            if (!usuarios[newId]) {
+                // Asignación de nombre predeterminado
+                const nombreAsignado = nombresDisponibles.find((nombre) => !Object.values(usuarios).some((u) => u.nombre === nombre));
+                setNewUser((prevUser) => ({ ...prevUser, nombre: nombreAsignado || '' }));
+            } else {
+                alert('Este ID ya está en uso.');
             }
-
-            const newId = String(Object.keys(usuarios).length + 1).padStart(3, '0');
-            setUsuarios((prevUsuarios) => ({
-                ...prevUsuarios,
-                [newId]: { ...newUser, habilitado: true },
-            }));
-            setIsAddingUser(false);
-            setNewUser({ nombre: '', email: '', rol: '', fechaAlta: '', asigno: '' });
         }
     };
-
+    
+    const nombresDisponibles = ['Nombre Generado 1', 'Nombre Generado 2', 'Nombre Generado 3']; // Nombres de ejemplo
     return (
         <div className={styles.pageContainer}>
             <div className={styles.container}>
@@ -207,137 +206,133 @@ export default function AsignacionRoles() {
                                         />
                                     </td>
                                     <td className={!usuario.habilitado ? styles.disabledCell : ''}>{id}</td>
-                                    <td className={!usuario.habilitado ? styles.disabledCell : ''}>{usuario.nombre}</td>
-                                    <td className={!usuario.habilitado ? styles.disabledCell : ''}>{usuario.email}</td>
-                                    <td className={!usuario.habilitado ? styles.disabledCell : ''}>{usuario.rol}</td>
-                                    <td className={!usuario.habilitado ? styles.disabledCell : ''}>{usuario.fechaAlta}</td>
-                                    <td className={!usuario.habilitado ? styles.disabledCell : ''}>{usuario.asigno}</td>
+                                    
+                                    {/* Campo editable: Nombre */}
+                                    <td onDoubleClick={() => setEditMode(id)}>
+                                        {editMode === id ? (
+                                            <input
+                                                type="text"
+                                                value={usuario.nombre}
+                                                onChange={(e) => setUsuarios((prevUsuarios) => ({
+                                                    ...prevUsuarios,
+                                                    [id]: { ...usuario, nombre: e.target.value },
+                                                }))}
+                                            />
+                                        ) : (
+                                            usuario.nombre
+                                        )}
+                                    </td>
+                                    
+                                    {/* Campo editable: Email */}
+                                    <td onDoubleClick={() => setEditMode(id)}>
+                                        {editMode === id ? (
+                                            <input
+                                                type="text"
+                                                value={usuario.email}
+                                                onChange={(e) => setUsuarios((prevUsuarios) => ({
+                                                    ...prevUsuarios,
+                                                    [id]: { ...usuario, email: e.target.value },
+                                                }))}
+                                            />
+                                        ) : (
+                                            usuario.email
+                                        )}
+                                    </td>
+                                    
+                                    {/* Campo editable: Rol */}
+                                    <td onDoubleClick={() => setEditMode(id)}>
+                                        {editMode === id ? (
+                                            <select
+                                                value={usuario.rol}
+                                                onChange={(e) => setUsuarios((prevUsuarios) => ({
+                                                    ...prevUsuarios,
+                                                    [id]: { ...usuario, rol: e.target.value },
+                                                }))}
+                                            >
+                                                <option value="Administrador">Administrador</option>
+                                                <option value="Gestor de Cheques">Gestor de Cheques</option>
+                                                <option value="Revisor">Revisor</option>
+                                                <option value="Supervisor">Supervisor</option>
+                                            </select>
+                                        ) : (
+                                            usuario.rol
+                                        )}
+                                    </td>
+                                    
+                                    {/* Campo editable: Fecha de Alta */}
+                                    <td onDoubleClick={() => setEditMode(id)}>
+                                        {editMode === id ? (
+                                            <input
+                                                type="text"
+                                                value={usuario.fechaAlta}
+                                                onChange={(e) => setUsuarios((prevUsuarios) => ({
+                                                    ...prevUsuarios,
+                                                    [id]: { ...usuario, fechaAlta: e.target.value },
+                                                }))}
+                                            />
+                                        ) : (
+                                            usuario.fechaAlta
+                                        )}
+                                    </td>
+                                    
+                                    {/* Campo editable: Asignó */}
+                                    <td onDoubleClick={() => setEditMode(id)}>
+                                        {editMode === id ? (
+                                            <input
+                                                type="text"
+                                                value={usuario.asigno}
+                                                onChange={(e) => setUsuarios((prevUsuarios) => ({
+                                                    ...prevUsuarios,
+                                                    [id]: { ...usuario, asigno: e.target.value },
+                                                }))}
+                                            />
+                                        ) : (
+                                            usuario.asigno
+                                        )}
+                                    </td>
+                                    
+                                    {/* Botones de Guardar y Cancelar en Modo Edición */}
                                     <td>
-                                        <button
-                                            className={styles.menuButton}
-                                            onClick={(event) => toggleMenu(event, `menu-${id}`)}
-                                        >
-                                            ⋮
-                                        </button>
-                                        {menus[`menu-${id}`] && (
-                                            <div className={styles.dropdownMenu}>
-                                                <a
-                                                    href="#"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        setSelectedUser(id);
-                                                        setModalOpen(true);
-                                                        setMenus({});
+                                        {editMode === id ? (
+                                            <>
+                                                <button
+                                                    className={styles.cancelButton}
+                                                    onClick={() => setEditMode(null)}
+                                                >
+                                                    <CloseIcon />
+                                                </button>
+                                                <button
+                                                    className={styles.saveButton}
+                                                    onClick={() => {
+                                                        setEditMode(null);
                                                     }}
                                                 >
-                                                    Cambiar Rol
-                                                </a>
-                                                <a
-                                                    href="#"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        setPasswordModalOpen(true); // Abre el modal de nueva contraseña
-                                                        setMenus({});
-                                                    }}
-                                                >
-                                                    Cambiar contraseña
-                                                </a>
-                                                <a
-                                                    href="#"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        toggleHabilitarUsuario(id);
-                                                        setMenus({});
-                                                    }}
-                                                >
-                                                    {usuario.habilitado ? 'Deshabilitar' : 'Habilitar'}
-                                                </a>
-                                            </div>
+                                                    <CheckIcon />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                className={styles.menuButton}
+                                                onClick={(event) => toggleMenu(event, `menu-${id}`)}
+                                            >
+                                                ⋮
+                                            </button>
                                         )}
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                                <td colSpan="8" style={{ textAlign: 'center' }}>
                                     No se encontraron resultados
                                 </td>
                             </tr>
                         )}
-                        {isAddingUser && (
-                            <tr>
-                                <td></td>
-                                <td className={styles.newUserField}>{String(Object.keys(usuarios).length + 1).padStart(3, '0')}</td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        name="nombre"
-                                        value={newUser.nombre}
-                                        onChange={handleNewUserChange}
-                                        onKeyDown={handleNewUserSubmit}
-                                        placeholder="Nombre"
-                                    />
-                                </td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        name="email"
-                                        value={newUser.email}
-                                        onChange={handleNewUserChange}
-                                        onKeyDown={handleNewUserSubmit}
-                                        placeholder="Email"
-                                    />
-                                </td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        name="rol"
-                                        value={newUser.rol}
-                                        onChange={handleNewUserChange}
-                                        onKeyDown={handleNewUserSubmit}
-                                        placeholder="Rol"
-                                    />
-                                </td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        name="fechaAlta"
-                                        value={newUser.fechaAlta}
-                                        onChange={handleNewUserChange}
-                                        onKeyDown={handleNewUserSubmit}
-                                        placeholder="Fecha de Alta"
-                                    />
-                                </td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        name="asigno"
-                                        value={newUser.asigno}
-                                        onChange={handleNewUserChange}
-                                        onKeyDown={handleNewUserSubmit}
-                                        placeholder="Asignó"
-                                    />
-                                </td>
-                                <td></td>
-                            </tr>
-                        )}
                     </tbody>
                 </table>
-
-                <div className={styles.buttonDeshabilitar}>
-                    {selectedEnabledUsersCount >= 2 && (
-                        <button className={styles.disableButton} onClick={handleDisableUsers}>
-                            Deshabilitar usuarios
-                        </button>
-                    )}
-                    {selectedDisabledUsersCount >= 2 && (
-                        <button className={styles.enableButton} onClick={handleEnableUsers}>
-                            Habilitar usuarios
-                        </button>
-                    )}
-                </div>
             </div>
 
+            {/* Modales */}
             <CambioRolModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
@@ -345,7 +340,6 @@ export default function AsignacionRoles() {
                 onRoleChange={handleRoleChange}
             />
 
-            {/* Modal de Nueva Contraseña */}
             <CambioContra
                 isOpen={passwordModalOpen} 
                 onClose={() => setPasswordModalOpen(false)} 
