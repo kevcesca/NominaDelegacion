@@ -40,6 +40,10 @@
     border-radius: 5px;
 }
 
+.textarea {
+    resize: vertical;
+}
+
 .actions {
     background-color: #8B2635 !important;
     color: white;
@@ -50,6 +54,32 @@
     cursor: pointer;
 }
 
+.actions:hover {
+    background-color: #BB905B;
+}
+
+/* Barra de búsqueda */
+.searchBar {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+}
+
+.searchInput {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+    margin-right: 10px;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #8B2635;
+}
+
+/* Tabla */
 .tableSection {
     margin-top: 30px;
     overflow-x: auto;
@@ -59,101 +89,56 @@
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    font-size: 0.9em;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
+    font-size: 14px;
 }
 
-.th, .td {
+.table th,
+.table td {
     padding: 12px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
+    text-align: left;
+    border: 1px solid #ddd;
 }
 
-.th {
-    background-color: #8B2635;
-    color: white;
+.table th {
+    background-color: #f4f4f4;
     font-weight: bold;
     text-transform: uppercase;
+    font-size: 14px;
 }
 
-.td {
-    background-color: #F6F1F1;
-    color: #333;
+.table tr:nth-child(even) {
+    background-color: #f9f9f9;
 }
 
-.tr:nth-child(even) .td {
-    background-color: #EFE8E8;
+.table tr:hover {
+    background-color: #f1f1f1;
 }
 
-.tr:hover .td {
-    background-color: #DED2D2;
-}
-
-.a {
-    color: #8B2635;
-    text-decoration: underline;
-    font-weight: bold;
-}
-
-.a:hover {
-    color: #BB905B;
-    text-decoration: none;
-}
-
-.modal {
+.table input[type="checkbox"] {
+    margin: 0 auto;
     display: block;
-    position: relative;
-    top: -400px;
-    left: 280px;
-    width: 100%;
-    height: 100%;
+    cursor: pointer;
+}
+
+/* Mantén el CSS proporcionado inicialmente con las siguientes actualizaciones */
+.pagination {
+    display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 10px;
+    gap: 10px;
 }
 
-.modalContent {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    max-width: 400px;
-    width: 80%;
-}
-
-.modalButtons {
-    margin-top: 20px;
-}
-
-.modalBtn {
-    padding: 10px 20px;
-    margin: 10px;
+.pagination button {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: 1px solid #8B2635;
     background-color: #8B2635;
     color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.modalBtn:hover {
-    background-color: #BB905B;
-}
-
-.modalBtnGreen {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    margin: 4px 2px;
-    cursor: pointer;
     border-radius: 4px;
+    cursor: pointer;
 }
 
-.modalBtnGreen:hover {
-    background-color: #45a049;
+.pagination button:hover {
+    background-color: #BB905B;
 }
