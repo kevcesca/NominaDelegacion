@@ -1,19 +1,16 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import React, { useState } from 'react';
 import { ThemeProvider, Box, Typography, Select, MenuItem, Button, Alert } from '@mui/material';
 import styles from './page.module.css';
 import theme from '../$tema/theme';
 import ComparativaTable from '../%Components/ComparativeTable/ComparativeTable';
 import ComparativaTable2 from '../%Components/ComparativeTable/ComparativeTable2';
 import { useSearchParams, useRouter } from 'next/navigation';
-
+import ProtectedView from '../%Components/ProtectedView/ProtectedView'; // Importa el componente
 
 const AprobarCargaNomina = () => {
-
     const router = useRouter();
-    const { data: session } = useSession();
     const searchParams = useSearchParams();
     const anioParam = searchParams.get('anio');
     const quincenaParam = searchParams.get('quincena');
@@ -80,23 +77,23 @@ const AprobarCargaNomina = () => {
                     </Select>
                 </Box>
 
-                {/* Texto de ayuda */}
                 <Alert severity="info" className={styles.alert} sx={{ margin: '1rem' }}>
                     Estás viendo únicamente los archivos que requieren aprobación. La aprobación se completará cuando se haya hecho la doble validación.
                 </Alert>
-                {/* Renderiza la tabla de aprobación 1 solo si el usuario tiene el rol 'Admin' */}
-                {session && session.roles && session.roles.includes('Admin') && (
-                    <Box mt={4}>
-                        <ComparativaTable userRevision={session.user.name} quincena={quincena} anio={anio} />
-                    </Box>
-                )}
 
-                {/* Renderiza la tabla de aprobación 2 solo si el usuario tiene el rol 'SuperAdmin' */}
-                {session && session.roles && session.roles.includes('SuperAdmin') && (
+                {/* Protege la tabla de aprobación 1 para el permiso "ver_aprobacion_1" */}
+                <ProtectedView requiredPermissions={["ver_aprobacion_1", "Acceso_total"]}>
                     <Box mt={4}>
-                        <ComparativaTable2 userRevision={session.user.name} quincena={quincena} anio={anio} />
+                        <ComparativaTable quincena={quincena} anio={anio} />
                     </Box>
-                )}
+                </ProtectedView>
+
+                {/* Protege la tabla de aprobación 2 para el permiso "ver_aprobacion_2" */}
+                <ProtectedView requiredPermissions={["ver_aprobacion_2", "Acceso_total"]}>
+                    <Box mt={4}>
+                        <ComparativaTable2 quincena={quincena} anio={anio} />
+                    </Box>
+                </ProtectedView>
 
                 {/* Botón para regresar a la página anterior */}
                 <Button

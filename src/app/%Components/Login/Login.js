@@ -1,35 +1,47 @@
-'use client';
+"use client";
 import React, { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 import Image from 'next/image';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Button, TextField, Container, Typography, Box, ThemeProvider } from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
 import styles from './Login.module.css';
 import theme from '../../$tema/theme';
+import { API_USERS_URL } from '../../%Config/apiConfig';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const router = useRouter();
+    const { setUser } = useAuth();  // Usa el contexto de autenticación para guardar el usuario
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        const result = await signIn('credentials', {
-            redirect: false,
-            email,
-            password
-        });
+        try {
+            const response = await fetch(`${API_USERS_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    correo_usuario: email,
+                    contrasena_usuario: password
+                }),
+                credentials: 'include'  // Incluir las cookies en la solicitud
+            });
 
-        if (!result.error) {
-            window.location.href = '/';
-        } else {
-            setError('Email o contraseña inválidos');
+            const data = await response.json();
+            if (response.ok) {
+                // Guardar los datos del usuario en el contexto de sesión
+                setUser(data.user);  // Asumiendo que `data.user` contiene la información del usuario
+                // Redirigir al usuario a la página principal
+                router.push('/');
+            } else {
+                setError(data.message || 'Error de autenticación');
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            setError('Error de autenticación');
         }
-    };
-
-    const handleGoogleSignIn = async () => {
-        signIn('google');
     };
 
     return (

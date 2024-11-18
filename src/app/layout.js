@@ -5,7 +5,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import { AuthProvider } from './context/AuthContext';
 import AuthWrapper from './%Components/Wrapper/AuthWrapper';
-import SessionProviderWrapper from './%Components/Wrapper/SessionProviderWrapper';
+import AuthProviderWrapper from './%Components/Wrapper/SessionProviderWrapper';
 import { AlertProvider } from './context/AlertContext';
 import AlertWrapper from './%Components/Wrapper/AlertWrapper'; 
 
@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className={inter.className}>
-        <SessionProviderWrapper>
+        <AuthProviderWrapper>
           <AuthProvider>
             <AlertProvider>
               <AuthWrapper>
@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
               </AuthWrapper>
             </AlertProvider>
           </AuthProvider>
-        </SessionProviderWrapper>
+        </AuthProviderWrapper>
       </body>
     </html>
   );

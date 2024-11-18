@@ -1,51 +1,156 @@
-/* src/app/roles/CrudRoles.module.css */
-
-.button-gold {
-    background-color: #bc955c !important;
-    border-color: #bc955c !important;
-    color: #fff !important;
+.pageContainer {
+    padding: 20px;
 }
 
-.button-red {
-    background-color: #dc3545 !important;
-    border-color: #dc3545 !important;
-    color: #fff !important;
-}
-
-.button-teal {
-    background-color: #358874 !important;
-    border-color: #358874 !important;
-    color: #fff !important;
-}
-
-.button-margin {
-    margin-right: 0.5rem;
-}
-
-.barra {
-    width: 80vw;
-}
-
-.flex {
+.toolbar {
     display: flex;
-    justify-content: space-around;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.button {
+    padding: 8px 12px;
+    background-color: #b8860b; /* Dorado */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+    display: flex;
     align-items: center;
-    flex-direction: row;
 }
 
-.pageContainer{
+.button:hover {
+    background-color: #8b6914; /* Dorado más oscuro */
+}
+
+.button-blue {
+    background-color: #007bff; /* Azul */
+}
+
+.button-green {
+    background-color: #28a745; /* Verde */
+}
+
+.button-yellow {
+    background-color: #ffc107; /* Amarillo */
+}
+
+.button-blue:hover {
+    background-color: #0069d9;
+}
+
+.button-green:hover {
+    background-color: #218838;
+}
+
+.button-yellow:hover {
+    background-color: #e0a800;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.table th, .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.editing {
+    background-color: #f0f8ff; /* Azul claro para campos editables */
+}
+
+.menuButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666; /* Gris oscuro */
+    transition: color 0.2s;
+}
+
+.menuButton:hover {
+    color: #333; /* Gris más oscuro */
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
+    align-items: center;
     justify-content: center;
-    align-items: center;
 }
 
-.card{
-    width: 50vw;
+.modalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
 }
 
-.buttonContainer{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: row;
+.permissionList {
+    margin-top: 10px;
+}
+
+.permissionItem {
+    margin-bottom: 8px;
+}
+
+/* Estilos de botones de acción */
+.actionButton {
+    padding: 5px 10px;
+    margin-right: 5px;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.actionButton.edit {
+    background-color: #b8860b; /* Dorado */
+}
+
+.actionButton.edit:hover {
+    background-color: #8b6914; /* Dorado más oscuro */
+}
+
+.actionButton.delete {
+    background-color: #dc3545; /* Rojo */
+}
+
+.actionButton.delete:hover {
+    background-color: #c82333; /* Rojo más oscuro */
+}
+
+.buttonSave {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.buttonCancel {
+    background-color: #f44336; /* Rojo */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
 }

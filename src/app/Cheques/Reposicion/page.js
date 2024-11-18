@@ -224,7 +224,7 @@ export default function RepositionCheque() {
           </Box>
 
           <Box className={styles.buttonContainer}>
-            <Link href="/Antonio">
+            <Link href="/Cheques">
               <Button type="submit" variant="contained" color="primary">Reponer Cheque</Button>
             </Link>
             <Button
