@@ -7,6 +7,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Button, TextField, Container, Typography, Box, ThemeProvider } from '@mui/material';
 import styles from './Login.module.css';
 import theme from '../../$tema/theme';
+import { API_USERS_URL } from '../../%Config/apiConfig';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:3001/login', {
+            const response = await fetch(`${API_USERS_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
