@@ -37,3 +37,5 @@ yarn-error.log*
 next-env.d.ts
 
 .env
+
+/src/app/%Config/apiConfig.js

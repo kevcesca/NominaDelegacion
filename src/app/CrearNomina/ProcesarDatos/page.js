@@ -14,6 +14,8 @@ import PercepcionesTabla from '../../%Components/TablasComparativasNomina/Percep
 import DeduccionesTabla from '../../%Components/TablasComparativasNomina/DeduccionesTabla';
 import API_BASE_URL from '../../%Config/apiConfig';
 import DateFilter from '../../%Components/DateFilter/DateFilter'; // Importa el componente DateFilter
+import ProtectedView from '../../%Components/ProtectedView/ProtectedView';
+
 
 const CargarDatos = () => {
     const router = useRouter();
@@ -132,6 +134,7 @@ const CargarDatos = () => {
     };
 
     return (
+        <ProtectedView requiredPermissions={["Resumen_nomina", "Acceso_total"]}>
         <ThemeProvider theme={theme}>
             <main className={styles.main}>
                 <h1 className={styles.h1}>Resumen de Nómina</h1>
@@ -220,6 +223,7 @@ const CargarDatos = () => {
                 </Box>
             </main>
         </ThemeProvider>
+        </ProtectedView>
     );
 };
 
