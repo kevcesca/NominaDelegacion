@@ -5,6 +5,8 @@
 import React, { useState } from 'react';
 import styles from './page.module.css';
 import ReportCard from '../%Components/Card/Card';
+import ProtectedView from '../%Components/ProtectedView/ProtectedView';
+
 
 export default function Page() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -100,33 +102,37 @@ export default function Page() {
         //     link: "/ListaReportes/SaldosDiariosBancos"
         // }
     ];
-    
+
     const filteredReports = reportes.filter(report =>
         report.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
-        <>
-            <h1 className={styles.h1}>
-                Lista de reportes
-            </h1>
-            <input
-                type="text"
-                placeholder="Buscar reporte..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={styles.searchInput}
-            />
-            <main className={styles.mainLista}>
-                {filteredReports.map((report, index) => (
-                    <ReportCard
-                        key={index}
-                        title={report.title}
-                        description={report.description}
-                        link={report.link}
-                    />
-                ))}
-            </main>
-        </>
+        <ProtectedView requiredPermissions={["Reportes", "Acceso_total"]}>
+
+            <>
+                <h1 className={styles.h1}>
+                    Lista de reportes
+                </h1>
+                <input
+                    type="text"
+                    placeholder="Buscar reporte..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={styles.searchInput}
+                />
+                <main className={styles.mainLista}>
+                    {filteredReports.map((report, index) => (
+                        <ReportCard
+                            key={index}
+                            title={report.title}
+                            description={report.description}
+                            link={report.link}
+                        />
+                    ))}
+                </main>
+            </>
+        </ProtectedView>
+
     );
 }
