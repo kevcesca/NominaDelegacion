@@ -1,46 +1,11 @@
-
-
 .container {
-    margin: auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-
+    padding: 20px;
 }
 
-.h1 {
-    text-align: center;
-    color: #8B2635;
+.title {
     margin-bottom: 20px;
-}
-
-.searchBar {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.searchBar input[type="text"] {
-    padding: 8px;
-    font-size: 16px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    width: 300px;
-    margin-right: 10px;
-}
-
-.searchBar button {
-    padding: 8px 12px;
-    background-color: #8B2635;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.searchBar button:hover {
-    background-color: #BB905B;
+    font-size: 24px;
+    font-weight: bold;
 }
 
 .table {
@@ -51,9 +16,9 @@
 
 .table th,
 .table td {
-    border: 1px solid #ced4da;
+    border: 1px solid #ddd;
+    padding: 8px;
     text-align: left;
-    padding: 10px;
 }
 
 .table th {
@@ -61,175 +26,7 @@
     font-weight: bold;
 }
 
-.menuButton {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-/* Menú desplegable */
-.dropdownMenu {
-    display: block;
-    position: absolute;
-    background-color: #ffffff;
-    border: 1px solid #ced4da;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    z-index: 1;
-    padding: 10px;
-    width: 150px;
-}
-
-.dropdownMenu a {
-    display: block;
-    padding: 8px;
-    text-decoration: none;
-    color: #333;
-    font-size: 14px;
-    border-radius: 5px;
-}
-
-.dropdownMenu a:hover {
-    background-color: #f4f4f4;
-}
-
-/* Estilo para celdas de datos deshabilitadas */
-.disabledRow td {
-    color: #999;
-    background-color: #f5f5f5;
-    pointer-events: none; /* Deshabilita la interacción con las celdas */
-}
-
-.disabledRow td:last-child .menuButton {
-    color: #333; /* Color normal para el botón de menú */
-    pointer-events: auto; /* Habilita la interacción solo en el botón */
-}
-
-.disabledCell {
+.disabledRow {
     opacity: 0.5;
-    pointer-events: none;
+    background-color: #f9f9f9;
 }
-
-/* Estilo para enlaces deshabilitados dentro del menú */
-.disabledLink {
-    color: #999;
-    pointer-events: none;
-    cursor: not-allowed;
-}
-
-.button {
-    background-color: #8B2635;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.button:hover {
-    background-color: #BB905B;
-}
-
-.buttonDeshabilitar{
-display: flex;
-justify-content: flex-end;
-
-
-
-}
-
-
-.disableButton {
-    margin-top: 20px;
-    bottom: 20px;
-    padding: 12px 20px;
-    font-size: 16px;
-    background-color: #8B2635;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-
-}
-
-.disableButton:hover {
-    background-color: #BB905B;
-}
-
-.enableButton{
-    margin-top: 20px;
-    bottom: 20px;
-    padding: 12px 20px;
-    font-size: 16px;
-    background-color: #8B2635;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.enableButton:hover {
-    background-color: #BB905B;
-}
-
-.uploadButtonContainer {
-    display: flex;
-    justify-content: flex-start;
-    margin-bottom: 15px;
-}
-
-.uploadButton {
-    margin-top: 20px;
-    bottom: 20px;
-    padding: 7px 15px;
-    font-size: 16px;
-    background-color: #8B2635;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.uploadButton:hover {
-    background-color: #BB905B;
-}
-
-.uploadIcon {
-    font-size: 10px;
-    margin-right: 3px;
-}
-
-.buttonContainer {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
- .addButton {
-    margin-top: 20px;
-    bottom: 20px;
-    padding: 7px 15px;
-    font-size: 16px;
-    background-color: #8B2635;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.addButton:hover{
-     background-color: #BB905B;
-}
-
-.uploadIcon, .addIcon {
-    font-size: 10px;
-}
-
-
-
