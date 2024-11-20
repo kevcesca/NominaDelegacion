@@ -6,6 +6,7 @@ import TablaConsultaDetallesBitacora from '../%Components/TablasCambios/TablaCon
 import styles from './page.module.css';
 import { ThemeProvider } from '@mui/material';
 import theme from '../$tema/theme';
+import ProtectedView from '../%Components/ProtectedView/ProtectedView';
 
 export default function Validacion() {
     const [tipoNomina, setTipoNomina] = useState('');
@@ -19,6 +20,7 @@ export default function Validacion() {
     };
 
     return (
+        <ProtectedView requiredPermissions={[ "Acceso_total", "Validacion_de_registros_consulta_bitacora"]}>
         <ThemeProvider theme={theme}>
             <main className={styles.main}>
                 <h1 className={styles.h1}>Validación de registros base vs post base y consulta de bitácora</h1>
@@ -65,5 +67,6 @@ export default function Validacion() {
                 </div>
             </main>
         </ThemeProvider>
+        </ProtectedView>
     );
 }
