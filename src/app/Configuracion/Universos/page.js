@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import ProtectedView from "../../%Components/ProtectedView/ProtectedView"; // Ajusta esta ruta según tu estructura
 import styles from './page.module.css';
 
-const opcionesNomina = ["BASE", "ESTRUCTURA", "NOMINA 8", "HONORARIOS", "OTRO"];
+const opcionesNomina = ["BASE", "ESTRUCTURA", "NOMINA 8", "HONORARIOS"];
 
 const datosIniciales = [
     { id: 'A', nombre: 'BASE' },
@@ -45,7 +45,7 @@ const Universos = () => {
     };
 
     const crearUniverso = () => {
-        const nuevoUniverso = { id: '', nombre: 'BASE', isEditing: true, isOther: false };
+        const nuevoUniverso = { id: '', nombre: 'BASE', isEditing: true };
         setDatosUniverso((prevDatos) => [nuevoUniverso, ...prevDatos]);
     };
 
@@ -60,7 +60,7 @@ const Universos = () => {
     const guardarUniverso = (index) => {
         setDatosUniverso((prevDatos) =>
             prevDatos.map((dato, i) =>
-                i === index ? { ...dato, isEditing: false, isOther: false } : dato
+                i === index ? { ...dato, isEditing: false } : dato
             )
         );
     };
@@ -72,7 +72,7 @@ const Universos = () => {
     const handleNominaChange = (index, value) => {
         setDatosUniverso((prevDatos) =>
             prevDatos.map((dato, i) =>
-                i === index ? { ...dato, nombre: value, isOther: value === "OTRO" } : dato
+                i === index ? { ...dato, nombre: value } : dato
             )
         );
     };
@@ -123,29 +123,17 @@ const Universos = () => {
                                 </td>
                                 <td>
                                     {dato.isEditing ? (
-                                        <>
-                                            <select
-                                                value={dato.isOther ? "OTRO" : dato.nombre}
-                                                onChange={(e) => handleNominaChange(index, e.target.value)}
-                                                className={styles.selectField}
-                                            >
-                                                {opcionesNomina.map((opcion) => (
-                                                    <option key={opcion} value={opcion}>
-                                                        {opcion}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {dato.isOther && (
-                                                <input
-                                                    type="text"
-                                                    placeholder="Especificar Otro"
-                                                    value={dato.nombre === "OTRO" ? '' : dato.nombre}
-                                                    onChange={(e) => handleInputChange(index, 'nombre', e.target.value)}
-                                                    className={styles.inputField}
-                                                    style={{ marginTop: "5px" }}
-                                                />
-                                            )}
-                                        </>
+                                        <select
+                                            value={dato.nombre}
+                                            onChange={(e) => handleNominaChange(index, e.target.value)}
+                                            className={styles.selectField}
+                                        >
+                                            {opcionesNomina.map((opcion) => (
+                                                <option key={opcion} value={opcion}>
+                                                    {opcion}
+                                                </option>
+                                            ))}
+                                        </select>
                                     ) : (
                                         dato.nombre
                                     )}
