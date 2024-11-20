@@ -1,6 +1,7 @@
 'use client';
 // pages/universos.js
 import React, { useState } from 'react';
+import ProtectedView from "../../%Components/ProtectedView/ProtectedView"; // Ajusta esta ruta según tu estructura
 import styles from './page.module.css';
 
 const opcionesNomina = ["BASE", "ESTRUCTURA", "NOMINA 8", "HONORARIOS", "OTRO"];
@@ -192,4 +193,10 @@ const Universos = () => {
     );
 };
 
-export default Universos;
+const ProtectedUniversos = () => (
+    <ProtectedView requiredPermissions={["Universos", "Acceso_total"]}>
+        <Universos />
+    </ProtectedView>
+);
+
+export default ProtectedUniversos;

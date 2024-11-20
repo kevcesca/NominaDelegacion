@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ThemeProvider } from '@mui/material';
 import { useRouter } from 'next/navigation'; // Importa useRouter para manejar la navegación
+import ProtectedView from "../../%Components/ProtectedView/ProtectedView"; // Ajusta la ruta según tu estructura
 import styles from './page.module.css';
 import theme from '../../$tema/theme';
 
@@ -10,7 +11,7 @@ const initialEmpleados = [
   { id: "2", nombre: "Ana", apellido: "Gómez", nomina: "Base", clc: "654321", numeroCheque: "56789", quincena: "2", motivoCancelacion: "Error", fechaCancelacion: "15/11/2024", evidencia: "evidencia.jpg" }
 ];
 
-export default function CancelacionCheques() {
+function CancelacionCheques() {
   const [empleados, setEmpleados] = useState([]);
   const [empleadosIds, setEmpleadosIds] = useState('');
   const [numeroCheque, setNumeroCheque] = useState('');
@@ -228,3 +229,11 @@ export default function CancelacionCheques() {
     </ThemeProvider>
   );
 }
+
+const ProtectedCancelacionCheques = () => (
+  <ProtectedView requiredPermissions={["Cancelacion_Cheques", "Acceso_total"]}>
+    <CancelacionCheques />
+  </ProtectedView>
+);
+
+export default ProtectedCancelacionCheques;

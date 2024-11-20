@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import ProtectedView from "../../%Components/ProtectedView/ProtectedView"; // Ajusta la ruta según tu estructura
 import styles from './page.module.css';
 
 const datosIniciales = [
@@ -190,4 +191,10 @@ const ClcPage = () => {
     );
 };
 
-export default ClcPage;
+const ProtectedClcPage = () => (
+    <ProtectedView requiredPermissions={["CLC", "Acceso_total"]}>
+        <ClcPage />
+    </ProtectedView>
+);
+
+export default ProtectedClcPage;
