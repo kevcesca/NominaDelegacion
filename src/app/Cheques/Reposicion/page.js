@@ -4,9 +4,10 @@ import styles from '../Reposicion/page.module.css';
 import Link from 'next/link';
 import { Box, Typography, TextField, Button, Paper, Grid, ThemeProvider } from '@mui/material';
 import { FileUpload } from 'primereact/fileupload';
+import ProtectedView from "../../%Components/ProtectedView/ProtectedView"; // Ajusta la ruta según tu estructura
 import theme from '../../$tema/theme';
 
-export default function RepositionCheque() {
+function RepositionCheque() {
   const [employeeData] = useState({
     "123": { firstName: "Juan", lastName: "Pérez", amount: "1500", payrollType: "NOMINA 8" },
     "456": { firstName: "Ana", lastName: "Gómez", amount: "2000", payrollType: "ESTRUCTURA" }
@@ -85,12 +86,10 @@ export default function RepositionCheque() {
 
   return (
     <ThemeProvider theme={theme}>
-
       <Paper elevation={3} className={styles.container}>
         <Typography variant="h4" gutterBottom>Reposición de Cheques</Typography>
         <form id="repositionForm" onSubmit={handleSubmit}>
           <Grid container spacing={3}>
-            {/* Columna de Información del Empleado */}
             <Grid className={styles.inputContainer} item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -146,7 +145,6 @@ export default function RepositionCheque() {
               />
             </Grid>
 
-            {/* Columna de Información del Cheque */}
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -246,3 +244,11 @@ export default function RepositionCheque() {
     </ThemeProvider>
   );
 }
+
+const ProtectedRepositionCheque = () => (
+  <ProtectedView requiredPermissions={["ver_reposicion_cheques", "Acceso_total"]}>
+    <RepositionCheque />
+  </ProtectedView>
+);
+
+export default ProtectedRepositionCheque;

@@ -15,7 +15,6 @@ import API_BASE_URL from '../%Config/apiConfig';
 import DateSelector from '../%Components/DateSelector/DateSelector';  // Importar el nuevo componente
 
 function CargarEstadosCuenta() {
-    const { data: session } = useSession();
     const [mes, setMes] = useState('');
     const [anio, setAnio] = useState('');
     const [quincena, setQuincena] = useState('');
@@ -36,7 +35,6 @@ function CargarEstadosCuenta() {
                     anio={anio}
                     mes={mes}
                     quincena={quincena}  // Pasar quincena como prop
-                    session={session}
                     setProgress={setProgressEstadosCuenta}
                     setUploaded={() => {}}
                 />
@@ -51,7 +49,6 @@ function CargarEstadosCuenta() {
                     anio={anio}
                     mes={mes}
                     quincena={quincena}  // Pasar quincena como prop
-                    session={session}
                     setProgress={setProgressRetenciones}
                     setUploaded={() => {}}
                 />
@@ -60,4 +57,4 @@ function CargarEstadosCuenta() {
     );
 }
 
-export default withAdminRole(CargarEstadosCuenta);
+export default CargarEstadosCuenta;

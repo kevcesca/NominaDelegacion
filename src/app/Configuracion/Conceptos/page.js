@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import ProtectedView from "../../%Components/ProtectedView/ProtectedView" // Asegúrate de importar correctamente este componente
 import styles from './page.module.css';
 
 const datosIniciales = [
@@ -88,104 +89,108 @@ const Conceptos = () => {
     };
 
     return (
-
         <div className={styles.body}>
             <div className={styles.container}>
-            <div className={styles.subHeader}>Gestión de Conceptos</div>
-            
-            <div className={styles.searchBar}>
-                <input
-                    type="text"
-                    value={filtro}
-                    onChange={(e) => setFiltro(e.target.value)}
-                    placeholder="Buscar en la tabla..."
-                    className={styles.inputField}
-                />
-                <button onClick={crearConcepto} className={styles.styledButton}>Crear Concepto</button>
-            </div>
-            
-            <table className={styles.table}>
-                <thead>
-                    <tr>
-                        <th>ID del Concepto</th>
-                        <th>Nombre del Concepto</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {mostrarPagina().map((dato, index) => (
-                        <tr key={index}>
-                            <td>
-                                {dato.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={dato.id}
-                                        onChange={(e) => handleInputChange(index, 'id', e.target.value)}
-                                        className={styles.inputField}
-                                    />
-                                ) : (
-                                    dato.id
-                                )}
-                            </td>
-                            <td>
-                                {dato.isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={dato.nombre}
-                                        onChange={(e) => handleInputChange(index, 'nombre', e.target.value)}
-                                        className={styles.inputField}
-                                    />
-                                ) : (
-                                    dato.nombre
-                                )}
-                            </td>
-                            <td>
-                                {dato.isEditing ? (
-                                    <span
-                                        className={styles.iconButton}
-                                        onClick={() => guardarConcepto(index)}
-                                    >
-                                        💾
-                                    </span>
-                                ) : (
-                                    <span
-                                        className={styles.iconButton}
-                                        onClick={() => actualizarConcepto(index)}
-                                    >
-                                        ✏️
-                                    </span>
-                                )}
-                                <span
-                                    className={styles.iconButton}
-                                    onClick={() => eliminarConcepto(index)}
-                                >
-                                    🗑️
-                                </span>
-                            </td>
+                <div className={styles.subHeader}>Gestión de Conceptos</div>
+
+                <div className={styles.searchBar}>
+                    <input
+                        type="text"
+                        value={filtro}
+                        onChange={(e) => setFiltro(e.target.value)}
+                        placeholder="Buscar en la tabla..."
+                        className={styles.inputField}
+                    />
+                    <button onClick={crearConcepto} className={styles.styledButton}>Crear Concepto</button>
+                </div>
+
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>ID del Concepto</th>
+                            <th>Nombre del Concepto</th>
+                            <th>Acciones</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-            <div className={styles.pagination}>
-                <button
-                    onClick={() => cambiarPagina(-1)}
-                    className={styles.styledButton}
-                    disabled={paginaActual <= 0}
-                >
-                    Anterior
-                </button>
-                <button
-                    onClick={() => cambiarPagina(1)}
-                    className={styles.styledButton}
-                    disabled={(paginaActual + 1) * filasPorPagina >= datosFiltrados.length}
-                >
-                    Siguiente
-                </button>
+                    </thead>
+                    <tbody>
+                        {mostrarPagina().map((dato, index) => (
+                            <tr key={index}>
+                                <td>
+                                    {dato.isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={dato.id}
+                                            onChange={(e) => handleInputChange(index, 'id', e.target.value)}
+                                            className={styles.inputField}
+                                        />
+                                    ) : (
+                                        dato.id
+                                    )}
+                                </td>
+                                <td>
+                                    {dato.isEditing ? (
+                                        <input
+                                            type="text"
+                                            value={dato.nombre}
+                                            onChange={(e) => handleInputChange(index, 'nombre', e.target.value)}
+                                            className={styles.inputField}
+                                        />
+                                    ) : (
+                                        dato.nombre
+                                    )}
+                                </td>
+                                <td>
+                                    {dato.isEditing ? (
+                                        <span
+                                            className={styles.iconButton}
+                                            onClick={() => guardarConcepto(index)}
+                                        >
+                                            💾
+                                        </span>
+                                    ) : (
+                                        <span
+                                            className={styles.iconButton}
+                                            onClick={() => actualizarConcepto(index)}
+                                        >
+                                            ✏️
+                                        </span>
+                                    )}
+                                    <span
+                                        className={styles.iconButton}
+                                        onClick={() => eliminarConcepto(index)}
+                                    >
+                                        🗑️
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                <div className={styles.pagination}>
+                    <button
+                        onClick={() => cambiarPagina(-1)}
+                        className={styles.styledButton}
+                        disabled={paginaActual <= 0}
+                    >
+                        Anterior
+                    </button>
+                    <button
+                        onClick={() => cambiarPagina(1)}
+                        className={styles.styledButton}
+                        disabled={(paginaActual + 1) * filasPorPagina >= datosFiltrados.length}
+                    >
+                        Siguiente
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-        
     );
 };
 
-export default Conceptos;
+const ProtectedConceptos = () => (
+    <ProtectedView requiredPermissions={["Conceptos", "Acceso_total"]}>
+        <Conceptos />
+    </ProtectedView>
+);
+
+export default ProtectedConceptos;
