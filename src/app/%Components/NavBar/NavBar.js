@@ -138,7 +138,7 @@ export default function NavBar() {
                             <MenuItem icon={<EditIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cambios de la Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/CrearNomina/ProcesarDatos" passHref>
-                            <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Resumen de Nómina</MenuItem>
+                            <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Resumen de la Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/AprobarCargaNomina" passHref>
                             <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Aprobar nómina</MenuItem>
