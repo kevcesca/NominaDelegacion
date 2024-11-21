@@ -49,13 +49,12 @@
     background-color: #235b4e; /* morado claro */
 }
 
-
-.table2{
+.table2 {
     margin-top: 2rem;
     padding-top: 2rem;
 }
 
-.tableContainer{
+.tableContainer {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -69,10 +68,9 @@
     justify-content: space-between;
     margin-bottom: 20px;
     align-items: baseline;
-    
 }
 
-.buttonContainer{
+.buttonContainer {
     margin-top: 3rem;
     display: flex;
     flex-direction: row-reverse;
@@ -80,15 +78,15 @@
     align-items: center;
 }
 
-.backButton{
+.backButton {
     color: white !important;
 }
 
-.alert{
+.alert {
     margin: 2rem;
 }
 
-.tableSelector{
+.tableSelector {
     width: 60vw;
     background-color: white;
     align-self: center;
@@ -101,13 +99,42 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-  }
- 
+}
 
-  .labels {
+.labels {
     width: 20vw;
     height: 6vh;
     margin: 2rem;
     margin-right: 1rem !important;
+}
 
-  }
+/* Estilos añadidos para HeaderSeccion */
+.headerSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer; /* Indicar que el encabezado es interactivo */
+    background-color: #bc955c; /* Fondo similar al encabezado principal */
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.headerSection:hover {
+    background-color: #9f7c42; /* Color más oscuro al pasar el cursor */
+}
+
+.headerSectionTitle {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.headerSectionButton {
+    font-size: 1.5rem;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 1rem;
+}

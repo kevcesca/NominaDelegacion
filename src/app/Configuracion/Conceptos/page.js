@@ -1,196 +1,129 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
-import ProtectedView from "../../%Components/ProtectedView/ProtectedView" // Asegúrate de importar correctamente este componente
+import { Box, Button, TextField, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, IconButton, Paper } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
+import API_BASE_URL from '../../%Config/apiConfig';
 import styles from './page.module.css';
 
-const datosIniciales = [
-    { id: '2203', nombre: 'APOYO SEGURO GASTOS FUNERARIOS CDMX' },
-    { id: '2204', nombre: 'APOYO TRANSPORTE' },
-    { id: '2205', nombre: 'SUBSIDIO PARA VIVIENDA' },
-    { id: '2206', nombre: 'ASISTENCIA SOCIAL' },
-    { id: '2207', nombre: 'APOYO ALIMENTARIO' },
-    { id: '2208', nombre: 'BECAS PARA ESTUDIANTES' },
-    { id: '2209', nombre: 'SEGURO MÉDICO' },
-    { id: '2210', nombre: 'APOYO ECONÓMICO A ADULTOS MAYORES' }
-];
+export default function TablaConceptos() {
+    const [data, setData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
 
-const Conceptos = () => {
-    const [datosConcepto, setDatosConcepto] = useState(datosIniciales);
-    const [paginaActual, setPaginaActual] = useState(0);
-    const filasPorPagina = 4;
-    const [filtro, setFiltro] = useState('');
-    const [datosFiltrados, setDatosFiltrados] = useState(datosIniciales);
-
-    useEffect(() => {
-        filtrarTabla();
-    }, [filtro, datosConcepto]);
-
-    const mostrarPagina = () => {
-        const inicio = paginaActual * filasPorPagina;
-        const fin = inicio + filasPorPagina;
-        return datosFiltrados.slice(inicio, fin);
-    };
-
-    const cambiarPagina = (direccion) => {
-        const nuevaPagina = paginaActual + direccion;
-        if (nuevaPagina >= 0 && nuevaPagina * filasPorPagina < datosFiltrados.length) {
-            setPaginaActual(nuevaPagina);
+    // Fetch inicial de datos
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/cat/conceptos`);
+            if (!response.ok) throw new Error('Error al obtener los datos');
+            const result = await response.json();
+            setData(result);
+            setFilteredData(result);
+        } catch (error) {
+            console.error(error);
         }
     };
 
-    const crearConcepto = () => {
-        const nuevoConcepto = { id: '', nombre: '', isEditing: true };
-        setDatosConcepto([nuevoConcepto, ...datosConcepto]); // Añadir al inicio
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    // Búsqueda en la tabla
+    useEffect(() => {
+        const lowerCaseSearch = searchTerm.toLowerCase();
+        const filtered = data.filter(item =>
+            item.nombre_concepto.toLowerCase().includes(lowerCaseSearch) ||
+            item.id_concepto.toString().includes(lowerCaseSearch)
+        );
+        setFilteredData(filtered);
+    }, [searchTerm, data]);
+
+    // Manejo de cambio de página y filas por página
+    const handleChangePage = (event, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
     };
 
-    const guardarConcepto = (index) => {
-        setDatosConcepto((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, isEditing: false } : dato
-            )
-        );
-        setDatosFiltrados((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, isEditing: false } : dato
-            )
-        );
+    // Handlers para agregar, actualizar y eliminar
+    const handleAddConcept = () => {
+        console.log('Agregar concepto');
+        // Implementar lógica para abrir un formulario de creación
     };
 
-    const actualizarConcepto = (index) => {
-        setDatosConcepto((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, isEditing: true } : dato
-            )
-        );
+    const handleEditConcept = (concept) => {
+        console.log('Editar concepto:', concept);
+        // Implementar lógica para abrir un formulario de edición
     };
 
-    const eliminarConcepto = (index) => {
-        const nuevosDatos = datosConcepto.filter((_, i) => i !== index);
-        setDatosConcepto(nuevosDatos);
-        setDatosFiltrados(nuevosDatos);
-    };
-
-    const filtrarTabla = () => {
-        const filtroActualizado = filtro.toLowerCase();
-        setDatosFiltrados(
-            datosConcepto.filter(dato =>
-                dato.id.toLowerCase().includes(filtroActualizado) || dato.nombre.toLowerCase().includes(filtroActualizado)
-            )
-        );
-        setPaginaActual(0); // Reinicia a la primera página después de filtrar
-    };
-
-    const handleInputChange = (index, field, value) => {
-        setDatosConcepto((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, [field]: value } : dato
-            )
-        );
+    const handleDeleteConcept = async (conceptId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/cat/conceptos/${conceptId}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Error al eliminar el concepto');
+            setData(data.filter(item => item.id_concepto !== conceptId));
+        } catch (error) {
+            console.error('Error al eliminar:', error);
+        }
     };
 
     return (
-        <div className={styles.body}>
-            <div className={styles.container}>
-                <div className={styles.subHeader}>Gestión de Conceptos</div>
+        <Box className={styles.container}>
+            <Typography variant="h4" gutterBottom className={styles.title}>
+                Gestión de Conceptos
+            </Typography>
 
-                <div className={styles.searchBar}>
-                    <input
-                        type="text"
-                        value={filtro}
-                        onChange={(e) => setFiltro(e.target.value)}
-                        placeholder="Buscar en la tabla..."
-                        className={styles.inputField}
-                    />
-                    <button onClick={crearConcepto} className={styles.styledButton}>Crear Concepto</button>
-                </div>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} className={styles.button}>
+                <TextField
+                    variant="outlined"
+                    size="small"
+                    placeholder="Buscar en la tabla..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Button variant="contained" color="primary" onClick={handleAddConcept}>
+                    Crear Concepto
+                </Button>
+            </Box>
 
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>ID del Concepto</th>
-                            <th>Nombre del Concepto</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {mostrarPagina().map((dato, index) => (
-                            <tr key={index}>
-                                <td>
-                                    {dato.isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={dato.id}
-                                            onChange={(e) => handleInputChange(index, 'id', e.target.value)}
-                                            className={styles.inputField}
-                                        />
-                                    ) : (
-                                        dato.id
-                                    )}
-                                </td>
-                                <td>
-                                    {dato.isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={dato.nombre}
-                                            onChange={(e) => handleInputChange(index, 'nombre', e.target.value)}
-                                            className={styles.inputField}
-                                        />
-                                    ) : (
-                                        dato.nombre
-                                    )}
-                                </td>
-                                <td>
-                                    {dato.isEditing ? (
-                                        <span
-                                            className={styles.iconButton}
-                                            onClick={() => guardarConcepto(index)}
-                                        >
-                                            💾
-                                        </span>
-                                    ) : (
-                                        <span
-                                            className={styles.iconButton}
-                                            onClick={() => actualizarConcepto(index)}
-                                        >
-                                            ✏️
-                                        </span>
-                                    )}
-                                    <span
-                                        className={styles.iconButton}
-                                        onClick={() => eliminarConcepto(index)}
-                                    >
-                                        🗑️
-                                    </span>
-                                </td>
-                            </tr>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="left"><strong>ID del Concepto</strong></TableCell>
+                            <TableCell align="left"><strong>Nombre del Concepto</strong></TableCell>
+                            <TableCell align="center"><strong>Acciones</strong></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                            <TableRow key={row.id_concepto}>
+                                <TableCell>{row.id_concepto}</TableCell>
+                                <TableCell>{row.nombre_concepto}</TableCell>
+                                <TableCell align="center">
+                                    <IconButton onClick={() => handleEditConcept(row)} color="primary">
+                                        <Edit />
+                                    </IconButton>
+                                    <IconButton onClick={() => handleDeleteConcept(row.id_concepto)} color="error">
+                                        <Delete />
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
                         ))}
-                    </tbody>
-                </table>
-                <div className={styles.pagination}>
-                    <button
-                        onClick={() => cambiarPagina(-1)}
-                        className={styles.styledButton}
-                        disabled={paginaActual <= 0}
-                    >
-                        Anterior
-                    </button>
-                    <button
-                        onClick={() => cambiarPagina(1)}
-                        className={styles.styledButton}
-                        disabled={(paginaActual + 1) * filasPorPagina >= datosFiltrados.length}
-                    >
-                        Siguiente
-                    </button>
-                </div>
-            </div>
-        </div>
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={filteredData.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+        </Box>
     );
-};
-
-const ProtectedConceptos = () => (
-    <ProtectedView requiredPermissions={["Conceptos", "Acceso_total"]}>
-        <Conceptos />
-    </ProtectedView>
-);
-
-export default ProtectedConceptos;
+}
