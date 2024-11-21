@@ -1,221 +1,228 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
-import { ProgressBar } from "primereact/progressbar";
-import { Button } from "primereact/button";
-import { Toolbar } from "primereact/toolbar";
-import { Toast } from "primereact/toast";
-import { Collapse } from "@mui/material";
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
-import "primeicons/primeicons.css";
-import ColumnSelector from "../ColumnSelector/ColumnSelector";
-import API_BASE_URL from "../../%Config/apiConfig";
-import styles from "./TablaUsuarios.module.css";
+import React, { useState, useEffect } from 'react';
+import { Button, TextField, Box, Typography, Collapse } from '@mui/material';
+import { DataGrid, getGridStringOperators } from '@mui/x-data-grid';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import saveAs from 'file-saver';
+import ColumnSelector from '../../%Components/ColumnSelector/ColumnSelector';
+import API_BASE_URL from '../../%Config/apiConfig';
+import styles from './TablaUsuarios.module.css';
 
-export default function TablaEmpleados() {
-  const [empleados, setEmpleados] = useState([]);
-  const [selectedEmpleado, setSelectedEmpleado] = useState(null);
-  const [globalFilter, setGlobalFilter] = useState(null);
-  const [isDialogVisible, setIsDialogVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [visibleColumns, setVisibleColumns] = useState({});
-  const [showTable, setShowTable] = useState(false);
-  const [collapseOpen, setCollapseOpen] = useState(false);
-  const dt = useRef(null);
-  const toast = useRef(null);
+export default function EmpleadosTable() {
+    // Estados
+    const [data, setData] = useState([]); // Datos de la tabla
+    const [columns, setColumns] = useState([]); // Columnas visibles en la tabla
+    const [selectedColumns, setSelectedColumns] = useState({}); // Columnas seleccionadas dinámicamente
+    const [globalFilter, setGlobalFilter] = useState(''); // Texto del filtro global
+    const [collapseOpen, setCollapseOpen] = useState(false); // Control del panel de selección de columnas
 
-  const availableColumns = [
-    { key: "nombre", label: "Nombre", defaultSelected: true },
-    { key: "apellido1", label: "Apellido Paterno", defaultSelected: true },
-    { key: "apellido2", label: "Apellido Materno", defaultSelected: true },
-    { key: "curp", label: "CURP" },
-    { key: "idLegal", label: "ID Legal" },
-    { key: "idSexo", label: "Sexo" },
-    { key: "numeroSs", label: "Número de Seguro Social" },
-    { key: "colonia", label: "Colonia" },
-    { key: "direccion", label: "Dirección" },
-    { key: "codigoPostal", label: "Código Postal" },
-    { key: "nPuesto", label: "Puesto" },
-    { key: "activo", label: "Activo" },
-    { key: "formaDePago", label: "Forma de Pago" },
-  ];
+    // Columnas disponibles
+    const availableColumns = [
+        { key: 'id_empleado', label: 'ID Empleado', defaultSelected: true },
+        { key: 'nombre', label: 'Nombre', defaultSelected: true },
+        { key: 'apellido_1', label: 'Apellido Paterno', defaultSelected: true },
+        { key: 'apellido_2', label: 'Apellido Materno', defaultSelected: true },
+        { key: 'curp', label: 'CURP', defaultSelected: false },
+        { key: 'id_legal', label: 'ID Legal', defaultSelected: false },
+        { key: 'id_sexo', label: 'Sexo', defaultSelected: false },
+        { key: 'fec_nac', label: 'Fecha de Nacimiento', defaultSelected: false },
+        { key: 'fec_alta_empleado', label: 'Fecha de Alta', defaultSelected: false },
+        { key: 'fec_antiguedad', label: 'Fecha de Antigüedad', defaultSelected: false },
+        { key: 'numero_ss', label: 'Número de Seguro Social', defaultSelected: false },
+        { key: 'id_reg_issste', label: 'Registro ISSSTE', defaultSelected: false },
+        { key: 'ahorr_soli_porc', label: 'Porcentaje de Ahorro Solidario', defaultSelected: false },
+        { key: 'estado', label: 'Estado', defaultSelected: false },
+        { key: 'deleg_municip', label: 'Delegación/Municipio', defaultSelected: false },
+        { key: 'poblacion', label: 'Población', defaultSelected: false },
+        { key: 'colonia', label: 'Colonia', defaultSelected: false },
+        { key: 'direccion', label: 'Dirección', defaultSelected: false },
+        { key: 'codigo_postal', label: 'Código Postal', defaultSelected: false },
+        { key: 'num_interior', label: 'Número Interior', defaultSelected: false },
+        { key: 'num_exterior', label: 'Número Exterior', defaultSelected: false },
+        { key: 'calle', label: 'Calle', defaultSelected: false },
+        { key: 'n_delegacion_municipio', label: 'Nombre Delegación/Municipio', defaultSelected: false },
+        { key: 'ent_federativa', label: 'Entidad Federativa', defaultSelected: false },
+        { key: 'sect_pres', label: 'Sector Presupuestal', defaultSelected: false },
+        { key: 'n_puesto', label: 'Puesto', defaultSelected: false },
+        { key: 'fecha_insercion', label: 'Fecha de Inserción', defaultSelected: false },
+        { key: 'activo', label: 'Activo', defaultSelected: false },
+        { key: 'nombre_nomina', label: 'Nombre Nómina', defaultSelected: false },
+        { key: 'forma_de_pago', label: 'Forma de Pago', defaultSelected: false }
+    ];
 
-  useEffect(() => {
-    const fetchEmpleados = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`${API_BASE_URL}/empleados`);
-        if (!response.ok) {
-          throw new Error("Network response was not ok " + response.statusText);
+    // Fetch de datos desde el API
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/NominaCtrl/Empleados`);
+            if (!response.ok) {
+                throw new Error('Error al obtener los datos');
+            }
+            const json = await response.json();
+            setData(json);
+        } catch (error) {
+            console.error('Error al cargar los datos:', error);
         }
-        const data = await response.json();
-        // Transformar datos a camelCase
-        const transformedData = data.map((item) => ({
-          idEmpleado: item.id_empleado,
-          nombre: item.nombre,
-          apellido1: item.apellido_1,
-          apellido2: item.apellido_2,
-          curp: item.curp,
-          idLegal: item.id_legal,
-          idSexo: item.id_sexo,
-          numeroSs: item.numero_ss,
-          colonia: item.colonia,
-          direccion: item.direccion,
-          codigoPostal: item.codigo_postal,
-          nPuesto: item.n_puesto,
-          activo: item.activo,
-          formaDePago: item.forma_de_pago,
-        }));
-        setEmpleados(transformedData);
-      } catch (error) {
-        console.error("Error fetching the empleados:", error);
-      } finally {
-        setIsLoading(false);
-      }
     };
 
-    fetchEmpleados();
-  }, []);
+    // Mapear columnas con configuraciones completas
+    const mapColumns = (cols) =>
+        cols.map((col) => ({
+            field: col.key,
+            headerName: col.label,
+            flex: 1,
+            filterable: true,
+            sortable: true,
+            filterOperators: getGridStringOperators(), // Usa los operadores predeterminados de strings
+        }));
 
-  const handleRowClick = (rowData) => {
-    setSelectedEmpleado(rowData);
-    setIsDialogVisible(true);
-  };
+    useEffect(() => {
+        fetchData();
 
-  const header = (
-    <div className="flex justify-content-between align-items-center">
-      <h2 className={styles.titulo}>TABLA EMPLEADOS</h2>
-      <span
-        className="p-input-icon-left"
-        style={{ width: "400px", marginTop: "2rem" }}
-      >
-        <i className="pi pi-search" />
-        <InputText
-          type="search"
-          onInput={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Buscar..."
-          style={{ width: "100%", marginLeft: "2rem" }}
-        />
-      </span>
-    </div>
-  );
+        // Filtrar columnas por defecto y mapearlas
+        const initialColumns = mapColumns(
+            availableColumns.filter((col) => col.defaultSelected)
+        );
 
-  const empleadoDialogFooter = (
-    <div className="flex justify-content-end">
-      <button
-        onClick={() => setIsDialogVisible(false)}
-        className="p-button p-component p-button-text"
-      >
-        Cerrar
-      </button>
-    </div>
-  );
+        // Si no hay columnas por defecto seleccionadas, agrega una de fallback
+        if (initialColumns.length === 0) {
+            initialColumns.push({
+                field: 'id_empleado',
+                headerName: 'ID Empleado',
+                flex: 1,
+                filterable: true,
+                filterOperators: getGridStringOperators(),
+            });
+        }
 
-  const handleColumnSelectionChange = (selectedColumns) => {
-    setVisibleColumns(selectedColumns);
-    setShowTable(true);
-    setCollapseOpen(false);
-  };
+        setColumns(initialColumns);
 
-  return (
-    <div className="card">
-      <Toast ref={toast} />
-      <div className={styles.dropForm}>
-        <h3 className={styles.exportText}>Campos para generar tabla</h3>
-        <Button
-          type="button"
-          icon={`pi ${collapseOpen ? "pi-chevron-up" : "pi-chevron-down"}`}
-          severity="secondary"
-          rounded
-          onClick={() => setCollapseOpen(!collapseOpen)}
-          data-pr-tooltip="Configurar columnas"
-        />
-      </div>
+        // Configurar columnas seleccionadas
+        const initialSelection = availableColumns.reduce((acc, col) => {
+            acc[col.key] = col.defaultSelected;
+            return acc;
+        }, {});
+        setSelectedColumns(initialSelection);
+    }, []);
 
-      <Toolbar
-        className="mb-4"
-        right={() => (
-          <div className="flex align-items-center justify-content-end gap-2">
-            <Button
-              type="button"
-              icon="pi pi-file"
-              rounded
-              onClick={() => console.log("Export CSV")}
-              data-pr-tooltip="CSV"
+    // Actualizar columnas según la selección en el ColumnSelector
+    const handleColumnSelectionChange = (selected) => {
+        setSelectedColumns(selected);
+
+        const newColumns = mapColumns(
+            availableColumns.filter((col) => selected[col.key])
+        );
+
+        // Si el usuario no selecciona ninguna columna, agrega una columna de fallback
+        if (newColumns.length === 0) {
+            newColumns.push({
+                field: 'id_empleado',
+                headerName: 'ID Empleado',
+                flex: 1,
+                filterable: true,
+                filterOperators: getGridStringOperators(),
+            });
+        }
+
+        setColumns(newColumns);
+    };
+
+    // Exportar datos a CSV, Excel o PDF
+    const handleExport = (type) => {
+        const filteredData = data.map((row) => {
+            const filteredRow = {};
+            columns.forEach((col) => {
+                filteredRow[col.field] = row[col.field];
+            });
+            return filteredRow;
+        });
+
+        if (type === 'pdf') {
+            const doc = new jsPDF();
+            const tableColumns = columns.map((col) => col.headerName);
+            const tableRows = filteredData.map((row) =>
+                columns.map((col) => row[col.field])
+            );
+            autoTable(doc, { head: [tableColumns], body: tableRows });
+            doc.save('empleados.pdf');
+        } else if (type === 'csv') {
+            const csvContent = [
+                columns.map((col) => col.headerName).join(','), // Encabezados
+                ...filteredData.map((row) =>
+                    columns.map((col) => row[col.field]).join(',')
+                ), // Filas
+            ].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            saveAs(blob, 'empleados.csv');
+        } else if (type === 'excel') {
+            const worksheet = XLSX.utils.json_to_sheet(filteredData);
+            const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            saveAs(
+                new Blob([excelBuffer], { type: 'application/octet-stream' }),
+                'empleados.xlsx'
+            );
+        }
+    };
+
+    return (
+        <Box className={styles.container}>
+            <Typography variant="h4" gutterBottom>
+                Tabla Empleados
+            </Typography>
+
+            {/* Barra de búsqueda */}
+            <TextField
+                label="Buscar"
+                variant="outlined"
+                fullWidth
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                style={{ marginBottom: '20px' }}
             />
-          </div>
-        )}
-      />
 
-      <Collapse in={collapseOpen}>
-        <div className="p-3">
-          <ColumnSelector
-            availableColumns={availableColumns}
-            onSelectionChange={handleColumnSelectionChange}
-          />
-        </div>
-      </Collapse>
+            {/* Botón para seleccionar columnas */}
+            <Button variant="contained" onClick={() => setCollapseOpen(!collapseOpen)}>
+                Seleccionar Columnas
+            </Button>
 
-      {isLoading ? (
-        <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-      ) : (
-        showTable && (
-          <DataTable
-            ref={dt}
-            value={empleados}
-            paginator
-            rows={10}
-            rowsPerPageOptions={[5, 10, 25]}
-            dataKey="idEmpleado"
-            globalFilter={globalFilter}
-            header={header}
-          >
-            <Column
-              field="idEmpleado"
-              header="ID"
-              sortable
-              style={{ minWidth: "100px" }}
-            ></Column>
-            {availableColumns.map(
-              (column) =>
-                visibleColumns[column.key] && (
-                  <Column
-                    key={column.key}
-                    field={column.key}
-                    header={column.label}
-                    sortable
-                    style={{ minWidth: "150px" }}
-                  />
-                )
-            )}
-          </DataTable>
-        )
-      )}
+            {/* Panel de selección de columnas */}
+            <Collapse in={collapseOpen}>
+                <Box marginTop={2}>
+                    <ColumnSelector
+                        availableColumns={availableColumns}
+                        onSelectionChange={handleColumnSelectionChange}
+                    />
+                </Box>
+            </Collapse>
 
-      <Dialog
-        header="Detalles del Empleado"
-        visible={isDialogVisible}
-        style={{ width: "50vw" }}
-        modal
-        footer={empleadoDialogFooter}
-        onHide={() => setIsDialogVisible(false)}
-      >
-        {selectedEmpleado && (
-          <div>
-            {Object.entries(selectedEmpleado).map(([key, value]) => (
-              <p key={key}>
-                <strong>{key.replace(/([A-Z])/g, " $1").toUpperCase()}:</strong>{" "}
-                {value || "N/A"}
-              </p>
-            ))}
-          </div>
-        )}
-      </Dialog>
-    </div>
-  );
+            {/* Tabla */}
+            <Box marginTop={3} height={500}>
+                <DataGrid
+                    rows={data}
+                    columns={columns}
+                    pageSize={10}
+                    rowsPerPageOptions={[5, 10, 20]}
+                    getRowId={(row) => row.id_empleado}
+                    disableColumnFilter={false} // Habilitar menús de filtros dinámicos
+                    disableColumnMenu={false} // Mostrar menú completo para filtros
+                />
+            </Box>
+
+            {/* Botones de exportación */}
+            <Box marginTop={3} display="flex" gap={2}>
+                <Button variant="outlined" onClick={() => handleExport('csv')}>
+                    Exportar CSV
+                </Button>
+                <Button variant="outlined" onClick={() => handleExport('excel')}>
+                    Exportar Excel
+                </Button>
+                <Button variant="outlined" onClick={() => handleExport('pdf')}>
+                    Exportar PDF
+                </Button>
+            </Box>
+        </Box>
+    );
 }

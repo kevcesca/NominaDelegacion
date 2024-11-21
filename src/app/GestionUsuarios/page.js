@@ -1,32 +1,25 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Menu, MenuItem, IconButton, Button } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import React, { useState } from 'react';
+import { Button } from '@mui/material';
 import styles from './page.module.css';
+import AddUserModal from './components/AddUserModal';
+import UserTableRow from './components/UserTableRow';
+import UserActionsMenu from './components/UserActionsMenu';
+import useUsers from './components/useUsers';
+import { useAuth } from '../context/AuthContext';
 import { API_USERS_URL } from '../%Config/apiConfig';
 
 const UserTable = () => {
-    const [users, setUsers] = useState([]);
+    const { users, fetchUsers, toggleUserStatus } = useUsers();
+    const { user: currentUser } = useAuth();
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
-    const open = Boolean(anchorEl);
+    const [editingUser, setEditingUser] = useState(null);
+    const [editedFields, setEditedFields] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Cargar usuarios desde el servicio
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await fetch(`${API_USERS_URL}/users-with-roles`);
-                if (!response.ok) throw new Error('Error al obtener usuarios');
-                const data = await response.json();
-                setUsers(data);
-            } catch (error) {
-                console.error('Error al cargar los usuarios:', error);
-            }
-        };
-
-        fetchUsers();
-    }, []);
+    const openMenu = Boolean(anchorEl);
 
     const handleMenuOpen = (event, user) => {
         setAnchorEl(event.currentTarget);
@@ -38,43 +31,63 @@ const UserTable = () => {
         setSelectedUser(null);
     };
 
-    // Alternar el estado de usuario (habilitar/deshabilitar)
-    const toggleUserStatus = async () => {
-        if (!selectedUser) return;
+    const handleDoubleClick = (user, field) => {
+        setEditingUser(user['ID Empleado']);
+        setEditedFields({
+            'Nombre de Usuario': user['Nombre de Usuario'],
+            Email: user.Email,
+        });
+    };
 
+    const handleInputChange = (field, value) => {
+        setEditedFields((prevState) => ({
+            ...prevState,
+            [field]: value,
+        }));
+    };
+
+    const handleConfirmEdit = async () => {
         try {
+            const updatedDetails = {
+                nombre_usuario: editedFields['Nombre de Usuario'],
+                correo_usuario: editedFields.Email,
+            };
+    
             const response = await fetch(
-                `${API_USERS_URL}/users/${selectedUser['ID Empleado']}/toggle-status`,
-                { method: 'PUT' }
+                `${API_USERS_URL}/users/${editingUser}/update-details`,
+                {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedDetails),
+                }
             );
-
-            if (!response.ok) throw new Error('Error al alternar el estado del usuario');
-
+    
+            if (!response.ok) throw new Error('Error al actualizar los detalles del usuario');
+    
             const data = await response.json();
             console.log(data.message);
-
-            // Actualizar el estado local con el nuevo estado
-            setUsers((prevUsers) =>
-                prevUsers.map((user) =>
-                    user['ID Empleado'] === selectedUser['ID Empleado']
-                        ? { ...user, Activo: data.estado }
-                        : user
-                )
-            );
-
-            handleMenuClose();
+    
+            // Recargar la lista de usuarios
+            await fetchUsers();
+    
+            // Salir del modo de edición
+            setEditingUser(null); // << Aquí es donde nos aseguramos de salir del modo de edición
+            setEditedFields({});
         } catch (error) {
-            console.error('Error al alternar el estado del usuario:', error);
+            console.error('Error al confirmar la edición:', error);
         }
     };
+    
 
     return (
         <div className={styles.container}>
             <h2 className={styles.title}>Gestión de Usuarios</h2>
-            <Button variant="contained" color="secondary" style={{ marginRight: '10px' }}>
-                Cargar
-            </Button>
-            <Button variant="contained" color="primary">
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setIsModalOpen(true)}
+                style={{ marginBottom: '10px' }}
+            >
                 Añadir Usuario
             </Button>
 
@@ -92,56 +105,38 @@ const UserTable = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {users.length > 0 ? (
-                        users.map((user) => (
-                            <tr key={user['ID Empleado']} className={!user.Activo ? styles.disabledRow : ''}>
-                                <td>{user['ID Empleado']}</td>
-                                <td>{user['Nombre Empleado']}</td>
-                                <td>{user['Nombre de Usuario']}</td>
-                                <td>{user.Email}</td>
-                                <td>{user.Rol}</td> {/* Campo con roles agrupados */}
-                                <td>{new Date(user['Fecha de Alta']).toLocaleDateString()}</td>
-                                <td>{user.Asignó}</td>
-                                <td>
-                                    <IconButton
-                                        onClick={(event) => handleMenuOpen(event, user)}
-                                        aria-label="opciones"
-                                    >
-                                        <MoreVertIcon />
-                                    </IconButton>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="7" style={{ textAlign: 'center' }}>
-                                No se encontraron resultados
-                            </td>
-                        </tr>
-                    )}
+                    {users.map((user) => (
+                        <UserTableRow
+                            key={user['ID Empleado']}
+                            user={user}
+                            isEditing={editingUser === user['ID Empleado']}
+                            editedFields={editedFields}
+                            onDoubleClick={handleDoubleClick}
+                            onInputChange={handleInputChange}
+                            onConfirmEdit={handleConfirmEdit}
+                            onMenuOpen={handleMenuOpen}
+                        />
+                    ))}
                 </tbody>
             </table>
 
-            {/* Menú desplegable */}
-            <Menu
+            <UserActionsMenu
                 anchorEl={anchorEl}
-                open={open}
+                open={openMenu}
                 onClose={handleMenuClose}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
+                onToggleStatus={() => {
+                    toggleUserStatus(selectedUser['ID Empleado']);
+                    handleMenuClose();
                 }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                }}
-            >
-                {selectedUser?.Activo ? (
-                    <MenuItem onClick={toggleUserStatus}>Deshabilitar Usuario</MenuItem>
-                ) : (
-                    <MenuItem onClick={toggleUserStatus}>Habilitar Usuario</MenuItem>
-                )}
-            </Menu>
+                isActive={selectedUser?.Activo}
+            />
+
+            <AddUserModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onUserAdded={fetchUsers}
+                currentUser={currentUser?.nombre_usuario}
+            />
         </div>
     );
 };
