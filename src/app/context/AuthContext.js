@@ -14,15 +14,14 @@ export const AuthProvider = ({ children }) => {
         // Función para verificar si existe un token en las cookies
         const checkAuth = async () => {
             try {
-                // Enviar una solicitud al backend para verificar el token y obtener el usuario
                 const response = await fetch('http://localhost:3001/verify-token', {
                     method: 'GET',
-                    credentials: 'include' // Incluir las cookies en la solicitud
+                    credentials: 'include', // Incluir cookies
                 });
-                
+        
                 if (response.ok) {
                     const data = await response.json();
-                    setUser(data.user);
+                    setUser(data.user); // Aquí incluimos también "nombre_usuario"
                     setIsAuthenticated(true);
                 } else {
                     setUser(null);

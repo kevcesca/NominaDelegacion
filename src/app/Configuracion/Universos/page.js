@@ -1,202 +1,318 @@
 'use client';
-// pages/universos.js
-import React, { useState } from 'react';
-import ProtectedView from "../../%Components/ProtectedView/ProtectedView"; // Ajusta esta ruta según tu estructura
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TablePagination,
+  IconButton,
+  TextField,
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+import { Edit, Delete, Save, Add } from '@mui/icons-material';
+import API_BASE_URL from '../../%Config/apiConfig';
 import styles from './page.module.css';
 
-const opcionesNomina = ["BASE", "ESTRUCTURA", "NOMINA 8", "HONORARIOS", "OTRO"];
+export default function UniversosTable() {
+  const [universos, setUniversos] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [isEditing, setIsEditing] = useState(null);
+  const [editCache, setEditCache] = useState({});
+  const [errorDialog, setErrorDialog] = useState({ open: false, message: '' });
+  const [successDialog, setSuccessDialog] = useState({ open: false, message: '' });
+  const [deleteUniversoDialog, setDeleteUniversoDialog] = useState(false);
+  const [universoToDelete, setUniversoToDelete] = useState(null);
+  const nominaOptions = ['BASE', 'ESTRUCTURA', 'NOMINA 8', 'HONORARIOS'];
 
-const datosIniciales = [
-    { id: 'A', nombre: 'BASE' },
-    { id: 'CJ', nombre: 'ESTRUCTURA' },
-    { id: 'PR', nombre: 'NOMINA 8' },
-    { id: 'H', nombre: 'HONORARIOS' },
-    { id: 'G', nombre: 'BASE' },
-    { id: 'K', nombre: 'ESTRUCTURA' },
-    { id: 'PR2', nombre: 'NOMINA 8' },
-    { id: 'H2', nombre: 'HONORARIOS' },
-    { id: 'O', nombre: 'BASE' },
-    { id: 'L', nombre: 'ESTRUCTURA' },
-    { id: 'PR3', nombre: 'NOMINA 8' },
-    { id: 'H3', nombre: 'HONORARIOS' },
-];
+  // Obtener los datos de la API al cargar el componente
+  const fetchUniversos = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/cat/universos`);
+      setUniversos(response.data);
+      setFilteredData(response.data);
+    } catch (error) {
+      console.error('Error al cargar los universos:', error);
+    }
+  };
 
-const Universos = () => {
-    const [datosUniverso, setDatosUniverso] = useState(datosIniciales);
-    const [paginaActual, setPaginaActual] = useState(0);
-    const filasPorPagina = 4;
-    const [filtro, setFiltro] = useState('');
+  useEffect(() => {
+    fetchUniversos();
+  }, []);
 
-    const mostrarPagina = () => {
-        const inicio = paginaActual * filasPorPagina;
-        const fin = inicio + filasPorPagina;
-        return datosUniverso
-            .filter(dato => dato.id.toLowerCase().includes(filtro) || dato.nombre.toLowerCase().includes(filtro))
-            .slice(inicio, fin);
-    };
-
-    const cambiarPagina = (direccion) => {
-        setPaginaActual((prev) => prev + direccion);
-    };
-
-    const filtrarTabla = (e) => {
-        setFiltro(e.target.value.toLowerCase());
-        setPaginaActual(0);
-    };
-
-    const crearUniverso = () => {
-        const nuevoUniverso = { id: '', nombre: 'BASE', isEditing: true, isOther: false };
-        setDatosUniverso((prevDatos) => [nuevoUniverso, ...prevDatos]);
-    };
-
-    const actualizarUniverso = (id) => {
-        setDatosUniverso((prevDatos) =>
-            prevDatos.map((dato) =>
-                dato.id === id ? { ...dato, isEditing: true } : dato
-            )
-        );
-    };
-
-    const guardarUniverso = (index) => {
-        setDatosUniverso((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, isEditing: false, isOther: false } : dato
-            )
-        );
-    };
-
-    const eliminarUniverso = (index) => {
-        setDatosUniverso((prevDatos) => prevDatos.filter((_, i) => i !== index));
-    };
-
-    const handleNominaChange = (index, value) => {
-        setDatosUniverso((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, nombre: value, isOther: value === "OTRO" } : dato
-            )
-        );
-    };
-
-    const handleInputChange = (index, field, value) => {
-        setDatosUniverso((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, [field]: value } : dato
-            )
-        );
-    };
-
-    return (
-        <div className={styles.body}>
-            <div className={styles.container}>
-                <div className={styles.subHeader}>Gestión de Universos</div>
-                <div className={styles.buttons}>
-                    <input
-                        type="text"
-                        onChange={filtrarTabla}
-                        placeholder="Buscar en la tabla..."
-                        className={styles.inputField}
-                    />
-                    <button onClick={crearUniverso} className={styles.styledButton}>Crear Universo</button>
-                </div>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>Identificador Universo</th>
-                            <th>Nombre Nómina</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {mostrarPagina().map((dato, index) => (
-                            <tr key={index}>
-                                <td>
-                                    {dato.isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={dato.id}
-                                            onChange={(e) => handleInputChange(index, 'id', e.target.value)}
-                                            className={styles.inputField}
-                                        />
-                                    ) : (
-                                        dato.id
-                                    )}
-                                </td>
-                                <td>
-                                    {dato.isEditing ? (
-                                        <>
-                                            <select
-                                                value={dato.isOther ? "OTRO" : dato.nombre}
-                                                onChange={(e) => handleNominaChange(index, e.target.value)}
-                                                className={styles.selectField}
-                                            >
-                                                {opcionesNomina.map((opcion) => (
-                                                    <option key={opcion} value={opcion}>
-                                                        {opcion}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {dato.isOther && (
-                                                <input
-                                                    type="text"
-                                                    placeholder="Especificar Otro"
-                                                    value={dato.nombre === "OTRO" ? '' : dato.nombre}
-                                                    onChange={(e) => handleInputChange(index, 'nombre', e.target.value)}
-                                                    className={styles.inputField}
-                                                    style={{ marginTop: "5px" }}
-                                                />
-                                            )}
-                                        </>
-                                    ) : (
-                                        dato.nombre
-                                    )}
-                                </td>
-                                <td>
-                                    {dato.isEditing ? (
-                                        <span
-                                            className={styles.iconButton}
-                                            onClick={() => guardarUniverso(index)}
-                                        >
-                                            💾
-                                        </span>
-                                    ) : (
-                                        <span
-                                            className={styles.iconButton}
-                                            onClick={() => actualizarUniverso(dato.id)}
-                                        >
-                                            ✏️
-                                        </span>
-                                    )}
-                                    <span className={styles.iconButton} onClick={() => eliminarUniverso(index)}>🗑️</span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                <div className={styles.pagination}>
-                    <button
-                        onClick={() => cambiarPagina(-1)}
-                        disabled={paginaActual <= 0}
-                        className={styles.styledButton}
-                    >
-                        Anterior
-                    </button>
-                    <button
-                        onClick={() => cambiarPagina(1)}
-                        disabled={(paginaActual + 1) * filasPorPagina >= datosUniverso.length}
-                        className={styles.styledButton}
-                    >
-                        Siguiente
-                    </button>
-                </div>
-            </div>
-        </div>
+  const handleSearch = (event) => {
+    const query = event.target.value.toLowerCase();
+    setSearchQuery(query);
+    setFilteredData(
+      universos.filter(
+        (universo) =>
+          universo.id_universo.toLowerCase().includes(query) ||
+          universo.nombre_nomina.toLowerCase().includes(query)
+      )
     );
-};
+  };
 
-const ProtectedUniversos = () => (
-    <ProtectedView requiredPermissions={["Universos", "Acceso_total"]}>
-        <Universos />
-    </ProtectedView>
-);
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
 
-export default ProtectedUniversos;
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleEdit = (id) => {
+    setIsEditing(id);
+    const universoToEdit = universos.find((universo) => universo.id_universo === id);
+    setEditCache({ ...universoToEdit });
+  };
+
+  const handleSave = async (oldId) => {
+    try {
+      const editedUniverso = { ...editCache };
+
+      if (!editedUniverso.nombre_nomina || (oldId === null && !editedUniverso.id_universo)) {
+        setErrorDialog({
+          open: true,
+          message: 'Por favor, rellena todos los campos antes de guardar.',
+        });
+        return;
+      }
+
+      if (oldId === null) {
+        // Crear un nuevo universo
+        await axios.get(`${API_BASE_URL}/insertarUniverso`, {
+          params: {
+            id_universo: editedUniverso.id_universo,
+            nombre_nomina: editedUniverso.nombre_nomina,
+          },
+        });
+        setSuccessDialog({ open: true, message: 'Universo creado correctamente.' });
+      } else {
+        // Actualizar universo existente
+        await axios.get(`${API_BASE_URL}/actualizarUniverso`, {
+          params: {
+            id_universo: editedUniverso.id_universo,
+            nombre_nomina: editedUniverso.nombre_nomina,
+          },
+        });
+        setSuccessDialog({ open: true, message: 'Universo actualizado correctamente.' });
+      }
+
+      // Refrescar el componente para actualizar los datos
+      await fetchUniversos();
+
+      setIsEditing(null);
+      setEditCache({});
+    } catch (error) {
+      console.error('Error al guardar los cambios:', error);
+      setErrorDialog({
+        open: true,
+        message: oldId === null ? 'Error al crear el universo.' : 'Error al actualizar el universo.',
+      });
+    }
+  };
+
+  const handleRowChange = (field, value) => {
+    setEditCache((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddUniverso = () => {
+    const newUniverso = { id_universo: '', nombre_nomina: '' };
+    setUniversos((prev) => [newUniverso, ...prev]);
+    setFilteredData((prev) => [newUniverso, ...prev]);
+    setIsEditing(newUniverso.id_universo);
+    setEditCache(newUniverso);
+  };
+
+  const confirmDeleteUniverso = (universo) => {
+    setUniversoToDelete(universo);
+    setDeleteUniversoDialog(true);
+  };
+
+  const handleDeleteUniverso = async () => {
+    try {
+      await axios.get(`${API_BASE_URL}/eliminarUniverso`, {
+        params: {
+          id_universo: universoToDelete.id_universo,
+        },
+      });
+
+      const updatedUniversos = universos.filter(
+        (universo) => universo.id_universo !== universoToDelete.id_universo
+      );
+      setUniversos(updatedUniversos);
+      setFilteredData(updatedUniversos);
+
+      setSuccessDialog({ open: true, message: 'Universo eliminado correctamente.' });
+    } catch (error) {
+      console.error('Error al eliminar el universo:', error);
+      setErrorDialog({
+        open: true,
+        message: 'Error al eliminar el universo. Por favor, inténtalo de nuevo.',
+      });
+    } finally {
+      setDeleteUniversoDialog(false);
+      setUniversoToDelete(null);
+    }
+  };
+
+  const closeSuccessDialog = () => setSuccessDialog({ open: false, message: '' });
+  const closeErrorDialog = () => setErrorDialog({ open: false, message: '' });
+
+  return (
+    <Box className={styles.container}>
+      <Typography variant="h4" className={styles.title}>
+        Gestión de Universos
+      </Typography>
+      <Box className={styles.actions} display="flex" justifyContent="space-between">
+        <TextField
+          label="Buscar en la tabla..."
+          variant="outlined"
+          value={searchQuery}
+          onChange={handleSearch}
+          className={styles.searchBar}
+        />
+        <Button variant="contained" color="primary" startIcon={<Add />} onClick={handleAddUniverso}>
+          Crear Universo
+        </Button>
+      </Box>
+      <TableContainer component={Paper} className={styles.tableContainer}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Identificador Universo</TableCell>
+              <TableCell>Nombre Nómina</TableCell>
+              <TableCell>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredData
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((universo) => (
+                <TableRow key={universo.id_universo || 'new'}>
+                  <TableCell>
+                    {isEditing === universo.id_universo && !universo.id_universo ? (
+                      <TextField
+                        value={editCache.id_universo}
+                        onChange={(e) => handleRowChange('id_universo', e.target.value)}
+                      />
+                    ) : (
+                      universo.id_universo
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isEditing === universo.id_universo ? (
+                      <Select
+                        value={editCache.nombre_nomina}
+                        onChange={(e) => handleRowChange('nombre_nomina', e.target.value)}
+                      >
+                        {nominaOptions.map((option) => (
+                          <MenuItem key={option} value={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      universo.nombre_nomina
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isEditing === universo.id_universo ? (
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleSave(universo.id_universo || null)}
+                      >
+                        <Save />
+                      </IconButton>
+                    ) : (
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEdit(universo.id_universo)}
+                      >
+                        <Edit />
+                      </IconButton>
+                    )}
+                    <IconButton
+                      color="secondary"
+                      onClick={() => confirmDeleteUniverso(universo)}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        component="div"
+        count={filteredData.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+        className={styles.pagination}
+      />
+
+      <Dialog open={successDialog.open} onClose={closeSuccessDialog}>
+        <DialogTitle>Éxito</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{successDialog.message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeSuccessDialog} color="primary">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={errorDialog.open} onClose={closeErrorDialog}>
+        <DialogTitle>Error</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{errorDialog.message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeErrorDialog} color="primary">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteUniversoDialog} onClose={() => setDeleteUniversoDialog(false)}>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro de que deseas eliminar el universo "{universoToDelete?.id_universo}"?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteUniversoDialog(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleDeleteUniverso} color="secondary">
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}

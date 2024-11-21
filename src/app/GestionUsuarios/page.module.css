@@ -30,3 +30,39 @@
     opacity: 0.5;
     background-color: #f9f9f9;
 }
+
+.modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background-color: white;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+    padding: 20px;
+    z-index: 1000;
+}
+
+.modal h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 20px;
+    color: #333;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form button {
+    margin-top: 15px;
+}
+
+form .MuiButton-root {
+    height: 45px;
+    font-weight: bold;
+}
