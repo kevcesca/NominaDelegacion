@@ -100,9 +100,7 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
 
     return (
         <div className={`card ${styles.card}`}>
-            <div className="flex justify-content-between align-items-center mb-4">
-                <h2 className={styles.header}>Percepciones {nombreNomina} (QNA {quincena}/{anio})</h2>
-            </div>
+            
             <DataTable 
                 value={data} 
                 paginator 

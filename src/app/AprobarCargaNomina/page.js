@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ThemeProvider, Box, Typography, Button, Alert } from '@mui/material';
+import { ThemeProvider, Box, Button, Alert } from '@mui/material';
 import styles from './page.module.css';
 import theme from '../$tema/theme';
 import DateFilter from '../%Components/DateFilter/DateFilter'; // Importa tu componente DateFilter
 import ComparativaTable from '../%Components/ComparativeTable/ComparativeTable';
 import ComparativaTable2 from '../%Components/ComparativeTable/ComparativeTable2';
+import HeaderSeccion from '../%Components/HeaderSeccion/HeaderSeccion'; // Importa HeaderSeccion
 import { useRouter } from 'next/navigation';
 import ProtectedView from '../%Components/ProtectedView/ProtectedView'; // Importa el componente
 
@@ -43,6 +44,11 @@ const AprobarCargaNomina = () => {
                     {/* Protege la tabla de aprobación 1 para el permiso "ver_aprobacion_1" */}
                     <ProtectedView requiredPermissions={["ver_aprobacion_1", "Acceso_total"]}>
                         <Box mt={4}>
+                            {/* Implementación de HeaderSeccion */}
+                            <HeaderSeccion
+                                title={`Aprobación de Nómina - Tabla 1`}
+                               
+                            />
                             <ComparativaTable quincena={quincena} anio={anio} />
                         </Box>
                     </ProtectedView>
@@ -50,19 +56,25 @@ const AprobarCargaNomina = () => {
                     {/* Protege la tabla de aprobación 2 para el permiso "ver_aprobacion_2" */}
                     <ProtectedView requiredPermissions={["ver_aprobacion_2", "Acceso_total"]}>
                         <Box mt={4}>
+                            {/* Implementación de HeaderSeccion */}
+                            <HeaderSeccion
+                                title={`Aprobación de Nómina - Tabla 2`}
+                            />
                             <ComparativaTable2 quincena={quincena} anio={anio} />
                         </Box>
                     </ProtectedView>
 
                     {/* Botón para regresar a la página anterior */}
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => router.back()} // Regresa a la página anterior
-                        className={styles.backButton}
-                    >
-                        Regresar
-                    </Button>
+                    <Box className={styles.buttonContainer}>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => router.back()} // Regresa a la página anterior
+                            className={styles.backButton}
+                        >
+                            Regresar
+                        </Button>
+                    </Box>
                 </main>
             </ThemeProvider>
         </ProtectedView>

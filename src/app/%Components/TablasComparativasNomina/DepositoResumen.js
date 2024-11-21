@@ -56,9 +56,7 @@ export default function DepositoResumen({ resumenData, anio, quincena }) {
 
     return (
         <div className={`card ${styles.card}`}>
-            <div className="flex justify-content-between align-items-center mb-4">
-                <h2 className={styles.header}>DEPOSITO RESUMEN (QNA {quincena}/{anio})</h2>
-            </div>
+           
 
             {/* Tabla de datos normales */}
             <DataTable

@@ -1,5 +1,4 @@
-// src/components/DateFilter.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, TextField } from '@mui/material';
 import { Calendar } from 'primereact/calendar';
 import styles from './DateFilter.module.css';
@@ -42,6 +41,13 @@ export default function DateFilter({ onDateChange }) {
             setAnio('');
         }
     };
+
+    // Establecer la fecha actual al cargar el componente
+    useEffect(() => {
+        const hoy = new Date();
+        setFechaSeleccionada(hoy); // Establecer la fecha actual como seleccionada
+        actualizarFecha(hoy); // Actualizar los datos basados en la fecha actual
+    }, []);
 
     return (
         <Box className={styles.dateFilter}>
