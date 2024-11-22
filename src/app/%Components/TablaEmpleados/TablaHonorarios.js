@@ -10,51 +10,33 @@ import saveAs from 'file-saver';
 import API_BASE_URL from '../../%Config/apiConfig';
 import styles from './TablaUsuarios.module.css';
 
-export default function EmpleadosTable() {
+export default function HonorariosTable() {
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [selectedColumns, setSelectedColumns] = useState({});
     const [collapseOpen, setCollapseOpen] = useState(false);
     const [globalFilter, setGlobalFilter] = useState('');
-    const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
+    const [showModal, setShowModal] = useState(false);
 
     const availableColumns = [
-        { key: 'id_empleado', label: 'ID Empleado' },
-        { key: 'nombre', label: 'Nombre' },
-        { key: 'apellido_1', label: 'Apellido Paterno' },
-        { key: 'apellido_2', label: 'Apellido Materno' },
-        { key: 'curp', label: 'CURP' },
-        { key: 'id_legal', label: 'ID Legal' },
-        { key: 'id_sexo', label: 'Sexo' },
-        { key: 'fec_nac', label: 'Fecha de Nacimiento' },
-        { key: 'fec_alta_empleado', label: 'Fecha de Alta' },
-        { key: 'fec_antiguedad', label: 'Fecha de Antigüedad' },
-        { key: 'numero_ss', label: 'Número de Seguro Social' },
-        { key: 'id_reg_issste', label: 'Registro ISSSTE' },
-        { key: 'ahorr_soli_porc', label: 'Porcentaje de Ahorro Solidario' },
-        { key: 'estado', label: 'Estado' },
-        { key: 'deleg_municip', label: 'Delegación/Municipio' },
-        { key: 'poblacion', label: 'Población' },
-        { key: 'colonia', label: 'Colonia' },
-        { key: 'direccion', label: 'Dirección' },
-        { key: 'codigo_postal', label: 'Código Postal' },
-        { key: 'num_interior', label: 'Número Interior' },
-        { key: 'num_exterior', label: 'Número Exterior' },
-        { key: 'calle', label: 'Calle' },
-        { key: 'n_delegacion_municipio', label: 'Nombre Delegación/Municipio' },
-        { key: 'ent_federativa', label: 'Entidad Federativa' },
-        { key: 'sect_pres', label: 'Sector Presupuestal' },
-        { key: 'n_puesto', label: 'Puesto' },
-        { key: 'fecha_insercion', label: 'Fecha de Inserción' },
-        { key: 'activo', label: 'Activo' },
-        { key: 'nombre_nomina', label: 'Nombre Nómina' },
+        { key: 'id', label: 'ID' },
+        { key: 'identificador', label: 'Identificador' },
+        { key: 'unidad_administrativa', label: 'Unidad Administrativa' },
+        { key: 'subprograma', label: 'Subprograma' },
+        { key: 'nombre_empleado', label: 'Nombre Empleado' },
+        { key: 'nombre_puesto', label: 'Nombre Puesto' },
+        { key: 'folio', label: 'Folio' },
+        { key: 'fecha_pago', label: 'Fecha de Pago' },
+        { key: 'percepciones', label: 'Percepciones' },
+        { key: 'deducciones', label: 'Deducciones' },
+        { key: 'liquido', label: 'Líquido' },
         { key: 'forma_de_pago', label: 'Forma de Pago' },
     ];
 
     const fetchData = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/NominaCtrl/Empleados`);
+            const response = await fetch(`${API_BASE_URL}/NominaCtrl/Honorarios/Consulta`);
             if (!response.ok) {
                 throw new Error('Error al obtener los datos');
             }
@@ -78,7 +60,7 @@ export default function EmpleadosTable() {
         fetchData();
 
         const initialColumns = mapColumns(
-            availableColumns.filter((col) => col.key === 'id_empleado' || col.key === 'nombre')
+            availableColumns.filter((col) => col.key === 'id' || col.key === 'nombre_empleado')
         );
         setColumns(initialColumns);
 
@@ -144,7 +126,7 @@ export default function EmpleadosTable() {
                 columns.map((col) => row[col.field])
             );
             autoTable(doc, { head: [tableColumns], body: tableRows });
-            doc.save('empleados.pdf');
+            doc.save('honorarios.pdf');
         } else if (type === 'csv') {
             const csvContent = [
                 columns.map((col) => col.headerName).join(','), // Encabezados
@@ -153,14 +135,14 @@ export default function EmpleadosTable() {
                 ), // Filas
             ].join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            saveAs(blob, 'empleados.csv');
+            saveAs(blob, 'honorarios.csv');
         } else if (type === 'excel') {
             const worksheet = XLSX.utils.json_to_sheet(filteredExportData);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
             saveAs(
                 new Blob([excelBuffer], { type: 'application/octet-stream' }),
-                'empleados.xlsx'
+                'honorarios.xlsx'
             );
         }
     };
@@ -229,7 +211,7 @@ export default function EmpleadosTable() {
             backgroundColor="#f9f9f9"
         >
             <Typography variant="h4" gutterBottom>
-                Tabla Empleados
+                Tabla Honorarios
             </Typography>
 
             <TextField
@@ -269,7 +251,7 @@ export default function EmpleadosTable() {
                     columns={columns}
                     pageSize={10}
                     rowsPerPageOptions={[10, 20, 50, 100]}
-                    getRowId={(row) => row.id_empleado}
+                    getRowId={(row) => row.id}
                 />
             </Box>
 
@@ -285,7 +267,6 @@ export default function EmpleadosTable() {
                 </Button>
             </Box>
 
-            {/* Modal para mostrar advertencia */}
             <Modal
                 open={showModal}
                 onClose={() => setShowModal(false)}
