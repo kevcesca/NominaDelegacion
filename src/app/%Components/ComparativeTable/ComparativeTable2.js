@@ -133,7 +133,7 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
 
     return (
         <div>
-            <h2 className={styles.header}>Aprobación 2</h2>
+            
             <Toast ref={toast} />
             <Toolbar className="mb-4" right={() => (
                 <div className="flex align-items-center justify-content-end gap-2">

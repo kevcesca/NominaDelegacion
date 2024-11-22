@@ -7,16 +7,18 @@ import theme from '../$tema/theme';
 import DateFilter from '../%Components/DateFilter/DateFilter'; // Importa tu componente DateFilter
 import ComparativaTable from '../%Components/ComparativeTable/ComparativeTable';
 import ComparativaTable2 from '../%Components/ComparativeTable/ComparativeTable2';
-import HeaderSeccion from '../%Components/HeaderSeccion/HeaderSeccion'; // Importa HeaderSeccion
+import HeaderSeccion from '../%Components/HeaderSeccion/HeaderSeccion'; // Importa el HeaderSeccion
 import { useRouter } from 'next/navigation';
 import ProtectedView from '../%Components/ProtectedView/ProtectedView'; // Importa el componente
 
 const AprobarCargaNomina = () => {
     const router = useRouter();
 
-    // Estados para el año y la quincena (inicializados con valores predeterminados)
+    // Estados para el año, quincena y visibilidad de tablas
     const [anio, setAnio] = useState('2024');
     const [quincena, setQuincena] = useState('01');
+    const [showTabla1, setShowTabla1] = useState(false); // Controla visibilidad de tabla 1
+    const [showTabla2, setShowTabla2] = useState(false); // Controla visibilidad de tabla 2
 
     // Función para manejar los cambios de fecha desde el DateFilter
     const handleDateChange = ({ anio: nuevoAnio, quincena: nuevaQuincena }) => {
@@ -41,26 +43,35 @@ const AprobarCargaNomina = () => {
                         Estás viendo únicamente los archivos que requieren aprobación. La aprobación se completará cuando se haya hecho la doble validación.
                     </Alert>
 
-                    {/* Protege la tabla de aprobación 1 para el permiso "ver_aprobacion_1" */}
+                    {/* Tabla 1: Encabezado y tabla plegable */}
                     <ProtectedView requiredPermissions={["ver_aprobacion_1", "Acceso_total"]}>
                         <Box mt={4}>
-                            {/* Implementación de HeaderSeccion */}
                             <HeaderSeccion
-                                title={`Aprobación de Nómina - Tabla 1`}
-                               
+                                titulo={`Aprobación 1 - Quincena ${quincena}/${anio}`}
+                                isOpen={showTabla1}
+                                onToggle={() => setShowTabla1(!showTabla1)} // Alterna la visibilidad
                             />
-                            <ComparativaTable quincena={quincena} anio={anio} />
+                            {showTabla1 && (
+                                <Box>
+                                    <ComparativaTable quincena={quincena} anio={anio} />
+                                </Box>
+                            )}
                         </Box>
                     </ProtectedView>
 
-                    {/* Protege la tabla de aprobación 2 para el permiso "ver_aprobacion_2" */}
+                    {/* Tabla 2: Encabezado y tabla plegable */}
                     <ProtectedView requiredPermissions={["ver_aprobacion_2", "Acceso_total"]}>
                         <Box mt={4}>
-                            {/* Implementación de HeaderSeccion */}
                             <HeaderSeccion
-                                title={`Aprobación de Nómina - Tabla 2`}
+                                titulo={`Aprobación 2 - Quincena ${quincena}/${anio}`}
+                                isOpen={showTabla2}
+                                onToggle={() => setShowTabla2(!showTabla2)} // Alterna la visibilidad
                             />
-                            <ComparativaTable2 quincena={quincena} anio={anio} />
+                            {showTabla2 && (
+                                <Box>
+                                    <ComparativaTable2 quincena={quincena} anio={anio} />
+                                </Box>
+                            )}
                         </Box>
                     </ProtectedView>
 
