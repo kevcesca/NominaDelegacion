@@ -40,9 +40,9 @@ export default function Validacion() {
                                     onChange={(e) => setTipoNomina(e.target.value)}
                                     label="Tipo de Nómina"
                                 >
-                                    <MenuItem value="COMPUESTA">Compuesta</MenuItem>
+                                    <MenuItem value="ESTRUCTURA">Estructura</MenuItem>
                                     <MenuItem value="BASE">Base</MenuItem>
-                                    <MenuItem value="NOMINA8">Nómina 8</MenuItem>
+                                    <MenuItem value="NOMINA 8">Nómina 8</MenuItem>
                                 </Select>
                             </FormControl>
                         </Box>
@@ -61,6 +61,7 @@ export default function Validacion() {
                             <TablaConsultaDetallesBitacora
                                 tipoNomina={tipoNomina}
                                 anio={anio}
+                                quincena={quincena}
                                
                             />
                         </div>
