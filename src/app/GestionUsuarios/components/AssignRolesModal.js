@@ -126,3 +126,5 @@ const AssignRolesModal = ({ isOpen, onClose, user, onRolesUpdated }) => {
 };
 
 export default AssignRolesModal;
+
+
