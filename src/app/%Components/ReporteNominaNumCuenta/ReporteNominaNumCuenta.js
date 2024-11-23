@@ -1,171 +1,294 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { InputText } from 'primereact/inputtext';
-import { ProgressBar } from 'primereact/progressbar';
-import { Button } from 'primereact/button';
-import { Toolbar } from 'primereact/toolbar';
-import { Toast } from 'primereact/toast';
-import { ThemeProvider, Typography, Box, Grid, Chip } from '@mui/material';
-import 'primereact/resources/themes/saga-blue/theme.css';
-import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
+import React, { useState, useEffect } from 'react';
+import { Button, TextField, Box, Typography, Collapse, Checkbox, FormControlLabel, Modal } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import saveAs from 'file-saver';
 import API_BASE_URL from '../../%Config/apiConfig';
-import theme from '../../$tema/theme';
-import styles from './ReporteNominaNumCuenta';
 
 export default function TablaMovimientosVariasQuincenas() {
     const [data, setData] = useState([]);
-    const [globalFilter, setGlobalFilter] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [filteredData, setFilteredData] = useState([]);
+    const [columns, setColumns] = useState([]);
+    const [selectedColumns, setSelectedColumns] = useState({});
+    const [collapseOpen, setCollapseOpen] = useState(false);
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [showModal, setShowModal] = useState(false);
     const [anio, setAnio] = useState('2024');
-    const [quincenas, setQuincenas] = useState(['01', '02', '03']); // Quincenas de ejemplo
-    const dt = useRef(null);
-    const toast = useRef(null);
+    const [quincenas, setQuincenas] = useState(['01', '02', '03']);
 
     const availableColumns = [
-        { key: 'id_empleado', label: 'ID Empleado', defaultSelected: true },
-        { key: 'nombre', label: 'Nombre', defaultSelected: true },
-        { key: 'apellido_1', label: 'Apellido Paterno', defaultSelected: true },
-        { key: 'apellido_2', label: 'Apellido Materno', defaultSelected: true },
-        { key: 'anio', label: 'Año', defaultSelected: true },
-        { key: 'quincena', label: 'Quincena', defaultSelected: true },
-        { key: 'nomina', label: 'Nómina', defaultSelected: true },
-        { key: 'liquido', label: 'Líquido', defaultSelected: true },
-        { key: 'transferencia', label: 'Transferencia', defaultSelected: true },
-        { key: 'num_cuenta', label: 'Número de Cuenta', defaultSelected: true },
-        { key: 'fec_pago', label: 'Fecha de Pago', defaultSelected: true }
+        { key: 'id_empleado', label: 'ID Empleado' },
+        { key: 'nombre', label: 'Nombre' },
+        { key: 'apellido_1', label: 'Apellido Paterno' },
+        { key: 'apellido_2', label: 'Apellido Materno' },
+        { key: 'anio', label: 'Año' },
+        { key: 'quincena', label: 'Quincena' },
+        { key: 'nomina', label: 'Nómina' },
+        { key: 'liquido', label: 'Líquido' },
+        { key: 'transferencia', label: 'Transferencia' },
+        { key: 'num_cuenta', label: 'Número de Cuenta' },
+        { key: 'fec_pago', label: 'Fecha de Pago' },
     ];
 
     const fetchData = async () => {
         try {
-            setIsLoading(true);
-            const quincenasParams = quincenas.map(q => `quincena=${q}`).join('&');
-            const url = `${API_BASE_URL}/consultaMovimientosVariasQuincenas?anio=${anio}&${quincenasParams}`;
-            const response = await fetch(url);
-
+            const quincenasParams = quincenas.map((q) => `quincena=${q}`).join('&');
+            const response = await fetch(`${API_BASE_URL}/consultaMovimientosVariasQuincenas?anio=${anio}&${quincenasParams}`);
             if (!response.ok) {
-                throw new Error('Error al obtener los datos: ' + response.statusText);
+                throw new Error('Error al obtener los datos');
             }
-
-            const data = await response.json();
-            setData(data);
+            const json = await response.json();
+            setData(json);
+            setFilteredData(json);
         } catch (error) {
-            console.error('Error al obtener los datos:', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar la data.' });
-        } finally {
-            setIsLoading(false);
+            console.error('Error al cargar los datos:', error);
         }
     };
 
+    const mapColumns = (cols) =>
+        cols.map((col) => ({
+            field: col.key,
+            headerName: col.label,
+            flex: 1,
+            minWidth: 150,
+        }));
+
     useEffect(() => {
         fetchData();
-    }, [anio, quincenas]);
 
-    const handleQuincenaChange = (event) => {
-        const value = event.target.value;
-        const quincenasArray = value.split(',').map(q => q.trim());
-        setQuincenas(quincenasArray);
+        const initialColumns = mapColumns(
+            availableColumns.filter((col) => col.key === 'id_empleado' || col.key === 'anio')
+        );
+        setColumns(initialColumns);
+
+        const initialSelection = availableColumns.reduce((acc, col) => {
+            acc[col.key] = false;
+            return acc;
+        }, {});
+        setSelectedColumns(initialSelection);
+    }, []);
+
+    const handleConsultar = () => {
+        fetchData();
     };
 
-    const exportCSV = () => {
-        dt.current.exportCSV();
+    const handleFilterChange = (event) => {
+        const value = event.target.value.toLowerCase();
+        setGlobalFilter(value);
+
+        const filtered = data.filter((row) =>
+            Object.values(row).some((val) => val?.toString().toLowerCase().includes(value))
+        );
+        setFilteredData(filtered);
     };
 
-    const header = (
-        <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Consulta de Movimientos por Varias Quincenas</Typography>
-            <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
-                <i className="pi pi-search" />
-                <InputText
-                    type="search"
-                    onInput={(e) => setGlobalFilter(e.target.value)}
-                    placeholder="Buscar..."
-                    style={{ width: '100%', marginLeft: '2rem' }}
-                />
-            </span>
-        </div>
-    );
+    const handleGenerateTable = () => {
+        const selectedKeys = Object.keys(selectedColumns).filter((key) => selectedColumns[key]);
+
+        if (selectedKeys.length === 0) {
+            setShowModal(true);
+            return;
+        }
+
+        const newColumns = mapColumns(availableColumns.filter((col) => selectedKeys.includes(col.key)));
+        setColumns(newColumns);
+        setCollapseOpen(false);
+    };
+
+    const handleColumnSelectionChange = (event) => {
+        setSelectedColumns({
+            ...selectedColumns,
+            [event.target.name]: event.target.checked,
+        });
+    };
+
+    const handleSelectAll = (event) => {
+        const isChecked = event.target.checked;
+        const updatedSelection = availableColumns.reduce((acc, col) => {
+            acc[col.key] = isChecked;
+            return acc;
+        }, {});
+        setSelectedColumns(updatedSelection);
+    };
+
+    const handleExport = (type) => {
+        const filteredExportData = filteredData.map((row) => {
+            const filteredRow = {};
+            columns.forEach((col) => {
+                filteredRow[col.field] = row[col.field];
+            });
+            return filteredRow;
+        });
+
+        if (type === 'pdf') {
+            const doc = new jsPDF();
+            const tableColumns = columns.map((col) => col.headerName);
+            const tableRows = filteredExportData.map((row) =>
+                columns.map((col) => row[col.field])
+            );
+            autoTable(doc, { head: [tableColumns], body: tableRows });
+            doc.save('movimientos_varias_quincenas.pdf');
+        } else if (type === 'csv') {
+            const csvContent = [
+                columns.map((col) => col.headerName).join(','),
+                ...filteredExportData.map((row) =>
+                    columns.map((col) => row[col.field]).join(',')
+                ),
+            ].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            saveAs(blob, 'movimientos_varias_quincenas.csv');
+        } else if (type === 'excel') {
+            const worksheet = XLSX.utils.json_to_sheet(filteredExportData);
+            const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            saveAs(
+                new Blob([excelBuffer], { type: 'application/octet-stream' }),
+                'movimientos_varias_quincenas.xlsx'
+            );
+        }
+    };
 
     return (
-        <ThemeProvider theme={theme}>
-            <div className={styles.main}>
-                <h1 className={styles.h1}>Reporte de Movimientos por Varias Quincenas</h1>
-                <Toast ref={toast} />
-                <Box className={styles.dropForm}>
-                    <Typography variant="h6" className={styles.exportText}>Parametros de consulta</Typography>
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            fetchData();
-                        }}
-                    >
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
-                                <InputText
-                                    value={anio}
-                                    onChange={(e) => setAnio(e.target.value)}
-                                    placeholder="Año"
-                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <InputText
-                                    value={quincenas.join(', ')}
-                                    onChange={handleQuincenaChange}
-                                    placeholder="Quincenas (ej. 01, 02, 03)"
-                                    style={{ width: '80%', padding: "1rem", margin: "2rem" }}
-                                />
-                            </Grid>
-                        </Grid>
-                        <Button
-                            type="submit"
-                            label="Consultar"
-                            className="p-button-primary"
-                            style={{ marginTop: '1rem' }}
-                        />
-                    </form>
-                </Box>
+        <Box display="flex" flexDirection="column" alignItems="center" padding="20px">
+            <Typography variant="h4" gutterBottom>
+                Consulta de Movimientos por Varias Quincenas
+            </Typography>
 
-                <Toolbar className="mb-4" right={() => (
-                    <div className="flex align-items-center justify-content-end gap-2">
-                        <Button
-                            type="button"
-                            icon="pi pi-file"
-                            rounded
-                            onClick={() => exportCSV()}
-                            data-pr-tooltip="CSV"
-                        />
-                    </div>
-                )} />
+            <Box display="flex" gap="20px" marginBottom="20px">
+                <TextField
+                    label="Año"
+                    variant="outlined"
+                    value={anio}
+                    onChange={(e) => setAnio(e.target.value)}
+                />
+                <TextField
+                    label="Quincenas (separadas por coma)"
+                    variant="outlined"
+                    value={quincenas.join(', ')}
+                    onChange={(e) => setQuincenas(e.target.value.split(',').map((q) => q.trim()))}
+                />
+                <Button variant="contained" onClick={handleConsultar}>
+                    Consultar
+                </Button>
+            </Box>
 
-                {isLoading ? (
-                    <ProgressBar mode="indeterminate" style={{ height: '6px' }} />
-                ) : (
-                    <DataTable
-                        ref={dt}
-                        value={data}
-                        paginator
-                        rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
-                        globalFilter={globalFilter}
-                        header={header}
-                        responsiveLayout="scroll"
-                        className="p-datatable-sm p-datatable-gridlines"
-                    >
-                        {availableColumns.map(column => (
-                            <Column
-                                key={column.key}
-                                field={column.key}
-                                header={column.label}
-                                sortable
+            <TextField
+                label="Buscar"
+                variant="outlined"
+                fullWidth
+                value={globalFilter}
+                onChange={handleFilterChange}
+                style={{ marginBottom: '20px', maxWidth: '1200px' }}
+            />
+
+            <Button
+                variant="contained"
+                onClick={() => setCollapseOpen(!collapseOpen)}
+                style={{ marginBottom: '20px' }}
+            >
+                Seleccionar Columnas
+            </Button>
+
+            <Collapse in={collapseOpen}>
+                <Box padding="20px" border="1px solid #c4c4c4" borderRadius="8px" maxWidth="1200px" margin="20px auto">
+                    <Typography variant="h6" align="center" gutterBottom>
+                        Campos para generar tabla
+                    </Typography>
+                    <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" gap="10px">
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={Object.values(selectedColumns).every((val) => val)}
+                                    indeterminate={
+                                        Object.values(selectedColumns).some((val) => val) &&
+                                        !Object.values(selectedColumns).every((val) => val)
+                                    }
+                                    onChange={handleSelectAll}
+                                />
+                            }
+                            label="Todos los campos"
+                            style={{ gridColumn: 'span 4' }}
+                        />
+                        {availableColumns.map((col) => (
+                            <FormControlLabel
+                                key={col.key}
+                                control={
+                                    <Checkbox
+                                        checked={selectedColumns[col.key] || false}
+                                        onChange={handleColumnSelectionChange}
+                                        name={col.key}
+                                    />
+                                }
+                                label={col.label}
                             />
                         ))}
-                    </DataTable>
-                )}
-            </div>
-        </ThemeProvider>
+                    </Box>
+                    <Box textAlign="center" marginTop="20px">
+                        <Button variant="contained" color="primary" onClick={handleGenerateTable}>
+                            Generar Tabla
+                        </Button>
+                    </Box>
+                </Box>
+            </Collapse>
+
+            <Box height="500px" width="100%" maxWidth="1200px">
+                <DataGrid
+                    rows={filteredData}
+                    columns={columns}
+                    pageSize={10}
+                    rowsPerPageOptions={[10, 20, 50]}
+                    getRowId={(row) => row.id_empleado + row.quincena}
+                />
+            </Box>
+
+            <Box marginTop="20px" display="flex" gap="10px">
+                <Button variant="outlined" onClick={() => handleExport('csv')}>
+                    Exportar CSV
+                </Button>
+                <Button variant="outlined" onClick={() => handleExport('excel')}>
+                    Exportar Excel
+                </Button>
+                <Button variant="outlined" onClick={() => handleExport('pdf')}>
+                    Exportar PDF
+                </Button>
+            </Box>
+
+            <Modal
+                open={showModal}
+                onClose={() => setShowModal(false)}
+                aria-labelledby="modal-title"
+                aria-describedby="modal-description"
+            >
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '50%',
+                        backgroundColor: 'white',
+                        borderRadius: '8px',
+                        boxShadow: 24,
+                        p: 4,
+                        textAlign: 'center',
+                    }}
+                >
+                    <Typography id="modal-title" variant="h6" gutterBottom>
+                        Por favor selecciona al menos un campo
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setShowModal(false)}
+                    >
+                        Cerrar
+                    </Button>
+                </Box>
+            </Modal>
+        </Box>
     );
 }
