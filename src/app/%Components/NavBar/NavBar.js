@@ -117,7 +117,7 @@ export default function NavBar() {
                         </Link>
                     )}
 
-{collapsed ? (
+                    {collapsed ? (
                         // Muestra el SubMenu cuando collapsed es true
                         <SubMenu label="Roles" icon={<KeySharpIcon />}>
                             <Link className={styles.tWhite} href="/Roles" passHref>
@@ -144,7 +144,7 @@ export default function NavBar() {
                         <Link className={styles.tWhite} href="/AprobarCargaNomina" passHref>
                             <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Aprobar nómina</MenuItem>
                         </Link>
-                        
+
                     </SubMenu>
                     <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />}>
                         <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
@@ -209,6 +209,21 @@ export default function NavBar() {
                             <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Reportes</MenuItem>
                         </Link>
                     )}
+
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Nueva Contrasena" icon={<AssessmentIcon />}>
+                            <Link className={styles.tWhite} href="/NuevaContrasena" passHref>
+                                <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Nueva Contrseña</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false1
+                        <Link className={styles.textAlone} href="/NuevaContrasena" passHref>
+                            <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Nueva Contraseña</MenuItem>
+                        </Link>
+                    )}
+
                 </Menu>
             </Sidebar>
         </div>
