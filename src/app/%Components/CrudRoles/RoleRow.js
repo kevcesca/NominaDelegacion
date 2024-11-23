@@ -1,7 +1,20 @@
 import React from 'react';
+import { Checkbox, IconButton, Tooltip, TextField, Button } from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import styles from './CrudRoles.module.css';
 
-const RoleRow = ({ role, setRoles, editingRoleId, setEditingRoleId, editValues, setEditValues, updateRole, onOpenModal }) => {
+const RoleRow = ({
+    role,
+    isSelected,
+    onToggleRole,
+    setRoles,
+    editingRoleId,
+    setEditingRoleId,
+    editValues,
+    setEditValues,
+    updateRole,
+    onOpenModal,
+}) => {
     const startEditing = () => {
         setEditingRoleId(role.id);
         setEditValues({ name: role.name, description: role.description });
@@ -13,24 +26,35 @@ const RoleRow = ({ role, setRoles, editingRoleId, setEditingRoleId, editValues, 
     };
 
     const saveEditing = () => {
-        setRoles(prevRoles =>
-            prevRoles.map(r =>
-                r.id === role.id ? { ...r, name: editValues.name, description: editValues.description } : r
+        setRoles((prevRoles) =>
+            prevRoles.map((r) =>
+                r.id === role.id
+                    ? { ...r, name: editValues.name, description: editValues.description }
+                    : r
             )
         );
-        updateRole(role.id, { nombre_rol: editValues.name, descripcion_rol: editValues.description });
+        updateRole(role.id, {
+            nombre_rol: editValues.name,
+            descripcion_rol: editValues.description,
+        });
         setEditingRoleId(null);
     };
 
     return (
         <tr>
+            <td>
+                <Checkbox checked={isSelected} onChange={onToggleRole} />
+            </td>
             <td>{role.id}</td>
             <td onDoubleClick={startEditing}>
                 {editingRoleId === role.id ? (
-                    <input
-                        type="text"
+                    <TextField
+                        variant="outlined"
+                        size="small"
                         value={editValues.name}
-                        onChange={(e) => setEditValues(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) =>
+                            setEditValues((prev) => ({ ...prev, name: e.target.value }))
+                        }
                         autoFocus
                     />
                 ) : (
@@ -39,25 +63,56 @@ const RoleRow = ({ role, setRoles, editingRoleId, setEditingRoleId, editValues, 
             </td>
             <td onDoubleClick={startEditing}>
                 {editingRoleId === role.id ? (
-                    <input
-                        type="text"
+                    <TextField
+                        variant="outlined"
+                        size="small"
                         value={editValues.description}
-                        onChange={(e) => setEditValues(prev => ({ ...prev, description: e.target.value }))}
+                        onChange={(e) =>
+                            setEditValues((prev) => ({
+                                ...prev,
+                                description: e.target.value,
+                            }))
+                        }
                     />
                 ) : (
                     role.description
                 )}
             </td>
-            <td>{role.permissions.join(', ')}</td>
             <td>
-                <button className={styles.menuButton} onClick={() => onOpenModal(role)}>
-                    &#x22EE;
-                </button>
+                <div className={styles.permissionsCell}>
+                    <span>{role.permissions.join(', ') || 'Sin permisos'}</span>
+                    <Tooltip title="Editar permisos">
+                        <IconButton
+                            className={styles.addPermissionButton}
+                            onClick={() => onOpenModal(role)}
+                        >
+                            <AddCircleOutlineIcon />
+                        </IconButton>
+                    </Tooltip>
+                </div>
             </td>
             {editingRoleId === role.id && (
                 <td>
-                    <button className={styles.buttonSave} onClick={saveEditing}>Guardar</button>
-                    <button className={styles.buttonCancel} onClick={cancelEditing}>Cancelar</button>
+                    <div className={styles.botonesAceptCancel}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={saveEditing}
+                            className={styles.buttonSave}
+                        >
+                            Guardar
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            size="small"
+                            onClick={cancelEditing}
+                            className={styles.buttonCancel}
+                        >
+                            Cancelar
+                        </Button>
+                    </div>
                 </td>
             )}
         </tr>
