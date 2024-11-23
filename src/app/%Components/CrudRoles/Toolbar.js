@@ -1,13 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './CrudRoles.module.css';
+import { Button } from '@mui/material';
+import CreateRoleModal from './CreateRolModal';
 
-const Toolbar = () => (
-    <div className={styles.toolbar}>
-        <button className={styles.button} onClick={() => console.log('Nuevo Rol')}>Nuevo Rol</button>
-        <button className={`${styles.button} ${styles.buttonBlue}`} onClick={() => console.log('Exportar CSV')}>Exportar CSV</button>
-        <button className={`${styles.button} ${styles.buttonGreen}`} onClick={() => console.log('Exportar Excel')}>Exportar Excel</button>
-        <button className={`${styles.button} ${styles.buttonYellow}`} onClick={() => console.log('Exportar PDF')}>Exportar PDF</button>
-    </div>
-);
+const Toolbar = ({ onDeleteSelected, disableDelete, onRoleCreated }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    return (
+        <div className={styles.toolbar}>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setIsModalOpen(true)} // Abrir modal
+            >
+                Crear Rol
+            </Button>
+            <Button variant="contained" color="secondary" onClick={() => console.log('Exportar CSV')}>
+                Exportar CSV
+            </Button>
+            <Button variant="contained" color="secondary" onClick={() => console.log('Exportar Excel')}>
+                Exportar Excel
+            </Button>
+            <Button variant="contained" color="secondary" onClick={() => console.log('Exportar PDF')}>
+                Exportar PDF
+            </Button>
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={onDeleteSelected}
+                disabled={disableDelete}
+            >
+                Eliminar seleccionados
+            </Button>
+            {/* Modal para crear un rol */}
+            <CreateRoleModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)} // Cerrar modal
+                onRoleCreated={onRoleCreated} // Notificar al componente principal
+            />
+        </div>
+    );
+};
 
 export default Toolbar;

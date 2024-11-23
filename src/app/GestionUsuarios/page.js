@@ -6,31 +6,36 @@ import styles from './page.module.css';
 import AddUserModal from './components/AddUserModal';
 import UserTableRow from './components/UserTableRow';
 import UserActionsMenu from './components/UserActionsMenu';
+import AssignRolesModal from './components/AssignRolesModal'; // Modal para asignar roles
 import useUsers from './components/useUsers';
 import { useAuth } from '../context/AuthContext';
 import { API_USERS_URL } from '../%Config/apiConfig';
 
 const UserTable = () => {
-    const { users, fetchUsers, toggleUserStatus } = useUsers();
+    const { users, setUsers, fetchUsers, toggleUserStatus } = useUsers(); // Incluimos `setUsers` para actualizar la lista localmente
     const { user: currentUser } = useAuth();
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
     const [editingUser, setEditingUser] = useState(null);
     const [editedFields, setEditedFields] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isRolesModalOpen, setIsRolesModalOpen] = useState(false); // Estado del modal de roles
 
     const openMenu = Boolean(anchorEl);
 
+    // Abrir el menú contextual de opciones
     const handleMenuOpen = (event, user) => {
         setAnchorEl(event.currentTarget);
         setSelectedUser(user);
     };
 
+    // Cerrar el menú contextual de opciones
     const handleMenuClose = () => {
         setAnchorEl(null);
         setSelectedUser(null);
     };
 
+    // Entrar en modo edición al hacer doble clic
     const handleDoubleClick = (user, field) => {
         setEditingUser(user['ID Empleado']);
         setEditedFields({
@@ -39,6 +44,7 @@ const UserTable = () => {
         });
     };
 
+    // Manejar cambios en los campos editables
     const handleInputChange = (field, value) => {
         setEditedFields((prevState) => ({
             ...prevState,
@@ -46,13 +52,14 @@ const UserTable = () => {
         }));
     };
 
+    // Confirmar cambios al editar un usuario
     const handleConfirmEdit = async () => {
         try {
             const updatedDetails = {
                 nombre_usuario: editedFields['Nombre de Usuario'],
                 correo_usuario: editedFields.Email,
             };
-    
+
             const response = await fetch(
                 `${API_USERS_URL}/users/${editingUser}/update-details`,
                 {
@@ -61,23 +68,34 @@ const UserTable = () => {
                     body: JSON.stringify(updatedDetails),
                 }
             );
-    
+
             if (!response.ok) throw new Error('Error al actualizar los detalles del usuario');
-    
-            const data = await response.json();
-            console.log(data.message);
-    
-            // Recargar la lista de usuarios
-            await fetchUsers();
-    
-            // Salir del modo de edición
-            setEditingUser(null); // << Aquí es donde nos aseguramos de salir del modo de edición
+
+            console.log('Detalles actualizados exitosamente.');
+            await fetchUsers(); // Refrescar la lista de usuarios
+            setEditingUser(null);
             setEditedFields({});
         } catch (error) {
             console.error('Error al confirmar la edición:', error);
         }
     };
-    
+
+    // Abrir el modal de roles
+    const handleOpenRolesModal = (user) => {
+        setSelectedUser(user);
+        setIsRolesModalOpen(true);
+    };
+
+    // Manejar la actualización de roles desde el modal
+    const handleRolesUpdated = (userId, newRoles) => {
+        setUsers((prevUsers) =>
+            prevUsers.map((user) =>
+                user['ID Empleado'] === userId
+                    ? { ...user, Rol: newRoles.join(', ') } // Actualizar los roles en la lista local
+                    : user
+            )
+        );
+    };
 
     return (
         <div className={styles.container}>
@@ -115,6 +133,8 @@ const UserTable = () => {
                             onInputChange={handleInputChange}
                             onConfirmEdit={handleConfirmEdit}
                             onMenuOpen={handleMenuOpen}
+                            onRolesUpdated={handleRolesUpdated} // Pasar el handler al componente
+                            onOpenRolesModal={handleOpenRolesModal} // Pasar para abrir el modal de roles
                         />
                     ))}
                 </tbody>
@@ -136,6 +156,15 @@ const UserTable = () => {
                 onClose={() => setIsModalOpen(false)}
                 onUserAdded={fetchUsers}
                 currentUser={currentUser?.nombre_usuario}
+            />
+
+            <AssignRolesModal
+                isOpen={isRolesModalOpen}
+                onClose={() => setIsRolesModalOpen(false)}
+                user={selectedUser}
+                onRolesUpdated={(newRoles) =>
+                    handleRolesUpdated(selectedUser?.['ID Empleado'], newRoles)
+                } // Actualizamos roles tras guardar
             />
         </div>
     );

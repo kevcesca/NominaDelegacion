@@ -14,12 +14,13 @@ import {
 } from '@mui/material';
 import { API_USERS_URL } from '../../%Config/apiConfig';
 
-const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
+const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
     const [permissions, setPermissions] = useState([]); // Todos los permisos disponibles
     const [selectedPermissions, setSelectedPermissions] = useState([]); // IDs de los permisos seleccionados
     const [searchTerm, setSearchTerm] = useState(''); // Texto de búsqueda
+    const [roleData, setRoleData] = useState({ name: '', description: '' }); // Datos del nuevo rol
 
-    // Cargar permisos y mapear los seleccionados
+    // Cargar permisos disponibles al abrir el modal
     useEffect(() => {
         const fetchPermissions = async () => {
             try {
@@ -29,55 +30,58 @@ const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
                 if (!response.ok) throw new Error('Error al obtener permisos');
                 const data = await response.json();
                 setPermissions(data);
-
-                // Mapeo inicial: convertir los permisos actuales del rol (nombres) a IDs
-                if (role?.permissions) {
-                    const permissionIds = data
-                        .filter((perm) => role.permissions.includes(perm.acceso)) // Mapeamos nombres a IDs
-                        .map((perm) => perm.permiso_id);
-                    setSelectedPermissions(permissionIds);
-                }
             } catch (error) {
                 console.error('Error al cargar permisos:', error);
             }
         };
 
-        if (role) fetchPermissions();
-    }, [role]);
+        if (isOpen) {
+            fetchPermissions();
+        }
+    }, [isOpen]);
 
-    // Manejar la selección o deselección de un permiso
+    // Manejar selección de permisos
     const handleTogglePermission = (permissionId) => {
         setSelectedPermissions((prev) =>
             prev.includes(permissionId)
-                ? prev.filter((id) => id !== permissionId) // Quitar el ID si ya estaba seleccionado
-                : [...prev, permissionId] // Agregar el ID si no estaba seleccionado
+                ? prev.filter((id) => id !== permissionId) // Deseleccionar
+                : [...prev, permissionId] // Seleccionar
         );
     };
 
-    // Guardar cambios y enviar los IDs al backend
+    // Manejar el cambio en los inputs del nombre y descripción del rol
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setRoleData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    // Guardar el nuevo rol
     const handleSave = async () => {
+        if (!roleData.name || !roleData.description || selectedPermissions.length === 0) {
+            alert('Por favor completa todos los campos y selecciona al menos un permiso.');
+            return;
+        }
+
         try {
-            const response = await fetch(`${API_USERS_URL}/roles/${role.id}/assign-permissions`, {
+            const response = await fetch(`${API_USERS_URL}/roles`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ permissions: selectedPermissions }), // Enviar solo IDs
+                body: JSON.stringify({
+                    nombre_rol: roleData.name,
+                    descripcion_rol: roleData.description,
+                    permisos: selectedPermissions,
+                }),
             });
 
-            if (!response.ok) throw new Error('Error al asignar permisos');
+            if (!response.ok) throw new Error('Error al crear el rol');
 
-            // Actualizamos el rol con los permisos asignados (solo nombres para mostrar en la fila)
-            const updatedPermissions = permissions
-                .filter((perm) => selectedPermissions.includes(perm.permiso_id))
-                .map((perm) => perm.acceso);
-
-            // Notificar al componente principal sobre los permisos actualizados
-            onPermissionsUpdated(role.id, updatedPermissions);
-
-            onClose(); // Cerrar el modal después de guardar
+            const newRole = await response.json();
+            onRoleCreated(newRole.data); // Notificar al componente principal
+            onClose(); // Cerrar el modal
         } catch (error) {
-            console.error('Error al asignar permisos:', error);
+            console.error('Error al crear el rol:', error);
         }
     };
 
@@ -88,9 +92,29 @@ const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
     );
 
     return (
-        <Dialog open={Boolean(role)} onClose={onClose} fullWidth maxWidth="md">
-            <DialogTitle>Asignar Permisos - {role?.name}</DialogTitle>
+        <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
+            <DialogTitle>Crear Nuevo Rol</DialogTitle>
             <DialogContent>
+                {/* Inputs para nombre y descripción */}
+                <TextField
+                    label="Nombre del Rol"
+                    variant="outlined"
+                    fullWidth
+                    margin="dense"
+                    name="name"
+                    value={roleData.name}
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    label="Descripción del Rol"
+                    variant="outlined"
+                    fullWidth
+                    margin="dense"
+                    name="description"
+                    value={roleData.description}
+                    onChange={handleInputChange}
+                />
+
                 {/* Barra de búsqueda */}
                 <TextField
                     label="Buscar permisos"
@@ -100,18 +124,19 @@ const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
+
                 {/* Lista de permisos */}
                 <Grid container spacing={2}>
                     {filteredPermissions.map((permission) => (
                         <Grid item xs={12} sm={6} md={4} key={permission.permiso_id}>
                             <ListItem
                                 button
-                                onClick={() => handleTogglePermission(permission.permiso_id)} // Usar ID directamente
+                                onClick={() => handleTogglePermission(permission.permiso_id)}
                                 style={{ padding: '8px 16px' }}
                             >
                                 <ListItemIcon>
                                     <Checkbox
-                                        checked={selectedPermissions.includes(permission.permiso_id)} // Comparar con IDs
+                                        checked={selectedPermissions.includes(permission.permiso_id)}
                                     />
                                 </ListItemIcon>
                                 <ListItemText
@@ -133,11 +158,11 @@ const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
                     Cancelar
                 </Button>
                 <Button onClick={handleSave} color="primary">
-                    Guardar Permisos
+                    Crear Rol
                 </Button>
             </DialogActions>
         </Dialog>
     );
 };
 
-export default AssignPermissionsModal;
+export default CreateRoleModal;

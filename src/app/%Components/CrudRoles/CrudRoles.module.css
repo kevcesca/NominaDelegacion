@@ -138,19 +138,28 @@
     background-color: #c82333; /* Rojo más oscuro */
 }
 
+.permissionsCell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.addPermissionButton {
+    margin-left: 8px;
+    color: #1976d2; /* Color azul */
+}
+
 .buttonSave {
-    background-color: #4CAF50; /* Verde */
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    margin-right: 5px;
+    margin-right: 8px;
 }
 
 .buttonCancel {
-    background-color: #f44336; /* Rojo */
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
+    margin-left: 8px;
+}
+
+.botonesAceptCancel{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 10vw;
 }

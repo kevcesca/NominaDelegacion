@@ -29,7 +29,7 @@ const useUsers = () => {
         fetchUsers();
     }, []);
 
-    return { users, fetchUsers, toggleUserStatus };
+    return { users, setUsers, fetchUsers, toggleUserStatus }; // Exponemos setUsers
 };
 
 export default useUsers;
