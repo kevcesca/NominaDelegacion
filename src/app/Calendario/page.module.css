@@ -1,60 +1,98 @@
-/* General Body Styling */
-.body {
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
-  background: linear-gradient(white, #ffcccc);
-}
-
 .container {
   width: 90%;
   max-width: 1600px;
+  margin: 0 auto;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .title {
   text-align: center;
-  color: #ffffff;
   background-color: #bc955c;
   padding: 15px 0;
-  margin: 0;
+  color: white;
 }
 
 .containerContent {
   flex: 1;
   padding: 30px;
-  text-align: center;
-  color: #333;
-  overflow-y: auto;
 }
 
 .calendarContainer {
   display: flex;
-  justify-content: center;
-  padding-top: 20px;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 20px;
 }
 
-.calendar {
-  background-color: #ffffff;
+.summaryContainer {
+  margin-top: 20px;
+}
+.sidebar {
+  background: #ffffff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  width: 60%;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+}
+
+.formSection {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.formSection input,
+.formSection textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.btnSave {
+  background-color: #1f5841;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+.btnSave:hover {
+  background-color: #145932;
+}
+
+.btnCancel {
+  background-color: #d9534f;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+.btnCancel:hover {
+  background-color: #b84742;
 }
 
 .calendarTable {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  margin-top: 20px;
 }
 
 .calendarTable th,
@@ -62,7 +100,74 @@
   border: 1px solid #ddd;
   padding: 10px;
   text-align: center;
+}
+
+.calendarTable th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.event {
+  margin: 5px 0;
+  padding: 5px;
+  border-radius: 5px;
+  background-color: #ffcc99;
+  color: black;
+}
+
+.calendar {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f5841;
+  margin-bottom: 10px;
+}
+
+.navButton {
+  background-color: #1f5841;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  color: white;
+  font-size: 1.5rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.navButton:hover {
+  background-color: #145932;
+}
+
+.calendarTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.calendarTable th,
+.calendarTable td {
+  border: 1px solid #ddd;
+  width: calc(100% / 7); /* Para que las columnas sean iguales */
+  height: 50px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  font-size: 1rem;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .calendarTable th {
@@ -71,114 +176,23 @@
   color: #666;
 }
 
-.event {
-  background-color: #e2b673;
-  color: #711c31;
-  font-weight: bold;
+.day {
+  background-color: #f9f9f9;
 }
 
-.holiday {
-  background-color: #000000;
-  color: #ffffff;
+.day:hover {
+  background-color: #e2b673;
+  color: #711c31;
+}
+
+.today {
+  background-color: #ffcc99;
+  color: #000;
   font-weight: bold;
 }
 
 .selected {
-  border: 2px solid #1f5841;
-}
-
-.buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  justify-content: center;
-}
-
-.button {
-  padding: 8px 15px;
-  font-size: 0.9em;
-  border: none;
-  border-radius: 5px;
-  color: #ffffff;
-  cursor: pointer;
-}
-
-.btn-prev,
-.btn-next {
-  background-color: #b9274b;
-}
-
-.btn-add {
-  background-color: #1f5841;
-}
-
-.btn-delete {
-  background-color: #d9534f;
-}
-
-.btn-ex {
-  background-color: #987849;
-}
-
-.eventForm {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
-  text-align: left;
-  background-color: #f0f0f0;
-  padding: 20px;
-  border-radius: 8px;
-}
-
-.eventForm input,
-.eventForm textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 5px 0;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-}
-
-.exportButtons {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 15px;
-}
-
-.extraContainer {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  width: 96%;
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.dataTableWrapper {
-  width: 100%;
-  max-height: 400px;
-  overflow-y: auto;
-  margin-top: 20px;
-}
-
-.dataTableWrapper table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.dataTableWrapper th,
-.dataTableWrapper td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
-}
-
-.dataTableWrapper th {
-  background-color: #f4f4f4;
+  background-color: #d3d3d3;
+  color: #000;
   font-weight: bold;
 }

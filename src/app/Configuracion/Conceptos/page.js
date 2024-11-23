@@ -1,196 +1,334 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
-import ProtectedView from "../../%Components/ProtectedView/ProtectedView" // Asegúrate de importar correctamente este componente
+import axios from 'axios';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TablePagination,
+  IconButton,
+  TextField,
+  Box,
+  Typography,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+import { Edit, Save, Delete, Add } from '@mui/icons-material';
+import API_BASE_URL from '../../%Config/apiConfig';
 import styles from './page.module.css';
 
-const datosIniciales = [
-    { id: '2203', nombre: 'APOYO SEGURO GASTOS FUNERARIOS CDMX' },
-    { id: '2204', nombre: 'APOYO TRANSPORTE' },
-    { id: '2205', nombre: 'SUBSIDIO PARA VIVIENDA' },
-    { id: '2206', nombre: 'ASISTENCIA SOCIAL' },
-    { id: '2207', nombre: 'APOYO ALIMENTARIO' },
-    { id: '2208', nombre: 'BECAS PARA ESTUDIANTES' },
-    { id: '2209', nombre: 'SEGURO MÉDICO' },
-    { id: '2210', nombre: 'APOYO ECONÓMICO A ADULTOS MAYORES' }
-];
+export default function ConceptosTable() {
+  const [conceptos, setConceptos] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [editedRow, setEditedRow] = useState(null); // ID de la fila en modo edición
+  const [editedValue, setEditedValue] = useState(''); // Valor editado
+  const [isAdding, setIsAdding] = useState(false); // Estado para saber si estamos añadiendo un concepto
+  const [newConcepto, setNewConcepto] = useState({ id_concepto: '', nombre_concepto: '' }); // Datos del nuevo concepto
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
-const Conceptos = () => {
-    const [datosConcepto, setDatosConcepto] = useState(datosIniciales);
-    const [paginaActual, setPaginaActual] = useState(0);
-    const filasPorPagina = 4;
-    const [filtro, setFiltro] = useState('');
-    const [datosFiltrados, setDatosFiltrados] = useState(datosIniciales);
+  // Modales
+  const [errorDialog, setErrorDialog] = useState({ open: false, message: '' });
+  const [successDialog, setSuccessDialog] = useState({ open: false, message: '' });
+  const [deleteConceptoDialog, setDeleteConceptoDialog] = useState(false);
+  const [conceptoToDelete, setConceptoToDelete] = useState(null);
 
-    useEffect(() => {
-        filtrarTabla();
-    }, [filtro, datosConcepto]);
+  // Obtener los datos de la API al cargar el componente
+  const fetchConceptos = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/cat/conceptos`);
+      setConceptos(response.data);
+      setFilteredData(response.data);
+    } catch (error) {
+      console.error('Error al cargar los conceptos:', error);
+    }
+  };
 
-    const mostrarPagina = () => {
-        const inicio = paginaActual * filasPorPagina;
-        const fin = inicio + filasPorPagina;
-        return datosFiltrados.slice(inicio, fin);
-    };
+  useEffect(() => {
+    fetchConceptos();
+  }, []);
 
-    const cambiarPagina = (direccion) => {
-        const nuevaPagina = paginaActual + direccion;
-        if (nuevaPagina >= 0 && nuevaPagina * filasPorPagina < datosFiltrados.length) {
-            setPaginaActual(nuevaPagina);
-        }
-    };
-
-    const crearConcepto = () => {
-        const nuevoConcepto = { id: '', nombre: '', isEditing: true };
-        setDatosConcepto([nuevoConcepto, ...datosConcepto]); // Añadir al inicio
-    };
-
-    const guardarConcepto = (index) => {
-        setDatosConcepto((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, isEditing: false } : dato
-            )
-        );
-        setDatosFiltrados((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, isEditing: false } : dato
-            )
-        );
-    };
-
-    const actualizarConcepto = (index) => {
-        setDatosConcepto((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, isEditing: true } : dato
-            )
-        );
-    };
-
-    const eliminarConcepto = (index) => {
-        const nuevosDatos = datosConcepto.filter((_, i) => i !== index);
-        setDatosConcepto(nuevosDatos);
-        setDatosFiltrados(nuevosDatos);
-    };
-
-    const filtrarTabla = () => {
-        const filtroActualizado = filtro.toLowerCase();
-        setDatosFiltrados(
-            datosConcepto.filter(dato =>
-                dato.id.toLowerCase().includes(filtroActualizado) || dato.nombre.toLowerCase().includes(filtroActualizado)
-            )
-        );
-        setPaginaActual(0); // Reinicia a la primera página después de filtrar
-    };
-
-    const handleInputChange = (index, field, value) => {
-        setDatosConcepto((prevDatos) =>
-            prevDatos.map((dato, i) =>
-                i === index ? { ...dato, [field]: value } : dato
-            )
-        );
-    };
-
-    return (
-        <div className={styles.body}>
-            <div className={styles.container}>
-                <div className={styles.subHeader}>Gestión de Conceptos</div>
-
-                <div className={styles.searchBar}>
-                    <input
-                        type="text"
-                        value={filtro}
-                        onChange={(e) => setFiltro(e.target.value)}
-                        placeholder="Buscar en la tabla..."
-                        className={styles.inputField}
-                    />
-                    <button onClick={crearConcepto} className={styles.styledButton}>Crear Concepto</button>
-                </div>
-
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>ID del Concepto</th>
-                            <th>Nombre del Concepto</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {mostrarPagina().map((dato, index) => (
-                            <tr key={index}>
-                                <td>
-                                    {dato.isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={dato.id}
-                                            onChange={(e) => handleInputChange(index, 'id', e.target.value)}
-                                            className={styles.inputField}
-                                        />
-                                    ) : (
-                                        dato.id
-                                    )}
-                                </td>
-                                <td>
-                                    {dato.isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={dato.nombre}
-                                            onChange={(e) => handleInputChange(index, 'nombre', e.target.value)}
-                                            className={styles.inputField}
-                                        />
-                                    ) : (
-                                        dato.nombre
-                                    )}
-                                </td>
-                                <td>
-                                    {dato.isEditing ? (
-                                        <span
-                                            className={styles.iconButton}
-                                            onClick={() => guardarConcepto(index)}
-                                        >
-                                            💾
-                                        </span>
-                                    ) : (
-                                        <span
-                                            className={styles.iconButton}
-                                            onClick={() => actualizarConcepto(index)}
-                                        >
-                                            ✏️
-                                        </span>
-                                    )}
-                                    <span
-                                        className={styles.iconButton}
-                                        onClick={() => eliminarConcepto(index)}
-                                    >
-                                        🗑️
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                <div className={styles.pagination}>
-                    <button
-                        onClick={() => cambiarPagina(-1)}
-                        className={styles.styledButton}
-                        disabled={paginaActual <= 0}
-                    >
-                        Anterior
-                    </button>
-                    <button
-                        onClick={() => cambiarPagina(1)}
-                        className={styles.styledButton}
-                        disabled={(paginaActual + 1) * filasPorPagina >= datosFiltrados.length}
-                    >
-                        Siguiente
-                    </button>
-                </div>
-            </div>
-        </div>
+  const handleSearch = (event) => {
+    const query = event.target.value.toLowerCase();
+    setSearchQuery(query);
+    setFilteredData(
+      conceptos.filter(
+        (concepto) =>
+          concepto.id_concepto.toString().includes(query) ||
+          concepto.nombre_concepto.toLowerCase().includes(query)
+      )
     );
-};
+  };
 
-const ProtectedConceptos = () => (
-    <ProtectedView requiredPermissions={["Conceptos", "Acceso_total"]}>
-        <Conceptos />
-    </ProtectedView>
-);
+  const handleAddStart = () => {
+    setNewConcepto({ id_concepto: '', nombre_concepto: '' });
+    setIsAdding(true);
+  };
 
-export default ProtectedConceptos;
+  const handleSaveAdd = () => {
+    const { id_concepto, nombre_concepto } = newConcepto;
+
+    if (id_concepto.trim() === '' || nombre_concepto.trim() === '') {
+      setErrorDialog({ open: true, message: 'Por favor, completa todos los campos antes de guardar.' });
+      return;
+    }
+
+    axios
+      .get(`${API_BASE_URL}/insertarConcepto`, {
+        params: { id_concepto, nombre_concepto },
+      })
+      .then(() => {
+        const updatedConceptos = [{ id_concepto, nombre_concepto }, ...conceptos];
+        setConceptos(updatedConceptos);
+        setFilteredData(updatedConceptos);
+        setIsAdding(false);
+        setSuccessDialog({ open: true, message: 'Concepto creado exitosamente.' });
+      })
+      .catch((error) => {
+        console.error('Error al crear el concepto:', error);
+        setErrorDialog({ open: true, message: 'Error al crear el concepto. Verifique que el ID no esté duplicado.' });
+      });
+  };
+
+  const handleCancelAdd = () => {
+    setIsAdding(false);
+  };
+
+  const handleEditStart = (concepto) => {
+    setEditedRow(concepto.id_concepto);
+    setEditedValue(concepto.nombre_concepto);
+  };
+
+  const handleSaveEdit = (concepto) => {
+    if (editedValue.trim() === '') {
+      setErrorDialog({ open: true, message: 'El nombre del concepto no puede estar vacío.' });
+      return;
+    }
+
+    axios
+      .get(`${API_BASE_URL}/actualizarConcepto`, {
+        params: { id_concepto: concepto.id_concepto, nombre_concepto: editedValue },
+      })
+      .then(() => {
+        setConceptos((prevConceptos) =>
+          prevConceptos.map((row) =>
+            row.id_concepto === concepto.id_concepto
+              ? { ...row, nombre_concepto: editedValue }
+              : row
+          )
+        );
+        setFilteredData((prevFilteredData) =>
+          prevFilteredData.map((row) =>
+            row.id_concepto === concepto.id_concepto
+              ? { ...row, nombre_concepto: editedValue }
+              : row
+          )
+        );
+        setEditedRow(null);
+        setSuccessDialog({ open: true, message: 'Concepto actualizado exitosamente.' });
+      })
+      .catch((error) => {
+        console.error('Error al actualizar el concepto:', error);
+        setErrorDialog({ open: true, message: 'Error al actualizar el concepto.' });
+      });
+  };
+
+  const handleDeleteConcepto = () => {
+    axios
+      .get(`${API_BASE_URL}/eliminarConcepto`, {
+        params: { id_concepto: conceptoToDelete.id_concepto },
+      })
+      .then(() => {
+        const updatedConceptos = conceptos.filter(
+          (row) => row.id_concepto !== conceptoToDelete.id_concepto
+        );
+        setConceptos(updatedConceptos);
+        setFilteredData(updatedConceptos);
+        setDeleteConceptoDialog(false);
+        setSuccessDialog({ open: true, message: 'Concepto eliminado exitosamente.' });
+      })
+      .catch((error) => {
+        console.error('Error al eliminar el concepto:', error);
+        setErrorDialog({ open: true, message: 'Error al eliminar el concepto.' });
+      });
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  return (
+    <Box className={styles.container}>
+      <Typography variant="h4" className={styles.title}>
+        Gestión de Conceptos
+      </Typography>
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <TextField
+          label="Buscar en la tabla..."
+          variant="outlined"
+          value={searchQuery}
+          onChange={handleSearch}
+        />
+        {!isAdding && (
+          <Button variant="contained" color="primary" startIcon={<Add />} onClick={handleAddStart}>
+            Crear Concepto
+          </Button>
+        )}
+      </Box>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID Concepto</TableCell>
+              <TableCell>Nombre Concepto</TableCell>
+              <TableCell>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {isAdding && (
+              <TableRow>
+                <TableCell>
+                  <TextField
+                    value={newConcepto.id_concepto}
+                    onChange={(e) => setNewConcepto({ ...newConcepto, id_concepto: e.target.value })}
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>
+                  <TextField
+                    value={newConcepto.nombre_concepto}
+                    onChange={(e) =>
+                      setNewConcepto({ ...newConcepto, nombre_concepto: e.target.value })
+                    }
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>
+                  <IconButton color="primary" onClick={handleSaveAdd}>
+                    <Save />
+                  </IconButton>
+                  <IconButton color="secondary" onClick={handleCancelAdd}>
+                    <Delete />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            )}
+            {filteredData
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((concepto) => (
+                <TableRow key={concepto.id_concepto}>
+                  <TableCell>{concepto.id_concepto}</TableCell>
+                  <TableCell>
+                    {editedRow === concepto.id_concepto ? (
+                      <TextField
+                        value={editedValue}
+                        onChange={(e) => setEditedValue(e.target.value)}
+                        fullWidth
+                        size="small"
+                      />
+                    ) : (
+                      concepto.nombre_concepto
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editedRow === concepto.id_concepto ? (
+                      <IconButton color="primary" onClick={() => handleSaveEdit(concepto)}>
+                        <Save />
+                      </IconButton>
+                    ) : (
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEditStart(concepto)}
+                      >
+                        <Edit />
+                      </IconButton>
+                    )}
+                    <IconButton
+                      color="secondary"
+                      onClick={() => {
+                        setConceptoToDelete(concepto);
+                        setDeleteConceptoDialog(true);
+                      }}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        component="div"
+        count={filteredData.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+      />
+
+      {/* Modal de error */}
+      <Dialog open={errorDialog.open} onClose={() => setErrorDialog({ open: false, message: '' })}>
+        <DialogTitle>Error</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{errorDialog.message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setErrorDialog({ open: false, message: '' })} color="primary">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal de éxito */}
+      <Dialog open={successDialog.open} onClose={() => setSuccessDialog({ open: false, message: '' })}>
+        <DialogTitle>Éxito</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{successDialog.message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSuccessDialog({ open: false, message: '' })} color="primary">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal de confirmación para eliminar */}
+      <Dialog
+        open={deleteConceptoDialog}
+        onClose={() => setDeleteConceptoDialog(false)}
+      >
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro de que deseas eliminar el concepto "{conceptoToDelete?.id_concepto}"?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConceptoDialog(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleDeleteConcepto} color="secondary">
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}

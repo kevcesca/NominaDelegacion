@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Sidebar, Menu, MenuItem, SubMenu, sidebarClasses } from 'react-pro-sidebar';
 import styles from './NavBar.module.css';
@@ -24,11 +24,10 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import KeySharpIcon from '@mui/icons-material/KeySharp';
 import CancelPresentationSharpIcon from '@mui/icons-material/CancelPresentationSharp';
 
-
 export default function NavBar() {
     const isSmallScreen = useMediaQuery('(max-width: 600px)');
-    // Inicializa collapsed como true para que esté contraída por defecto
-    const [collapsed, setCollapsed] = React.useState(true);
+    const [collapsed, setCollapsed] = useState(true);
+    const [isLoading, setIsLoading] = useState(false); // Estado para el modal
     const sidebarRef = useRef(null);
 
     useEffect(() => {
@@ -38,23 +37,28 @@ export default function NavBar() {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-                setCollapsed(true);  // Contraer la barra de navegación si se hace clic fuera
+                setCollapsed(true);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const handleLinkClick = () => {
-        setCollapsed(true);  // Contraer la barra de navegación al hacer clic en un enlace
+        setIsLoading(true); // Mostrar el modal al hacer clic en un enlace
+        setTimeout(() => setIsLoading(false), 2000); // Ocultar el modal después de 3 segundos
+        setCollapsed(true);
     };
 
     return (
         <div className={styles.NavbarContainer} ref={sidebarRef}>
+            {/* Modal de Carga */}
+            {isLoading && (
+                <div className={styles.loadingModal}>
+                    <p>Cargando, por favor espere...</p>
+                </div>
+            )}
+
             <Sidebar
                 collapsed={collapsed}
                 transitionDuration={1000}
@@ -65,18 +69,12 @@ export default function NavBar() {
                         backgroundColor: '#f4f4f47a',
                         border: '2px solid transparent',
                     },
-                    [`.${sidebarClasses.MenuItem}`]: {
-                        backgroundColor: 'black',
-                        color: 'black'
-                    }
                 }}
             >
                 <Menu
                     menuItemStyles={{
-                        subMenuContent: {
-                            width: '15vw',  // Ajusta el ancho deseado aquí 
-                        },
-                        button: ({ level, active, disabled }) => ({
+                        subMenuContent: { width: '15vw' },
+                        button: () => ({
                             '&:hover': {
                                 backgroundColor: '#9f2241',
                                 color: 'white',
@@ -87,32 +85,35 @@ export default function NavBar() {
                     <button className={styles.botonNavbar} onClick={() => setCollapsed(!collapsed)}>
                         <MenuIcon fontSize="large" className={styles.hamburgerIcon} />
                     </button>
-
                     {collapsed ? (
-                        // Muestra el SubMenu cuando collapsed es true
                         <SubMenu label="Calendario" icon={<CalendarTodayIcon />}>
                             <Link className={styles.tWhite} href="/Calendario" passHref>
-                                <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack} onClick={handleLinkClick}>Calendario</MenuItem>
+                                <MenuItem icon={<EventAvailableIcon />} className={styles.bgblack} onClick={handleLinkClick}>
+                                    Calendario
+                                </MenuItem>
                             </Link>
                         </SubMenu>
                     ) : (
-                        // Muestra un solo enlace cuando collapsed es false
                         <Link className={styles.textAlone} href="/Calendario" passHref>
-                            <MenuItem icon={<EventAvailableIcon />} onClick={handleLinkClick}>Calendario</MenuItem>
+                            <MenuItem icon={<EventAvailableIcon />} onClick={handleLinkClick}>
+                                Calendario
+                            </MenuItem>
                         </Link>
                     )}
 
                     {collapsed ? (
-                        // Muestra el SubMenu cuando collapsed es true
                         <SubMenu label="Usuarios" icon={<PeopleIcon />}>
                             <Link className={styles.tWhite} href="/GestionUsuarios" passHref>
-                                <MenuItem icon={<PeopleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Usuarios</MenuItem>
+                                <MenuItem icon={<PeopleIcon />} className={styles.bgblack} onClick={handleLinkClick}>
+                                    Usuarios
+                                </MenuItem>
                             </Link>
                         </SubMenu>
                     ) : (
-                        // Muestra un solo enlace cuando collapsed es false1
                         <Link className={styles.textAlone} href="/GestionUsuarios" passHref>
-                            <MenuItem icon={<PeopleIcon />} onClick={handleLinkClick}>Usuarios</MenuItem>
+                            <MenuItem icon={<PeopleIcon />} onClick={handleLinkClick}>
+                                Usuarios
+                            </MenuItem>
                         </Link>
                     )}
 
@@ -138,12 +139,12 @@ export default function NavBar() {
                             <MenuItem icon={<EditIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cambios de la Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/CrearNomina/ProcesarDatos" passHref>
-                            <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Resumen de Nómina</MenuItem>
+                            <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Resumen de la Nómina</MenuItem>
                         </Link>
                         <Link className={styles.tWhite} href="/AprobarCargaNomina" passHref>
                             <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Aprobar nómina</MenuItem>
                         </Link>
-                        
+
                     </SubMenu>
                     <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />}>
                         <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
@@ -208,6 +209,21 @@ export default function NavBar() {
                             <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Reportes</MenuItem>
                         </Link>
                     )}
+
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Nueva Contrasena" icon={<AssessmentIcon />}>
+                            <Link className={styles.tWhite} href="/NuevaContrasena" passHref>
+                                <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Nueva Contrseña</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false1
+                        <Link className={styles.textAlone} href="/NuevaContrasena" passHref>
+                            <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Nueva Contraseña</MenuItem>
+                        </Link>
+                    )}
+
                 </Menu>
             </Sidebar>
         </div>

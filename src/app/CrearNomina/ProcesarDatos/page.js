@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { useRouter } from 'next/navigation';
-import { ThemeProvider, Button, Box, Typography, FormControlLabel, Switch, Alert } from '@mui/material';
+import { ThemeProvider, Button, Box, Switch, FormControlLabel, Alert } from '@mui/material';
 import styles from './page.module.css';
 import theme from '../../$tema/theme';
 import ChequesResumen from '../../%Components/TablasComparativasNomina/ChequesResumen';
@@ -13,9 +13,9 @@ import Totales from '../../%Components/TablasComparativasNomina/Totales';
 import PercepcionesTabla from '../../%Components/TablasComparativasNomina/PercepcionesTablas';
 import DeduccionesTabla from '../../%Components/TablasComparativasNomina/DeduccionesTabla';
 import API_BASE_URL from '../../%Config/apiConfig';
-import DateFilter from '../../%Components/DateFilter/DateFilter'; // Importa el componente DateFilter
+import DateFilter from '../../%Components/DateFilter/DateFilter';
 import ProtectedView from '../../%Components/ProtectedView/ProtectedView';
-
+import HeaderSeccion from '../../%Components/HeaderSeccion/HeaderSeccion'; // Importar HeaderSeccion
 
 const CargarDatos = () => {
     const router = useRouter();
@@ -27,8 +27,13 @@ const CargarDatos = () => {
     const [depositoData, setDepositoData] = useState([]);
     const [totalesData, setTotalesData] = useState([]);
 
+    const [showDepositos, setShowDepositos] = useState(false);
+    const [showCheques, setShowCheques] = useState(false);
+    const [showTotales, setShowTotales] = useState(false);
     const [showPercepciones, setShowPercepciones] = useState(false);
     const [showDeducciones, setShowDeducciones] = useState(false);
+
+    const nombreNomina = 'Compuesta';
 
     // Función que se ejecutará al seleccionar una fecha en el DateFilter
     const handleDateChange = ({ anio, quincena }) => {
@@ -47,12 +52,7 @@ const CargarDatos = () => {
     const fetchChequesData = async (anio, quincena) => {
         try {
             const response = await axios.get(`${API_BASE_URL}/NominaCtrl/BancosNulos`, {
-                params: {
-                    anio,
-                    quincena,
-                    cancelado: false,
-                    completado: true,
-                },
+                params: { anio, quincena, cancelado: false, completado: true },
             });
             setChequesData(response.data);
         } catch (error) {
@@ -63,12 +63,7 @@ const CargarDatos = () => {
     const fetchDepositoData = async (anio, quincena) => {
         try {
             const response = await axios.get(`${API_BASE_URL}/NominaCtrl/BancosNoNulos`, {
-                params: {
-                    anio,
-                    quincena,
-                    cancelado: false,
-                    completado: true,
-                },
+                params: { anio, quincena, cancelado: false, completado: true },
             });
             setDepositoData(response.data);
         } catch (error) {
@@ -79,12 +74,7 @@ const CargarDatos = () => {
     const fetchTotalesData = async (anio, quincena) => {
         try {
             const response = await axios.get(`${API_BASE_URL}/NominaCtrl/Totales`, {
-                params: {
-                    anio,
-                    quincena,
-                    cancelado: false,
-                    completado: true,
-                },
+                params: { anio, quincena, cancelado: false, completado: true },
             });
             setTotalesData(response.data);
         } catch (error) {
@@ -143,71 +133,65 @@ const CargarDatos = () => {
                     Aquí podrás ver los resúmenes de nómina para comprobar que sean correctos.
                 </Alert>
 
-                {/* Integración del DateFilter */}
                 <Box className={styles.selectorContainer}>
                     <DateFilter onDateChange={handleDateChange} />
                 </Box>
 
-                <Box className={styles.buttonContainer}>
-                    <Button
-                        className={styles.botonesExportar}
-                        variant="contained"
-                        color="primary"
-                        onClick={exportExcel}
-                    >
-                        Exportar resumen a Excel
-                    </Button>
-                    <Button
-                        className={styles.botonesExportar}
-                        variant="contained"
-                        color="primary"
-                        onClick={exportPDF}
-                    >
-                        Exportar resumen a PDF
-                    </Button>
-                </Box>
+                {/* Encabezado y tabla de Depósitos Resumen */}
+                <HeaderSeccion
+                     titulo={`Depositos Resumen QNA ${quincena}/${anio}`}
+                    onToggle={() => setShowDepositos(!showDepositos)}
+                    isOpen={showDepositos}
+                />
+                {showDepositos && (
+                    <DepositoResumen resumenData={depositoData} anio={anio} quincena={quincena} />
+                )}
 
-                <div className={styles.grid}>
-                    <div className={styles.gridItem1}>
-                        <DepositoResumen resumenData={depositoData} anio={anio} quincena={quincena} />
-                    </div>
-                    <div className={styles.gridItem1}>
-                        <ChequesResumen resumenData={chequesData} anio={anio} quincena={quincena} />
-                    </div>
-                    <div className={styles.gridItem1}>
-                        <Totales resumenData={totalesData} anio={anio} quincena={quincena} />
-                    </div>
+                {/* Encabezado y tabla de Cheques Resumen */}
+                <HeaderSeccion
+                     titulo={`Cheques Resumen QNA ${quincena}/${anio}`}
+                    onToggle={() => setShowCheques(!showCheques)}
+                    isOpen={showCheques}
+                />
+                {showCheques && (
+                    <ChequesResumen resumenData={chequesData} anio={anio} quincena={quincena} />
+                )}
 
-                    <FormControlLabel
-                        control={
-                            <Switch checked={showPercepciones} onChange={() => setShowPercepciones(!showPercepciones)} />
-                        }
-                        label="Mostrar Percepciones"
-                    />
-                    {showPercepciones && (
-                        <div className={styles.gridItem1}>
-                            <PercepcionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
-                        </div>
-                    )}
+                {/* Encabezado y tabla de Totales */}
+                <HeaderSeccion
+                     titulo={`Totales QNA ${quincena}/${anio}`}
+                    onToggle={() => setShowTotales(!showTotales)}
+                    isOpen={showTotales}
+                />
+                {showTotales && (
+                    <Totales resumenData={totalesData} anio={anio} quincena={quincena} />
+                )}
 
-                    <FormControlLabel
-                        control={
-                            <Switch checked={showDeducciones} onChange={() => setShowDeducciones(!showDeducciones)} />
-                        }
-                        label="Mostrar Deducciones"
-                    />
-                    {showDeducciones && (
-                        <div className={styles.gridItem1}>
-                            <DeduccionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
-                        </div>
-                    )}
-                </div>
+                {/* Encabezado y tabla de Percepciones */}
+                <HeaderSeccion
+                    titulo={`Percepciones QNA ${quincena}/${anio}`}
+                    onToggle={() => setShowPercepciones(!showPercepciones)}
+                    isOpen={showPercepciones}
+                />
+                {showPercepciones && (
+                    <PercepcionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
+                )}
+
+                {/* Encabezado y tabla de Deducciones */}
+                <HeaderSeccion
+                    titulo={`Deducciones QNA ${quincena}/${anio}`}
+                    onToggle={() => setShowDeducciones(!showDeducciones)}
+                    isOpen={showDeducciones}
+                />
+                {showDeducciones && (
+                    <DeduccionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
+                )}
 
                 <Box className={styles.buttonContainer}>
                     <Button
                         variant="contained"
                         color="secondary"
-                        onClick={() => router.back()} // Regresa a la página anterior
+                        onClick={() => router.back()}
                         className={styles.backButton}
                     >
                         Regresar

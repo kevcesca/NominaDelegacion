@@ -1,5 +1,4 @@
-// src/components/DateFilter.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, TextField } from '@mui/material';
 import { Calendar } from 'primereact/calendar';
 import styles from './DateFilter.module.css';
@@ -14,19 +13,19 @@ export default function DateFilter({ onDateChange }) {
 
         const fechaActual = new Date(fecha);
         const dia = fechaActual.getDate();
-        const mes = fechaActual.toLocaleString('es-ES', { month: 'long' }); // Mes como texto (ej. "noviembre")
-        const mesNumero = fechaActual.getMonth() + 1; // Mes como número (1-12)
+        const mesNumero = (fechaActual.getMonth() + 1).toString().padStart(2, '0'); // Mes como número con dos dígitos
+        const mesTexto = fechaActual.toLocaleString('es-ES', { month: 'long' }); // Mes como texto (ej. "noviembre")
         const anioSeleccionado = fechaActual.getFullYear();
 
         let numeroQuincena = null;
         let textoQuincena = '';
 
         if (dia >= 1 && dia <= 14) {
-            numeroQuincena = (mesNumero * 2) - 1; // Quincena impar
-            textoQuincena = `1ra quincena de ${mes}`;
+            numeroQuincena = ((parseInt(mesNumero) * 2) - 1).toString().padStart(2, '0'); // Quincena impar con dos dígitos
+            textoQuincena = `1ra quincena de ${mesTexto}`;
         } else if (dia >= 15 && dia <= 31) {
-            numeroQuincena = mesNumero * 2; // Quincena par
-            textoQuincena = `2da quincena de ${mes}`;
+            numeroQuincena = (parseInt(mesNumero) * 2).toString().padStart(2, '0'); // Quincena par con dos dígitos
+            textoQuincena = `2da quincena de ${mesTexto}`;
         }
 
         if (numeroQuincena) {
@@ -35,13 +34,23 @@ export default function DateFilter({ onDateChange }) {
 
             // Notificar al componente padre el año y el número de la quincena
             if (onDateChange) {
-                onDateChange({ anio: anioSeleccionado, quincena: numeroQuincena });
+                onDateChange({ 
+                    anio: anioSeleccionado, 
+                    quincena: numeroQuincena 
+                });
             }
         } else {
             setQuincenaTexto('Fecha no válida');
             setAnio('');
         }
     };
+
+    // Establecer la fecha actual al cargar el componente
+    useEffect(() => {
+        const hoy = new Date();
+        setFechaSeleccionada(hoy); // Establecer la fecha actual como seleccionada
+        actualizarFecha(hoy); // Actualizar los datos basados en la fecha actual
+    }, []);
 
     return (
         <Box className={styles.dateFilter}>

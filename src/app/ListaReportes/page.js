@@ -1,138 +1,90 @@
-// src/pages/index.jsx
-
-'use client'
+'use client';
 
 import React, { useState } from 'react';
-import styles from './page.module.css';
-import ReportCard from '../%Components/Card/Card';
-import ProtectedView from '../%Components/ProtectedView/ProtectedView';
-
+import ReporteTipoPago from "../%Components/ReporteTipoPago/ReporteTipoPago";
+import ReporteAltaBajas from "../%Components/ReporteAltasBajas/ReporteAltasBajas";
+import ReporteNominaNumCuenta from "../%Components/ReporteNominaNumCuenta/ReporteNominaNumCuenta";
+import ReporteDiferenciasLiquidoConLpad from "../%Components/ReporteDiferenciasLiquidoConLpad/ReporteDiferenciasLiquidoConLpad";
+import ReporteAbonoPorConceptoMovimientoQuincenas from "../%Components/ReporteAbonoPorConceptoMovimientoQuincenas/ReporteAbonoPorConceptoMovimientoQuincenas";
+import Reporte04 from "../%Components/Reporte04/Reporte04";
+import HeaderSeccion from "../%Components/HeaderSeccion/HeaderSeccion"; // Importar HeaderSeccion
+import ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido from "../%Components/ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido/ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido"
+import ReporteDeNominaCuentaPorLiquidarPagoPorCheque from "../%Components/ReporteDeNominaCuentaPorLiquidarPagoPorCheque/ReporteDeNominaCuentaPorLiquidarPagoPorCheque";
 
 export default function Page() {
-    const [searchTerm, setSearchTerm] = useState('');
-    const reportes = [
-        {
-            title: "AbonoPorConceptoMovimientoQuincenas",
-            description: "Este reporte muestra un historial detallado de los movimientos de percepción personal durante el último año.",
-            link: "/ListaReportes/AbonoPorConceptoMovimientoQuincenas"
-        },
-        {
-            title: "REPORTE DE NÓMINA HISTÓRICO POR MONTO, TIPO DE NÓMINA Y EJERCIDO",
-            description: "",
-            link: "/ListaReportes/04"
-        },
-        {
-            title: "DiferenciasLiquidoConLpad",
-            description: "Visualiza un reporte histórico de nóminas organizadas por monto y tipo de nómina.",
-            link: "/ListaReportes/DiferenciasLiquidoConLpad"
-        },
-        {
-            title: "01 NominaNumerosCuentaEmpleados",
-            description: "Consulta el histórico de nóminas por monto, tipo de nómina y cantidad ejercida.",
-            link: "/ListaReportes/NominaNumerosCuentaEmpleados"
-        },
-        {
-            title: "ReporteAltasBajas",
-            description: "Reporte detallado de cuentas pendientes por liquidar.",
-            link: "/ListaReportes/ReporteAltasBajas"
-        },
-        // {
-        //     title: "REPORTE DE REINTEGROS POR CUENTA POR LIQUIDAR",
-        //     description: "Informe de reintegros relacionados con cuentas por liquidar.",
-        //     link: "/ListaReportes/ReintegrosCuentaPorLiquidar"
-        // },
-        {
-            title: "01 TipoPagoTipoNominaPorEmpleadoQuincena",
-            description: "Reporte sobre la dispersión de nómina y cuentas por liquidar.",
-            link: "/ListaReportes/TipoPagoTipoNominaPorEmpleadoQuincena"
-        },
-        // {
-        //     title: "REPORTE DE NÓMINA, CUENTA POR LIQUIDAR, PAGO POR CHEQUE",
-        //     description: "Detalles de nóminas y cuentas por liquidar pagadas mediante cheque.",
-        //     link: "/ListaReportes/NominaCuentaPorLiquidarPagoCheque"
-        // },
-        // {
-        //     title: "REPORTE POR CUENTA POR LIQUIDAR CHEQUES EN TRÁNSITO",
-        //     description: "Reporte de cheques en tránsito relacionados con cuentas por liquidar.",
-        //     link: "/ListaReportes/CuentaPorLiquidarChequesTransito"
-        // },
-        // {
-        //     title: "REPORTE DE NÓMINAS EXTRAORDINARIAS",
-        //     description: "Informe sobre nóminas extraordinarias emitidas.",
-        //     link: "/ListaReportes/NominasExtraordinarias"
-        // },
-        // {
-        //     title: "REPORTE DE ACTAS POR RETENCIÓN DE PAGOS",
-        //     description: "Registro de actas relacionadas con la retención de pagos.",
-        //     link: "/ListaReportes/ActasRetencionPagos"
-        // },
-        // {
-        //     title: "REPORTE DE CONCEPTOS NO COBRADOS Y MOTIVO DE REEMBOLSOS",
-        //     description: "Informe sobre conceptos no cobrados y las razones de los reembolsos.",
-        //     link: "/ListaReportes/ConceptosNoCobradosReembolsos"
-        // },
-        // {
-        //     title: "EMISIÓN DE CHEQUES",
-        //     description: "Reporte detallado de la emisión de cheques.",
-        //     link: "/ListaReportes/EmisionCheques"
-        // },
-        // {
-        //     title: "REPORTE DE LIBERACIONES",
-        //     description: "Informe sobre las liberaciones de fondos o nóminas.",
-        //     link: "/ListaReportes/Liberaciones"
-        // },
-        // {
-        //     title: "REPORTE DE DEFUNCIONES",
-        //     description: "Reporte de defunciones registradas.",
-        //     link: "/ListaReportes/Defunciones"
-        // },
-        // {
-        //     title: "REPORTE DE BAJAS",
-        //     description: "Registro de bajas de empleados.",
-        //     link: "/ListaReportes/Bajas"
-        // },
-        // {
-        //     title: "REPORTE DE ALTAS",
-        //     description: "Informe sobre altas de nuevos empleados.",
-        //     link: "/ListaReportes/Altas"
-        // },
-        // {
-        //     title: "SALDOS DIARIOS EN BANCOS",
-        //     description: "Consulta los saldos diarios disponibles en bancos.",
-        //     link: "/ListaReportes/SaldosDiariosBancos"
-        // }
-    ];
-
-    const filteredReports = reportes.filter(report =>
-        report.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const [showTipoPago, setShowTipoPago] = useState(true);
+    const [showAltaBajas, setShowAltaBajas] = useState(false);
+    const [showNominaNumCuenta, setShowNominaNumCuenta] = useState(false);
+    const [showDiferenciasLiquido, setShowDiferenciasLiquido] = useState(false);
+    const [showAbonoConcepto, setShowAbonoConcepto] = useState(false);
+    const [showReporte04, setShowReporte04] = useState(false);
+    const [showHistorico, setShowHistorico] = useState(false);
+    const [showCuentaCheque, setShowCuentaCheque] = useState(false);
+    
 
     return (
-        <ProtectedView requiredPermissions={["Reportes", "Acceso_total"]}>
+        <div>
+            {/* Encabezado y ReporteTipoPago */}
+            <HeaderSeccion
+                titulo="Reporte: Tipo de Pago"
+                isOpen={showTipoPago}
+                onToggle={() => setShowTipoPago(!showTipoPago)}
+            />
+            {showTipoPago && <ReporteTipoPago />}
 
-            <>
-                <h1 className={styles.h1}>
-                    Lista de reportes
-                </h1>
-                <input
-                    type="text"
-                    placeholder="Buscar reporte..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className={styles.searchInput}
-                />
-                <main className={styles.mainLista}>
-                    {filteredReports.map((report, index) => (
-                        <ReportCard
-                            key={index}
-                            title={report.title}
-                            description={report.description}
-                            link={report.link}
-                        />
-                    ))}
-                </main>
-            </>
-        </ProtectedView>
+            {/* Encabezado y ReporteAltaBajas */}
+            <HeaderSeccion
+                titulo="Reporte: Altas y Bajas"
+                isOpen={showAltaBajas}
+                onToggle={() => setShowAltaBajas(!showAltaBajas)}
+            />
+            {showAltaBajas && <ReporteAltaBajas />}
 
+            {/* Encabezado y ReporteNominaNumCuenta */}
+            <HeaderSeccion
+                titulo="Reporte: Números de Cuenta en Nómina"
+                isOpen={showNominaNumCuenta}
+                onToggle={() => setShowNominaNumCuenta(!showNominaNumCuenta)}
+            />
+            {showNominaNumCuenta && <ReporteNominaNumCuenta />}
+
+            {/* Encabezado y ReporteDiferenciasLiquidoConLpad */}
+            <HeaderSeccion
+                titulo="Reporte: Diferencias de Líquido con Lpad"
+                isOpen={showDiferenciasLiquido}
+                onToggle={() => setShowDiferenciasLiquido(!showDiferenciasLiquido)}
+            />
+            {showDiferenciasLiquido && <ReporteDiferenciasLiquidoConLpad />}
+
+            {/* Encabezado y ReporteAbonoPorConceptoMovimientoQuincenas */}
+            <HeaderSeccion
+                titulo="Reporte: Abono por Concepto y Movimiento por Quincenas"
+                isOpen={showAbonoConcepto}
+                onToggle={() => setShowAbonoConcepto(!showAbonoConcepto)}
+            />
+            {showAbonoConcepto && <ReporteAbonoPorConceptoMovimientoQuincenas />}
+
+            {/* Encabezado y Reporte04 */}
+            <HeaderSeccion
+                titulo="Reporte: 04"
+                isOpen={showReporte04}
+                onToggle={() => setShowReporte04(!showReporte04)}
+            />
+            {showReporte04 && <Reporte04 />}
+
+            <HeaderSeccion
+                titulo="Reporte: Nómina Histórico por Monto, Tipo de Nómina y Ejercido"
+                isOpen={showHistorico}
+                onToggle={() => setShowHistorico(!showHistorico)}
+            />
+            {showHistorico && <ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido />}
+
+            <HeaderSeccion
+                titulo="Reporte: Nómina Cuenta por Liquidar Pago por Cheque"
+                isOpen={showCuentaCheque}
+                onToggle={() => setShowCuentaCheque(!showCuentaCheque)}
+            />
+            {showCuentaCheque && <ReporteDeNominaCuentaPorLiquidarPagoPorCheque />}
+        </div>
     );
 }

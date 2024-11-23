@@ -29,15 +29,15 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
     const toast = useRef(null);
 
     const availableColumns = [
-        { key: 'id_empleado', label: 'ID Empleado', defaultSelected: true },
-        { key: 'nombre', label: 'Nombre', defaultSelected: true },
-        { key: 'apellido_1', label: 'Apellido Paterno', defaultSelected: true },
-        { key: 'campo', label: 'Campo Modificado', defaultSelected: true },
-        { key: 'valor_inicial', label: 'Valor Inicial', defaultSelected: true },
-        { key: 'valor_final', label: 'Valor Final', defaultSelected: true },
-        { key: 'anio', label: 'Año', defaultSelected: false },
-        { key: 'quincena', label: 'Quincena', defaultSelected: false },
-        { key: 'nombre_nomina', label: 'Nombre Nómina', defaultSelected: false },
+        { key: 'ID Empleado', label: 'ID Empleado', defaultSelected: true },
+        { key: 'Nombre', label: 'Nombre', defaultSelected: true },
+        { key: 'Apellido 1', label: 'Apellido Paterno', defaultSelected: true },
+        { key: 'Campo Modificado', label: 'Campo Modificado', defaultSelected: true },
+        { key: 'Valor Inicial', label: 'Valor Inicial', defaultSelected: true },
+        { key: 'Valor Final', label: 'Valor Final', defaultSelected: true },
+        { key: 'Año', label: 'Año', defaultSelected: false },
+        { key: 'Quincena', label: 'Quincena', defaultSelected: false },
+        { key: 'Nombre Nómina', label: 'Nombre Nómina', defaultSelected: false },
     ];
 
     useEffect(() => {
@@ -154,7 +154,7 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
 
     const header = (
         <div className="flex justify-content-between align-items-center">
-            <Typography variant="h4" className={styles.titulo}>Cambios a detalle por empleado y quincena</Typography>
+            
             <span className="p-input-icon-left" style={{ width: '400px', marginTop: '2rem' }}>
                 <i className="pi pi-search" />
                 <InputText

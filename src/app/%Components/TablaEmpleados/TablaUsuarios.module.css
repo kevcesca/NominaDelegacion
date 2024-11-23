@@ -28,3 +28,10 @@
     position: absolute;
     translate: 1rem;
 }
+
+.selectAllCheckbox{
+ 
+    background-color: rgba(0, 0, 0, 0.253);
+    text-align: center;
+    text-decoration: double;
+}
