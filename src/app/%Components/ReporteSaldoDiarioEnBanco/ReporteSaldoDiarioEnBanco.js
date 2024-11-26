@@ -7,20 +7,20 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import API_BASE_URL from '../../%Config/apiConfig';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import saveAs from 'file-saver';
+import API_BASE_URL from '../../%Config/apiConfig';
 
-export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
+export default function ReporteSaldoDiarioEnBanco() {
     const [data, setData] = useState([]); // Datos de la tabla
     const [filteredData, setFilteredData] = useState([]); // Datos filtrados
     const [columns, setColumns] = useState([]); // Columnas visibles
     const [selectedColumns, setSelectedColumns] = useState({}); // Columnas seleccionadas
     const [collapseOpen, setCollapseOpen] = useState(false); // Control de colapso
     const [globalFilter, setGlobalFilter] = useState(''); // Filtro global
-    const [startDate, setStartDate] = useState(dayjs('2024-01-01')); // Fecha de inicio predefinida
+    const [startDate, setStartDate] = useState(dayjs('2024-01-02')); // Fecha de inicio predefinida
     const [endDate, setEndDate] = useState(dayjs('2024-01-31')); // Fecha de fin predefinida
     const [loading, setLoading] = useState(false); // Indicador de carga
     const [error, setError] = useState(null); // Mensaje de error
@@ -28,22 +28,22 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
 
     const availableColumns = [
         { key: 'Registro', label: 'Registro' },
-        { key: 'Tipo de Nómina', label: 'Tipo de Nómina' },
-        { key: 'CLC de la Nómina Generada', label: 'CLC de la Nómina Generada' },
-        { key: 'Periodo', label: 'Periodo' },
-        { key: 'Monto de CLC', label: 'Monto de CLC' },
-        { key: 'Pago de Inicio de Pago', label: 'Pago de Inicio de Pago' },
-        { key: 'Monto Pagado', label: 'Monto Pagado' },
-        { key: 'Pendiente por Pagar', label: 'Pendiente por Pagar' },
+        { key: 'Día', label: 'Día' },
+        { key: 'Banco/Cuenta', label: 'Banco/Cuenta' },
+        { key: 'Total Egresos (Cargo)', label: 'Total Egresos (Cargo)' },
+        { key: 'Total Ingresos (Abono)', label: 'Total Ingresos (Abono)' },
+        { key: 'Saldo Inicial', label: 'Saldo Inicial' },
+        { key: 'Saldo Final', label: 'Saldo Final' },
+        { key: 'Número de Transacciones', label: 'Número de Transacciones' },
+        { key: 'Conceptos del Día', label: 'Conceptos del Día' },
     ];
 
+    // Función para obtener los datos desde el API
     const fetchData = async () => {
         setLoading(true);
         setError(null);
 
-        const url = `${API_BASE_URL}/reporteNominaHistorico?anio=${startDate.year()}&fechaInicio=${startDate.format(
-            'YYYY-MM-DD'
-        )}&fechaFin=${endDate.format('YYYY-MM-DD')}`;
+        const url = `${API_BASE_URL}/saldosDiarios?fechaInicio=${startDate.format('YYYY-MM-DD')}&fechaFin=${endDate.format('YYYY-MM-DD')}`;
 
         console.log('Realizando petición a:', url);
 
@@ -77,7 +77,7 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
 
     useEffect(() => {
         const initialColumns = mapColumns(
-            availableColumns.filter((col) => col.key === 'Registro' || col.key === 'Tipo de Nómina')
+            availableColumns.filter((col) => col.key === 'Registro' || col.key === 'Día')
         );
         setColumns(initialColumns);
 
@@ -137,26 +137,26 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                 columns.map((col) => row[col.field])
             );
             autoTable(doc, { head: [tableColumns], body: tableRows });
-            doc.save('reporte_nomina_historico.pdf');
+            doc.save('reporte_saldo_diario.pdf');
         } else if (type === 'csv') {
             const csvContent = [
                 columns.map((col) => col.headerName).join(','),
                 ...exportData.map((row) => columns.map((col) => row[col.field]).join(',')),
             ].join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            saveAs(blob, 'reporte_nomina_historico.csv');
+            saveAs(blob, 'reporte_saldo_diario.csv');
         } else if (type === 'excel') {
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-            saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), 'reporte_nomina_historico.xlsx');
+            saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), 'reporte_saldo_diario.xlsx');
         }
     };
 
     return (
         <Box display="flex" flexDirection="column" alignItems="center" padding="20px">
             <Typography variant="h4" gutterBottom>
-                Reporte: Nómina Histórico por Monto, Tipo de Nómina y Ejercido
+                Reporte: Saldos Diarios en Banco
             </Typography>
 
             {/* Rango de fechas */}
@@ -172,7 +172,7 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                                     setEndDate(newStartDate);
                                 }
                             }}
-                            minDate={dayjs('2024-01-01')}
+                            minDate={dayjs('2024-01-02')}
                             renderInput={(params) => <TextField {...params} fullWidth />}
                         />
                     </Grid>

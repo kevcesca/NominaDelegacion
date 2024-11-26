@@ -3,47 +3,36 @@
 import React, { useState, useEffect } from 'react';
 import { Button, TextField, Box, Typography, Collapse, Checkbox, FormControlLabel, Grid, Modal } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
 import API_BASE_URL from '../../%Config/apiConfig';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import saveAs from 'file-saver';
 
-export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
+export default function ReporteDeNominasExtraordinarias() {
     const [data, setData] = useState([]); // Datos de la tabla
     const [filteredData, setFilteredData] = useState([]); // Datos filtrados
     const [columns, setColumns] = useState([]); // Columnas visibles
     const [selectedColumns, setSelectedColumns] = useState({}); // Columnas seleccionadas
     const [collapseOpen, setCollapseOpen] = useState(false); // Control de colapso
-    const [globalFilter, setGlobalFilter] = useState(''); // Filtro global
-    const [startDate, setStartDate] = useState(dayjs('2024-01-01')); // Fecha de inicio predefinida
-    const [endDate, setEndDate] = useState(dayjs('2024-01-31')); // Fecha de fin predefinida
     const [loading, setLoading] = useState(false); // Indicador de carga
     const [error, setError] = useState(null); // Mensaje de error
-    const [showModal, setShowModal] = useState(false); // Control del modal
+    const [quincena, setQuincena] = useState('09'); // Parámetro inicial de quincena
+    const [globalFilter, setGlobalFilter] = useState(''); // Filtro global para búsqueda
+    const [showModal, setShowModal] = useState(false); // Control del modal de error
 
     const availableColumns = [
         { key: 'Registro', label: 'Registro' },
-        { key: 'Tipo de Nómina', label: 'Tipo de Nómina' },
+        { key: 'Nómina Extraordinaria', label: 'Nómina Extraordinaria' },
         { key: 'CLC de la Nómina Generada', label: 'CLC de la Nómina Generada' },
-        { key: 'Periodo', label: 'Periodo' },
         { key: 'Monto de CLC', label: 'Monto de CLC' },
-        { key: 'Pago de Inicio de Pago', label: 'Pago de Inicio de Pago' },
-        { key: 'Monto Pagado', label: 'Monto Pagado' },
-        { key: 'Pendiente por Pagar', label: 'Pendiente por Pagar' },
     ];
 
     const fetchData = async () => {
         setLoading(true);
         setError(null);
 
-        const url = `${API_BASE_URL}/reporteNominaHistorico?anio=${startDate.year()}&fechaInicio=${startDate.format(
-            'YYYY-MM-DD'
-        )}&fechaFin=${endDate.format('YYYY-MM-DD')}`;
+        const url = `${API_BASE_URL}/reporteNominasExtraordinarias?anio=2024&quincena=${quincena}&cargaCompleta=true&regCancelado=false`;
 
         console.log('Realizando petición a:', url);
 
@@ -77,7 +66,7 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
 
     useEffect(() => {
         const initialColumns = mapColumns(
-            availableColumns.filter((col) => col.key === 'Registro' || col.key === 'Tipo de Nómina')
+            availableColumns.filter((col) => col.key === 'Registro' || col.key === 'Nómina Extraordinaria')
         );
         setColumns(initialColumns);
 
@@ -94,7 +83,7 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
         const selectedKeys = Object.keys(selectedColumns).filter((key) => selectedColumns[key]);
 
         if (selectedKeys.length === 0) {
-            setShowModal(true);
+            setShowModal(true); // Mostrar el modal si no se seleccionan columnas
             return;
         }
 
@@ -137,68 +126,51 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                 columns.map((col) => row[col.field])
             );
             autoTable(doc, { head: [tableColumns], body: tableRows });
-            doc.save('reporte_nomina_historico.pdf');
+            doc.save('reporte_nominas_extraordinarias.pdf');
         } else if (type === 'csv') {
             const csvContent = [
                 columns.map((col) => col.headerName).join(','),
                 ...exportData.map((row) => columns.map((col) => row[col.field]).join(',')),
             ].join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            saveAs(blob, 'reporte_nomina_historico.csv');
+            saveAs(blob, 'reporte_nominas_extraordinarias.csv');
         } else if (type === 'excel') {
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
             const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-            saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), 'reporte_nomina_historico.xlsx');
+            saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), 'reporte_nominas_extraordinarias.xlsx');
         }
     };
 
     return (
         <Box display="flex" flexDirection="column" alignItems="center" padding="20px">
             <Typography variant="h4" gutterBottom>
-                Reporte: Nómina Histórico por Monto, Tipo de Nómina y Ejercido
+                Reporte: Nóminas Extraordinarias
             </Typography>
 
-            {/* Rango de fechas */}
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <Grid container spacing={2} justifyContent="center" marginBottom="20px">
-                    <Grid item xs={12} sm={6} md={3}>
-                        <DatePicker
-                            label="Fecha de Inicio"
-                            value={startDate}
-                            onChange={(newStartDate) => {
-                                setStartDate(newStartDate);
-                                if (endDate.isBefore(newStartDate)) {
-                                    setEndDate(newStartDate);
-                                }
-                            }}
-                            minDate={dayjs('2024-01-01')}
-                            renderInput={(params) => <TextField {...params} fullWidth />}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <DatePicker
-                            label="Fecha de Fin"
-                            value={endDate}
-                            onChange={(newEndDate) => setEndDate(newEndDate)}
-                            minDate={startDate}
-                            renderInput={(params) => <TextField {...params} fullWidth />}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={3}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            onClick={fetchData}
-                            disabled={loading}
-                            style={{ height: '56px' }}
-                        >
-                            {loading ? 'Cargando...' : 'Consultar'}
-                        </Button>
-                    </Grid>
+            {/* Parámetro: Quincena */}
+            <Grid container spacing={2} justifyContent="center" marginBottom="20px">
+                <Grid item xs={12} sm={6} md={3}>
+                    <TextField
+                        label="Quincena"
+                        value={quincena}
+                        onChange={(e) => setQuincena(e.target.value)}
+                        fullWidth
+                    />
                 </Grid>
-            </LocalizationProvider>
+                <Grid item xs={12} sm={12} md={3}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        onClick={fetchData}
+                        disabled={loading}
+                        style={{ height: '56px' }}
+                    >
+                        {loading ? 'Cargando...' : 'Consultar'}
+                    </Button>
+                </Grid>
+            </Grid>
 
             {error && (
                 <Typography color="error" variant="body1" marginBottom="20px">
