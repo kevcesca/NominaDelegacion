@@ -1,47 +1,55 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, TextField, Box, Typography, Collapse, Checkbox, FormControlLabel, Grid, Modal } from '@mui/material';
+import {
+    Button,
+    TextField,
+    Box,
+    Typography,
+    Collapse,
+    Checkbox,
+    FormControlLabel,
+    Grid,
+    Modal,
+} from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
-import API_BASE_URL from '../../%Config/apiConfig';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import saveAs from 'file-saver';
+import dayjs from 'dayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import API_BASE_URL from '../../%Config/apiConfig';
 
-export default function ReporteDeHonorariosPorFecha() {
+const availableColumns = [
+    { key: 'Registro', label: 'Registro' },
+    { key: 'Quincena', label: 'Quincena' },
+    { key: 'No. Empleado', label: 'No. Empleado' },
+    { key: 'Nombre', label: 'Nombre' },
+    { key: 'Percepciones', label: 'Percepciones' },
+    { key: 'Deducciones', label: 'Deducciones' },
+    { key: 'Monto Neto', label: 'Monto Neto' },
+    { key: 'Periodo', label: 'Periodo' },
+];
+
+export default function ReporteDeMovimientoPorQuincena() {
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [selectedColumns, setSelectedColumns] = useState({});
     const [collapseOpen, setCollapseOpen] = useState(false);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [startDate, setStartDate] = useState(dayjs('2024-01-02'));
-    const [endDate, setEndDate] = useState(dayjs('2024-01-31'));
+    const [quincenas, setQuincenas] = useState(['01']);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-
-    const availableColumns = [
-        { key: 'Registro', label: 'Registro' },
-        { key: 'ID Honorario', label: 'ID Honorario' },
-        { key: 'Nombre Empleado', label: 'Nombre Empleado' },
-        { key: 'Puesto', label: 'Puesto' },
-        { key: 'Monto Pagado', label: 'Monto Pagado' },
-        { key: 'Fecha de Pago', label: 'Fecha de Pago' },
-    ];
+    const [modalOpen, setModalOpen] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
         setError(null);
 
-        const url = `${API_BASE_URL}/reporteHonorarios?fechaInicio=${startDate.format(
-            'YYYY-MM-DD'
-        )}&fechaFin=${endDate.format('YYYY-MM-DD')}`;
+        const queryQuincenas = quincenas.join(',');
+        const url = `${API_BASE_URL}/reporteMovimientos?anio=2024&quincenas=${queryQuincenas}`;
 
         try {
             const response = await fetch(url);
@@ -70,7 +78,7 @@ export default function ReporteDeHonorariosPorFecha() {
 
     useEffect(() => {
         const initialColumns = mapColumns(
-            availableColumns.filter((col) => col.key === 'Registro' || col.key === 'Nombre Empleado')
+            availableColumns.filter((col) => col.key === 'Registro' || col.key === 'Nombre')
         );
         setColumns(initialColumns);
 
@@ -87,23 +95,13 @@ export default function ReporteDeHonorariosPorFecha() {
         const selectedKeys = Object.keys(selectedColumns).filter((key) => selectedColumns[key]);
 
         if (selectedKeys.length === 0) {
-            setShowModal(true); // Mostrar modal si no hay selección
+            setModalOpen(true);
             return;
         }
 
         const newColumns = mapColumns(availableColumns.filter((col) => selectedKeys.includes(col.key)));
         setColumns(newColumns);
         setCollapseOpen(false);
-    };
-
-    const handleFilterChange = (event) => {
-        const value = event.target.value.toLowerCase();
-        setGlobalFilter(value);
-
-        const filtered = data.filter((row) =>
-            Object.values(row).some((val) => val?.toString().toLowerCase().includes(value))
-        );
-        setFilteredData(filtered);
     };
 
     const handleSelectAll = (isChecked) => {
@@ -114,7 +112,39 @@ export default function ReporteDeHonorariosPorFecha() {
         setSelectedColumns(updatedSelection);
     };
 
-    const handleExport = (type) => {
+    const exportToCSV = () => {
+        const csvRows = [];
+        const headers = columns.map((col) => col.headerName).join(',');
+        csvRows.push(headers);
+
+        filteredData.forEach((row) => {
+            const values = columns.map((col) => row[col.field]);
+            csvRows.push(values.join(','));
+        });
+
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('hidden', '');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'reporte_movimientos.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        const tableColumns = columns.map((col) => col.headerName);
+        const tableRows = filteredData.map((row) =>
+            columns.map((col) => row[col.field])
+        );
+        autoTable(doc, { head: [tableColumns], body: tableRows });
+        doc.save('reporte_movimientos.pdf');
+    };
+
+    const exportToExcel = () => {
         const exportData = filteredData.map((row) => {
             const filteredRow = {};
             columns.forEach((col) => {
@@ -123,84 +153,51 @@ export default function ReporteDeHonorariosPorFecha() {
             return filteredRow;
         });
 
-        if (type === 'pdf') {
-            const doc = new jsPDF();
-            const tableColumns = columns.map((col) => col.headerName);
-            const tableRows = exportData.map((row) =>
-                columns.map((col) => row[col.field])
-            );
-            autoTable(doc, { head: [tableColumns], body: tableRows });
-            doc.save('reporte_honorarios.pdf');
-        } else if (type === 'csv') {
-            const csvContent = [
-                columns.map((col) => col.headerName).join(','),
-                ...exportData.map((row) => columns.map((col) => row[col.field]).join(',')),
-            ].join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            saveAs(blob, 'reporte_honorarios.csv');
-        } else if (type === 'excel') {
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
-            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-            saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), 'reporte_honorarios.xlsx');
-        }
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'reporte_movimientos.xlsx');
+        a.click();
     };
 
     return (
         <Box display="flex" flexDirection="column" alignItems="center" padding="20px">
             <Typography variant="h4" gutterBottom>
-                Reporte: Honorarios por Fecha
+                Reporte: Movimientos por Quincena
             </Typography>
 
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <Grid container spacing={2} justifyContent="center" marginBottom="20px">
-                    <Grid item xs={12} sm={6} md={3}>
-                        <DatePicker
-                            label="Fecha de Inicio"
-                            value={startDate}
-                            onChange={(newStartDate) => setStartDate(newStartDate)}
-                            minDate={dayjs('2024-01-01')}
-                            renderInput={(params) => <TextField {...params} fullWidth />}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <DatePicker
-                            label="Fecha de Fin"
-                            value={endDate}
-                            onChange={(newEndDate) => setEndDate(newEndDate)}
-                            minDate={startDate}
-                            renderInput={(params) => <TextField {...params} fullWidth />}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={3}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            onClick={fetchData}
-                            disabled={loading}
-                            style={{ height: '56px' }}
-                        >
-                            {loading ? 'Cargando...' : 'Consultar'}
-                        </Button>
-                    </Grid>
+            <Grid container spacing={2} justifyContent="center" marginBottom="20px">
+                <Grid item xs={12} sm={6} md={3}>
+                    <TextField
+                        label="Quincenas (separadas por coma)"
+                        value={quincenas.join(',')}
+                        onChange={(e) => setQuincenas(e.target.value.split(','))}
+                        fullWidth
+                    />
                 </Grid>
-            </LocalizationProvider>
+                <Grid item xs={12} sm={12} md={3}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        onClick={fetchData}
+                        disabled={loading}
+                        style={{ height: '56px' }}
+                    >
+                        {loading ? 'Cargando...' : 'Consultar'}
+                    </Button>
+                </Grid>
+            </Grid>
 
             {error && (
                 <Typography color="error" variant="body1" marginBottom="20px">
                     {error}
                 </Typography>
             )}
-
-            <TextField
-                label="Buscar"
-                variant="outlined"
-                fullWidth
-                value={globalFilter}
-                onChange={handleFilterChange}
-                style={{ marginBottom: '20px', maxWidth: '1200px' }}
-            />
 
             <Button
                 variant="contained"
@@ -242,6 +239,7 @@ export default function ReporteDeHonorariosPorFecha() {
                                                 [col.key]: e.target.checked,
                                             })
                                         }
+                                        name={col.key}
                                     />
                                 }
                                 label={col.label}
@@ -266,21 +264,21 @@ export default function ReporteDeHonorariosPorFecha() {
                 />
             </Box>
 
-            <Box marginTop="20px" display="flex" gap="10px">
-                <Button variant="contained" color="secondary" onClick={() => handleExport('csv')}>
+            <Box display="flex" gap="10px" marginTop="20px">
+                <Button variant="outlined" onClick={exportToCSV}>
                     Exportar CSV
                 </Button>
-                <Button variant="contained" color="info" onClick={() => handleExport('excel')}>
+                <Button variant="outlined" onClick={exportToExcel}>
                     Exportar Excel
                 </Button>
-                <Button variant="contained" color="error" onClick={() => handleExport('pdf')}>
+                <Button variant="outlined" onClick={exportToPDF}>
                     Exportar PDF
                 </Button>
             </Box>
 
             <Modal
-                open={showModal}
-                onClose={() => setShowModal(false)}
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
                 aria-labelledby="modal-title"
                 aria-describedby="modal-description"
             >
@@ -291,7 +289,7 @@ export default function ReporteDeHonorariosPorFecha() {
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
                         width: '400px',
-                        backgroundColor: 'white',
+                        bgcolor: 'background.paper',
                         borderRadius: '8px',
                         boxShadow: 24,
                         p: 4,
@@ -299,18 +297,13 @@ export default function ReporteDeHonorariosPorFecha() {
                     }}
                 >
                     <Typography id="modal-title" variant="h6" gutterBottom>
-                        Advertencia
+                        Por favor selecciona al menos un campo
                     </Typography>
-                    <Typography id="modal-description" variant="body1" gutterBottom>
-                        Por favor selecciona al menos un campo para generar la tabla.
-                    </Typography>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => setShowModal(false)}
-                    >
-                        Cerrar
-                    </Button>
+                    <Box textAlign="center" marginTop="20px">
+                        <Button variant="contained" color="primary" onClick={() => setModalOpen(false)}>
+                            Cerrar
+                        </Button>
+                    </Box>
                 </Box>
             </Modal>
         </Box>

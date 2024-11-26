@@ -1,51 +1,56 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, TextField, Box, Typography, Collapse, Checkbox, FormControlLabel, Grid, Modal } from '@mui/material';
+import {
+    Button,
+    TextField,
+    Box,
+    Typography,
+    Collapse,
+    Checkbox,
+    FormControlLabel,
+    Grid,
+    Modal,
+} from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import API_BASE_URL from '../../%Config/apiConfig';
+import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
-import saveAs from 'file-saver';
+import API_BASE_URL from '../../%Config/apiConfig';
 
-export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
-    const [data, setData] = useState([]); // Datos de la tabla
-    const [filteredData, setFilteredData] = useState([]); // Datos filtrados
-    const [columns, setColumns] = useState([]); // Columnas visibles
-    const [selectedColumns, setSelectedColumns] = useState({}); // Columnas seleccionadas
-    const [collapseOpen, setCollapseOpen] = useState(false); // Control de colapso
-    const [globalFilter, setGlobalFilter] = useState(''); // Filtro global
-    const [startDate, setStartDate] = useState(dayjs('2024-01-01')); // Fecha de inicio predefinida
-    const [endDate, setEndDate] = useState(dayjs('2024-01-31')); // Fecha de fin predefinida
-    const [loading, setLoading] = useState(false); // Indicador de carga
-    const [error, setError] = useState(null); // Mensaje de error
-    const [showModal, setShowModal] = useState(false); // Control del modal
+export default function ReporteDeHonorariosPorFecha() {
+    const [data, setData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const [columns, setColumns] = useState([]);
+    const [selectedColumns, setSelectedColumns] = useState({});
+    const [collapseOpen, setCollapseOpen] = useState(false);
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [startDate, setStartDate] = useState(dayjs('2024-01-01'));
+    const [endDate, setEndDate] = useState(dayjs('2024-01-31'));
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [modalOpen, setModalOpen] = useState(false);
 
     const availableColumns = [
         { key: 'Registro', label: 'Registro' },
-        { key: 'Tipo de Nómina', label: 'Tipo de Nómina' },
-        { key: 'CLC de la Nómina Generada', label: 'CLC de la Nómina Generada' },
-        { key: 'Periodo', label: 'Periodo' },
-        { key: 'Monto de CLC', label: 'Monto de CLC' },
-        { key: 'Pago de Inicio de Pago', label: 'Pago de Inicio de Pago' },
+        { key: 'ID Honorario', label: 'ID Honorario' },
+        { key: 'Nombre Empleado', label: 'Nombre Empleado' },
+        { key: 'Puesto', label: 'Puesto' },
         { key: 'Monto Pagado', label: 'Monto Pagado' },
-        { key: 'Pendiente por Pagar', label: 'Pendiente por Pagar' },
+        { key: 'Fecha de Pago', label: 'Fecha de Pago' },
     ];
 
     const fetchData = async () => {
         setLoading(true);
         setError(null);
 
-        const url = `${API_BASE_URL}/reporteNominaHistorico?anio=${startDate.year()}&fechaInicio=${startDate.format(
+        const url = `${API_BASE_URL}/reporteHonorarios?fechaInicio=${startDate.format(
             'YYYY-MM-DD'
         )}&fechaFin=${endDate.format('YYYY-MM-DD')}`;
-
-        console.log('Realizando petición a:', url);
 
         try {
             const response = await fetch(url);
@@ -55,12 +60,9 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
             }
 
             const result = await response.json();
-            console.log('Datos obtenidos del servidor:', result);
-
             setData(result);
             setFilteredData(result);
         } catch (error) {
-            console.error('Error al cargar los datos:', error);
             setError('No se pudieron cargar los datos. Verifique la conexión o contacte al administrador.');
         } finally {
             setLoading(false);
@@ -77,7 +79,7 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
 
     useEffect(() => {
         const initialColumns = mapColumns(
-            availableColumns.filter((col) => col.key === 'Registro' || col.key === 'Tipo de Nómina')
+            availableColumns.filter((col) => col.key === 'Registro' || col.key === 'Nombre Empleado')
         );
         setColumns(initialColumns);
 
@@ -94,7 +96,7 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
         const selectedKeys = Object.keys(selectedColumns).filter((key) => selectedColumns[key]);
 
         if (selectedKeys.length === 0) {
-            setShowModal(true);
+            setModalOpen(true);
             return;
         }
 
@@ -121,7 +123,29 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
         setSelectedColumns(updatedSelection);
     };
 
-    const handleExport = (type) => {
+    const exportToCSV = () => {
+        const csvRows = [];
+        const headers = columns.map((col) => col.headerName).join(',');
+        csvRows.push(headers);
+
+        filteredData.forEach((row) => {
+            const values = columns.map((col) => row[col.field]);
+            csvRows.push(values.join(','));
+        });
+
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('hidden', '');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'reporte_honorarios.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    const exportToExcel = () => {
         const exportData = filteredData.map((row) => {
             const filteredRow = {};
             columns.forEach((col) => {
@@ -130,48 +154,40 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
             return filteredRow;
         });
 
-        if (type === 'pdf') {
-            const doc = new jsPDF();
-            const tableColumns = columns.map((col) => col.headerName);
-            const tableRows = exportData.map((row) =>
-                columns.map((col) => row[col.field])
-            );
-            autoTable(doc, { head: [tableColumns], body: tableRows });
-            doc.save('reporte_nomina_historico.pdf');
-        } else if (type === 'csv') {
-            const csvContent = [
-                columns.map((col) => col.headerName).join(','),
-                ...exportData.map((row) => columns.map((col) => row[col.field]).join(',')),
-            ].join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            saveAs(blob, 'reporte_nomina_historico.csv');
-        } else if (type === 'excel') {
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
-            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-            saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), 'reporte_nomina_historico.xlsx');
-        }
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'reporte_honorarios.xlsx');
+        a.click();
+    };
+
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        const tableColumns = columns.map((col) => col.headerName);
+        const tableRows = filteredData.map((row) =>
+            columns.map((col) => row[col.field])
+        );
+        autoTable(doc, { head: [tableColumns], body: tableRows });
+        doc.save('reporte_honorarios.pdf');
     };
 
     return (
         <Box display="flex" flexDirection="column" alignItems="center" padding="20px">
             <Typography variant="h4" gutterBottom>
-                Reporte: Nómina Histórico por Monto, Tipo de Nómina y Ejercido
+                Reporte: Honorarios por Fecha
             </Typography>
 
-            {/* Rango de fechas */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Grid container spacing={2} justifyContent="center" marginBottom="20px">
                     <Grid item xs={12} sm={6} md={3}>
                         <DatePicker
                             label="Fecha de Inicio"
                             value={startDate}
-                            onChange={(newStartDate) => {
-                                setStartDate(newStartDate);
-                                if (endDate.isBefore(newStartDate)) {
-                                    setEndDate(newStartDate);
-                                }
-                            }}
+                            onChange={(newStartDate) => setStartDate(newStartDate)}
                             minDate={dayjs('2024-01-01')}
                             renderInput={(params) => <TextField {...params} fullWidth />}
                         />
@@ -206,7 +222,6 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                 </Typography>
             )}
 
-            {/* Barra de búsqueda */}
             <TextField
                 label="Buscar"
                 variant="outlined"
@@ -216,7 +231,6 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                 style={{ marginBottom: '20px', maxWidth: '1200px' }}
             />
 
-            {/* Seleccionar columnas */}
             <Button
                 variant="contained"
                 onClick={() => setCollapseOpen(!collapseOpen)}
@@ -230,7 +244,7 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                     <Typography variant="h6" align="center" gutterBottom>
                         Campos para generar tabla
                     </Typography>
-                    <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" gap="10px">
+                    <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap="10px">
                         <FormControlLabel
                             control={
                                 <Checkbox
@@ -243,7 +257,7 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                                 />
                             }
                             label="Todos los campos"
-                            style={{ gridColumn: 'span 4' }}
+                            style={{ gridColumn: 'span 3' }}
                         />
                         {availableColumns.map((col) => (
                             <FormControlLabel
@@ -272,7 +286,6 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                 </Box>
             </Collapse>
 
-            {/* Tabla */}
             <Box height="500px" width="100%" maxWidth="1200px">
                 <DataGrid
                     rows={filteredData}
@@ -283,23 +296,57 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                 />
             </Box>
 
-            {/* Botones de exportación */}
-            <Box marginTop="20px" display="flex" gap="10px">
-                <Button variant="outlined" onClick={() => handleExport('csv')}>
-                    Exportar CSV
+            <Box display="flex" gap="10px" marginTop="20px">
+                <Button
+                    variant="outlined"
+                    sx={{
+                        color: '#a80b3b', // Texto rojo
+                        border: '1px solid #a80b3b', // Borde rojo
+                        backgroundColor: 'white', // Fondo blanco
+                        '&:hover': {
+                            backgroundColor: '#f5f5f5', // Fondo al pasar el mouse
+                        },
+                        textTransform: 'none', // Evitar texto en mayúsculas
+                    }}
+                    onClick={exportToCSV}
+                >
+                    EXPORTAR CSV
                 </Button>
-                <Button variant="outlined" onClick={() => handleExport('excel')}>
-                    Exportar Excel
+                <Button
+                    variant="outlined"
+                    sx={{
+                        color: '#a80b3b',
+                        border: '1px solid #a80b3b',
+                        backgroundColor: 'white',
+                        '&:hover': {
+                            backgroundColor: '#f5f5f5',
+                        },
+                        textTransform: 'none',
+                    }}
+                    onClick={exportToExcel}
+                >
+                    EXPORTAR EXCEL
                 </Button>
-                <Button variant="outlined" onClick={() => handleExport('pdf')}>
-                    Exportar PDF
+                <Button
+                    variant="outlined"
+                    sx={{
+                        color: '#a80b3b',
+                        border: '1px solid #a80b3b',
+                        backgroundColor: 'white',
+                        '&:hover': {
+                            backgroundColor: '#f5f5f5',
+                        },
+                        textTransform: 'none',
+                    }}
+                    onClick={exportToPDF}
+                >
+                    EXPORTAR PDF
                 </Button>
             </Box>
 
-            {/* Modal */}
             <Modal
-                open={showModal}
-                onClose={() => setShowModal(false)}
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
                 aria-labelledby="modal-title"
                 aria-describedby="modal-description"
             >
@@ -309,8 +356,8 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        width: '50%',
-                        backgroundColor: 'white',
+                        width: '400px',
+                        bgcolor: 'background.paper',
                         borderRadius: '8px',
                         boxShadow: 24,
                         p: 4,
@@ -320,13 +367,15 @@ export default function ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido() {
                     <Typography id="modal-title" variant="h6" gutterBottom>
                         Por favor selecciona al menos un campo
                     </Typography>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => setShowModal(false)}
-                    >
-                        Cerrar
-                    </Button>
+                    <Box textAlign="center" marginTop="20px">
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => setModalOpen(false)}
+                        >
+                            Cerrar
+                        </Button>
+                    </Box>
                 </Box>
             </Modal>
         </Box>
