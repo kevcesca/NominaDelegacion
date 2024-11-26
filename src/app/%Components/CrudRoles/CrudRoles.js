@@ -48,6 +48,31 @@ const CrudRoles = () => {
         fetchRoles();
     }, []);
 
+    // Función para manejar la creación de un nuevo rol
+    const handleRoleCreated = async (newRole) => {
+        try {
+            const response = await fetch(`${API_USERS_URL}/roles-permissions`, {
+                credentials: 'include',
+            });
+    
+            if (!response.ok) {
+                throw new Error('Error al obtener los roles después de crear uno nuevo');
+            }
+    
+            const updatedRoles = await response.json();
+            const mappedRoles = updatedRoles.map((role) => ({
+                id: role.rol_id,
+                name: role.nombre_rol,
+                description: role.descripcion_rol,
+                permissions: role.permisos || [],
+            }));
+    
+            setRoles(mappedRoles); // Actualiza la lista completa de roles en el estado
+        } catch (error) {
+            console.error('Error al actualizar la tabla después de crear un rol:', error);
+        }
+    };    
+
     // Actualizar un rol
     const updateRole = async (id, updatedData) => {
         try {
@@ -84,7 +109,7 @@ const CrudRoles = () => {
             }
 
             setRoles((prevRoles) => prevRoles.filter((role) => !selectedRoles.includes(role.id)));
-            setSelectedRoles([]);
+            setSelectedRoles([]); // Limpia la selección después de eliminar
             alert('Roles eliminados correctamente');
         } catch (error) {
             console.error('Error al eliminar roles:', error);
@@ -110,8 +135,10 @@ const CrudRoles = () => {
     return (
         <div className={styles.pageContainer}>
             <Toolbar
+                selectedRoles={roles.filter((role) => selectedRoles.includes(role.id))} // Pasa los roles seleccionados
                 onDeleteSelected={deleteSelectedRoles}
                 disableDelete={selectedRoles.length === 0} // Deshabilitar si no hay roles seleccionados
+                onRoleCreated={handleRoleCreated} // Pasa la función como prop
             />
             {loading ? (
                 <div>Cargando roles...</div>

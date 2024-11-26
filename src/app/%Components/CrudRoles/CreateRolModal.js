@@ -61,29 +61,28 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
             alert('Por favor completa todos los campos y selecciona al menos un permiso.');
             return;
         }
-
+    
         try {
             const response = await fetch(`${API_USERS_URL}/roles`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     nombre_rol: roleData.name,
                     descripcion_rol: roleData.description,
                     permisos: selectedPermissions,
                 }),
             });
-
+    
             if (!response.ok) throw new Error('Error al crear el rol');
-
+    
             const newRole = await response.json();
-            onRoleCreated(newRole.data); // Notificar al componente principal
-            onClose(); // Cerrar el modal
+    
+            onRoleCreated(newRole.data); // Llama a handleRoleCreated en CrudRoles
+            onClose(); // Cierra el modal
         } catch (error) {
             console.error('Error al crear el rol:', error);
         }
-    };
+    };    
 
     const filteredPermissions = permissions.filter(
         (permission) =>
