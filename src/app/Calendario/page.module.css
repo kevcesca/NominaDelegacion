@@ -196,3 +196,47 @@
   color: #000;
   font-weight: bold;
 }
+
+.calendarTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.day {
+  width: 14.28%;
+  height: 100px;
+  vertical-align: top;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  position: relative;
+  padding: 5px;
+}
+
+.dayNumber {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.today {
+  background-color: #ffebcc;
+}
+
+.selected {
+  background-color: #cce5ff;
+}
+
+.eventList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: #007bff;
+}
+
+.eventItem {
+  margin: 2px 0;
+}
+
+.emptyCell {
+  background-color: #f9f9f9;
+}
