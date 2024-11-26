@@ -19,16 +19,17 @@ export default function UserTable({
     newUser,
     handleNewUserChange,
     handleNewUserSubmit,
-    handleCancelAddUser
+    handleCancelAddUser,
 }) {
     return (
         <table className={styles.table}>
             <thead>
                 <tr>
                     <th>
+                        {/* Checkbox para seleccionar todos */}
                         <input
                             type="checkbox"
-                            onChange={handleSelectAll}
+                            onChange={(e) => handleSelectAll(e.target.checked)}
                             checked={
                                 selectedUsers.length === usuariosFiltrados.length &&
                                 usuariosFiltrados.length > 0
