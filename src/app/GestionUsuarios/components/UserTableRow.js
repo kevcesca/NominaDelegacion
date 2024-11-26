@@ -13,25 +13,32 @@ const UserTableRow = ({
     onInputChange,
     onConfirmEdit,
     onMenuOpen,
-    onRolesUpdated, // Nueva prop para manejar la actualización de roles
+    onRolesUpdated,
+    isSelected,
+    onToggleSelect,
 }) => {
-    const [isRolesModalOpen, setIsRolesModalOpen] = useState(false); // Estado local para el modal de roles
+    const [isRolesModalOpen, setIsRolesModalOpen] = useState(false);
 
-    // Método para manejar la apertura del modal
     const handleOpenRolesModal = () => {
-        console.log('Abriendo modal de roles...'); // Depuración
         setIsRolesModalOpen(true);
     };
 
-    // Método para manejar el cierre del modal
     const handleCloseRolesModal = () => {
-        console.log('Cerrando modal de roles...'); // Depuración
         setIsRolesModalOpen(false);
     };
 
     return (
         <>
             <tr className={!user.Activo ? styles.disabledRow : ''}>
+                {/* Checkbox para seleccionar al usuario */}
+                <td>
+                    <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={onToggleSelect}
+                    />
+                </td>
+
                 <td>{user['ID Empleado']}</td>
                 <td>{user['Nombre Empleado']}</td>
 
@@ -41,7 +48,11 @@ const UserTableRow = ({
                         <TextField
                             variant="outlined"
                             size="small"
-                            value={editedFields['Nombre de Usuario'] || ''}
+                            value={
+                                editedFields['Nombre de Usuario'] !== undefined
+                                    ? editedFields['Nombre de Usuario']
+                                    : user['Nombre de Usuario']
+                            }
                             onChange={(e) => onInputChange('Nombre de Usuario', e.target.value)}
                             className={styles.editableField}
                         />
@@ -56,7 +67,11 @@ const UserTableRow = ({
                         <TextField
                             variant="outlined"
                             size="small"
-                            value={editedFields.Email || ''}
+                            value={
+                                editedFields.Email !== undefined
+                                    ? editedFields.Email
+                                    : user.Email
+                            }
                             onChange={(e) => onInputChange('Email', e.target.value)}
                             className={styles.editableField}
                         />
@@ -66,24 +81,29 @@ const UserTableRow = ({
                 </td>
 
                 {/* Roles */}
+                <td>{user.Rol}</td>
+
+                {/* Botón de "Editar roles" */}
                 <td>
-                    {user.Rol}
                     <Tooltip title="Editar roles">
                         <IconButton onClick={handleOpenRolesModal}>
                             <AddCircleOutlineIcon />
                         </IconButton>
                     </Tooltip>
                 </td>
-
                 <td>{new Date(user['Fecha de Alta']).toLocaleDateString()}</td>
                 <td>{user.Asignó}</td>
+
+
+
+                {/* Opciones */}
                 <td>
                     {isEditing ? (
                         <Button
                             variant="contained"
                             color="primary"
                             size="small"
-                            onClick={onConfirmEdit}
+                            onClick={onConfirmEdit} // Llamar la función del padre
                             className={styles.confirmButton}
                         >
                             Confirmar
@@ -98,11 +118,11 @@ const UserTableRow = ({
 
             {/* Modal de roles */}
             <AssignRolesModal
-                isOpen={isRolesModalOpen} // Cambiar de `open` a `isOpen` para mantener consistencia
-                onClose={handleCloseRolesModal} // Usar el método para cerrar el modal
-                user={user} // Pasar el usuario completo como prop
+                isOpen={isRolesModalOpen}
+                onClose={handleCloseRolesModal}
+                user={user}
                 onRolesUpdated={(newRoles) => {
-                    onRolesUpdated(user['ID Empleado'], newRoles); // Llamar al método del padre para actualizar los roles
+                    onRolesUpdated(user['ID Empleado'], newRoles);
                 }}
             />
         </>

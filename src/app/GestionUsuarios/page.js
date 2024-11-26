@@ -20,6 +20,7 @@ const UserTable = () => {
     const [editedFields, setEditedFields] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isRolesModalOpen, setIsRolesModalOpen] = useState(false); // Estado del modal de roles
+    const [selectedUsers, setSelectedUsers] = useState([]); // Manejo de selección de usuarios
 
     const openMenu = Boolean(anchorEl);
 
@@ -35,13 +36,49 @@ const UserTable = () => {
         setSelectedUser(null);
     };
 
+    // Selección global de usuarios
+    const handleSelectAll = (checked) => {
+        if (checked) {
+            const allUserIds = users.map((user) => user['ID Empleado']);
+            setSelectedUsers(allUserIds);
+        } else {
+            setSelectedUsers([]);
+        }
+    };
+
+    // Selección individual de usuarios
+    const handleSelectUser = (userId) => {
+        setSelectedUsers((prevSelected) =>
+            prevSelected.includes(userId)
+                ? prevSelected.filter((id) => id !== userId)
+                : [...prevSelected, userId]
+        );
+    };
+
+    // Verificar si todos los usuarios seleccionados están habilitados
+    const areAllSelectedUsersActive = selectedUsers.every((userId) => {
+        const user = users.find((u) => u['ID Empleado'] === userId);
+        return user?.Activo;
+    });
+
+    // Acción para habilitar/deshabilitar usuarios seleccionados
+    const handleToggleSelectedUsers = async () => {
+        for (const userId of selectedUsers) {
+            await toggleUserStatus(userId); // Usamos el método de `useUsers`
+        }
+        await fetchUsers(); // Refrescamos la lista después de las operaciones
+        setSelectedUsers([]); // Limpiamos la selección
+    };
+
     // Entrar en modo edición al hacer doble clic
     const handleDoubleClick = (user, field) => {
         setEditingUser(user['ID Empleado']);
-        setEditedFields({
+        // Inicializar los campos editables con los valores actuales del usuario
+        setEditedFields((prevFields) => ({
+            ...prevFields,
             'Nombre de Usuario': user['Nombre de Usuario'],
             Email: user.Email,
-        });
+        }));
     };
 
     // Manejar cambios en los campos editables
@@ -80,23 +117,6 @@ const UserTable = () => {
         }
     };
 
-    // Abrir el modal de roles
-    const handleOpenRolesModal = (user) => {
-        setSelectedUser(user);
-        setIsRolesModalOpen(true);
-    };
-
-    // Manejar la actualización de roles desde el modal
-    const handleRolesUpdated = (userId, newRoles) => {
-        setUsers((prevUsers) =>
-            prevUsers.map((user) =>
-                user['ID Empleado'] === userId
-                    ? { ...user, Rol: newRoles.join(', ') } // Actualizar los roles en la lista local
-                    : user
-            )
-        );
-    };
-
     return (
         <div className={styles.container}>
             <h2 className={styles.title}>Gestión de Usuarios</h2>
@@ -109,14 +129,36 @@ const UserTable = () => {
                 Añadir Usuario
             </Button>
 
+            {/* Botón dinámico: Solo aparece si se seleccionan 2 o más usuarios */}
+            {selectedUsers.length >= 2 && (
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleToggleSelectedUsers}
+                    style={{ marginBottom: '10px', marginLeft: '10px' }}
+                >
+                    {areAllSelectedUsersActive
+                        ? 'Deshabilitar Usuarios'
+                        : 'Habilitar Usuarios'}
+                </Button>
+            )}
+
             <table className={styles.table}>
                 <thead>
                     <tr>
+                        <th>
+                            <input
+                                type="checkbox"
+                                checked={selectedUsers.length === users.length && users.length > 0}
+                                onChange={(e) => handleSelectAll(e.target.checked)}
+                            />
+                        </th>
                         <th>ID Empleado</th>
                         <th>Nombre Empleado</th>
                         <th>Nombre Usuario</th>
                         <th>Email</th>
                         <th>Rol</th>
+                        <th></th> {/* Columna para "Editar roles" */}
                         <th>Fecha de Alta</th>
                         <th>Asignó</th>
                         <th>Opciones</th>
@@ -132,9 +174,21 @@ const UserTable = () => {
                             onDoubleClick={handleDoubleClick}
                             onInputChange={handleInputChange}
                             onConfirmEdit={handleConfirmEdit}
-                            onMenuOpen={handleMenuOpen}
-                            onRolesUpdated={handleRolesUpdated} // Pasar el handler al componente
-                            onOpenRolesModal={handleOpenRolesModal} // Pasar para abrir el modal de roles
+                            onMenuOpen={(e, user) => {
+                                setAnchorEl(e.currentTarget);
+                                setSelectedUser(user);
+                            }}
+                            onRolesUpdated={(userId, newRoles) => {
+                                setUsers((prevUsers) =>
+                                    prevUsers.map((u) =>
+                                        u['ID Empleado'] === userId
+                                            ? { ...u, Rol: newRoles.join(', ') }
+                                            : u
+                                    )
+                                );
+                            }}
+                            isSelected={selectedUsers.includes(user['ID Empleado'])}
+                            onToggleSelect={() => handleSelectUser(user['ID Empleado'])}
                         />
                     ))}
                 </tbody>
@@ -142,11 +196,11 @@ const UserTable = () => {
 
             <UserActionsMenu
                 anchorEl={anchorEl}
-                open={openMenu}
-                onClose={handleMenuClose}
+                open={Boolean(anchorEl)}
+                onClose={() => setAnchorEl(null)}
                 onToggleStatus={() => {
                     toggleUserStatus(selectedUser['ID Empleado']);
-                    handleMenuClose();
+                    setAnchorEl(null);
                 }}
                 isActive={selectedUser?.Activo}
             />
@@ -163,8 +217,14 @@ const UserTable = () => {
                 onClose={() => setIsRolesModalOpen(false)}
                 user={selectedUser}
                 onRolesUpdated={(newRoles) =>
-                    handleRolesUpdated(selectedUser?.['ID Empleado'], newRoles)
-                } // Actualizamos roles tras guardar
+                    setUsers((prevUsers) =>
+                        prevUsers.map((u) =>
+                            u['ID Empleado'] === selectedUser?.['ID Empleado']
+                                ? { ...u, Rol: newRoles.join(', ') }
+                                : u
+                        )
+                    )
+                }
             />
         </div>
     );
