@@ -6,9 +6,9 @@ import ProtectedView from '../../%Components/ProtectedView/ProtectedView';
 
 
 const empleados = [
-    { id: 13515, nombre: "Juan Pérez", tipoNomina: "Estructura", percepciones: "$5200", deducciones: "$200", liquido: "$5000", clc: "CLC1234", estadoCheque: "Creado" },
-    { id: 13516, nombre: "Ana Gómez", tipoNomina: "Nómina 8", percepciones: "$4700", deducciones: "$200", liquido: "$4500", clc: "CLC5678", estadoCheque: "Creado" },
-    { id: 13517, nombre: "Luis Ramírez", tipoNomina: "Base", percepciones: "$4200", deducciones: "$200", liquido: "$4000", clc: "CLC9012", estadoCheque: "Creado" },
+    { id: 13515, nombre: "Juan Pérez", tipoNomina: "Estructura", percepciones: "$5200", deducciones: "$200", liquido: "$5000", estadoCheque: "Creado" },
+    { id: 13516, nombre: "Ana Gómez", tipoNomina: "Nómina 8", percepciones: "$4700", deducciones: "$200", liquido: "$4500", estadoCheque: "Creado" },
+    { id: 13517, nombre: "Luis Ramírez", tipoNomina: "Base", percepciones: "$4200", deducciones: "$200", liquido: "$4000", estadoCheque: "Creado" },
 ];
 
 export default function GestorPolizas() {
@@ -133,7 +133,6 @@ export default function GestorPolizas() {
                                         <TableCell>Percepciones</TableCell>
                                         <TableCell>Deducciones</TableCell>
                                         <TableCell>Líquido</TableCell>
-                                        <TableCell>CLC</TableCell>
                                         <TableCell>Estado Cheque</TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -148,7 +147,6 @@ export default function GestorPolizas() {
                                             <TableCell>{empleado.percepciones}</TableCell>
                                             <TableCell>{empleado.deducciones}</TableCell>
                                             <TableCell>{empleado.liquido}</TableCell>
-                                            <TableCell>{empleado.clc}</TableCell>
                                             <TableCell>{empleado.estadoCheque}</TableCell>
                                         </TableRow>
                                     ))}

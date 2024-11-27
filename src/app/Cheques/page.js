@@ -93,10 +93,9 @@ export default function ChequeManager() {
               <InputLabel>Tipo de Nómina</InputLabel>
               <Select id="nomina" label="Tipo de Nómina" defaultValue="">
                 <MenuItem value="compuesta">Compuesta</MenuItem>
-                <MenuItem value="base">Base</MenuItem>
-                <MenuItem value="nomina8">Nómina 8</MenuItem>
-                <MenuItem value="estructura">Estructura</MenuItem>
-                <MenuItem value="extraordinario">Extraordinario</MenuItem>
+                <MenuItem value="base">Finiquitos</MenuItem>
+                <MenuItem value="extraordinario">Extraordinarios</MenuItem>
+                
               </Select>
             </FormControl>
 
@@ -144,7 +143,6 @@ export default function ChequeManager() {
                     <TableCell>Estado Cheque</TableCell>
                     <TableCell>Fecha</TableCell>
                     <TableCell>Quincena</TableCell>
-                    <TableCell>CLC</TableCell>
                     <TableCell>Tipo de Pago</TableCell>
                   </TableRow>
                 </TableHead>
@@ -166,7 +164,6 @@ export default function ChequeManager() {
                         <TableCell>{empleado.estadoCheque}</TableCell>
                         <TableCell>{empleado.fecha}</TableCell>
                         <TableCell>{empleado.quincena}</TableCell>
-                        <TableCell>{empleado.clc}</TableCell>
                         <TableCell>{empleado.tipoPago}</TableCell>
                       </TableRow>
                     ))

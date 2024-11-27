@@ -1,254 +1,225 @@
 "use client";
 import { useState } from 'react';
 import styles from '../Reposicion/page.module.css';
-import Link from 'next/link';
-import { Box, Typography, TextField, Button, Paper, Grid, ThemeProvider } from '@mui/material';
-import { FileUpload } from 'primereact/fileupload';
-import ProtectedView from "../../%Components/ProtectedView/ProtectedView"; // Ajusta la ruta según tu estructura
-import theme from '../../$tema/theme';
+import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Checkbox } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import Edit from '@mui/icons-material/Edit';
+import Save from '@mui/icons-material/Save';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
 
-function RepositionCheque() {
-  const [employeeData] = useState({
-    "123": { firstName: "Juan", lastName: "Pérez", amount: "1500", payrollType: "NOMINA 8" },
-    "456": { firstName: "Ana", lastName: "Gómez", amount: "2000", payrollType: "ESTRUCTURA" }
-  });
+export default function RepositionChequesTable() {
+    const [cheques, setCheques] = useState([
+        {
+            id: '101',
+            employeeName: 'Juan Pérez',
+            amount: '1500',
+            payrollType: 'NOMINA 8',
+            chequeFolio: '2001',
+            policyFolio: '1001',
+            fortnight: '1',
+            year: '2024',
+            reason: '',
+            evidence: null,
+        },
+        {
+            id: '102',
+            employeeName: 'Ana Gómez',
+            amount: '2000',
+            payrollType: 'ESTRUCTURA',
+            chequeFolio: '2002',
+            policyFolio: '1002',
+            fortnight: '2',
+            year: '2024',
+            reason: '',
+            evidence: null,
+        },
+    ]);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [editedRow, setEditedRow] = useState(null);
+    const [editedReason, setEditedReason] = useState('');
+    const [editedEvidence, setEditedEvidence] = useState(null);
+    const [successDialog, setSuccessDialog] = useState({ open: false, message: '' });
+    const [selectedRows, setSelectedRows] = useState([]);
 
-  const [checkData] = useState({
-    "101": { policyFolio: "1001", fortnight: "1", year: "2024" },
-    "102": { policyFolio: "1002", fortnight: "2", year: "2024" }
-  });
+    const handleEditStart = (row) => {
+        setEditedRow(row.id);
+        setEditedReason(row.reason);
+        setEditedEvidence(null);
+    };
 
-  const [formState, setFormState] = useState({
-    employeeId: '',
-    checkFolio: '',
-    reason: '',
-    evidence: null
-  });
+    const handleSaveEdit = () => {
+        if (!editedReason.trim() || !editedEvidence) {
+            setSuccessDialog({ open: true, message: 'El motivo y la evidencia son obligatorios.' });
+            return;
+        }
 
-  const [displayData, setDisplayData] = useState({
-    firstName: '-',
-    lastName: '-',
-    amount: '-',
-    payrollType: '-',
-    policyFolio: '-',
-    fortnight: '-',
-    year: '-'
-  });
+        setCheques((prev) =>
+            prev.map((cheque) =>
+                cheque.id === editedRow
+                    ? { ...cheque, reason: editedReason, evidence: editedEvidence }
+                    : cheque
+            )
+        );
 
-  const [successMessage, setSuccessMessage] = useState(false);
+        setEditedRow(null);
+        setSuccessDialog({ open: true, message: 'Datos actualizados correctamente.' });
+    };
 
-  const fetchEmployeeData = () => {
-    const data = employeeData[formState.employeeId];
-    if (data) {
-      setDisplayData((prevState) => ({
-        ...prevState,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        amount: data.amount,
-        payrollType: data.payrollType
-      }));
-    } else {
-      setDisplayData((prevState) => ({
-        ...prevState,
-        firstName: '-',
-        lastName: '-',
-        amount: '-',
-        payrollType: '-'
-      }));
-    }
-  };
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
 
-  const fetchCheckData = () => {
-    const data = checkData[formState.checkFolio];
-    if (data) {
-      setDisplayData((prevState) => ({
-        ...prevState,
-        policyFolio: data.policyFolio,
-        fortnight: data.fortnight,
-        year: data.year
-      }));
-    } else {
-      setDisplayData((prevState) => ({
-        ...prevState,
-        policyFolio: '-',
-        fortnight: '-',
-        year: '-'
-      }));
-    }
-  };
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setSuccessMessage(true);
-    setFormState({ employeeId: '', checkFolio: '', reason: '', evidence: null });
-    setTimeout(() => setSuccessMessage(false), 3000);
-  };
+    const handleCheckboxChange = (id) => {
+        setSelectedRows((prev) =>
+            prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+        );
+    };
 
-  return (
-    <ThemeProvider theme={theme}>
-      <Paper elevation={3} className={styles.container}>
-        <Typography variant="h4" gutterBottom>Reposición de Cheques</Typography>
-        <form id="repositionForm" onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            <Grid className={styles.inputContainer} item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="ID Empleado"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                placeholder="Ingrese el ID del empleado"
-                value={formState.employeeId}
-                onChange={(e) => setFormState({ ...formState, employeeId: e.target.value })}
-                onInput={fetchEmployeeData}
-                required
-              />
-              <TextField
-                fullWidth
-                label="Nombre"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.firstName}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Apellido"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.lastName}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Monto"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.amount}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Tipo de Nómina"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.payrollType}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Folio de Cheque"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                type="number"
-                placeholder="Ingrese el folio del cheque"
-                value={formState.checkFolio}
-                onChange={(e) => setFormState({ ...formState, checkFolio: e.target.value })}
-                onInput={fetchCheckData}
-                required
-              />
-              <TextField
-                fullWidth
-                label="Folio de Póliza"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.policyFolio}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Quincena"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.fortnight}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Año"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.year}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-            </Grid>
-          </Grid>
-
-          <TextField
-            fullWidth
-            label="Motivo de Reposición"
-            variant="outlined"
-            className={styles.textField}
-            size="small"
-            placeholder="Describa el motivo de la reposición"
-            value={formState.reason}
-            onChange={(e) => setFormState({ ...formState, reason: e.target.value })}
-            required
-            multiline
-            rows={4}
-            sx={{ marginTop: '1.5rem' }}
-          />
-
-          <Box className={styles.buttonContainer2}>
-            <Typography variant="body1" sx={{ marginTop: '1rem' }}>Subir Evidencia (Obligatorio):</Typography>
-            <FileUpload
-              mode="basic"
-              name="evidence"
-              accept="image/*,application/pdf"
-              customUpload
-              auto
-              uploadHandler={(e) => setFormState({ ...formState, evidence: e.files[0] })}
-              chooseLabel="Seleccionar Archivo"
-              className={styles.uploadButton}
-            />
-          </Box>
-
-          <Box className={styles.buttonContainer}>
-            <Link href="/Cheques">
-              <Button type="submit" variant="contained" color="primary">Reponer Cheque</Button>
-            </Link>
+    return (
+        <Box className={styles.container}>
+            <Typography variant="h4" className={styles.title}>
+                Reposición de Cheques
+            </Typography>
             <Button
-              type="reset"
-              color="secondary"
-              onClick={() => setFormState({ employeeId: '', checkFolio: '', reason: '', evidence: null })}
+                variant="contained"
+                color="primary"
+                style={{ marginBottom: '20px' }}
+                onClick={() => {
+                    console.log("Ruta a donde se enviarán los cheques seleccionados:", selectedRows);
+                }}
             >
-              Cancelar
+                Generar Cheques
             </Button>
-          </Box>
-        </form>
-      </Paper>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell padding="checkbox">
+                                <Checkbox
+                                    indeterminate={
+                                        selectedRows.length > 0 && selectedRows.length < cheques.length
+                                    }
+                                    checked={selectedRows.length === cheques.length}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectedRows(cheques.map((cheque) => cheque.id));
+                                        } else {
+                                            setSelectedRows([]);
+                                        }
+                                    }}
+                                />
+                            </TableCell>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Nombre</TableCell>
+                            <TableCell>Monto</TableCell>
+                            <TableCell>Tipo de Nómina</TableCell>
+                            <TableCell>Folio Cheque</TableCell>
+                            <TableCell>Folio Póliza</TableCell>
+                            <TableCell>Quincena</TableCell>
+                            <TableCell>Año</TableCell>
+                            <TableCell>Motivo</TableCell>
+                            <TableCell>Evidencia</TableCell>
+                            <TableCell>Acciones</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {cheques
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map((cheque) => (
+                                <TableRow key={cheque.id}>
+                                    <TableCell padding="checkbox">
+                                        <Checkbox
+                                            checked={selectedRows.includes(cheque.id)}
+                                            onChange={() => handleCheckboxChange(cheque.id)}
+                                        />
+                                    </TableCell>
+                                    <TableCell>{cheque.id}</TableCell>
+                                    <TableCell>{cheque.employeeName}</TableCell>
+                                    <TableCell>{cheque.amount}</TableCell>
+                                    <TableCell>{cheque.payrollType}</TableCell>
+                                    <TableCell>{cheque.chequeFolio}</TableCell>
+                                    <TableCell>{cheque.policyFolio}</TableCell>
+                                    <TableCell>{cheque.fortnight}</TableCell>
+                                    <TableCell>{cheque.year}</TableCell>
+                                    <TableCell>
+                                        {editedRow === cheque.id ? (
+                                            <TextField
+                                                value={editedReason}
+                                                onChange={(e) => setEditedReason(e.target.value)}
+                                                fullWidth
+                                                size="small"
+                                                multiline
+                                                rows={1}
+                                                placeholder="Ingrese el motivo"
+                                            />
+                                        ) : (
+                                            cheque.reason || '-'
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {editedRow === cheque.id ? (
+                                            <input
+                                                type="file"
+                                                onChange={(e) => setEditedEvidence(e.target.files[0])}
+                                                required
+                                            />
+                                        ) : (
+                                            cheque.evidence ? cheque.evidence.name : '-'
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <IconButton color="primary" onClick={() => handleEditStart(cheque)}>
+                                            <Edit />
+                                        </IconButton>
+                                        {editedRow === cheque.id && (
+                                            <IconButton color="primary" onClick={handleSaveEdit} style={{ marginLeft: '8px' }}>
+                                                <Save />
+                                            </IconButton>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                    </TableBody>
+                </Table>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={cheques.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            </TableContainer>
 
-      {successMessage && (
-        <Box className={styles.successMessage}>
-          <Typography variant="body1" color="success">¡Cheque repuesto exitosamente!</Typography>
+            {/* Modal de éxito */}
+            <Dialog
+                open={successDialog.open}
+                onClose={() => setSuccessDialog({ open: false, message: '' })}
+            >
+                <DialogTitle>Éxito</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>{successDialog.message}</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setSuccessDialog({ open: false, message: '' })}
+                        color="primary"
+                    >
+                        Cerrar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
-      )}
-    </ThemeProvider>
-  );
+    );
 }
-
-const ProtectedRepositionCheque = () => (
-  <ProtectedView requiredPermissions={["ver_reposicion_cheques", "Acceso_total"]}>
-    <RepositionCheque />
-  </ProtectedView>
-);
-
-export default ProtectedRepositionCheque;
