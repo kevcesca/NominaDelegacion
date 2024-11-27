@@ -1,6 +1,8 @@
 import React from 'react';
 import { Checkbox, IconButton, Tooltip, TextField, Button } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 import styles from './CrudRoles.module.css';
 
 const RoleRow = ({
@@ -15,17 +17,21 @@ const RoleRow = ({
     updateRole,
     onOpenModal,
 }) => {
+    // Inicia la edición del rol
     const startEditing = () => {
         setEditingRoleId(role.id);
         setEditValues({ name: role.name, description: role.description });
     };
 
+    // Cancela la edición
     const cancelEditing = () => {
         setEditingRoleId(null);
         setEditValues({ name: '', description: '' });
     };
 
+    // Guarda los cambios realizados al rol
     const saveEditing = () => {
+        // Actualiza el estado local
         setRoles((prevRoles) =>
             prevRoles.map((r) =>
                 r.id === role.id
@@ -33,19 +39,28 @@ const RoleRow = ({
                     : r
             )
         );
+        // Llama a la función para actualizar en el backend
         updateRole(role.id, {
             nombre_rol: editValues.name,
             descripcion_rol: editValues.description,
         });
-        setEditingRoleId(null);
+        setEditingRoleId(null); // Finaliza la edición
     };
 
     return (
         <tr>
+            {/* Checkbox de selección */}
             <td>
-                <Checkbox checked={isSelected} onChange={onToggleRole} />
+                <Checkbox
+                    checked={isSelected}
+                    onChange={onToggleRole}
+                />
             </td>
+
+            {/* ID del rol */}
             <td>{role.id}</td>
+
+            {/* Campo de nombre del rol */}
             <td onDoubleClick={startEditing}>
                 {editingRoleId === role.id ? (
                     <TextField
@@ -61,6 +76,8 @@ const RoleRow = ({
                     role.name
                 )}
             </td>
+
+            {/* Campo de descripción del rol */}
             <td onDoubleClick={startEditing}>
                 {editingRoleId === role.id ? (
                     <TextField
@@ -78,6 +95,8 @@ const RoleRow = ({
                     role.description
                 )}
             </td>
+
+            {/* Permisos del rol */}
             <td>
                 <div className={styles.permissionsCell}>
                     <span>{role.permissions.join(', ') || 'Sin permisos'}</span>
@@ -91,27 +110,35 @@ const RoleRow = ({
                     </Tooltip>
                 </div>
             </td>
+
+            {/* Botones de acción para guardar/cancelar */}
             {editingRoleId === role.id && (
                 <td>
                     <div className={styles.botonesAceptCancel}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={saveEditing}
-                            className={styles.buttonSave}
-                        >
-                            Guardar
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            color="secondary"
-                            size="small"
-                            onClick={cancelEditing}
-                            className={styles.buttonCancel}
-                        >
-                            Cancelar
-                        </Button>
+                        <Tooltip title="Guardar cambios">
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={saveEditing}
+                                startIcon={<SaveIcon />}
+                                className={styles.buttonSave}
+                            >
+                                Guardar
+                            </Button>
+                        </Tooltip>
+                        <Tooltip title="Cancelar edición">
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                size="small"
+                                onClick={cancelEditing}
+                                startIcon={<CancelIcon />}
+                                className={styles.buttonCancel}
+                            >
+                                Cancelar
+                            </Button>
+                        </Tooltip>
                     </div>
                 </td>
             )}

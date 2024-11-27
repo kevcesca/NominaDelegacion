@@ -51,7 +51,12 @@
 
 .disabledRow {
     opacity: 0.6; /* Reducir la opacidad para destacar que está deshabilitado */
-    background-color: #f9f9f9;
+    background-color: #e62f2f;
+}
+
+.disabledRow td:last-child ¡importat{
+  opacity: 1; /* Mantén la visibilidad completa de las últimas columnas */
+  color: inherit; /* Restaura el color original */
 }
 
 .modal {
@@ -89,3 +94,13 @@ form .MuiButton-root {
     height: 45px;
     font-weight: bold;
 }
+
+
+.provisionalPasswordMessage {
+    font-size: 14px; /* Tamaño de letra moderado */
+    color: #555; /* Color gris oscuro para buena legibilidad */
+    margin: 10px 0; /* Espaciado hacia arriba y abajo */
+    text-align:justify; /* Alineación a la izquierda */
+    font-weight: bold;
+  }
+  

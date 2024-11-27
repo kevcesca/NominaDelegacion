@@ -11,6 +11,7 @@ import {
     ListItemIcon,
     ListItemText,
     TextField,
+    Typography,
 } from '@mui/material';
 import { API_USERS_URL } from '../../%Config/apiConfig';
 
@@ -19,6 +20,7 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
     const [selectedPermissions, setSelectedPermissions] = useState([]); // IDs de los permisos seleccionados
     const [searchTerm, setSearchTerm] = useState(''); // Texto de búsqueda
     const [roleData, setRoleData] = useState({ name: '', description: '' }); // Datos del nuevo rol
+    const [showValidationMessage, setShowValidationMessage] = useState(false); // Mostrar mensaje de validación
 
     // Cargar permisos disponibles al abrir el modal
     useEffect(() => {
@@ -40,6 +42,16 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
         }
     }, [isOpen]);
 
+    // Restablecer formulario al abrir el modal
+    useEffect(() => {
+        if (isOpen) {
+            setRoleData({ name: '', description: '' }); // Vaciar campos de texto
+            setSelectedPermissions([]); // Deseleccionar permisos
+            setSearchTerm(''); // Limpiar búsqueda
+            setShowValidationMessage(false); // Ocultar mensaje de validación
+        }
+    }, [isOpen]);
+
     // Manejar selección de permisos
     const handleTogglePermission = (permissionId) => {
         setSelectedPermissions((prev) =>
@@ -57,11 +69,12 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
 
     // Guardar el nuevo rol
     const handleSave = async () => {
+        // Validar que todos los campos estén completos
         if (!roleData.name || !roleData.description || selectedPermissions.length === 0) {
-            alert('Por favor completa todos los campos y selecciona al menos un permiso.');
+            setShowValidationMessage(true); // Mostrar mensaje de validación
             return;
         }
-    
+
         try {
             const response = await fetch(`${API_USERS_URL}/roles`, {
                 method: 'POST',
@@ -72,28 +85,36 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
                     permisos: selectedPermissions,
                 }),
             });
-    
+
             if (!response.ok) throw new Error('Error al crear el rol');
-    
+
             const newRole = await response.json();
-    
+
             onRoleCreated(newRole.data); // Llama a handleRoleCreated en CrudRoles
             onClose(); // Cierra el modal
         } catch (error) {
             console.error('Error al crear el rol:', error);
         }
-    };    
+    };
 
+    // Filtrar permisos según el término de búsqueda
     const filteredPermissions = permissions.filter(
         (permission) =>
-            permission.acceso.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            permission.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+            (permission.acceso?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+            (permission.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
     );
 
     return (
         <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
             <DialogTitle>Crear Nuevo Rol</DialogTitle>
             <DialogContent>
+                {/* Mostrar mensaje de validación si hay campos vacíos */}
+                {showValidationMessage && (
+                    <Typography color="error" variant="body2" sx={{ marginBottom: 2 }}>
+                        Por favor, completa todos los campos y selecciona al menos un permiso.
+                    </Typography>
+                )}
+
                 {/* Inputs para nombre y descripción */}
                 <TextField
                     label="Nombre del Rol"
@@ -165,5 +186,3 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
 };
 
 export default CreateRoleModal;
-
-

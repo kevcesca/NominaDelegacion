@@ -365,7 +365,7 @@ export default function ReporteDeHonorariosPorFecha() {
                     }}
                 >
                     <Typography id="modal-title" variant="h6" gutterBottom>
-                        Por favor selecciona al menos un campo xd
+                        Por favor selecciona al menos un campo 
                     </Typography>
                     <Box textAlign="center" marginTop="20px">
                         <Button

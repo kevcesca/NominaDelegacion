@@ -14,21 +14,29 @@ export default function DepositoResumen({ resumenData, anio, quincena }) {
 
     // Limpia los datos para eliminar espacios en blanco y asegurar que las claves coincidan
     const limpiarDatos = (data) => {
-        return data.map(item => ({
-            ANIO: item.ANIO.trim(),
-            QUINCENA: item.QUINCENA.trim(),
-            NOMINA: item.nomina.trim(),
-            BANCO: item.banco.trim(),
-            PERCEPCIONES: parseFloat(item.PERCEPCIONES.trim().replace(/,/g, '')),
-            DEDUCCIONES: parseFloat(item.DEDUCCIONES.trim().replace(/,/g, '')),
-            LIQUIDO: parseFloat(item.LIQUIDO.trim().replace(/,/g, '')),
-            EMPLEADOS: parseInt(item.empleados.trim(), 10)
+        return data.map((item) => ({
+            ANIO: (item.ANIO || '').trim(),
+            QUINCENA: (item.QUINCENA || '').trim(),
+            NOMINA: (item.nomina || '').trim(),
+            BANCO: (item.banco || '').trim(),
+            PERCEPCIONES: parseFloat((item.PERCEPCIONES || '0').trim().replace(/,/g, '')),
+            DEDUCCIONES: parseFloat((item.DEDUCCIONES || '0').trim().replace(/,/g, '')),
+            LIQUIDO: parseFloat((item.LIQUIDO || '0').trim().replace(/,/g, '')),
+            EMPLEADOS: parseInt((item.empleados || '0').trim(), 10),
         }));
     };
 
+    // Depuración: detectar datos problemáticos
+    const problematicItems = resumenData.filter((item) =>
+        Object.values(item).some((value) => value === null || value === undefined)
+    );
+    if (problematicItems.length > 0) {
+        console.warn('Datos problemáticos detectados:', problematicItems);
+    }
+
     const depositoData = limpiarDatos(resumenData);
-    const datosNormales = depositoData.filter(item => item.BANCO !== 'Total');
-    const datosTotales = depositoData.filter(item => item.BANCO === 'Total');
+    const datosNormales = depositoData.filter((item) => item.BANCO !== 'Total');
+    const datosTotales = depositoData.filter((item) => item.BANCO === 'Total');
 
     const handleEmpleadosClick = (rowData) => {
         const { ANIO, QUINCENA, NOMINA, BANCO } = rowData;
@@ -56,8 +64,6 @@ export default function DepositoResumen({ resumenData, anio, quincena }) {
 
     return (
         <div className={`card ${styles.card}`}>
-           
-
             {/* Tabla de datos normales */}
             <DataTable
                 value={datosNormales}
