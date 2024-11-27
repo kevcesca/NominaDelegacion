@@ -116,6 +116,12 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
                         required
                         margin="normal"
                     />
+
+                    {/* Mensaje de Contraseña Provisional */}
+                    <label className={styles.provisionalPasswordMessage}>
+                        Contraseña provisional: Por seguridad, cámbiala en tu primer acceso.
+                    </label>
+
                     <TextField
                         label="Contraseña"
                         name="contrasena_usuario"
@@ -127,6 +133,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
                             readOnly: true, // Campo bloqueado
                         }}
                     />
+
                     <TextField
                         label="Asignó"
                         name="asigno"
@@ -137,6 +144,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
                             readOnly: true, // Campo bloqueado
                         }}
                     />
+
                     <Button type="submit" variant="contained" color="primary">
                         Registrar
                     </Button>
