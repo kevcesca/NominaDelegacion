@@ -2,253 +2,203 @@
 import { useState } from 'react';
 import styles from '../Reposicion/page.module.css';
 import Link from 'next/link';
-import { Box, Typography, TextField, Button, Paper, Grid, ThemeProvider } from '@mui/material';
+import { Box, Typography, TextField, Button, Paper, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { FileUpload } from 'primereact/fileupload';
 import ProtectedView from "../../%Components/ProtectedView/ProtectedView"; // Ajusta la ruta según tu estructura
 import theme from '../../$tema/theme';
 
+
+
+
 function RepositionCheque() {
+  // Datos estáticos para empleados y cheques
   const [employeeData] = useState({
-    "123": { firstName: "Juan", lastName: "Pérez", amount: "1500", payrollType: "NOMINA 8" },
-    "456": { firstName: "Ana", lastName: "Gómez", amount: "2000", payrollType: "ESTRUCTURA" }
+      "123": { firstName: "Juan", lastName: "Pérez", amount: "$5000", payrollType: "Base" },
+      "456": { firstName: "Ana", lastName: "Gómez", amount: "$4500", payrollType: "Nómina 8" }
   });
 
   const [checkData] = useState({
-    "101": { policyFolio: "1001", fortnight: "1", year: "2024" },
-    "102": { policyFolio: "1002", fortnight: "2", year: "2024" }
+      "50": { policyFolio: "001", fortnight: "1ra quincena de noviembre", year: "2024" },
+      "51": { policyFolio: "002", fortnight: "1ra quincena de noviembre", year: "2024" }
   });
 
+  // Estado para almacenar la información del formulario y los datos a mostrar
   const [formState, setFormState] = useState({
-    employeeId: '',
-    checkFolio: '',
-    reason: '',
-    evidence: null
+      employeeId: '',
+      checkFolio: '',
+      reason: '',
+      evidence: null
   });
 
   const [displayData, setDisplayData] = useState({
-    firstName: '-',
-    lastName: '-',
-    amount: '-',
-    payrollType: '-',
-    policyFolio: '-',
-    fortnight: '-',
-    year: '-'
+      firstName: '-',
+      lastName: '-',
+      amount: '-',
+      payrollType: '-',
+      policyFolio: '-',
+      fortnight: '-',
+      year: '-'
   });
 
+  const [cheques, setCheques] = useState([]);
   const [successMessage, setSuccessMessage] = useState(false);
 
+  // Función para obtener los datos del empleado según el ID
   const fetchEmployeeData = () => {
-    const data = employeeData[formState.employeeId];
-    if (data) {
-      setDisplayData((prevState) => ({
-        ...prevState,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        amount: data.amount,
-        payrollType: data.payrollType
-      }));
-    } else {
-      setDisplayData((prevState) => ({
-        ...prevState,
-        firstName: '-',
-        lastName: '-',
-        amount: '-',
-        payrollType: '-'
-      }));
-    }
+      const data = employeeData[formState.employeeId];
+      if (data) {
+          setDisplayData((prevState) => ({
+              ...prevState,
+              firstName: data.firstName,
+              lastName: data.lastName,
+              amount: data.amount,
+              payrollType: data.payrollType
+          }));
+      }
   };
 
+  // Función para obtener los datos del cheque según el folio
   const fetchCheckData = () => {
-    const data = checkData[formState.checkFolio];
-    if (data) {
-      setDisplayData((prevState) => ({
-        ...prevState,
-        policyFolio: data.policyFolio,
-        fortnight: data.fortnight,
-        year: data.year
-      }));
-    } else {
-      setDisplayData((prevState) => ({
-        ...prevState,
-        policyFolio: '-',
-        fortnight: '-',
-        year: '-'
-      }));
-    }
+      const data = checkData[formState.checkFolio];
+      if (data) {
+          setDisplayData((prevState) => ({
+              ...prevState,
+              policyFolio: data.policyFolio,
+              fortnight: data.fortnight,
+              year: data.year
+          }));
+      }
   };
 
+  // Función para manejar el envío del formulario
   const handleSubmit = (event) => {
-    event.preventDefault();
-    setSuccessMessage(true);
-    setFormState({ employeeId: '', checkFolio: '', reason: '', evidence: null });
-    setTimeout(() => setSuccessMessage(false), 3000);
+      event.preventDefault();
+
+      // Crear el nuevo cheque con la información del formulario
+      const newCheque = {
+          employeeId: formState.employeeId,
+          firstName: displayData.firstName,
+          lastName: displayData.lastName,
+          payrollType: displayData.payrollType,
+          checkFolio: formState.checkFolio,
+          policyFolio: displayData.policyFolio,
+          fortnight: displayData.fortnight,
+          year: displayData.year,
+          reason: formState.reason,
+          evidence: formState.evidence ? formState.evidence.name : '', // Mostrar solo el nombre del archivo
+          status: 'Reposición', // Estado de la reposición
+          paymentType: 'Cheque' // Tipo de pago
+      };
+
+      // Añadir el nuevo cheque a la tabla
+      setCheques([...cheques, newCheque]);
+
+      // Limpiar el formulario después de agregar el cheque
+      setFormState({ employeeId: '', checkFolio: '', reason: '', evidence: null });
+      setDisplayData({
+          firstName: '-',
+          lastName: '-',
+          amount: '-',
+          payrollType: '-',
+          policyFolio: '-',
+          fortnight: '-',
+          year: '-'
+      });
+      setSuccessMessage(true);
+
+      // Ocultar el mensaje de éxito después de 3 segundos
+      setTimeout(() => setSuccessMessage(false), 3000);
   };
 
   return (
-    <ThemeProvider theme={theme}>
       <Paper elevation={3} className={styles.container}>
-        <Typography variant="h4" gutterBottom>Reposición de Cheques</Typography>
-        <form id="repositionForm" onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            <Grid className={styles.inputContainer} item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="ID Empleado"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                placeholder="Ingrese el ID del empleado"
-                value={formState.employeeId}
-                onChange={(e) => setFormState({ ...formState, employeeId: e.target.value })}
-                onInput={fetchEmployeeData}
-                required
-              />
-              <TextField
-                fullWidth
-                label="Nombre"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.firstName}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Apellido"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.lastName}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Monto"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.amount}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Tipo de Nómina"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.payrollType}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-            </Grid>
+          <Typography variant="h4" gutterBottom>Reposición de Cheques</Typography>
+          <form onSubmit={handleSubmit}>
+              <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6}>
+                      <TextField 
+                          fullWidth 
+                          label="ID Empleado" 
+                          variant="outlined" 
+                          value={formState.employeeId} 
+                          onChange={(e) => setFormState({ ...formState, employeeId: e.target.value })} 
+                          onInput={fetchEmployeeData} 
+                          required 
+                      />
+                      <TextField 
+                          fullWidth 
+                          label="Folio de Cheque" 
+                          variant="outlined" 
+                          value={formState.checkFolio} 
+                          onChange={(e) => setFormState({ ...formState, checkFolio: e.target.value })} 
+                          onInput={fetchCheckData} 
+                          required 
+                      />
+                      <TextField 
+                          fullWidth 
+                          label="Motivo" 
+                          variant="outlined" 
+                          value={formState.reason} 
+                          onChange={(e) => setFormState({ ...formState, reason: e.target.value })} 
+                          required 
+                      />
+                      <FileUpload 
+                          name="file" 
+                          customUpload 
+                          uploadHandler={(e) => setFormState({ ...formState, evidence: e.files[0] })} 
+                          chooseLabel="Subir archivo" 
+                      />
+                  </Grid>
+              </Grid>
+              <Button variant="contained" color="primary" type="submit">Añadir Cheque</Button>
+          </form>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Folio de Cheque"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                type="number"
-                placeholder="Ingrese el folio del cheque"
-                value={formState.checkFolio}
-                onChange={(e) => setFormState({ ...formState, checkFolio: e.target.value })}
-                onInput={fetchCheckData}
-                required
-              />
-              <TextField
-                fullWidth
-                label="Folio de Póliza"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.policyFolio}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Quincena"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.fortnight}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-              <TextField
-                fullWidth
-                label="Año"
-                variant="outlined"
-                className={styles.textField}
-                size="small"
-                value={displayData.year}
-                InputProps={{ readOnly: true }}
-                sx={{ marginTop: '1rem' }}
-              />
-            </Grid>
-          </Grid>
+          {/* Tabla de cheques */}
+          <TableContainer component={Paper} sx={{ marginTop: '2rem' }}>
+              <Table>
+                  <TableHead>
+                      <TableRow>
+                          <TableCell><strong>ID Empleado</strong></TableCell>
+                          <TableCell><strong>Nombre</strong></TableCell>
+                          <TableCell><strong>Tipo Nómina</strong></TableCell>
+                          <TableCell><strong>F. Cheque</strong></TableCell>
+                          <TableCell><strong>Monto</strong></TableCell>
+                          <TableCell><strong>Folio de Póliza</strong></TableCell>
+                          <TableCell><strong>Quincena</strong></TableCell>
+                          <TableCell><strong>Motivo</strong></TableCell>
+                          <TableCell><strong>Estado</strong></TableCell>
+                          <TableCell><strong>Evidencia</strong></TableCell>
+                          <TableCell><strong>Tipo de Pago</strong></TableCell>
+                      </TableRow>
+                  </TableHead>
+                  <TableBody>
+                      {cheques.map((cheque, index) => (
+                          <TableRow key={index}>
+                              <TableCell>{cheque.employeeId}</TableCell>
+                              <TableCell>{cheque.firstName} {cheque.lastName}</TableCell>
+                              <TableCell>{cheque.payrollType}</TableCell>
+                              <TableCell>{cheque.checkFolio}</TableCell>
+                              <TableCell>{cheque.amount}</TableCell>
+                              <TableCell>{cheque.policyFolio}</TableCell>
+                              <TableCell>{cheque.fortnight}</TableCell>
+                              <TableCell>{cheque.reason}</TableCell>
+                              <TableCell>{cheque.status}</TableCell>
+                              <TableCell>{cheque.evidence}</TableCell>
+                              <TableCell>{cheque.paymentType}</TableCell>
+                          </TableRow>
+                      ))}
+                  </TableBody>
+              </Table>
+          </TableContainer>
 
-          <TextField
-            fullWidth
-            label="Motivo de Reposición"
-            variant="outlined"
-            className={styles.textField}
-            size="small"
-            placeholder="Describa el motivo de la reposición"
-            value={formState.reason}
-            onChange={(e) => setFormState({ ...formState, reason: e.target.value })}
-            required
-            multiline
-            rows={4}
-            sx={{ marginTop: '1.5rem' }}
-          />
-
-          <Box className={styles.buttonContainer2}>
-            <Typography variant="body1" sx={{ marginTop: '1rem' }}>Subir Evidencia (Obligatorio):</Typography>
-            <FileUpload
-              mode="basic"
-              name="evidence"
-              accept="image/*,application/pdf"
-              customUpload
-              auto
-              uploadHandler={(e) => setFormState({ ...formState, evidence: e.files[0] })}
-              chooseLabel="Seleccionar Archivo"
-              className={styles.uploadButton}
-            />
+          {/* Botón para generar cheques nuevos */}
+          <Box sx={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
+              <Link href="/ruta-generar-cheques">
+                  <Button variant="contained" color="primary">Generar Cheques Nuevos</Button>
+              </Link>
           </Box>
-
-          <Box className={styles.buttonContainer}>
-            <Link href="/Cheques">
-              <Button type="submit" variant="contained" color="primary">Reponer Cheque</Button>
-            </Link>
-            <Button
-              type="reset"
-              color="secondary"
-              onClick={() => setFormState({ employeeId: '', checkFolio: '', reason: '', evidence: null })}
-            >
-              Cancelar
-            </Button>
-          </Box>
-        </form>
       </Paper>
-
-      {successMessage && (
-        <Box className={styles.successMessage}>
-          <Typography variant="body1" color="success">¡Cheque repuesto exitosamente!</Typography>
-        </Box>
-      )}
-    </ThemeProvider>
   );
 }
 
-const ProtectedRepositionCheque = () => (
-  <ProtectedView requiredPermissions={["ver_reposicion_cheques", "Acceso_total"]}>
-    <RepositionCheque />
-  </ProtectedView>
-);
-
-export default ProtectedRepositionCheque;
+export default RepositionCheque;

@@ -1,6 +1,7 @@
 "use client"; // Asegura que el código se ejecute solo en el cliente
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
+import Link from "next/link";
 
 export default function MyComponent() {
   const router = useRouter();
@@ -22,13 +23,14 @@ export default function MyComponent() {
         <h3>Seleccione el tipo de cambio</h3>
 
         {/* Enlaces a las rutas de cambio de método de pago */}
-        <a href="/Cheques/CambioPago/Cheque-Trans" className={styles.optionButton}>
+        <Link href="/Cheques/CambioPago/Cheque-Trans" className={styles.optionButton}>
           Cheque a transferencias
-        </a>
-        <a href="/Cheques/CambioPago/Trans-Cheque" className={styles.optionButton}>
+        </Link>
+        <Link href="/Cheques/CambioPago/Trans-Cheque" className={styles.optionButton}>
           Transferencia a cheque
-        </a>
+        </Link>
       </div>
     </div>
   );
 }
+
