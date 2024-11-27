@@ -34,7 +34,7 @@ export default function Calendar({ selectedDate, events, onDateSelect }) {
     onDateSelect(formattedDate);
   };
 
-  // Generar las celdas del calendario
+  // Generar las celdas del calendario con eventos
   const renderDays = () => {
     const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7; // Garantiza celdas completas en la cuadrícula
     const cells = [];
@@ -44,11 +44,12 @@ export default function Calendar({ selectedDate, events, onDateSelect }) {
 
       if (i < firstDayOfMonth || day > daysInMonth) {
         // Celdas vacías (antes o después del mes)
-        cells.push(<td key={i}></td>);
+        cells.push(<td key={i} className={styles.emptyCell}></td>);
       } else {
         // Días del mes
         const formattedDate = `${currentYear}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const isSelected = selectedDate === formattedDate;
+        const dayEvents = events[formattedDate] || []; // Obtén eventos para este día
 
         cells.push(
           <td
@@ -56,7 +57,16 @@ export default function Calendar({ selectedDate, events, onDateSelect }) {
             className={`${styles.day} ${isToday(day) ? styles.today : ''} ${isSelected ? styles.selected : ''}`}
             onClick={() => handleDateClick(day)}
           >
-            {day}
+            <div className={styles.dayNumber}>{day}</div>
+            {dayEvents.length > 0 && (
+              <ul className={styles.eventList}>
+                {dayEvents.map((event, index) => (
+                  <li key={index} className={styles.eventItem}>
+                    {event.titulo}
+                  </li>
+                ))}
+              </ul>
+            )}
           </td>
         );
       }
@@ -67,6 +77,7 @@ export default function Calendar({ selectedDate, events, onDateSelect }) {
 
   return (
     <section className={styles.calendar}>
+      {/* Encabezado del calendario con navegación */}
       <h2 className={styles.header}>
         <button className={styles.navButton} onClick={handlePrevMonth}>
           &lt;
@@ -76,6 +87,8 @@ export default function Calendar({ selectedDate, events, onDateSelect }) {
           &gt;
         </button>
       </h2>
+
+      {/* Tabla del calendario */}
       <table className={styles.calendarTable}>
         <thead>
           <tr>
