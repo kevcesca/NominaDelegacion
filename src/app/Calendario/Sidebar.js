@@ -86,18 +86,20 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
       return;
     }
 
-    const newEvent = { titulo_evento: eventTitle, descripcion: eventDescription, fecha: selectedDate };
     const [year, month, day] = selectedDate.split('-');
-    const quincenaEvento = 'Primera quincena'; // Asumiendo que esto es fijo o calculado de alguna manera
+    const monthName = new Date(selectedDate).toLocaleString('en-US', { month: 'long' }); // Nombre del mes en inglés
+    const monthInSpanish = getMonthInSpanish(monthName); // Convertir mes a español
+    const dayName = new Date(selectedDate).toLocaleString('en-US', { weekday: 'long' }); // Día de la semana en inglés
+    const dayInSpanish = getDayInSpanish(dayName); // Convertir día a español
+    const esLaboral = true; // Esto lo deberás definir según tu lógica, si es laboral o no.
+    const estadoEvento = 'Pendiente'; // Puedes ajustar el estado si lo necesitas
 
     try {
       // Construcción de la URL para insertar un evento usando GET
-      const monthName = new Date(selectedDate).toLocaleString('en-US', { month: 'long' }); // Nombre del mes en inglés
-      const monthInSpanish = getMonthInSpanish(monthName); // Convertir mes a español
-      const url = `${API_BASE_URL}/insertarEventos?fechaEvento=${selectedDate}&quincenaEvento=${quincenaEvento}&mesEvento=${monthName}&anioEvento=${year}`; // Enviar el mes en inglés
+      const url = `${API_BASE_URL}/Nomina/insertarEventos?fecha=${selectedDate}&diaSemana=${dayInSpanish}&mes=${monthInSpanish}&anio=${year}&esLaboral=${esLaboral}&dia=${day}&tituloEvento=${encodeURIComponent(eventTitle)}&descripcion=${encodeURIComponent(eventDescription)}&estadoEvento=${estadoEvento}`;
 
       const response = await fetch(url, {
-        method: 'GET', // Cambiar de POST a GET
+        method: 'GET', // Usamos GET para insertar el evento
       });
 
       if (!response.ok) {
@@ -105,7 +107,7 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
       }
 
       // Actualizar eventos en el estado principal (pasar el evento a la vista principal)
-      onSaveEvent(selectedDate, newEvent);
+      onSaveEvent(selectedDate, { titulo_evento: eventTitle, descripcion: eventDescription });
 
       // Reiniciar los campos del formulario
       setEventTitle('');
