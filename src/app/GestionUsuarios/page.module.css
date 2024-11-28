@@ -34,8 +34,8 @@
 
 .table td:first-child,
 .table th:first-child {
-    width: 50px; /* Ancho fijo para la columna de checkboxes */
     text-align: center; /* Centrar los checkboxes */
+   
 }
 
 .table td:last-child,
@@ -51,12 +51,22 @@
 
 .disabledRow {
     opacity: 0.6; /* Reducir la opacidad para destacar que está deshabilitado */
-    background-color: #e62f2f;
+    background-color: #e62f2f; /* Fondo rojo para fila deshabilitada */
 }
 
-.disabledRow td:last-child ¡importat{
-  opacity: 1; /* Mantén la visibilidad completa de las últimas columnas */
-  color: inherit; /* Restaura el color original */
+.disabledRow td:last-child {
+    opacity: 1 !important;
+    background-color: #ddd !important; /* Mantener la visibilidad completa del botón de opciones */
+}
+
+/* Cambiar el color de los tres puntos (ícono de opciones) a negro cuando esté deshabilitado */
+.disabledRow td:last-child .MuiIconButton-root {
+    color: black !important; /* Cambiar el color del ícono a negro */
+    opacity: 1 !important; /* Asegurar que el ícono tenga opacidad total */
+}
+
+.disabledRow td:last-child .MuiSvgIcon-root {
+    color: black !important; /* Asegurar que el ícono SVG de MoreVertIcon también sea negro */
 }
 
 .modal {
@@ -95,12 +105,10 @@ form .MuiButton-root {
     font-weight: bold;
 }
 
-
 .provisionalPasswordMessage {
     font-size: 14px; /* Tamaño de letra moderado */
     color: #555; /* Color gris oscuro para buena legibilidad */
     margin: 10px 0; /* Espaciado hacia arriba y abajo */
-    text-align:justify; /* Alineación a la izquierda */
+    text-align: justify; /* Alineación justificada */
     font-weight: bold;
-  }
-  
+}
