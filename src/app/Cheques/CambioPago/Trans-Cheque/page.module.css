@@ -129,27 +129,219 @@
   margin: 5px;
 }
 
-.styledButton2 {
+.styledButton {
   background-color: #9f2241;
 }
 .styledButton:hover {
-  background-color: #987849;
+  background-color: #ab9144;
+}
+
+.styledButton1 {
+  background-color: #bb0000;
+}
+.styledButton1:hover {
+  background-color: #a04545;
+}
+
+.styledButton2 {
+  background-color: #45a049;
 }
 .styledButton2:hover {
-  background-color: #a04545;
+  background-color: #336335;
 }
-.styledButton1:hover {
-  background-color: #a04545;
-}
-.styledButton1 {
-  background-color: #235b4e;
-}
-.styledButton1:hover {
-  background-color: #1b473d;
-}
+
 .styledButton3 {
-  background-color: #bc955c;
+  background-color: #ab9144;
 }
 .styledButton3:hover {
+  background-color: #635e33;
+}
+
+/* Agrega esto al final de tu archivo CSS existente */
+
+.modal {
+  position: fixed; /* Fijar en la pantalla */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo opaco detrás */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+.modalContent {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modalContent h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.modalContent p {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.modalContent input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+.modalButtons button {
+  padding: 10px 15px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modalButtons .styledButton2 {
+  background-color: #45a049;
+  color: white;
+}
+
+.modalButtons .styledButton2:hover {
+  background-color: #336635;
+}
+
+.modalButtons .styledButton1 {
+  background-color: #bb0000;
+  color: white;
+}
+
+.modalButtons .styledButton1:hover {
+  background-color: #a04545;
+}
+
+/* Contenedor de la tabla */
+.tableContainer {
+  margin: 20px auto;
+  width: 100%;
+  max-width: 1200px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+}
+
+/* Estilo del título */
+.tableContainer h3 {
+  text-align: center;
+  color: white;
+  background-color: #1f5841; /* Color verde especificado */
+  padding: 10px 0;
+  margin: 0 0 20px 0;
+  border-radius: 8px 8px 0 0; /* Bordes superiores redondeados */
+  font-size: 18px;
+}
+
+/* Tabla */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+}
+
+/* Encabezado de la tabla */
+.table thead th {
+  background-color: #9f2241; /* Rojo del botón "Buscar" */
+  color: white;
+  padding: 10px;
+  text-align: center; /* Centramos el texto en el encabezado */
+}
+
+/* Filas de la tabla */
+.table tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* Color alternado */
+}
+
+.table tbody tr:hover {
+  background-color: #f1f1f1; /* Efecto hover */
+}
+
+/* Celdas */
+.table td,
+.table th {
+  padding: 10px;
+}
+
+/* Checkbox centrados */
+.table td input[type="checkbox"] {
+  display: block;
+  margin: 0 auto;
+}
+
+.exportButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px; /* Ajusta según tu diseño */
+  justify-content: center; /* Centra los botones debajo de la tabla */
+}
+
+.styledButton1 {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.styledButton1:hover {
+  background-color: #0056b3;
+}
+
+.styledButton2 {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.styledButton2:hover {
+  background-color: #1e7e34;
+}
+
+.styledButton3 {
   background-color: #987849;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.styledButton3:hover {
+  background-color: #e2b673;
 }

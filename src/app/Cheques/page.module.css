@@ -114,3 +114,15 @@
   border-color: #8d1409 !important;
   color: #8d1409 !important;
 }
+
+/* Agrega este estilo en tu archivo CSS */
+
+.last-folio-label {
+  color: rgb(250, 8, 8);
+  font-size: 18px;
+  margin-top: 10px;
+  position: relative;
+  left: 400px;
+  top: -70px;
+}
+
