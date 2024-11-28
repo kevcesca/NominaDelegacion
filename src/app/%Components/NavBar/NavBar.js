@@ -224,6 +224,19 @@ export default function NavBar() {
                         </Link>
                     )}
 
+                    {collapsed ? (
+                        // Muestra el SubMenu cuando collapsed es true
+                        <SubMenu label="Estatus cheques" icon={<AssessmentIcon />}>
+                            <Link className={styles.tWhite} href="/Cheques/Status" passHref>
+                                <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Estatus cheques</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    ) : (
+                        // Muestra un solo enlace cuando collapsed es false1
+                        <Link className={styles.textAlone} href="/Cheques/Status" passHref>
+                            <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Estatus cheques</MenuItem>
+                        </Link>
+                    )}
                 </Menu>
             </Sidebar>
         </div>

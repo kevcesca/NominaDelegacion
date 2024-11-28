@@ -240,3 +240,40 @@
 .emptyCell {
   background-color: #f9f9f9;
 }
+
+.container {
+  padding: 20px;
+}
+
+.title {
+  margin-bottom: 20px;
+}
+
+.filters {
+  margin-bottom: 20px;
+}
+
+.columnSelector {
+  margin-top: 20px;
+}
+
+.tableContainer {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.table th, .table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.table th {
+  background-color: #f4f4f4;
+}

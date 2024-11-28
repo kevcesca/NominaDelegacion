@@ -49,7 +49,7 @@ export default function Calendar({ selectedDate, events, onDateSelect }) {
         // Días del mes
         const formattedDate = `${currentYear}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const isSelected = selectedDate === formattedDate;
-        const dayEvents = events[formattedDate] || []; // Obtén eventos para este día
+        const dayEvents = events.filter(event => event.dia === day); // Obtén eventos para este día
 
         cells.push(
           <td
@@ -62,7 +62,7 @@ export default function Calendar({ selectedDate, events, onDateSelect }) {
               <ul className={styles.eventList}>
                 {dayEvents.map((event, index) => (
                   <li key={index} className={styles.eventItem}>
-                    {event.titulo}
+                    {event.titulo_evento}
                   </li>
                 ))}
               </ul>
