@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { TextField, IconButton, Button } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import styles from './NuevaContrasena.css'; // Usaremos estilos adicionales si son necesarios
+import styles from '../NuevaContrasena/NuevaContrasena.module.css'; // Usaremos estilos adicionales si son necesarios
 import { API_USERS_URL } from '../%Config/apiConfig'; // URL base de la API
 
 export default function RecuperarContraseña() {
@@ -69,11 +69,12 @@ export default function RecuperarContraseña() {
   };
 
   return (
+    <div className={styles.body}>
     <div className={styles.container}>
       <h1>Recuperación de Contraseña</h1>
 
       <div className={styles.section}>
-        <h2>Cambiar Contraseña</h2>
+        <h2 className={styles.h2}>Cambiar Contraseña</h2>
 
         {/* Campo para ID Empleado */}
         <TextField
@@ -145,6 +146,7 @@ export default function RecuperarContraseña() {
         {/* Muestra errores si los hay */}
         {error && <p className={styles.error}>{error}</p>}
       </div>
+    </div>
     </div>
   );
 }

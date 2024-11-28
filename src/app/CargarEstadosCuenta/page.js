@@ -4,13 +4,13 @@ import React, { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { Toast } from 'primereact/toast';
 import styles from './page.module.css';
-import TablaEstadosCuenta from '../%Components/TablaEstadosCuenta/TablaEstadosCuenta'; // Actualiza la ruta si es necesario
+import TablaEstadosCuenta from '../%Components/TablaEstadosCuenta/TablaEstadosCuenta'; // Asegúrate de que la ruta sea correcta
 import TablaRetenciones from '../%Components/TablaRetenciones/TablaRetenciones';
-import DateSelector from '../%Components/DateSelector/DateSelector'; // Importar el nuevo componente
-import { ProgressBar } from 'primereact/progressbar';
+import DateFilter from '../%Components/DateFilter/DateFilter'; // Importar DateFilter en lugar de DateSelector
+import { ProgressBar } from 'primereact/progressbar'; 
 import { ThemeProvider, Box, Typography } from '@mui/material';
-import theme from '../$tema/theme'; // Importa correctamente el tema aquí
-import HeaderSeccion from '../%Components/HeaderSeccion/HeaderSeccion'; // Importar el componente HeaderSeccion
+import theme from '../$tema/theme'; // Importa correctamente el tema
+import HeaderSeccion from '../%Components/HeaderSeccion/HeaderSeccion';
 
 function CargarEstadosCuenta() {
     const [mes, setMes] = useState('');
@@ -25,6 +25,16 @@ function CargarEstadosCuenta() {
 
     const toast = useRef(null);
 
+    // Callback para manejar el cambio de fecha desde DateFilter
+    const handleDateChange = ({ anio, quincena }) => {
+        setAnio(anio);
+        setQuincena(quincena);
+
+        // En este caso, el mes no lo estamos tomando directamente desde DateFilter, pero podrías actualizarlo también si lo deseas
+        const fechaActual = new Date();
+        setMes(fechaActual.getMonth() + 1); // Mes actual
+    };
+
     return (
         <ThemeProvider theme={theme}>
             <Toast ref={toast} />
@@ -34,8 +44,8 @@ function CargarEstadosCuenta() {
                     Carga de Estados de Cuenta y Retenciones
                 </Typography>
 
-                {/* Selector de Fecha */}
-                <DateSelector setMes={setMes} setAnio={setAnio} setQuincena={setQuincena} />
+                {/* Selector de Fecha usando DateFilter */}
+                <DateFilter onDateChange={handleDateChange} />
 
                 {/* Sección de Estados de Cuenta */}
                 <HeaderSeccion
@@ -68,9 +78,7 @@ function CargarEstadosCuenta() {
                         <TablaRetenciones
                             anio={anio}
                             mes={mes}
-                            quincena={quincena} // Pasar quincena como prop
-                            setProgress={setProgressRetenciones}
-                            setUploaded={() => {}}
+                            quincena={quincena} // Pasar quincena como...
                         />
                     </>
                 )}
