@@ -3,73 +3,68 @@
 import React, { useEffect, useState } from 'react';
 import Calendar from './Calendar';
 import Sidebar from './Sidebar';
-import SummaryTable from './SummaryTable';
+import EventTable from './EventTable';
 import styles from './page.module.css';
-import { API_USERS_URL } from '../%Config/apiConfig';
+import API_BASE_URL from '../%Config/apiConfig';
 
 export default function Calendario() {
   const [selectedDate, setSelectedDate] = useState(null); // Fecha seleccionada
-  const [events, setEvents] = useState({}); // Eventos organizados por fecha
+  const [events, setEvents] = useState([]); // Eventos de la fecha seleccionada
 
   // Manejar selección de fecha
   const handleDateSelect = (date) => {
     setSelectedDate(date);
   };
 
-  // Guardar evento (envía al backend y actualiza el estado local)
+  // Guardar evento (ahora con GET)
   const handleSaveEvent = async (date, newEvent) => {
     try {
-      const response = await fetch(`${API_USERS_URL}/calendario/evento`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...newEvent, fecha: date, id_creador: 1 }), // Cambia id_creador según tu lógica
+      const [year, month, day] = date.split('-');
+      const monthName = new Date(date).toLocaleString('en-US', { month: 'long' });
+      const quincenaEvento = 'Primera quincena'; // Asumido que esto es fijo o calculado de alguna manera
+
+      // Construcción de la URL para insertar un evento usando GET
+      const url = `${API_BASE_URL}/insertarEventos?fechaEvento=${date}&quincenaEvento=${quincenaEvento}&mesEvento=${monthName}&anioEvento=${year}&tituloEvento=${newEvent.titulo_evento}&descripcionEvento=${newEvent.descripcion}`;
+
+      const response = await fetch(url, {
+        method: 'GET', // Usar GET en vez de POST
       });
 
       if (!response.ok) {
         throw new Error('Error al guardar el evento');
       }
 
-      // Actualiza el estado local
-      setEvents((prevEvents) => ({
-        ...prevEvents,
-        [date]: [...(prevEvents[date] || []), newEvent],
-      }));
+      // Actualiza el estado local con el nuevo evento
+      setEvents((prevEvents) => [...prevEvents, newEvent]);
     } catch (error) {
       console.error('Error al guardar el evento:', error);
     }
   };
 
-  // Cargar eventos desde el backend al montar el componente
+  // Cargar eventos de la fecha seleccionada al montar el componente
   useEffect(() => {
-    const fetchEvents = async () => {
-      const inicio = new Date().toISOString().split('T')[0]; // Fecha actual (inicio)
-      const fin = new Date(new Date().setMonth(new Date().getMonth() + 1))
-        .toISOString()
-        .split('T')[0]; // Fecha de fin (mes siguiente)
+    if (selectedDate) {
+      const [year, month, day] = selectedDate.split('-');
+      const monthName = new Date(selectedDate).toLocaleString('en-US', { month: 'long' }); // Nombre del mes en inglés
 
-      try {
-        const response = await fetch(`${API_USERS_URL}/calendario/eventos?inicio=${inicio}&fin=${fin}`);
-        const data = await response.json();
+      const fetchEvents = async () => {
+        try {
+          // Consultar eventos para la fecha seleccionada
+          const response = await fetch(
+            `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthName}`
+          );
+          const data = await response.json();
 
-        // Organiza los eventos por fecha
-        const organizedEvents = data.reduce((acc, event) => {
-          if (!acc[event.fecha]) {
-            acc[event.fecha] = [];
-          }
-          acc[event.fecha].push(event);
-          return acc;
-        }, {});
+          // Actualizar los eventos del estado
+          setEvents(data);
+        } catch (error) {
+          console.error('Error al obtener los eventos:', error);
+        }
+      };
 
-        setEvents(organizedEvents);
-      } catch (error) {
-        console.error('Error al cargar los eventos:', error);
-      }
-    };
-
-    fetchEvents();
-  }, []);
+      fetchEvents();
+    }
+  }, [selectedDate]); // Ejecutar cuando cambie la fecha seleccionada
 
   return (
     <div className={styles.container}>
@@ -91,14 +86,14 @@ export default function Calendario() {
           {/* Barra lateral */}
           <Sidebar
             selectedDate={selectedDate}
-            events={events[selectedDate] || []}
+            events={events}
             onSaveEvent={handleSaveEvent}
           />
         </div>
 
         {/* Tabla resumen */}
         <div className={styles.summaryContainer}>
-          <SummaryTable events={events} />
+          <EventTable events={events} />
         </div>
       </div>
     </div>
