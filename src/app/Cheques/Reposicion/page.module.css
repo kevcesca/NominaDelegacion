@@ -66,4 +66,18 @@
     text-transform: none;
   }
   
-  
+  /* Asegúrate de agregar este estilo en tu archivo CSS */
+.buttons-container {
+    display: flex;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    gap: 10px; /* Espaciado entre los botones */
+    margin-bottom: 20px; /* Espaciado debajo de los botones */
+    position: relative;
+    top: 55px;
+}
+
+.button {
+    padding: 10px 20px; /* Tamaño del botón */
+    font-size: 1px; /* Tamaño de la fuente */
+    text-transform: uppercase; /* Opcional: Convierte el texto a mayúsculas */
+}

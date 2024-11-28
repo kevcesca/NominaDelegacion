@@ -166,4 +166,19 @@
     color: #aaa;
     cursor: not-allowed;
   }
+  .exportButtons {
+    display: flex;
+    position: relative;
+    left: 908px;
+    top: 60px;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    
+  }
   
+  .exportButton {
+    padding: 0.5rem 3rem;
+    font-size: 0.5rem;
+    cursor: pointer;
+  }
+    

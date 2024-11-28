@@ -5,11 +5,8 @@ import { Box, Typography, TextField, Button, Paper, Table, TableBody, TableCell,
 import IconButton from '@mui/material/IconButton';
 import Edit from '@mui/icons-material/Edit';
 import Save from '@mui/icons-material/Save';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogActions from '@mui/material/DialogActions';
+import { jsPDF } from 'jspdf';
+import * as XLSX from 'xlsx';
 
 export default function RepositionChequesTable() {
     const [cheques, setCheques] = useState([
@@ -38,23 +35,29 @@ export default function RepositionChequesTable() {
             evidence: null,
         },
     ]);
+
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [editedRow, setEditedRow] = useState(null);
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [editedRow, setEditedRow] = useState(null);  
     const [editedReason, setEditedReason] = useState('');
     const [editedEvidence, setEditedEvidence] = useState(null);
-    const [successDialog, setSuccessDialog] = useState({ open: false, message: '' });
-    const [selectedRows, setSelectedRows] = useState([]);
+
+    const handleCheckboxChange = (id) => {
+        setSelectedRows((prev) =>
+            prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+        );
+    };
 
     const handleEditStart = (row) => {
-        setEditedRow(row.id);
+        setEditedRow(row.id); // Set the editedRow to the current row id
         setEditedReason(row.reason);
         setEditedEvidence(null);
     };
 
     const handleSaveEdit = () => {
         if (!editedReason.trim() || !editedEvidence) {
-            setSuccessDialog({ open: true, message: 'El motivo y la evidencia son obligatorios.' });
+            alert('El motivo y la evidencia son obligatorios.');
             return;
         }
 
@@ -66,49 +69,117 @@ export default function RepositionChequesTable() {
             )
         );
 
-        setEditedRow(null);
-        setSuccessDialog({ open: true, message: 'Datos actualizados correctamente.' });
+        setEditedRow(null);  // Reset editedRow after saving
     };
 
+    // Define handleChangePage function
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
 
+    // Define handleChangeRowsPerPage function
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
+        setPage(0); // Reset to the first page when the rows per page change
     };
 
-    const handleCheckboxChange = (id) => {
-        setSelectedRows((prev) =>
-            prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
-        );
+    const handleExportCSV = () => {
+        const selectedData = cheques.filter((cheque) => selectedRows.includes(cheque.id));
+        const ws = XLSX.utils.json_to_sheet(selectedData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Cheques");
+        XLSX.writeFile(wb, "cheques_reposicion.csv");
+    };
+
+    const handleExportExcel = () => {
+        const selectedData = cheques.filter((cheque) => selectedRows.includes(cheque.id));
+        const ws = XLSX.utils.json_to_sheet(selectedData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Cheques");
+        XLSX.writeFile(wb, "cheques_reposicion.xlsx");
+    };
+
+    const handleExportPDF = () => {
+        const selectedData = cheques.filter((cheque) => selectedRows.includes(cheque.id));
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.text("Listado de Cheques", 20, 20);
+
+        const headers = [
+            'ID', 'Nombre', 'Monto', 'Tipo de Nómina', 'Folio Cheque', 'Folio Póliza', 'Quincena', 'Año'
+        ];
+        let yOffset = 30;
+        doc.setFontSize(12);
+        doc.text(headers.join(' | '), 20, yOffset);
+
+        selectedData.forEach((cheque, index) => {
+            yOffset += 10;
+            const row = [
+                cheque.id,
+                cheque.employeeName,
+                cheque.amount,
+                cheque.payrollType,
+                cheque.chequeFolio,
+                cheque.policyFolio,
+                cheque.fortnight,
+                cheque.year
+            ];
+            doc.text(row.join(' | '), 20, yOffset);
+        });
+
+        doc.save("cheques_reposicion.pdf");
     };
 
     return (
         <Box className={styles.container}>
-            <Typography variant="h4" className={styles.title}>
-                Reposición de Cheques
-            </Typography>
-            <Button
-                variant="contained"
-                color="primary"
-                style={{ marginBottom: '20px' }}
-                onClick={() => {
-                    console.log("Ruta a donde se enviarán los cheques seleccionados:", selectedRows);
-                }}
+        <Typography variant="h4" className={styles.title}>Reposición de Cheques</Typography>
+    
+        {/* Botones de exportación */}
+        <Box className={styles['buttons-container']}>
+            <Button 
+                variant="contained" 
+                color="primary" 
+                className={styles.button}
+                onClick={handleExportCSV}
             >
-                Generar Cheques
+                Exportar a CSV
             </Button>
+            <Button 
+                variant="contained" 
+                color="primary" 
+                className={styles.button}
+                onClick={handleExportExcel}
+            >
+                Exportar a Excel
+            </Button>
+            <Button 
+                variant="contained" 
+                color="primary" 
+                className={styles.button}
+                onClick={handleExportPDF}
+            >
+                Exportar a PDF
+            </Button>
+        </Box>
+    
+        <Button
+            variant="contained"
+            color="primary"
+            style={{ marginBottom: '20px' }}
+            onClick={() => {
+                console.log("Ruta a donde se enviarán los cheques seleccionados:", selectedRows);
+            }}
+        >
+            Generar Cheques 
+            </Button>
+
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
                         <TableRow>
                             <TableCell padding="checkbox">
                                 <Checkbox
-                                    indeterminate={
-                                        selectedRows.length > 0 && selectedRows.length < cheques.length
-                                    }
+                                    indeterminate={selectedRows.length > 0 && selectedRows.length < cheques.length}
                                     checked={selectedRows.length === cheques.length}
                                     onChange={(e) => {
                                         if (e.target.checked) {
@@ -171,7 +242,6 @@ export default function RepositionChequesTable() {
                                             <input
                                                 type="file"
                                                 onChange={(e) => setEditedEvidence(e.target.files[0])}
-                                                required
                                             />
                                         ) : (
                                             cheque.evidence ? cheque.evidence.name : '-'
@@ -192,34 +262,13 @@ export default function RepositionChequesTable() {
                     </TableBody>
                 </Table>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
                     count={cheques.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage} // Aquí se llama a la función definida
                 />
             </TableContainer>
-
-            {/* Modal de éxito */}
-            <Dialog
-                open={successDialog.open}
-                onClose={() => setSuccessDialog({ open: false, message: '' })}
-            >
-                <DialogTitle>Éxito</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>{successDialog.message}</DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={() => setSuccessDialog({ open: false, message: '' })}
-                        color="primary"
-                    >
-                        Cerrar
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </Box>
     );
 }

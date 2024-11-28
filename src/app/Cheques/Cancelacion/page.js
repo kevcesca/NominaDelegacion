@@ -52,7 +52,6 @@ function CancelacionCheques() {
       apellido: empleado.apellido,
       nomina: empleado.nomina,
       quincena,
-      clc: empleado.clc,
       numeroCheque,
       motivoCancelacion,
       fechaCancelacion: new Date().toLocaleDateString(),
@@ -149,6 +148,75 @@ function CancelacionCheques() {
     router.push('/Cheques/Reposicion'); // Navega a la ruta de reposición
   };
 
+  // Funciones de exportación
+const handleExportCSV = () => {
+  if (paginatedCancelados.length === 0) {
+    alert("No hay datos para exportar.");
+    return;
+  }
+
+  const csvData = paginatedCancelados.map(row => ({
+    'ID Empleado': row.idEmpleado,
+    Nombre: row.nombre,
+    Apellido: row.apellido,
+    'Tipo de Nómina': row.nomina,
+    Quincena: row.quincena,
+    CLC: row.clc,
+    'Número de Cheque': row.numeroCheque,
+    'Motivo de Cancelación': row.motivoCancelacion,
+    'Fecha de Cancelación': row.fechaCancelacion,
+    Evidencia: row.evidencia,
+  }));
+
+  const csv = [
+    Object.keys(csvData[0]).join(','), // Encabezados dinámicos
+    ...csvData.map(row => Object.values(row).join(',')), // Filas de datos
+  ].join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  saveAs(blob, 'cancelados.csv');
+};
+
+const handleExportExcel = () => {
+  if (paginatedCancelados.length === 0) {
+    alert("No hay datos para exportar.");
+    return;
+  }
+
+  const worksheet = XLSX.utils.json_to_sheet(paginatedCancelados);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Cancelados');
+  XLSX.writeFile(workbook, 'cancelados.xlsx');
+};
+
+const handleExportPDF = () => {
+  if (paginatedCancelados.length === 0) {
+    alert("No hay datos para exportar.");
+    return;
+  }
+
+  const doc = new jsPDF();
+  const tableData = paginatedCancelados.map(row => [
+    row.idEmpleado,
+    row.nombre,
+    row.apellido,
+    row.nomina,
+    row.quincena,
+    row.numeroCheque,
+    row.motivoCancelacion,
+    row.fechaCancelacion,
+    row.evidencia,
+  ]);
+
+  doc.text('Cancelación de Cheques', 20, 10);
+  doc.autoTable({
+    head: [['ID Empleado', 'Nombre', 'Apellido', 'Tipo de Nómina', 'Quincena', 'Número de Cheque', 'Motivo de Cancelación', 'Fecha de Cancelación', 'Evidencia']],
+    body: tableData,
+  });
+  doc.save('cancelados.pdf');
+};
+
+
   return (
     <ThemeProvider theme={theme}>
       <div className={styles.body}>
@@ -190,105 +258,118 @@ function CancelacionCheques() {
             <button type="button" className={styles.actions} onClick={handleSubmit}>Cancelar Cheque</button>
           </form>
 
-          {cancelados.length > 0 && (
-            <div className={styles.tableSection}>
-              <div className={styles.searchBar}>
-                <input
-                  type="text"
-                  className={styles.searchInput}
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  placeholder="Buscar por Nombre o Apellido"
-                />
-              </div>
+         {/* Tabla existente */}
+{cancelados.length > 0 && (
+  <div className={styles.tableSection}>
+    {/* Botones de exportación dentro de la tabla */}
+    <div className={styles.exportButtons}>
+      <Button onClick={handleExportCSV} variant="contained" className={styles.exportButton}>
+        Exportar a CSV
+      </Button>
+      <Button onClick={handleExportExcel} variant="contained" className={styles.exportButton}>
+        Exportar a Excel
+      </Button>
+      <Button onClick={handleExportPDF} variant="contained" className={styles.exportButton}>
+        Exportar a PDF
+      </Button>
+    </div>
 
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>
-                      <input
-                        type="checkbox"
-                        onChange={handleSelectAllRows}
-                        checked={paginatedCancelados.length > 0 && paginatedCancelados.every(row => selectedRows.includes(row.idEmpleado))}
-                      />
-                    </th>
-                    <th>ID Empleado</th>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Tipo de Nómina</th>
-                    <th>Quincena</th>
-                    <th>CLC</th>
-                    <th>Número de Cheque</th>
-                    <th>Motivo de Cancelación</th>
-                    <th>Fecha de Cancelación</th>
-                    <th>Evidencia</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedCancelados.map((item) => (
-                    <tr key={item.idEmpleado}>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={selectedRows.includes(item.idEmpleado)}
-                          onChange={() => handleSelectRow(item.idEmpleado)}
-                        />
-                      </td>
-                      <td>{item.idEmpleado}</td>
-                      <td>{item.nombre}</td>
-                      <td>{item.apellido}</td>
-                      <td>{item.nomina}</td>
-                      <td>{item.quincena}</td>
-                      <td>{item.clc}</td>
-                      <td>{item.numeroCheque}</td>
-                      <td>{item.motivoCancelacion}</td>
-                      <td>{item.fechaCancelacion}</td>
-                      <td>{item.evidencia}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+    <div className={styles.searchBar}>
+      <input
+        type="text"
+        className={styles.searchInput}
+        value={searchTerm}
+        onChange={handleSearch}
+        placeholder="Buscar por Nombre o Apellido"
+      />
+    </div>
 
-              <div className={styles.pagination}>
-  <div className={styles.paginationControl}>
-    <span className={styles.rowsText}>Rows per page:</span>
-    <select
-      value={rowsPerPage}
-      onChange={handleRowsPerPageChange}
-      className={styles.select}
-    >
-      <option value={5}>5</option>
-      <option value={10}>10</option>
-      <option value={15}>15</option>
-    </select>
+    <table className={styles.table}>
+      <thead>
+        <tr>
+          <th>
+            <input
+              type="checkbox"
+              onChange={handleSelectAllRows}
+              checked={paginatedCancelados.every(row => selectedRows.includes(row.idEmpleado))}
+            />
+          </th>
+          <th>ID Empleado</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Tipo de Nómina</th>
+          <th>Quincena</th>
+          <th>Número de Cheque</th>
+          <th>Motivo de Cancelación</th>
+          <th>Fecha de Cancelación</th>
+          <th>Evidencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {paginatedCancelados.map((item) => (
+          <tr key={item.idEmpleado}>
+            <td>
+              <input
+                type="checkbox"
+                checked={selectedRows.includes(item.idEmpleado)}
+                onChange={() => handleSelectRow(item.idEmpleado)}
+              />
+            </td>
+            <td>{item.idEmpleado}</td>
+            <td>{item.nombre}</td>
+            <td>{item.apellido}</td>
+            <td>{item.nomina}</td>
+            <td>{item.quincena}</td>
+            <td>{item.numeroCheque}</td>
+            <td>{item.motivoCancelacion}</td>
+            <td>{item.fechaCancelacion}</td>
+            <td>{item.evidencia}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <div className={styles.pagination}>
+      <div className={styles.paginationControl}>
+        <span className={styles.rowsText}>Rows per page:</span>
+        <select
+          value={rowsPerPage}
+          onChange={handleRowsPerPageChange}
+          className={styles.select}
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={15}>15</option>
+        </select>
+      </div>
+      <span className={styles.range}>
+        {`${(currentPage - 1) * rowsPerPage + 1}–${Math.min(
+          currentPage * rowsPerPage,
+          empleados.length
+        )} of ${empleados.length}`}
+      </span>
+      <button
+        onClick={() => handlePageChange('prev')}
+        disabled={currentPage === 1}
+        className={styles.paginationButton}
+      >
+        &lt;
+      </button>
+      <button
+        onClick={() => handlePageChange('next')}
+        disabled={currentPage === Math.ceil(empleados.length / rowsPerPage)}
+        className={styles.paginationButton}
+      >
+        &gt;
+      </button>
+    </div>
+
+    <button type="button" className={styles.actions} onClick={handleReposicion}>
+      Reposición de Cheque
+    </button>
   </div>
-  <span className={styles.range}>
-    {`${(currentPage - 1) * rowsPerPage + 1}–${Math.min(
-      currentPage * rowsPerPage,
-      empleados.length
-    )} of ${empleados.length}`}
-  </span>
-  <button
-    onClick={() => handlePageChange('prev')}
-    disabled={currentPage === 1}
-    className={styles.paginationButton}
-  >
-    &lt;
-  </button>
-  <button
-    onClick={() => handlePageChange('next')}
-    disabled={currentPage === Math.ceil(empleados.length / rowsPerPage)}
-    className={styles.paginationButton}
-  >
-    &gt;
-  </button>
-</div>
+)}
 
-              <button type="button" className={styles.actions} onClick={handleReposicion}>
-                Reposición de Cheque
-              </button>
-            </div>
-          )}
         </div>
 
         <Dialog open={modalVisible} onClose={cancelarCancelacion}>
