@@ -1,18 +1,18 @@
+// EventTable.js
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Button, TextField, Typography, Box, Collapse, Grid } from '@mui/material';
-import { ThemeProvider } from '@mui/material/styles';
+import React, { useState, useEffect } from 'react';
+import { Button, Typography, Box, Grid, TextField, Collapse } from '@mui/material';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import API_BASE_URL from "../%Config/apiConfig";
-import ColumnSelector from '../%Components/ColumnSelector/ColumnSelector'; // Asegúrate de tener este componente
-import styles from './page.module.css';
-import theme from '../$tema/theme';
 import * as xlsx from 'xlsx';
 import { saveAs } from 'file-saver';
+import API_BASE_URL from "../%Config/apiConfig";
+import ColumnSelector from '../%Components/ColumnSelector/ColumnSelector';
+import styles from './page.module.css';
+import theme from '../$tema/theme';
 
-export default function EventTable() {
+export default function EventTable({ onSaveEvent }) {
     const [data, setData] = useState([]); // Datos obtenidos de la API
     const [isLoading, setIsLoading] = useState(false); // Estado de carga
     const [visibleColumns, setVisibleColumns] = useState({
@@ -24,10 +24,9 @@ export default function EventTable() {
         anio: true,
         fecha: true,
     });
-    const [collapseOpen, setCollapseOpen] = useState(false); // Estado de colapso de selector de columnas
     const [anio, setAnio] = useState('2024'); // Año seleccionado
-    const [mes, setMes] = useState('2024-11'); // Mes seleccionado (formato YYYY-MM)
-    const toast = useRef(null); // Ref para mostrar errores
+    const [mes, setMes] = useState('2024-11'); // Mes seleccionado
+    const [collapseOpen, setCollapseOpen] = useState(false); // Estado de colapso de selector de columnas
 
     // Función para calcular el primer y último día del mes
     const getMonthRange = (yearMonth) => {
@@ -45,37 +44,37 @@ export default function EventTable() {
 
             const queryParams = `fechaInicio=${startDate.toISOString().split('T')[0]}&fechaFin=${endDate.toISOString().split('T')[0]}`;
             const response = await fetch(`${API_BASE_URL}/rangoFechas?${queryParams}`);
-            
-            // Verificar que la respuesta sea válida y convertirla en JSON
             const data = await response.json();
-            
-            // Solo actualizar el estado si la respuesta es un array
+
             if (Array.isArray(data)) {
                 setData(data);
             } else {
-                setData([]); // Si la respuesta no es un array, limpiar los datos
+                setData([]);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
-            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar los datos.' });
-            setData([]); // Limpiar los datos en caso de error
+            setData([]);
         } finally {
-            setIsLoading(false); // Desactivar carga
+            setIsLoading(false);
         }
     };
 
-    // useEffect para refrescar datos cuando cambia el mes
     useEffect(() => {
         fetchData(); // Refrescar datos automáticamente cuando cambia el mes
     }, [mes]); // Dependencia: cuando el mes cambie
 
     useEffect(() => {
-        fetchData(); // Refrescar datos cuando cambia el año (si es necesario)
+        fetchData(); // Refrescar datos cuando cambia el año
     }, [anio]); // Dependencia: cuando el año cambie
 
     // Función para manejar el cambio en la selección de columnas
     const handleColumnSelectionChange = (selectedColumns) => {
         setVisibleColumns(selectedColumns);
+    };
+
+    // Función para actualizar la tabla cuando se inserta un nuevo evento
+    const handleSaveEvent = (newEvent) => {
+        setData((prevData) => [newEvent, ...prevData]); // Añadir el nuevo evento a los datos ya existentes
     };
 
     // Función para exportar a PDF
@@ -108,7 +107,6 @@ export default function EventTable() {
                 return acc;
             }, {}));
 
-        // Generar un Blob para la descarga en CSV
         const csvData = filteredData.map((row) =>
             Object.values(row).map((value) => `"${value}"`).join(','));
         const header = Object.keys(visibleColumns)
@@ -138,118 +136,110 @@ export default function EventTable() {
     };
 
     return (
-        <ThemeProvider theme={theme}>
-            <div className={styles.container}>
-                <Typography variant="h4" className={styles.title}>Eventos del Mes</Typography>
-                <Box className={styles.filters}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                label="Año"
-                                value={anio}
-                                onChange={(e) => setAnio(e.target.value)} // Actualizar año
-                                fullWidth
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                label="Mes"
-                                value={mes}
-                                onChange={(e) => setMes(e.target.value)} // Actualizar mes
-                                fullWidth
-                                type="month"
-                            />
-                        </Grid>
-                    </Grid>
-                    <Button
-                        variant="outlined"
-                        onClick={() => setCollapseOpen(!collapseOpen)}
-                        style={{ marginTop: '1rem' }}
-                    >
-                        Configurar Columnas
-                    </Button>
+        <Box className={styles.tableContainer}>
+            <Typography variant="h4" className={styles.title}>Eventos del Mes</Typography>
+            <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        label="Año"
+                        value={anio}
+                        onChange={(e) => setAnio(e.target.value)} // Actualizar año
+                        fullWidth
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        label="Mes"
+                        value={mes}
+                        onChange={(e) => setMes(e.target.value)} // Actualizar mes
+                        fullWidth
+                        type="month"
+                    />
+                </Grid>
+            </Grid>
+            <Button
+                variant="outlined"
+                onClick={() => setCollapseOpen(!collapseOpen)}
+                style={{ marginTop: '1rem' }}
+            >
+                Configurar Columnas
+            </Button>
+            
+            <Collapse in={collapseOpen}>
+                <Box className={styles.columnSelector}>
+                    <ColumnSelector
+                        availableColumns={[ 
+                            { key: 'id', label: 'ID' },
+                            { key: 'titulo_evento', label: 'Título' },
+                            { key: 'descripcion', label: 'Descripción' },
+                            { key: 'quincena', label: 'Quincena' },
+                            { key: 'mes', label: 'Mes' },
+                            { key: 'anio', label: 'Año' },
+                            { key: 'fecha', label: 'Fecha' },
+                        ]}
+                        onSelectionChange={handleColumnSelectionChange}
+                    />
                 </Box>
+            </Collapse>
 
-                <Collapse in={collapseOpen}>
-                    <Box className={styles.columnSelector}>
-                        <ColumnSelector
-                            availableColumns={[
-                                { key: 'id', label: 'ID' },
-                                { key: 'titulo_evento', label: 'Título' },
-                                { key: 'descripcion', label: 'Descripción' },
-                                { key: 'quincena', label: 'Quincena' },
-                                { key: 'mes', label: 'Mes' },
-                                { key: 'anio', label: 'Año' },
-                                { key: 'fecha', label: 'Fecha' },
-                            ]}
-                            onSelectionChange={handleColumnSelectionChange}
-                        />
-                    </Box>
-                </Collapse>
-
-                <Box className={styles.tableContainer}>
-                    {isLoading ? (
-                        <Typography variant="body1">Cargando...</Typography>
-                    ) : (
-                        <>
-                            {data.length === 0 ? (
-                                <Typography variant="body1">No hay eventos disponibles para el mes seleccionado.</Typography>
-                            ) : (
-                                <>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={exportPDF}
-                                        style={{ margin: '10px' }}
-                                    >
-                                        Exportar a PDF
-                                    </Button>
-
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={exportCSV}
-                                        style={{ margin: '10px' }}
-                                    >
-                                        Exportar a CSV
-                                    </Button>
-
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={exportExcel}
-                                        style={{ margin: '10px' }}
-                                    >
-                                        Exportar a Excel
-                                    </Button>
-                                </>
+            <Box className={styles.tableContainer}>
+                {isLoading ? (
+                    <Typography variant="body1">Cargando...</Typography>
+                ) : (
+                    <>
+                        {data.length === 0 ? (
+                            <Typography variant="body1">No hay eventos disponibles para el mes seleccionado.</Typography>
+                        ) : (
+                            <>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={exportPDF}
+                                    style={{ margin: '10px' }}
+                                >
+                                    Exportar a PDF
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={exportCSV}
+                                    style={{ margin: '10px' }}
+                                >
+                                    Exportar a CSV
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={exportExcel}
+                                    style={{ margin: '10px' }}
+                                >
+                                    Exportar a Excel
+                                </Button>
+                            </>
+                        )}
+                    </>
+                )}
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            {Object.keys(visibleColumns).map(
+                                (key) =>
+                                    visibleColumns[key] && <th key={key}>{key}</th>
                             )}
-                        </>
-                    )}
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data.map((event) => (
+                            <tr key={event.id}>
                                 {Object.keys(visibleColumns).map(
                                     (key) =>
-                                        visibleColumns[key] && <th key={key}>{key}</th>
+                                        visibleColumns[key] && <td key={key}>{event[key]}</td>
                                 )}
                             </tr>
-                        </thead>
-                        <tbody>
-                            {data.map((event) => (
-                                <tr key={event.id}>
-                                    {Object.keys(visibleColumns).map(
-                                        (key) =>
-                                            visibleColumns[key] && (
-                                                <td key={key}>{event[key]}</td>
-                                            )
-                                    )}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </Box>
-            </div>
-        </ThemeProvider>
+                        ))}
+                    </tbody>
+                </table>
+            </Box>
+        </Box>
     );
 }
