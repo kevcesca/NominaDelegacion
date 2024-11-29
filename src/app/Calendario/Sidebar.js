@@ -29,15 +29,15 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
     }
   };
 
-  // Función para convertir el día de la semana en inglés a español usando condicionales
+  // Función para convertir el día de la semana en inglés a español
   const getDayInSpanish = (dayName) => {
-    if (dayName === 'Sunday ') return 'Domingo';
-    if (dayName === 'Monday ') return 'Lunes';
-    if (dayName === 'Tuesday ') return 'Martes';
-    if (dayName === 'Wednesday ') return 'Miércoles';
-    if (dayName === 'Thursday ') return 'Jueves';
-    if (dayName === 'Friday   ') return 'Viernes';
-    if (dayName === 'Saturday ') return 'Sábado';
+    if (dayName === 'Sunday') return 'Domingo';
+    if (dayName === 'Monday') return 'Lunes';
+    if (dayName === 'Tuesday') return 'Martes';
+    if (dayName === 'Wednesday') return 'Miércoles';
+    if (dayName === 'Thursday') return 'Jueves';
+    if (dayName === 'Friday') return 'Viernes';
+    if (dayName === 'Saturday') return 'Sábado';
     return dayName;
   };
 
@@ -59,7 +59,7 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
         setLoading(true);
         try {
           // Construcción de la URL para consultaEventosDia usando GET
-          const url = `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthName}`; // Enviar mes y día en inglés
+          const url = `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthInSpanish}`; // Usamos el mes en español
           
           const response = await fetch(url);
           if (response.ok) {
@@ -96,7 +96,7 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
 
     try {
       // Construcción de la URL para insertar un evento usando GET
-      const url = `${API_BASE_URL}/Nomina/insertarEventos?fecha=${selectedDate}&diaSemana=${dayInSpanish}&mes=${monthInSpanish}&anio=${year}&esLaboral=${esLaboral}&dia=${day}&tituloEvento=${encodeURIComponent(eventTitle)}&descripcion=${encodeURIComponent(eventDescription)}&estadoEvento=${estadoEvento}`;
+      const url = `${API_BASE_URL}/insertarEventos?fecha=${selectedDate}&diaSemana=${dayInSpanish}&mes=${monthInSpanish}&anio=${year}&esLaboral=${esLaboral}&dia=${day}&tituloEvento=${encodeURIComponent(eventTitle)}&descripcion=${encodeURIComponent(eventDescription)}&estadoEvento=${estadoEvento}`;
 
       const response = await fetch(url, {
         method: 'GET', // Usamos GET para insertar el evento
