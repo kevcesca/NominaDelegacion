@@ -29,15 +29,15 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
     }
   };
 
-  // Función para convertir el día de la semana en inglés a español usando condicionales
+  // Función para convertir el día de la semana en inglés a español
   const getDayInSpanish = (dayName) => {
-    if (dayName === 'Sunday ') return 'Domingo';
-    if (dayName === 'Monday ') return 'Lunes';
-    if (dayName === 'Tuesday ') return 'Martes';
-    if (dayName === 'Wednesday ') return 'Miércoles';
-    if (dayName === 'Thursday ') return 'Jueves';
-    if (dayName === 'Friday   ') return 'Viernes';
-    if (dayName === 'Saturday ') return 'Sábado';
+    if (dayName === 'Sunday') return 'Domingo';
+    if (dayName === 'Monday') return 'Lunes';
+    if (dayName === 'Tuesday') return 'Martes';
+    if (dayName === 'Wednesday') return 'Miércoles';
+    if (dayName === 'Thursday') return 'Jueves';
+    if (dayName === 'Friday') return 'Viernes';
+    if (dayName === 'Saturday') return 'Sábado';
     return dayName;
   };
 
@@ -59,7 +59,7 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
         setLoading(true);
         try {
           // Construcción de la URL para consultaEventosDia usando GET
-          const url = `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthName}`; // Enviar mes y día en inglés
+          const url = `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthInSpanish}`; // Usamos el mes en español
           
           const response = await fetch(url);
           if (response.ok) {
@@ -79,43 +79,53 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
     }
   }, [selectedDate]);
 
-  // Manejar la acción de guardar un nuevo evento
-  const handleSave = async () => {
-    if (!eventTitle || !eventDescription) {
+  // Sidebar.js
+const handleSave = async () => {
+  if (!eventTitle || !eventDescription) {
       alert('Por favor, completa todos los campos.');
       return;
-    }
+  }
 
-    const [year, month, day] = selectedDate.split('-');
-    const monthName = new Date(selectedDate).toLocaleString('en-US', { month: 'long' }); // Nombre del mes en inglés
-    const monthInSpanish = getMonthInSpanish(monthName); // Convertir mes a español
-    const dayName = new Date(selectedDate).toLocaleString('en-US', { weekday: 'long' }); // Día de la semana en inglés
-    const dayInSpanish = getDayInSpanish(dayName); // Convertir día a español
-    const esLaboral = true; // Esto lo deberás definir según tu lógica, si es laboral o no.
-    const estadoEvento = 'Pendiente'; // Puedes ajustar el estado si lo necesitas
+  const [year, month, day] = selectedDate.split('-');
+  const monthName = new Date(selectedDate).toLocaleString('en-US', { month: 'long' });
+  const monthInSpanish = getMonthInSpanish(monthName); // Convertir mes a español
+  const dayName = new Date(selectedDate).toLocaleString('en-US', { weekday: 'long' });
+  const dayInSpanish = getDayInSpanish(dayName); // Convertir día a español
+  const esLaboral = true;
+  const estadoEvento = 'Pendiente';
 
-    try {
-      // Construcción de la URL para insertar un evento usando GET
-      const url = `${API_BASE_URL}/Nomina/insertarEventos?fecha=${selectedDate}&diaSemana=${dayInSpanish}&mes=${monthInSpanish}&anio=${year}&esLaboral=${esLaboral}&dia=${day}&tituloEvento=${encodeURIComponent(eventTitle)}&descripcion=${encodeURIComponent(eventDescription)}&estadoEvento=${estadoEvento}`;
+  try {
+      const url = `${API_BASE_URL}/insertarEventos?fecha=${selectedDate}&diaSemana=${dayInSpanish}&mes=${monthInSpanish}&anio=${year}&esLaboral=${esLaboral}&dia=${day}&tituloEvento=${encodeURIComponent(eventTitle)}&descripcion=${encodeURIComponent(eventDescription)}&estadoEvento=${estadoEvento}`;
 
       const response = await fetch(url, {
-        method: 'GET', // Usamos GET para insertar el evento
+          method: 'GET',
       });
 
       if (!response.ok) {
-        throw new Error('Error al guardar el evento');
+          throw new Error('Error al guardar el evento');
       }
 
-      // Actualizar eventos en el estado principal (pasar el evento a la vista principal)
-      onSaveEvent(selectedDate, { titulo_evento: eventTitle, descripcion: eventDescription });
+      // Actualizar los eventos en el componente padre (EventTable)
+      const newEvent = {
+          titulo_evento: eventTitle,
+          descripcion: eventDescription,
+          dia: day,
+          mes: monthInSpanish,
+          anio: year,
+          dia_del_evento: dayInSpanish,
+      };
+      
+      onSaveEvent(newEvent); // Llamar al callback para agregar el evento
 
       // Reiniciar los campos del formulario
       setEventTitle('');
       setEventDescription('');
-    } catch (error) {
+  } catch (error) {
       console.error('Error al guardar el evento:', error);
-    }
-  };
+  }
+};
+
+  
 
   return (
     <aside className={styles.sidebar}>

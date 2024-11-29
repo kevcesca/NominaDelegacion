@@ -8,6 +8,7 @@ import styles from './page.module.css';
 import { ThemeProvider } from '@mui/material';
 import theme from '../$tema/theme';
 import ProtectedView from '../%Components/ProtectedView/ProtectedView';
+import Link from 'next/link';
 
 export default function Validacion() {
     const [tipoNomina, setTipoNomina] = useState('');
@@ -62,16 +63,19 @@ export default function Validacion() {
                                 tipoNomina={tipoNomina}
                                 anio={anio}
                                 quincena={quincena}
-                               
+
                             />
                         </div>
                     )}
 
                     {/* Botones de navegación */}
                     <div className={styles.buttonContainer}>
-                        <Button variant="contained" color="primary" className={styles.exportButton}>
-                            Resumen de Nómina
-                        </Button>
+                        <Link href='/CrearNomina/ProcesarDatos'>
+                            <Button variant="contained" color="primary" className={styles.exportButton}>
+                                Resumen de Nómina
+                            </Button>
+                        </Link>
+
                         <Button
                             variant="contained"
                             color="secondary"

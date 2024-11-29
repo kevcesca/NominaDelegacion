@@ -16,42 +16,52 @@ export default function Calendario() {
     setSelectedDate(date);
   };
 
-  // Guardar evento (ahora con GET)
-  const handleSaveEvent = async (date, newEvent) => {
-    try {
-      const [year, month, day] = date.split('-');
-      const monthName = new Date(date).toLocaleString('en-US', { month: 'long' });
-      const quincenaEvento = 'Primera quincena'; // Asumido que esto es fijo o calculado de alguna manera
-
-      // Construcción de la URL para insertar un evento usando GET
-      const url = `${API_BASE_URL}/insertarEventos?fechaEvento=${date}&quincenaEvento=${quincenaEvento}&mesEvento=${monthName}&anioEvento=${year}&tituloEvento=${newEvent.titulo_evento}&descripcionEvento=${newEvent.descripcion}`;
-
-      const response = await fetch(url, {
-        method: 'GET', // Usar GET en vez de POST
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al guardar el evento');
-      }
-
-      // Actualiza el estado local con el nuevo evento
-      setEvents((prevEvents) => [...prevEvents, newEvent]);
-    } catch (error) {
-      console.error('Error al guardar el evento:', error);
-    }
-  };
-
   // Cargar eventos de la fecha seleccionada al montar el componente
   useEffect(() => {
     if (selectedDate) {
       const [year, month, day] = selectedDate.split('-');
-      const monthName = new Date(selectedDate).toLocaleString('en-US', { month: 'long' }); // Nombre del mes en inglés
+      const dateObj = new Date(selectedDate);
+      const monthName = dateObj.toLocaleString('en-US', { month: 'long' });
+      const dayName = dateObj.toLocaleString('en-US', { weekday: 'long' });
+
+      const getMonthInSpanish = (monthName) => {
+        switch (monthName) {
+          case 'January': return 'Enero';
+          case 'February': return 'Febrero';
+          case 'March': return 'Marzo';
+          case 'April': return 'Abril';
+          case 'May': return 'Mayo';
+          case 'June': return 'Junio';
+          case 'July': return 'Julio';
+          case 'August': return 'Agosto';
+          case 'September': return 'Septiembre';
+          case 'October': return 'Octubre';
+          case 'November': return 'Noviembre';
+          case 'December': return 'Diciembre';
+          default: return monthName;
+        }
+      };
+
+      const getDayInSpanish = (dayName) => {
+        switch (dayName) {
+          case 'Sunday': return 'Domingo';
+          case 'Monday': return 'Lunes';
+          case 'Tuesday': return 'Martes';
+          case 'Wednesday': return 'Miércoles';
+          case 'Thursday': return 'Jueves';
+          case 'Friday': return 'Viernes';
+          case 'Saturday': return 'Sábado';
+          default: return dayName;
+        }
+      };
 
       const fetchEvents = async () => {
         try {
-          // Consultar eventos para la fecha seleccionada
+          const monthInSpanish = getMonthInSpanish(monthName);
+          const dayInSpanish = getDayInSpanish(dayName);
+
           const response = await fetch(
-            `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthName}`
+            `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthInSpanish}`
           );
           const data = await response.json();
 
@@ -83,11 +93,13 @@ export default function Calendario() {
             onDateSelect={handleDateSelect}
           />
 
-          {/* Barra lateral */}
+          {/* Barra lateral (ahora maneja la inserción de eventos) */}
           <Sidebar
             selectedDate={selectedDate}
             events={events}
-            onSaveEvent={handleSaveEvent}
+            onSaveEvent={(date, newEvent) => {
+              // Dejar que Sidebar maneje la inserción del evento
+            }}
           />
         </div>
 
