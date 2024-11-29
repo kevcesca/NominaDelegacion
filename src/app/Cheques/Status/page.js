@@ -9,6 +9,9 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from '../Status/page.module.css';
 import theme from '../../$tema/theme';
+import { jsPDF } from "jspdf"; // Para PDF
+import * as XLSX from "xlsx"; // Para Excel
+import { saveAs } from "file-saver"; // Para CSV
 
 const Home = () => {
   const chequeData = [
@@ -59,6 +62,66 @@ const Home = () => {
 
   const handleSelectAll = (e) => {
     setSelectedCheques(e.checked ? filteredData : []);
+  };
+
+  // Funciones de exportación
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const selectedData = filteredData.filter((cheque) => selectedCheques.includes(cheque.id_empleado));
+
+    doc.autoTable({
+      head: [['ID Empleado', 'Nombre', 'Tipo Nómina', 'Folio Cheque', 'Monto', 'Estado Cheque', 'Fecha', 'Quincena', 'Tipo de Pago']],
+      body: selectedData.map((cheque) => [
+        cheque.id_empleado, cheque.name, cheque.tipoNomina, cheque.chequeNumber, cheque.chequeAmount, cheque.chequeStatus,
+        cheque.chequeDate, cheque.quincena, cheque.tipoNomina
+      ])
+    });
+    doc.save('empleados_reporte.pdf');
+  };
+
+  const exportToExcel = () => {
+    const selectedData = filteredData.filter((cheque) => selectedCheques.includes(cheque.id_empleado));
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(
+      selectedData.map((cheque) => ({
+        'ID Empleado': cheque.id_empleado,
+        'Nombre': cheque.name,
+        'Tipo Nómina': cheque.tipoNomina,
+        'Folio Cheque': cheque.chequeNumber,
+        'Monto': cheque.chequeAmount,
+        'Estado Cheque': cheque.chequeStatus,
+        'Fecha': cheque.chequeDate,
+        'Quincena': cheque.quincena,
+        'Tipo de Pago': cheque.tipoNomina
+      }))
+    );
+    XLSX.utils.book_append_sheet(wb, ws, 'Empleados');
+    XLSX.writeFile(wb, 'empleados_reporte.xlsx');
+  };
+
+  const exportToCSV = () => {
+    const selectedData = filteredData.filter((cheque) => selectedCheques.includes(cheque.id_empleado));
+    const csvData = selectedData.map((cheque) => ({
+      'ID Empleado': cheque.id_empleado,
+      'Nombre': cheque.name,
+      'Tipo Nómina': cheque.tipoNomina,
+      'Folio Cheque': cheque.chequeNumber,
+      'Monto': cheque.chequeAmount,
+      'Estado Cheque': cheque.chequeStatus,
+      'Fecha': cheque.chequeDate,
+      'Quincena': cheque.quincena,
+      'Tipo de Pago': cheque.tipoNomina
+    }));
+
+    const csv = [
+      ['ID Empleado', 'Nombre', 'Tipo Nómina', 'Folio Cheque', 'Monto', 'Estado Cheque', 'Fecha', 'Quincena', 'Tipo de Pago'],
+      ...csvData.map(item => Object.values(item))
+    ]
+      .map(row => row.join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'empleados_reporte.csv');
   };
 
   return (
@@ -138,9 +201,36 @@ const Home = () => {
             No existen registros con esa fecha o estado.
           </Typography>
         )}
+
+        {/* Botones de exportación */}
+        <Box >
+        <Button
+  variant="contained"
+  className={styles.button}
+  onClick={exportToPDF}
+>
+  Exportar a PDF
+</Button>
+<Button
+  variant="contained"
+  className={styles.button}
+  onClick={exportToExcel}
+>
+  Exportar a Excel
+</Button>
+<Button
+  variant="contained"
+  className={styles.button}
+  onClick={exportToCSV}
+>
+  Exportar a CSV
+</Button>
+
+        </Box>
       </Box>
     </ThemeProvider>
   );
 };
 
 export default Home;
+
