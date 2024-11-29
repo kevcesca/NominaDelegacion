@@ -40,12 +40,14 @@
 }
 .actions {
   margin-top: 20px;
+  color: #ddd;
 }
 .actions button {
   padding: 10px 20px;
   margin: 10px;
   cursor: pointer;
   border-radius: 5px;
+  color: #ddd;
 }
 
 .actions button:hover {
@@ -71,7 +73,7 @@
   right: 00.8%;/* Naranja para el botón de cambio de tipo de pago */
 }
 
-.actions .generate {
+.actions .generate  {
   background-color: #8d1409;
   color: #ddd; /* Naranja para el botón de cambio de tipo de pago */
 }
@@ -82,6 +84,7 @@
 
 .extraButtons .cambiarTipoPago:hover {
   background-color: #8d1409; /* Hover naranja más oscuro */
+  color:#ddd;
 }
 
 .extraButtons .generarPoliza {
@@ -93,7 +96,7 @@
 
 .extraButtons .generarPoliza:hover {
   background-color: #8d1409; /* Hover verde más oscuro */
-  
+  color: #ddd;
 }
 
 .labels {
@@ -104,9 +107,22 @@
 
 .buttons{
   background-color: #8d1409 !important;
+  color:#ddd;
 }
 
 .buttonsOut{
   border-color: #8d1409 !important;
   color: #8d1409 !important;
 }
+
+/* Agrega este estilo en tu archivo CSS */
+
+.last-folio-label {
+  color: rgb(250, 8, 8);
+  font-size: 18px;
+  margin-top: 10px;
+  position: relative;
+  left: 400px;
+  top: -70px;
+}
+

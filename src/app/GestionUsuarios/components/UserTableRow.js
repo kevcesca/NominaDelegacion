@@ -91,10 +91,9 @@ const UserTableRow = ({
                         </IconButton>
                     </Tooltip>
                 </td>
+
                 <td>{new Date(user['Fecha de Alta']).toLocaleDateString()}</td>
                 <td>{user.Asignó}</td>
-
-
 
                 {/* Opciones */}
                 <td>
@@ -103,13 +102,17 @@ const UserTableRow = ({
                             variant="contained"
                             color="primary"
                             size="small"
-                            onClick={onConfirmEdit} // Llamar la función del padre
+                            onClick={onConfirmEdit}
                             className={styles.confirmButton}
                         >
                             Confirmar
                         </Button>
                     ) : (
-                        <IconButton onClick={(e) => onMenuOpen(e, user)} aria-label="opciones">
+                        <IconButton
+                            onClick={(e) => onMenuOpen(e, user)}
+                            aria-label="opciones"
+                            style={{ color: !user.Activo ? 'black' : 'inherit' }} // Cambiar el color si está deshabilitado
+                        >
                             <MoreVertIcon />
                         </IconButton>
                     )}
@@ -121,8 +124,9 @@ const UserTableRow = ({
                 isOpen={isRolesModalOpen}
                 onClose={handleCloseRolesModal}
                 user={user}
-                onRolesUpdated={(newRoles) => {
-                    onRolesUpdated(user['ID Empleado'], newRoles);
+                onRolesUpdated={(userId, newRoles) => {
+                    onRolesUpdated(userId, newRoles);
+                    setIsRolesModalOpen(false);
                 }}
             />
         </>

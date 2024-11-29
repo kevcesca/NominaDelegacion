@@ -119,26 +119,66 @@
     display: block;
     cursor: pointer;
 }
-
-/* Mantén el CSS proporcionado inicialmente con las siguientes actualizaciones */
 .pagination {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     margin-top: 10px;
-    gap: 10px;
-}
-
-.pagination button {
-    padding: 5px 10px;
+    gap: 20px; /* Espaciado entre bloques */
+    padding-right: 10px;
+  }
+  
+  .paginationControl {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espaciado entre "Rows per page:" y el selector */
+  }
+  
+  .rowsText {
     font-size: 14px;
-    border: 1px solid #8B2635;
-    background-color: #8B2635;
-    color: white;
+    color: #333;
+    white-space: nowrap; /* Evita que el texto se parta en dos líneas */
+  }
+  
+  .select {
+    border: 1px solid #ccc;
     border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 14px;
+    height: 30px;
+    min-width: 60px; /* Asegura que no se encimen opciones largas */
+  }
+  
+  .range {
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .paginationButton {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #333;
     cursor: pointer;
-}
-
-.pagination button:hover {
-    background-color: #BB905B;
-}
+  }
+  
+  .paginationButton:disabled {
+    color: #aaa;
+    cursor: not-allowed;
+  }
+  .exportButtons {
+    display: flex;
+    position: relative;
+    left: 908px;
+    top: 60px;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    
+  }
+  
+  .exportButton {
+    padding: 0.5rem 3rem;
+    font-size: 0.5rem;
+    cursor: pointer;
+  }
+    

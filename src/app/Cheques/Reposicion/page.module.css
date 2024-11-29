@@ -1,98 +1,83 @@
-/* RepositionCheque.module.css */
+/* Estilos generales del contenedor */
 .container {
-    background-color: #ffffff;
-    padding: 5rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 80vw;
-    margin: auto;
-    color: #8B2635;
-}
-
-.h2 {
-    margin-bottom: 20px;
-    color: #8B2635;
+    max-width: 1700px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Estilo del título */
+  .title {
     text-align: center;
-    font-weight: bolder;
-}
-
-.formColumns {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.formColumn {
-    flex: 1 1 45%;
-}
-
-.label {
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: #333;
     font-weight: bold;
-    color: #8B2635;
-    margin-top: 10px;
+  }
+  
+  /* Tabla */
+  .MuiTableContainer-root {
+    margin-top: 20px;
+  }
+  
+  .MuiTableHead-root {
+    background-color: #1976d2; /* Azul Material-UI */
+  }
+  
+  .MuiTableCell-head {
+    color: white;
+    font-weight: bold;
+  }
+  
+  .MuiTableCell-body {
+    font-size: 0.95rem;
+  }
+  
+  /* Input para subir archivo */
+  .input[type='file'] {
     display: block;
-}
-
-.input[type="text"],
-.input[type="number"],
-
-.buttonContainer {
+    margin: 0 auto;
+    color: #555;
+  }
+  
+  /* Botones de acción */
+  .MuiIconButton-root {
+    transition: transform 0.2s ease;
+  }
+  
+  .MuiIconButton-root:hover {
+    transform: scale(1.1);
+  }
+  
+  /* Diálogo de éxito */
+  .MuiDialog-paper {
+    border-radius: 10px;
+  }
+  
+  .MuiDialogTitle-root {
+    font-weight: bold;
+    font-size: 1.25rem;
+    text-align: center;
+  }
+  
+  .MuiButton-root {
+    text-transform: none;
+  }
+  
+  /* Asegúrate de agregar este estilo en tu archivo CSS */
+.buttons-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 2rem !important;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    gap: 10px; /* Espaciado entre los botones */
+    margin-bottom: 20px; /* Espaciado debajo de los botones */
+    position: relative;
+    top: 55px;
 }
-
-.buttonContainer2 {
-    color: #8B2635 !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    margin: 2rem;
-}
-
 
 .button {
-    flex: 1;
-    padding: 10px;
-    background-color: #8B2635;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.button.cancelar, .uploadButton {
-    background-color: #8B2635 !important;
-}
-
-.button:hover {
-    background-color: #BB905B;
-}
-
-
-.textField {
-    width: 30vw !important;
-    margin-left: 2rem !important;
-    color: #8B2635 !important;
-    border-color: #8B2635 !important;
-}
-
-.inputContainer{
-    padding: 2rem;
-    margin: 1rem;
-}
-
-.uploadButton {
-    display: block;
-    margin: 10px auto;
-    padding: 10px;
-    background-color: #8B2635;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    padding: 10px 20px; /* Tamaño del botón */
+    font-size: 1px; /* Tamaño de la fuente */
+    text-transform: uppercase; /* Opcional: Convierte el texto a mayúsculas */
 }

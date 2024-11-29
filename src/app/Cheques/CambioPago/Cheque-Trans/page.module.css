@@ -17,25 +17,34 @@
   margin: 20px auto;
 }
 
-.mainTitle,
-.subtitle {
+.header h1 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.backButton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.h3,
+.h2 {
   text-align: center;
   margin: 15px 0;
 }
 
-.mainTitle {
-  text-align: center;
+.h2 {
   color: #ffffff;
-  background-color: #bc955c;
-  padding: 10px 0;
-  margin: 0;
+  background-color: #1f5841;
 }
 
-.subtitle {
-  color: #333;
-}
-
-/* Contenedor de búsqueda de ID centrado */
 .searchContainer {
   display: flex;
   justify-content: center;
@@ -58,13 +67,27 @@
   border: 1px solid #ccc;
 }
 
-/* Ajustes para el formulario principal en 2 columnas */
+.mainTitle,
+.subtitle {
+  text-align: center;
+  margin: 15px 0;
+}
+
+.mainTitle {
+  text-align: center;
+  color: #ffffff;
+  background-color: #bc955c;
+  padding: 10px 0;
+  margin: 0;
+}
+
 .formRow {
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
   justify-content: center;
-  margin-top: 10px;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .formGroup {
@@ -79,18 +102,19 @@
   margin-top: 15px;
 }
 
-/* Centrar mensaje y botón de historial debajo de los botones */
-.message,
-.buttonContainer {
-  display: flex;
-  justify-content: center;
+.message {
+  margin-top: 10px;
   text-align: center;
   font-weight: bold;
   color: #9f2241;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
   margin-top: 15px;
 }
 
-/* Botones */
 .styledButton,
 .styledButton1,
 .styledButton2,
@@ -105,81 +129,230 @@
   margin: 5px;
 }
 
-.styledButton2 {
+.styledButton {
   background-color: #9f2241;
 }
 .styledButton:hover {
-  background-color: #987849;
+  background-color: #ab9144;
 }
-.styledButton2 {
+
+.styledButton1 {
   background-color: #bb0000;
 }
 .styledButton1:hover {
   background-color: #a04545;
 }
-.styledButton1 {
-  background-color: #235b4e;
+
+.styledButton2 {
+  background-color: #45a049;
 }
-.styledButton1:hover {
-  background-color: #1b473d;
-}
-.styledButton3 {
-  background-color: #bc955c;
-}
-.styledButton3:hover {
-  background-color: #987849;
+.styledButton2:hover {
+  background-color: #336335;
 }
 
-/* Modal */
+.styledButton3 {
+  background-color: #ab9144;
+}
+.styledButton3:hover {
+  background-color: #635e33;
+}
+
+/* Agrega esto al final de tu archivo CSS existente */
+
 .modal {
-  display: flex;
-  position: fixed;
-  z-index: 1001;
-  padding-top: 100px;
-  left: 0;
+  position: fixed; /* Fijar en la pantalla */
   top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  align-items: center;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo opaco detrás */
+  display: flex;
   justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
 }
 
 .modalContent {
-  background-color: #fefefe;
+  background-color: white;
+  border-radius: 8px;
   padding: 20px;
-  border: 1px solid #888;
-  max-width: 500px;
-  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
   text-align: center;
 }
 
-.closeButton {
-  color: #aaa;
-  font-size: 28px;
+.modalContent h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
   font-weight: bold;
-  cursor: pointer;
 }
 
-.closeButton:hover {
-  color: black;
+.modalContent p {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.modalContent input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+.modalButtons button {
+  padding: 10px 15px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modalButtons .styledButton2 {
+  background-color: #45a049;
+  color: white;
+}
+
+.modalButtons .styledButton2:hover {
+  background-color: #336635;
+}
+
+.modalButtons .styledButton1 {
+  background-color: #bb0000;
+  color: white;
+}
+
+.modalButtons .styledButton1:hover {
+  background-color: #a04545;
+}
+
+/* Contenedor de la tabla */
+.tableContainer {
+  margin: 20px auto;
+  width: 100%;
+  max-width: 1200px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+}
+
+/* Estilo del título */
+.tableContainer h3 {
+  text-align: center;
+  color: white;
+  background-color: #1f5841; /* Color verde especificado */
+  padding: 10px 0;
+  margin: 0 0 20px 0;
+  border-radius: 8px 8px 0 0; /* Bordes superiores redondeados */
+  font-size: 18px;
 }
 
 /* Tabla */
 .table {
   width: 100%;
-  margin-top: 15px;
   border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  font-size: 14px;
   text-align: left;
 }
 
-.table th {
-  background-color: #ab9144;
+/* Encabezado de la tabla */
+.table thead th {
+  background-color: #9f2241; /* Rojo del botón "Buscar" */
   color: white;
+  padding: 10px;
+  text-align: center; /* Centramos el texto en el encabezado */
+}
+
+/* Filas de la tabla */
+.table tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* Color alternado */
+}
+
+.table tbody tr:hover {
+  background-color: #f1f1f1; /* Efecto hover */
+}
+
+/* Celdas */
+.table td,
+.table th {
+  padding: 10px;
+}
+
+/* Checkbox centrados */
+.table td input[type="checkbox"] {
+  display: block;
+  margin: 0 auto;
+}
+
+.exportButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.exportButton {
+  padding: 10px 20px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.exportButton:hover {
+  background-color: #005bb5;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-left: 8px;
+  color: #007bff;
+}
+
+.iconButton:hover {
+  color: #0056b3;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }

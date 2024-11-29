@@ -10,6 +10,7 @@ import AssignRolesModal from './components/AssignRolesModal'; // Modal para asig
 import useUsers from './components/useUsers';
 import { useAuth } from '../context/AuthContext';
 import { API_USERS_URL } from '../%Config/apiConfig';
+import ChangePasswordModal from './components/ChangePasswordModal'; // Importa el nuevo componente
 
 const UserTable = () => {
     const { users, setUsers, fetchUsers, toggleUserStatus } = useUsers(); // Incluimos `setUsers` para actualizar la lista localmente
@@ -21,8 +22,15 @@ const UserTable = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isRolesModalOpen, setIsRolesModalOpen] = useState(false); // Estado del modal de roles
     const [selectedUsers, setSelectedUsers] = useState([]); // Manejo de selección de usuarios
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
     const openMenu = Boolean(anchorEl);
+
+    // Función para abrir el modal de cambio de contraseña
+    const handleChangePassword = () => {
+        setIsPasswordModalOpen(true);
+        setAnchorEl(null); // Cerrar el menú de opciones
+    };
 
     // Abrir el menú contextual de opciones
     const handleMenuOpen = (event, user) => {
@@ -179,6 +187,7 @@ const UserTable = () => {
                                 setSelectedUser(user);
                             }}
                             onRolesUpdated={(userId, newRoles) => {
+                                // Actualización de roles
                                 setUsers((prevUsers) =>
                                     prevUsers.map((u) =>
                                         u['ID Empleado'] === userId
@@ -186,6 +195,7 @@ const UserTable = () => {
                                             : u
                                     )
                                 );
+                                fetchUsers(); // Refrescar usuarios después de actualizar roles
                             }}
                             isSelected={selectedUsers.includes(user['ID Empleado'])}
                             onToggleSelect={() => handleSelectUser(user['ID Empleado'])}
@@ -203,7 +213,18 @@ const UserTable = () => {
                     setAnchorEl(null);
                 }}
                 isActive={selectedUser?.Activo}
+                onChangePassword={handleChangePassword} // Pasamos la función para cambiar la contraseña
             />
+
+            {/* Modal para cambiar la contraseña */}
+            {selectedUser && (
+                <ChangePasswordModal
+                    isOpen={isPasswordModalOpen}
+                    onClose={() => setIsPasswordModalOpen(false)}
+                    userId={selectedUser['ID Empleado']}
+                    onPasswordChanged={fetchUsers} // Refrescar los usuarios después de cambiar la contraseña
+                />
+            )}
 
             <AddUserModal
                 isOpen={isModalOpen}
@@ -216,15 +237,16 @@ const UserTable = () => {
                 isOpen={isRolesModalOpen}
                 onClose={() => setIsRolesModalOpen(false)}
                 user={selectedUser}
-                onRolesUpdated={(newRoles) =>
+                onRolesUpdated={(newRoles) => {
                     setUsers((prevUsers) =>
                         prevUsers.map((u) =>
                             u['ID Empleado'] === selectedUser?.['ID Empleado']
                                 ? { ...u, Rol: newRoles.join(', ') }
                                 : u
                         )
-                    )
-                }
+                    );
+                    fetchUsers(); // Refrescar usuarios después de actualizar roles
+                }}
             />
         </div>
     );

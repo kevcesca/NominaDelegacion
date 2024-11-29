@@ -1,14 +1,16 @@
-"use client"
-import { useState } from 'react';
+"use client";
+import { useState, useEffect } from 'react';
 import styles from '../Poliza/page.module.css';
 import { Box, Typography, Button, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import ProtectedView from '../../%Components/ProtectedView/ProtectedView';
 
+// Aquí deberías obtener los folios generados en la vista anterior, puede ser de un contexto, API o almacenamiento local
+// Supondré que los folios se pasan a través de props o contexto (en este caso están simulados)
 
 const empleados = [
-    { id: 13515, nombre: "Juan Pérez", tipoNomina: "Estructura", percepciones: "$5200", deducciones: "$200", liquido: "$5000", clc: "CLC1234", estadoCheque: "Creado" },
-    { id: 13516, nombre: "Ana Gómez", tipoNomina: "Nómina 8", percepciones: "$4700", deducciones: "$200", liquido: "$4500", clc: "CLC5678", estadoCheque: "Creado" },
-    { id: 13517, nombre: "Luis Ramírez", tipoNomina: "Base", percepciones: "$4200", deducciones: "$200", liquido: "$4000", clc: "CLC9012", estadoCheque: "Creado" },
+    { id: 13515, nombre: "Juan Pérez", tipoNomina: "Estructura", percepciones: "$5200", deducciones: "$200", liquido: "$5000", estadoCheque: "Creado" },
+    { id: 13516, nombre: "Ana Gómez", tipoNomina: "Nómina 8", percepciones: "$4700", deducciones: "$200", liquido: "$4500", estadoCheque: "Creado" },
+    { id: 13517, nombre: "Luis Ramírez", tipoNomina: "Base", percepciones: "$4200", deducciones: "$200", liquido: "$4000", estadoCheque: "Creado" },
 ];
 
 export default function GestorPolizas() {
@@ -16,6 +18,17 @@ export default function GestorPolizas() {
     const [finalFolioCheque, setFinalFolioCheque] = useState('');
     const [polizasGeneradas, setPolizasGeneradas] = useState([]);
     const [mostrarConsolidacion, setMostrarConsolidacion] = useState(false);
+
+    useEffect(() => {
+        // Simulamos que recibimos los folios generados de la vista anterior.
+        // Esto puede venir de un almacenamiento local, contexto o props.
+        const foliosGenerados = [135468, 135469, 135470]; // Por ejemplo, los folios generados.
+        
+        if (foliosGenerados.length > 0) {
+            setInicioFolioCheque(foliosGenerados[0]); // Asignamos el primer folio generado al inicio
+            setFinalFolioCheque(foliosGenerados[foliosGenerados.length - 1]); // Asignamos el último folio generado al final
+        }
+    }, []);
 
     const generarPolizas = () => {
         if (!inicioFolioCheque || !finalFolioCheque || inicioFolioCheque >= finalFolioCheque) {
@@ -46,7 +59,6 @@ export default function GestorPolizas() {
 
     return (
         <ProtectedView requiredPermissions={["Generacion_Polizas", "Acceso_total"]}>
-
             <Box className={styles.container}>
                 <Typography variant="h4" gutterBottom>Gestor de Pólizas</Typography>
 
@@ -124,32 +136,16 @@ export default function GestorPolizas() {
                         <TableContainer component={Paper}>
                             <Table>
                                 <TableHead>
-                                    <TableRow>
-                                        <TableCell>ID Empleado</TableCell>
-                                        <TableCell>Nombre</TableCell>
-                                        <TableCell>Concepto de Pago</TableCell>
+                                    <TableRow className={styles.table}>
                                         <TableCell>Folio Cheque</TableCell>
                                         <TableCell>Folio Póliza</TableCell>
-                                        <TableCell>Percepciones</TableCell>
-                                        <TableCell>Deducciones</TableCell>
-                                        <TableCell>Líquido</TableCell>
-                                        <TableCell>CLC</TableCell>
-                                        <TableCell>Estado Cheque</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {empleados.map((empleado, index) => (
+                                    {polizasGeneradas.map((poliza, index) => (
                                         <TableRow key={index}>
-                                            <TableCell>{empleado.id}</TableCell>
-                                            <TableCell>{empleado.nombre}</TableCell>
-                                            <TableCell>Quincena 2da - {empleado.tipoNomina}</TableCell>
-                                            <TableCell>{parseInt(inicioFolioCheque) + index}</TableCell>
-                                            <TableCell>{2000 + index}</TableCell>
-                                            <TableCell>{empleado.percepciones}</TableCell>
-                                            <TableCell>{empleado.deducciones}</TableCell>
-                                            <TableCell>{empleado.liquido}</TableCell>
-                                            <TableCell>{empleado.clc}</TableCell>
-                                            <TableCell>{empleado.estadoCheque}</TableCell>
+                                            <TableCell>{poliza.folioCheque}</TableCell>
+                                            <TableCell>{poliza.folioPoliza}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
