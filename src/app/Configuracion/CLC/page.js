@@ -192,9 +192,7 @@ const ClcPage = () => {
 };
 
 const ProtectedClcPage = () => (
-    <ProtectedView requiredPermissions={["CLC", "Acceso_total"]}>
         <ClcPage />
-    </ProtectedView>
 );
 
 export default ProtectedClcPage;
