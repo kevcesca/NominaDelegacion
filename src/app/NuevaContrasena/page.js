@@ -9,7 +9,6 @@ import { useAuth } from '../context/AuthContext';  // Importamos el contexto de 
 
 export default function RecuperarContraseña() {
   const { user } = useAuth();  // Recuperamos el usuario desde el contexto
-  const [idEmpleado, setIdEmpleado] = useState(user?.id_empleado || '');  // Inicializamos el ID con el valor del contexto (si existe)
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -17,12 +16,14 @@ export default function RecuperarContraseña() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Si el ID de empleado no está disponible en el contexto, podemos mostrar un mensaje de error o realizar alguna acción.
+  const idEmpleado = user?.id_empleado; // Obtenemos el ID del empleado directamente desde el contexto
+
+  // Asegurarnos de que el valor de idEmpleado esté disponible
   useEffect(() => {
-    if (!user?.id_empleado) {
+    if (!idEmpleado) {
       setError('No se ha encontrado el ID del empleado en la sesión.');
     }
-  }, [user]);
+  }, [idEmpleado]);
 
   // Función para validar la seguridad de la contraseña
   const validarSeguridadContraseña = (password) => {
@@ -47,13 +48,16 @@ export default function RecuperarContraseña() {
     }
 
     // Validación del ID del empleado
-    if (!idEmpleado.trim()) {
+    if (!idEmpleado) {
       alert('El ID del empleado es obligatorio.');
       return;
     }
 
     setLoading(true);
     setError(null);
+
+    // Verificar que el idEmpleado se pase correctamente en la solicitud
+    console.log("Enviando solicitud con ID:", idEmpleado);  // Debug
 
     // Solicitud para cambiar la contraseña
     try {
@@ -63,8 +67,8 @@ export default function RecuperarContraseña() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          newPassword,
-          confirmPassword,
+          newPassword,     // Nueva contraseña
+          confirmPassword, // Confirmación de la nueva contraseña
         }),
       });
 
@@ -91,17 +95,7 @@ export default function RecuperarContraseña() {
         <div className={styles.section}>
           <h2 className={styles.h2}>Cambiar Contraseña</h2>
 
-          {/* Campo para ID Empleado */}
-          <TextField
-            fullWidth
-            label="ID Empleado"
-            variant="outlined"
-            value={idEmpleado}
-            onChange={(e) => setIdEmpleado(e.target.value)}
-            margin="normal"
-            required
-            disabled
-          />
+          {/* El campo ID Empleado se elimina ya que se usa directamente desde el contexto */}
 
           {/* Campo para Nueva Contraseña */}
           <TextField
