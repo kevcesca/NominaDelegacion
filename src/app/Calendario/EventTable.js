@@ -1,8 +1,8 @@
-// EventTable.js
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Box, Grid, TextField, Collapse } from '@mui/material';
+import { Button, Typography, Box, Grid, Collapse } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh'; // Icono de refrescar
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as xlsx from 'xlsx';
@@ -10,9 +10,8 @@ import { saveAs } from 'file-saver';
 import API_BASE_URL from "../%Config/apiConfig";
 import ColumnSelector from '../%Components/ColumnSelector/ColumnSelector';
 import styles from './page.module.css';
-import theme from '../$tema/theme';
 
-export default function EventTable({ onSaveEvent }) {
+export default function EventTable({ anio, mes, onSaveEvent }) {
     const [data, setData] = useState([]); // Datos obtenidos de la API
     const [isLoading, setIsLoading] = useState(false); // Estado de carga
     const [visibleColumns, setVisibleColumns] = useState({
@@ -24,8 +23,6 @@ export default function EventTable({ onSaveEvent }) {
         anio: true,
         fecha: true,
     });
-    const [anio, setAnio] = useState('2024'); // Año seleccionado
-    const [mes, setMes] = useState('2024-11'); // Mes seleccionado
     const [collapseOpen, setCollapseOpen] = useState(false); // Estado de colapso de selector de columnas
 
     // Función para calcular el primer y último día del mes
@@ -49,32 +46,29 @@ export default function EventTable({ onSaveEvent }) {
             if (Array.isArray(data)) {
                 setData(data);
             } else {
-                setData([]);
+                setData([]); // Si no hay datos, se limpia el estado
             }
         } catch (error) {
             console.error('Error fetching data:', error);
-            setData([]);
+            setData([]); // Si hay error, se limpia el estado
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Llamar a fetchData cuando cambia el mes
     useEffect(() => {
-        fetchData(); // Refrescar datos automáticamente cuando cambia el mes
+        fetchData();
     }, [mes]); // Dependencia: cuando el mes cambie
 
+    // Llamar a fetchData cuando cambia el año
     useEffect(() => {
-        fetchData(); // Refrescar datos cuando cambia el año
+        fetchData();
     }, [anio]); // Dependencia: cuando el año cambie
 
     // Función para manejar el cambio en la selección de columnas
     const handleColumnSelectionChange = (selectedColumns) => {
         setVisibleColumns(selectedColumns);
-    };
-
-    // Función para actualizar la tabla cuando se inserta un nuevo evento
-    const handleSaveEvent = (newEvent) => {
-        setData((prevData) => [newEvent, ...prevData]); // Añadir el nuevo evento a los datos ya existentes
     };
 
     // Función para exportar a PDF
@@ -109,6 +103,7 @@ export default function EventTable({ onSaveEvent }) {
 
         const csvData = filteredData.map((row) =>
             Object.values(row).map((value) => `"${value}"`).join(','));
+
         const header = Object.keys(visibleColumns)
             .filter((key) => visibleColumns[key])
             .join(',');
@@ -138,33 +133,40 @@ export default function EventTable({ onSaveEvent }) {
     return (
         <Box className={styles.tableContainer}>
             <Typography variant="h4" className={styles.title}>Eventos del Mes</Typography>
-            <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="Año"
-                        value={anio}
-                        onChange={(e) => setAnio(e.target.value)} // Actualizar año
-                        fullWidth
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="Mes"
-                        value={mes}
-                        onChange={(e) => setMes(e.target.value)} // Actualizar mes
-                        fullWidth
-                        type="month"
-                    />
-                </Grid>
-            </Grid>
-            <Button
-                variant="outlined"
-                onClick={() => setCollapseOpen(!collapseOpen)}
-                style={{ marginTop: '1rem' }}
-            >
-                Configurar Columnas
-            </Button>
             
+            <Box sx={{
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginBottom: '1rem'
+            }}>
+                {/* Botón de Refrescar con icono */}
+                <Button
+                    variant="outlined"
+                    onClick={fetchData} // Llamar a fetchData para refrescar los datos
+                    color="primary"
+                    startIcon={<RefreshIcon />} // Ícono de refrescar
+                    sx={{
+                        marginRight: 2, // Espacio a la derecha
+                        padding: '8px 16px', // Padding para que el botón se vea más grande
+                    }}
+                >
+                    Refrescar
+                </Button>
+                
+                {/* Botón para configurar columnas */}
+                <Button
+                    variant="outlined"
+                    onClick={() => setCollapseOpen(!collapseOpen)}
+                    color="primary"
+                    sx={{
+                        padding: '8px 16px', // Padding igual para el botón
+                    }}
+                >
+                    Configurar Columnas
+                </Button>
+            </Box>
+
             <Collapse in={collapseOpen}>
                 <Box className={styles.columnSelector}>
                     <ColumnSelector
@@ -235,11 +237,4 @@ export default function EventTable({ onSaveEvent }) {
                                     (key) =>
                                         visibleColumns[key] && <td key={key}>{event[key]}</td>
                                 )}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </Box>
-        </Box>
-    );
-}
+                            </tr> ))} </tbody> </table> </Box> </Box> ); }
