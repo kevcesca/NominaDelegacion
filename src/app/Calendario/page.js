@@ -9,7 +9,7 @@ import API_BASE_URL from '../%Config/apiConfig';
 
 export default function Calendario() {
   const [selectedDate, setSelectedDate] = useState(null); // Fecha seleccionada
-  const [events, setEvents] = useState([]); // Eventos de la fecha seleccionada
+  const [events, setEvents] = useState([]); // Eventos del mes seleccionado
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // Mes actual
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear()); // Año actual
 
@@ -133,6 +133,48 @@ export default function Calendario() {
     });
   };
 
+  // Manejo de eventos guardados desde el Sidebar
+  const handleSaveEvent = (newEvent) => {
+    // Asegurarse de que `selectedDate` esté en el formato correcto (yyyy-mm-dd)
+    if (selectedDate) {
+      const fetchUpdatedEvents = async () => {
+        const [year, month, day] = selectedDate.split('-');
+        const dateObj = new Date(selectedDate);
+        const monthName = dateObj.toLocaleString('en-US', { month: 'long' });
+        const getMonthInSpanish = (monthName) => {
+          switch (monthName) {
+            case 'January': return 'Enero';
+            case 'February': return 'Febrero';
+            case 'March': return 'Marzo';
+            case 'April': return 'Abril';
+            case 'May': return 'Mayo';
+            case 'June': return 'Junio';
+            case 'July': return 'Julio';
+            case 'August': return 'Agosto';
+            case 'September': return 'Septiembre';
+            case 'October': return 'Octubre';
+            case 'November': return 'Noviembre';
+            case 'December': return 'Diciembre';
+            default: return monthName;
+          }
+        };
+  
+        try {
+          const monthInSpanish = getMonthInSpanish(monthName);
+          const response = await fetch(
+            `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthInSpanish}`
+          );
+          const data = await response.json();
+          setEvents(data); // Actualizar los eventos de la fecha seleccionada
+        } catch (error) {
+          console.error('Error al obtener los eventos actualizados:', error);
+        }
+      };
+  
+      fetchUpdatedEvents(); // Llamada para actualizar los eventos después de guardar
+    }
+  };
+
   return (
     <div className={styles.container}>
       {/* Título */}
@@ -158,15 +200,17 @@ export default function Calendario() {
           <Sidebar
             selectedDate={selectedDate}
             events={events}
-            onSaveEvent={(date, newEvent) => {
-              // Dejar que Sidebar maneje la inserción del evento
-            }}
+            onSaveEvent={handleSaveEvent} // Pasamos la función que guarda el evento
           />
         </div>
 
         {/* Tabla resumen */}
         <div className={styles.summaryContainer}>
-          <EventTable events={events} />
+          <EventTable
+            events={events}
+            anio={currentYear}
+            mes={`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`}
+          />
         </div>
       </div>
     </div>

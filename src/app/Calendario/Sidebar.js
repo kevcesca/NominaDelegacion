@@ -114,7 +114,7 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
         throw new Error('Error al guardar el evento');
       }
 
-      // Actualizar los eventos en el componente padre (EventTable)
+      // Nuevo evento guardado
       const newEvent = {
         titulo_evento: eventTitle,
         descripcion: eventDescription,
@@ -123,6 +123,9 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
         anio: year,
         dia_del_evento: dayInSpanish,
       };
+
+      // Actualizar los eventos en el componente padre (calendario)
+      onSaveEvent(newEvent);
 
       // Añadir el nuevo evento a la lista de eventos del día seleccionado
       setEvents((prevEvents) => [...prevEvents, newEvent]);
@@ -211,7 +214,12 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
               className={styles.btnCancel}
               onClick={() => { setEventTitle(''); setEventDescription(''); }} > 
                 Cancelar 
-            </button> </div> </>) 
-            : 
-            (<p>Por favor, selecciona una fecha para ver los eventos.</p>)} </aside>);
+            </button>
+          </div>
+        </>
+      ) : (
+        <p>Por favor, selecciona una fecha para ver los eventos.</p>
+      )}
+    </aside>
+  );
 }
