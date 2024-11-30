@@ -71,7 +71,7 @@ const CrudRoles = () => {
         } catch (error) {
             console.error('Error al actualizar la tabla después de crear un rol:', error);
         }
-    };    
+    };
 
     // Actualizar un rol
     const updateRole = async (id, updatedData) => {
@@ -105,7 +105,10 @@ const CrudRoles = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Error al eliminar roles seleccionados');
+                // Capturamos el mensaje de error detallado del backend
+                const errorData = await response.json();
+                const errorMessage = errorData.message || 'Error desconocido al eliminar roles';
+                throw new Error(errorMessage); // Lanza el error para ser capturado en el catch
             }
 
             setRoles((prevRoles) => prevRoles.filter((role) => !selectedRoles.includes(role.id)));
@@ -113,7 +116,14 @@ const CrudRoles = () => {
             alert('Roles eliminados correctamente');
         } catch (error) {
             console.error('Error al eliminar roles:', error);
-            alert('Error al eliminar los roles seleccionados');
+
+            // Si el error es un problema de JSON, mostramos el mensaje personalizado
+            if (error.message.includes('Unexpected token')) {
+                alert('Error desconocido_Revisa que el rol no esté asignado a un usuario');
+            } else {
+                // Si es otro tipo de error, mostramos el error del backend
+                alert(`No se pudieron eliminar los roles. Razón: ${error.message}`);
+            }
         }
     };
 
