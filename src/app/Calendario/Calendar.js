@@ -12,9 +12,24 @@ export default function Calendar({
     setCurrentDate(new Date(currentYear, currentMonth)); // Actualiza la fecha cuando cambie el mes
   }, [currentMonth, currentYear]);
 
+  // Fecha actual para resaltar el día actual
+  const today = new Date();
+  const isToday = (day) =>
+    today.getDate() === day &&
+    today.getMonth() === currentDate.getMonth() &&
+    today.getFullYear() === currentDate.getFullYear();
+
   const currentMonthName = currentDate.toLocaleString('es', { month: 'long' });
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  // Detectar el día actual si no hay uno seleccionado
+  useEffect(() => {
+    if (!selectedDate) {
+      const todayFormatted = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      onDateSelect(todayFormatted); // Seleccionar el día actual
+    }
+  }, [selectedDate, onDateSelect]);
 
   const renderDays = () => {
     const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7; // Garantiza celdas completas en la cuadrícula
@@ -29,14 +44,14 @@ export default function Calendar({
       } else {
         // Días del mes
         const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const isSelected = selectedDate === formattedDate;
-        const dayEvents = events.filter(event => event.dia === day); // Obtén eventos para este día
+        const isSelected = selectedDate === formattedDate; // Verificar si el día está seleccionado
+        const dayEvents = events.filter(event => event.dia === day); // Obtener eventos para este día
 
         cells.push(
           <td
             key={i}
-            className={`${styles.day} ${isSelected ? styles.selected : ''}`}
-            onClick={() => onDateSelect(formattedDate)}
+            className={`${styles.day} ${isToday(day) ? styles.today : ''} ${isSelected ? styles.selected : ''}`}
+            onClick={() => onDateSelect(formattedDate)} // Llamar a onDateSelect al hacer clic
           >
             <div className={styles.dayNumber}>{day}</div>
             {dayEvents.length > 0 && (
