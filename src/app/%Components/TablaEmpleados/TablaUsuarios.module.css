@@ -35,3 +35,8 @@
     text-align: center;
     text-decoration: double;
 }
+
+.employeeDetails {
+    max-height: 400px;
+    overflow-y: auto;
+}
