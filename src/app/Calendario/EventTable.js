@@ -237,4 +237,11 @@ export default function EventTable({ anio, mes, onSaveEvent }) {
                                     (key) =>
                                         visibleColumns[key] && <td key={key}>{event[key]}</td>
                                 )}
-                            </tr> ))} </tbody> </table> </Box> </Box> ); }
+                            </tr> 
+                        ))} 
+                    </tbody> 
+                </table> 
+            </Box> 
+        </Box> 
+    ); 
+}

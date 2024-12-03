@@ -5,12 +5,28 @@ import styles from './ColumnSelector.module.css';
 
 const ColumnSelector = ({ availableColumns, onSelectionChange }) => {
     const theme = useTheme();
+
+    // Inicializamos las selecciones con las columnas y un estado adicional para "Seleccionar todos"
     const initialSelection = availableColumns.reduce((acc, column) => {
         acc[column.key] = column.defaultSelected || false;
         return acc;
     }, {});
 
+    // Agregamos un estado para "select all" que por defecto es false
     const [selectedColumns, setSelectedColumns] = useState(initialSelection);
+    const [selectAll, setSelectAll] = useState(false);
+
+    const handleSelectAllChange = (event) => {
+        const checked = event.target.checked;
+        setSelectAll(checked);
+        
+        // Cambiar el estado de todos los checkboxes a lo que seleccione "select all"
+        const newSelection = availableColumns.reduce((acc, column) => {
+            acc[column.key] = checked;
+            return acc;
+        }, {});
+        setSelectedColumns(newSelection);
+    };
 
     const handleCheckboxChange = (event) => {
         setSelectedColumns({
@@ -37,7 +53,27 @@ const ColumnSelector = ({ availableColumns, onSelectionChange }) => {
             <Typography variant="h6" color="primary">
                 Campos para generar tabla
             </Typography>
-            {/* Usamos CSS Grid en lugar de Flexbox */}
+
+            {/* Casilla "Seleccionar todos" */}
+            <FormGroup sx={{ marginBottom: '1rem' }}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={selectAll}
+                            onChange={handleSelectAllChange}
+                            sx={{
+                                color: theme.palette.primary.main,
+                                '&.Mui-checked': {
+                                    color: theme.palette.primary.main,
+                                },
+                            }}
+                        />
+                    }
+                    label="Seleccionar todos"
+                />
+            </FormGroup>
+
+            {/* Resto de las casillas de columna */}
             <FormGroup 
                 sx={{
                     display: 'grid',
@@ -66,6 +102,7 @@ const ColumnSelector = ({ availableColumns, onSelectionChange }) => {
                     />
                 ))}
             </FormGroup>
+
             <Button
                 variant="contained"
                 onClick={handleSubmit}

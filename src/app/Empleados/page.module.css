@@ -37,3 +37,8 @@
 .generateButton:hover {
     background-color: #995c2c;
 }
+
+.h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
