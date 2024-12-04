@@ -9,6 +9,7 @@ import { ThemeProvider } from '@mui/material';
 import theme from '../$tema/theme';
 import ProtectedView from '../%Components/ProtectedView/ProtectedView';
 import Link from 'next/link';
+import AsyncButton from '../%Components/AsyncButton/AsyncButton'; // Importar el AsyncButton
 
 export default function Validacion() {
     const [tipoNomina, setTipoNomina] = useState('');
@@ -20,6 +21,17 @@ export default function Validacion() {
     const handleDateChange = ({ anio, quincena }) => {
         setAnio(anio);
         setQuincena(quincena);
+    };
+
+    // Función asíncrona para manejar el proceso del botón "Resumen de Nómina"
+    const handleResumenNomina = async () => {
+        try {
+            // Simular una operación asíncrona
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            console.log('Resumen de nómina procesado.');
+        } catch (error) {
+            console.error('Error al procesar el resumen de nómina:', error);
+        }
     };
 
     return (
@@ -63,27 +75,37 @@ export default function Validacion() {
                                 tipoNomina={tipoNomina}
                                 anio={anio}
                                 quincena={quincena}
-
                             />
                         </div>
                     )}
-
                     {/* Botones de navegación */}
                     <div className={styles.buttonContainer}>
-                        <Link href='/CrearNomina/ProcesarDatos'>
-                            <Button variant="contained" color="primary" className={styles.exportButton}>
+                        <Link href="/CrearNomina/ProcesarDatos">
+                            <AsyncButton
+                                variant="contained"
+                                color="primary"
+                                className={styles.exportButton}
+                                onClick={handleResumenNomina} // Usar función asíncrona para manejar la acción
+                            >
                                 Resumen de Nómina
-                            </Button>
+                            </AsyncButton>
                         </Link>
 
-                        <Button
+                        <AsyncButton
                             variant="contained"
                             color="secondary"
-                            onClick={() => window.history.back()}
+                            onClick={async () => {
+                                try {
+                                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                                    window.history.back(); // Regresar a la página anterior
+                                } catch (error) {
+                                    console.error('Error al regresar:', error);
+                                }
+                            }}
                             className={styles.backButton}
                         >
                             Regresar
-                        </Button>
+                        </AsyncButton>
                     </div>
                 </main>
             </ThemeProvider>
