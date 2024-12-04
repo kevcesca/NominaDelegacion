@@ -8,7 +8,7 @@ import { API_USERS_URL } from '../%Config/apiConfig'; // URL base de la API
 import { useAuth } from '../context/AuthContext';  // Importamos el contexto de autenticación
 
 export default function RecuperarContraseña() {
-  const { user } = useAuth();  // Recuperamos el usuario desde el contexto
+  const { user, logout } = useAuth();  // Recuperamos el usuario y la función logout desde el contexto
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -80,6 +80,10 @@ export default function RecuperarContraseña() {
       }
 
       alert(`La contraseña ha sido cambiada con éxito para el empleado con ID: ${idEmpleado}`);
+
+      // Llamamos al logout después de cambiar la contraseña
+      logout();  // Cerrar la sesión del usuario
+
     } catch (err) {
       setError('Ocurrió un error al intentar cambiar la contraseña.');
     } finally {
