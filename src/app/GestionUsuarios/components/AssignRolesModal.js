@@ -11,6 +11,7 @@ import {
     Checkbox,
     Grid,
     TextField,
+    FormHelperText, // Importar el componente FormHelperText para mostrar mensajes de error
 } from '@mui/material';
 import { API_USERS_URL } from '../../%Config/apiConfig';
 
@@ -18,6 +19,7 @@ const AssignRolesModal = ({ isOpen, onClose, user, onRolesUpdated }) => {
     const [roles, setRoles] = useState([]); // Todos los roles disponibles
     const [selectedRoles, setSelectedRoles] = useState([]); // Roles seleccionados para el usuario
     const [searchTerm, setSearchTerm] = useState(''); // Texto de búsqueda
+    const [error, setError] = useState(''); // Estado para el mensaje de error
 
     useEffect(() => {
         const fetchRoles = async () => {
@@ -54,6 +56,11 @@ const AssignRolesModal = ({ isOpen, onClose, user, onRolesUpdated }) => {
     };
 
     const handleUpdateRoles = async () => {
+        if (selectedRoles.length === 0) {
+            setError('Debe seleccionar al menos un rol para continuar.');
+            return; // No continuar si no se seleccionaron roles
+        }
+
         try {
             const response = await fetch(`${API_USERS_URL}/users/${user['ID Empleado']}/assign-roles`, {
                 method: 'POST',
@@ -112,6 +119,8 @@ const AssignRolesModal = ({ isOpen, onClose, user, onRolesUpdated }) => {
                         </Grid>
                     ))}
                 </Grid>
+                {/* Mostrar mensaje de error si no se selecciona ningún rol */}
+                {error && <FormHelperText error>{error}</FormHelperText>}
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="secondary">
@@ -126,5 +135,3 @@ const AssignRolesModal = ({ isOpen, onClose, user, onRolesUpdated }) => {
 };
 
 export default AssignRolesModal;
-
-
