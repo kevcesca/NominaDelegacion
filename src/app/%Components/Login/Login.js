@@ -14,7 +14,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const router = useRouter();
-    const { setUser } = useAuth();  // Usa el contexto de autenticación para guardar el usuario
+    const { setUser, checkPasswordForEmployee } = useAuth();  // Usamos el contexto de autenticación para guardar el usuario y la función de comprobación
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -26,15 +26,25 @@ const Login = () => {
                     correo_usuario: email,
                     contrasena_usuario: password
                 }),
-                credentials: 'include'  // Incluir las cookies en la solicitud
+                credentials: 'include',  // Incluir las cookies en la solicitud
             });
 
             const data = await response.json();
             if (response.ok) {
                 // Guardar los datos del usuario en el contexto de sesión
                 setUser(data.user);  // Asumiendo que `data.user` contiene la información del usuario
-                // Redirigir al usuario a la página principal
-                router.push('/');
+
+                // Después de hacer login, verificamos la contraseña
+                const idEmpleado = data.user.id_empleado;  // Asumiendo que `data.user.id_empleado` está disponible
+                const isPasswordCorrect = await checkPasswordForEmployee(idEmpleado);
+                console.log('¿La contraseña es correcta?', isPasswordCorrect);
+
+                // Redirigir al usuario a la página de nueva contraseña si la contraseña es correcta
+                if (isPasswordCorrect) {
+                    router.push('/NuevaContrasena');
+                } else {
+                    setError('Contraseña incorrecta');
+                }
             } else {
                 setError(data.message || 'Error de autenticación');
             }

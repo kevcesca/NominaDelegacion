@@ -1,7 +1,7 @@
 import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
 
-const UserActionsMenu = ({ anchorEl, open, onClose, onToggleStatus, isActive }) => {
+const UserActionsMenu = ({ anchorEl, open, onClose, onToggleStatus, isActive, onChangePassword }) => {
     return (
         <Menu
             anchorEl={anchorEl}
@@ -21,6 +21,7 @@ const UserActionsMenu = ({ anchorEl, open, onClose, onToggleStatus, isActive }) 
             ) : (
                 <MenuItem onClick={onToggleStatus}>Habilitar Usuario</MenuItem>
             )}
+            <MenuItem onClick={onChangePassword}>Cambiar Contraseña</MenuItem> {/* Nueva opción */}
         </Menu>
     );
 };
