@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, TextField, Typography, Box, Collapse, Grid } from '@mui/material';
+import { TextField, Typography, Box, Collapse, Grid } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -11,6 +11,7 @@ import styles from './page.module.css';
 import theme from '../$tema/theme';
 import * as xlsx from 'xlsx';
 import { saveAs } from 'file-saver';
+import AsyncButton from '../%Components/AsyncButton/AsyncButton'; // Importa AsyncButton
 
 export default function EventTable() {
     const [data, setData] = useState([]); // Datos obtenidos de la API
@@ -79,7 +80,7 @@ export default function EventTable() {
     };
 
     // Función para exportar a PDF
-    const exportPDF = () => {
+    const exportPDF = async () => {
         const doc = new jsPDF();
         const columns = Object.keys(visibleColumns)
             .filter((key) => visibleColumns[key])
@@ -99,7 +100,7 @@ export default function EventTable() {
     };
 
     // Función para exportar a CSV
-    const exportCSV = () => {
+    const exportCSV = async () => {
         const filteredData = data.map(item =>
             Object.keys(visibleColumns).reduce((acc, key) => {
                 if (visibleColumns[key]) {
@@ -121,7 +122,7 @@ export default function EventTable() {
     };
 
     // Función para exportar a Excel
-    const exportExcel = () => {
+    const exportExcel = async () => {
         const filteredData = data.map(item =>
             Object.keys(visibleColumns).reduce((acc, key) => {
                 if (visibleColumns[key]) {
@@ -144,6 +145,7 @@ export default function EventTable() {
                 <Box className={styles.filters}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
+                            <br></br>
                             <TextField
                                 label="Año"
                                 value={anio}
@@ -152,6 +154,7 @@ export default function EventTable() {
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
+                            <br></br>
                             <TextField
                                 label="Mes"
                                 value={mes}
@@ -161,15 +164,14 @@ export default function EventTable() {
                             />
                         </Grid>
                     </Grid>
-                    <Button
+                    <AsyncButton
                         variant="outlined"
                         onClick={() => setCollapseOpen(!collapseOpen)}
                         style={{ marginTop: '1rem' }}
                     >
                         Configurar Columnas
-                    </Button>
+                    </AsyncButton>
                 </Box>
-
                 <Collapse in={collapseOpen}>
                     <Box className={styles.columnSelector}>
                         <ColumnSelector
@@ -196,32 +198,32 @@ export default function EventTable() {
                                 <Typography variant="body1">No hay eventos disponibles para el mes seleccionado.</Typography>
                             ) : (
                                 <>
-                                    <Button
+                                    <AsyncButton
                                         variant="contained"
                                         color="primary"
                                         onClick={exportPDF}
                                         style={{ margin: '10px' }}
                                     >
                                         Exportar a PDF
-                                    </Button>
+                                    </AsyncButton>
 
-                                    <Button
+                                    <AsyncButton
                                         variant="contained"
                                         color="primary"
                                         onClick={exportCSV}
                                         style={{ margin: '10px' }}
                                     >
                                         Exportar a CSV
-                                    </Button>
+                                    </AsyncButton>
 
-                                    <Button
+                                    <AsyncButton
                                         variant="contained"
                                         color="primary"
                                         onClick={exportExcel}
                                         style={{ margin: '10px' }}
                                     >
                                         Exportar a Excel
-                                    </Button>
+                                    </AsyncButton>
                                 </>
                             )}
                         </>

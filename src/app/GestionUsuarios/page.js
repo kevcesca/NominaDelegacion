@@ -10,6 +10,7 @@ import AssignRolesModal from './components/AssignRolesModal'; // Modal para asig
 import useUsers from './components/useUsers';
 import { useAuth } from '../context/AuthContext';
 import { API_USERS_URL } from '../%Config/apiConfig';
+import AsyncButton from '../%Components/AsyncButton/AsyncButton'; // Importamos el AsyncButton
 
 const UserTable = () => {
     const { users, setUsers, fetchUsers, toggleUserStatus } = useUsers(); // Incluimos `setUsers` para actualizar la lista localmente
@@ -120,18 +121,18 @@ const UserTable = () => {
     return (
         <div className={styles.container}>
             <h2 className={styles.title}>Gestión de Usuarios</h2>
-            <Button
+            <AsyncButton
                 variant="contained"
                 color="primary"
                 onClick={() => setIsModalOpen(true)}
                 style={{ marginBottom: '10px' }}
             >
                 Añadir Usuario
-            </Button>
+            </AsyncButton>
 
             {/* Botón dinámico: Solo aparece si se seleccionan 2 o más usuarios */}
             {selectedUsers.length >= 2 && (
-                <Button
+                <AsyncButton
                     variant="contained"
                     color="secondary"
                     onClick={handleToggleSelectedUsers}
@@ -140,7 +141,7 @@ const UserTable = () => {
                     {areAllSelectedUsersActive
                         ? 'Deshabilitar Usuarios'
                         : 'Habilitar Usuarios'}
-                </Button>
+                </AsyncButton>
             )}
 
             <table className={styles.table}>
@@ -193,7 +194,6 @@ const UserTable = () => {
                     ))}
                 </tbody>
             </table>
-
             <UserActionsMenu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
