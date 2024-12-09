@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 import API_BASE_URL from '../%Config/apiConfig';
 import { Toast } from 'primereact/toast';
+import AsyncButton from '../%Components/AsyncButton/AsyncButton';
+import { Button } from "@mui/material"
+
 
 export default function Sidebar({ selectedDate, onSaveEvent }) {
   const [events, setEvents] = useState([]); // Para guardar los eventos del día seleccionado
@@ -207,15 +210,27 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
               value={eventDescription}
               onChange={(e) => setEventDescription(e.target.value)}
             />
-            <button className={styles.btnSave} onClick={handleSave}>
-              Guardar Evento
-            </button>
-            <button
+            <AsyncButton
+              onClick={handleSave}
+              variant="contained"
+              color="primary"
+              className={styles.btnSave}
+            >
+              <Button className={styles.btnSave}>
+                Guardar Evento
+              </Button>
+            </AsyncButton>
+            <AsyncButton
+              onClick= {() => { setEventTitle(''); setEventDescription(''); }}
+              variant="contained"
+              color="primary"
               className={styles.btnCancel}
-              onClick={() => { setEventTitle(''); setEventDescription(''); }} > 
-                Cancelar 
-            </button>
-          </div>
+              >
+                 <Button className={styles.btnCancel} >
+              Cancelar
+            </Button>
+            </AsyncButton>
+           </div>
         </>
       ) : (
         <p>Por favor, selecciona una fecha para ver los eventos.</p>

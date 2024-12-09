@@ -91,13 +91,14 @@ export default function Validacion() {
                             </AsyncButton>
                         </Link>
 
+                        <Link href="/CrearNomina">
                         <AsyncButton
                             variant="contained"
                             color="secondary"
                             onClick={async () => {
                                 try {
                                     await new Promise((resolve) => setTimeout(resolve, 1000));
-                                    window.history.back(); // Regresar a la página anterior
+                                    router.push('/CrearNomina'); // Navega al enlace especificado
                                 } catch (error) {
                                     console.error('Error al regresar:', error);
                                 }
@@ -106,6 +107,7 @@ export default function Validacion() {
                         >
                             Regresar
                         </AsyncButton>
+                        </Link>
                     </div>
                 </main>
             </ThemeProvider>

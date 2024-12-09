@@ -37,7 +37,7 @@ const CrudRoles = () => {
             setRoles(mappedRoles);
         } catch (error) {
             console.error(error);
-            setError('No se pudieron cargar los roles.');
+            alert('No se pudieron cargar los roles. Por favor, inténtalo nuevamente.');
         } finally {
             setLoading(false);
         }
@@ -54,11 +54,11 @@ const CrudRoles = () => {
             const response = await fetch(`${API_USERS_URL}/roles-permissions`, {
                 credentials: 'include',
             });
-    
+
             if (!response.ok) {
                 throw new Error('Error al obtener los roles después de crear uno nuevo');
             }
-    
+
             const updatedRoles = await response.json();
             const mappedRoles = updatedRoles.map((role) => ({
                 id: role.rol_id,
@@ -66,13 +66,14 @@ const CrudRoles = () => {
                 description: role.descripcion_rol,
                 permissions: role.permisos || [],
             }));
-    
+
             setRoles(mappedRoles); // Actualiza la lista completa de roles en el estado
+            alert('Rol creado con éxito.'); // Alerta para confirmar la creación
         } catch (error) {
             console.error('Error al actualizar la tabla después de crear un rol:', error);
+            alert('No se pudo crear el nuevo rol. Inténtalo nuevamente.');
         }
     };
-
     // Actualizar un rol
     const updateRole = async (id, updatedData) => {
         try {
@@ -88,8 +89,11 @@ const CrudRoles = () => {
                 throw new Error('Error al actualizar el rol');
             }
             fetchRoles(); // Refrescar la lista después de actualizar
-        } catch (error) {
+            alert('Rol actualizado correctamente.');
+        }
+        catch (error) {
             console.error('Error al actualizar el rol en el servidor:', error);
+            alert('No se pudo actualizar el rol. Por favor, inténtalo nuevamente.');
         }
     };
 
@@ -105,10 +109,9 @@ const CrudRoles = () => {
             });
 
             if (!response.ok) {
-                // Capturamos el mensaje de error detallado del backend
                 const errorData = await response.json();
                 const errorMessage = errorData.message || 'Error desconocido al eliminar roles';
-                throw new Error(errorMessage); // Lanza el error para ser capturado en el catch
+                throw new Error(errorMessage);
             }
 
             setRoles((prevRoles) => prevRoles.filter((role) => !selectedRoles.includes(role.id)));
@@ -117,11 +120,9 @@ const CrudRoles = () => {
         } catch (error) {
             console.error('Error al eliminar roles:', error);
 
-            // Si el error es un problema de JSON, mostramos el mensaje personalizado
             if (error.message.includes('Unexpected token')) {
-                alert('Error desconocido_Revisa que el rol no esté asignado a un usuario');
+                alert('Error desconocido. Revisa que el rol no esté asignado a un usuario.');
             } else {
-                // Si es otro tipo de error, mostramos el error del backend
                 alert(`No se pudieron eliminar los roles. Razón: ${error.message}`);
             }
         }
@@ -140,6 +141,7 @@ const CrudRoles = () => {
                 role.id === roleId ? { ...role, permissions: updatedPermissions } : role
             )
         );
+        alert('Permisos actualizados correctamente.');
     };
 
     return (
