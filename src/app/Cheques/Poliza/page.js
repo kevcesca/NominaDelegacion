@@ -1,159 +1,94 @@
-"use client";
-import { useState, useEffect } from 'react';
-import styles from '../Poliza/page.module.css';
-import { Box, Typography, Button, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import ProtectedView from '../../%Components/ProtectedView/ProtectedView';
+'use client';
 
-// Aquí deberías obtener los folios generados en la vista anterior, puede ser de un contexto, API o almacenamiento local
-// Supondré que los folios se pasan a través de props o contexto (en este caso están simulados)
+import React, { useState } from 'react';
+import { Box, Typography, TextField, Pagination } from '@mui/material';
+import DateFilter from '../../%Components/DateFilter/DateFilter'; // Ajusta la ruta si es necesario
+import PolizasTable from './components/PolizasTable'; // Ajusta la ruta si es necesario
+import styles from './page.module.css';
+import API_BASE_URL from '../../%Config/apiConfig';
 
-const empleados = [
-    { id: 13515, nombre: "Juan Pérez", tipoNomina: "Estructura", percepciones: "$5200", deducciones: "$200", liquido: "$5000", estadoCheque: "Creado" },
-    { id: 13516, nombre: "Ana Gómez", tipoNomina: "Nómina 8", percepciones: "$4700", deducciones: "$200", liquido: "$4500", estadoCheque: "Creado" },
-    { id: 13517, nombre: "Luis Ramírez", tipoNomina: "Base", percepciones: "$4200", deducciones: "$200", liquido: "$4000", estadoCheque: "Creado" },
-];
+export default function PolizasGeneradas() {
+    const [polizas, setPolizas] = useState([]);
+    const [filteredPolizas, setFilteredPolizas] = useState([]); // Para la búsqueda
+    const [loading, setLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 5; // Número de filas por página
 
-export default function GestorPolizas() {
-    const [inicioFolioCheque, setInicioFolioCheque] = useState('');
-    const [finalFolioCheque, setFinalFolioCheque] = useState('');
-    const [polizasGeneradas, setPolizasGeneradas] = useState([]);
-    const [mostrarConsolidacion, setMostrarConsolidacion] = useState(false);
-
-    useEffect(() => {
-        // Simulamos que recibimos los folios generados de la vista anterior.
-        // Esto puede venir de un almacenamiento local, contexto o props.
-        const foliosGenerados = [135468, 135469, 135470]; // Por ejemplo, los folios generados.
-        
-        if (foliosGenerados.length > 0) {
-            setInicioFolioCheque(foliosGenerados[0]); // Asignamos el primer folio generado al inicio
-            setFinalFolioCheque(foliosGenerados[foliosGenerados.length - 1]); // Asignamos el último folio generado al final
+    const fetchPolizas = async ({ anio, quincena, fecha }) => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/poliza?quincena=${quincena}&fecha=${fecha}`);
+            if (!response.ok) throw new Error('Error al obtener las pólizas');
+            const data = await response.json();
+            setPolizas(data);
+            setFilteredPolizas(data); // Inicializar la búsqueda
+        } catch (error) {
+            console.error(error);
+            setPolizas([]);
+            setFilteredPolizas([]);
+        } finally {
+            setLoading(false);
         }
-    }, []);
-
-    const generarPolizas = () => {
-        if (!inicioFolioCheque || !finalFolioCheque || inicioFolioCheque >= finalFolioCheque) {
-            alert("Ingrese un rango de folios válido.");
-            return;
-        }
-
-        let folioPoliza = 2000;
-        const cantidadCheques = Math.min(finalFolioCheque - inicioFolioCheque + 1, empleados.length);
-        const nuevasPolizas = [];
-
-        for (let i = 0; i < cantidadCheques; i++) {
-            const empleado = empleados[i];
-            const conceptoPago = `Quincena 2da - ${empleado.tipoNomina}`;
-            nuevasPolizas.push({
-                ...empleado,
-                folioCheque: parseInt(inicioFolioCheque) + i,
-                folioPoliza: folioPoliza++,
-                conceptoPago,
-            });
-        }
-        setPolizasGeneradas(nuevasPolizas);
     };
 
-    const consolidarInformacion = () => {
-        setMostrarConsolidacion(true);
+    const handleDateChange = (date) => {
+        const { anio, quincena } = date;
+        const fechaSeleccionada = new Date(anio, Math.floor((quincena - 1) / 2), quincena % 2 === 0 ? 15 : 1)
+            .toISOString()
+            .split('T')[0]; // Convertir a formato "yyyy-mm-dd"
+
+        fetchPolizas({ anio, quincena, fecha: fechaSeleccionada });
+    };
+
+    const handleSearch = (e) => {
+        const query = e.target.value.toLowerCase();
+        setSearchQuery(query);
+
+        const filtered = polizas.filter((poliza) =>
+            Object.values(poliza).some((value) => value.toString().toLowerCase().includes(query))
+        );
+
+        setFilteredPolizas(filtered);
+        setCurrentPage(1); // Reiniciar a la primera página al filtrar
+    };
+
+    // Obtener los datos actuales de la página
+    const paginatedData = filteredPolizas.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
+
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
     };
 
     return (
-        <ProtectedView requiredPermissions={["Generacion_Polizas", "Acceso_total"]}>
-            <Box className={styles.container}>
-                <Typography variant="h4" gutterBottom>Gestor de Pólizas</Typography>
+        <Box className={styles.container}>
+            <Typography variant="h5" className={styles.title}>
+                Pólizas Generadas
+            </Typography>
+            <DateFilter onDateChange={handleDateChange} />
 
-                <Box className={styles.inputGroup}>
-                    <TextField
-                        label="Folio de Cheque Inicial"
-                        type="number"
-                        value={inicioFolioCheque}
-                        onChange={(e) => setInicioFolioCheque(e.target.value)}
-                        placeholder="Ejemplo: 135468"
-                        className={styles.labels}
-                    />
-                    <TextField
-                        label="Folio de Cheque Final"
-                        type="number"
-                        value={finalFolioCheque}
-                        onChange={(e) => setFinalFolioCheque(e.target.value)}
-                        placeholder="Ejemplo: 135471"
-                        className={styles.labels}
-                    />
-                    <Button variant="contained" color="primary" onClick={generarPolizas} className={styles.buttons}>Generar</Button>
-                </Box>
+            <TextField
+                variant="outlined"
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={handleSearch}
+                fullWidth
+                margin="normal"
+                sx={{ marginTop: '6rem' }}
+            />
 
-                <Box className={styles.tableSection}>
-                    <Typography variant="h5" gutterBottom>Pólizas Generadas</Typography>
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow className={styles.table}>
-                                    <TableCell>ID Empleado</TableCell>
-                                    <TableCell>Nombre</TableCell>
-                                    <TableCell>Folio Cheque</TableCell>
-                                    <TableCell>Folio Póliza</TableCell>
-                                    <TableCell>Concepto de Pago</TableCell>
-                                    <TableCell>Percepciones</TableCell>
-                                    <TableCell>Deducciones</TableCell>
-                                    <TableCell>Líquido</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {polizasGeneradas.length > 0 ? (
-                                    polizasGeneradas.map((poliza, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{poliza.id}</TableCell>
-                                            <TableCell>{poliza.nombre}</TableCell>
-                                            <TableCell>{poliza.folioCheque}</TableCell>
-                                            <TableCell>{poliza.folioPoliza}</TableCell>
-                                            <TableCell>{poliza.conceptoPago}</TableCell>
-                                            <TableCell>{poliza.percepciones}</TableCell>
-                                            <TableCell>{poliza.deducciones}</TableCell>
-                                            <TableCell>{poliza.liquido}</TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={8} align="center">
-                                            <Typography variant="body1" color="textSecondary">
-                                                Actualmente no existen pólizas
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Box>
+            <PolizasTable polizas={paginatedData} loading={loading} />
 
-                <Button variant="contained" color="secondary" onClick={consolidarInformacion} className={styles.buttons} style={{ marginTop: '20px' }}>
-                    Consolidar Información
-                </Button>
-
-                {mostrarConsolidacion && (
-                    <Box className={styles.tableSection} style={{ marginTop: '30px' }}>
-                        <Typography variant="h5" gutterBottom>Consolidación de Información Cheque-Poliza</Typography>
-                        <TableContainer component={Paper}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow className={styles.table}>
-                                        <TableCell>Folio Cheque</TableCell>
-                                        <TableCell>Folio Póliza</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {polizasGeneradas.map((poliza, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{poliza.folioCheque}</TableCell>
-                                            <TableCell>{poliza.folioPoliza}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Box>
-                )}
-            </Box>
-        </ProtectedView>
+            <Pagination
+                count={Math.ceil(filteredPolizas.length / rowsPerPage)}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                className={styles.pagination}
+            />
+        </Box>
     );
 }
