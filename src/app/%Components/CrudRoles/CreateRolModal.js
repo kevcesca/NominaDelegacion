@@ -14,6 +14,8 @@ import {
     Typography,
 } from '@mui/material';
 import { API_USERS_URL } from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
+
 
 const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
     const [permissions, setPermissions] = useState([]); // Todos los permisos disponibles
@@ -66,11 +68,13 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
         const { name, value } = e.target;
         setRoleData((prev) => ({ ...prev, [name]: value }));
     };
-
     // Guardar el nuevo rol
     const handleSave = async () => {
+        // Eliminar espacios al final del nombre del rol
+        const trimmedName = roleData.name.trim();
+
         // Validar que todos los campos estén completos
-        if (!roleData.name || !roleData.description || selectedPermissions.length === 0) {
+        if (!trimmedName || !roleData.description || selectedPermissions.length === 0) {
             setShowValidationMessage(true); // Mostrar mensaje de validación
             return;
         }
@@ -80,7 +84,7 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    nombre_rol: roleData.name,
+                    nombre_rol: trimmedName, // Usar el nombre limpio
                     descripcion_rol: roleData.description,
                     permisos: selectedPermissions,
                 }),
@@ -94,7 +98,9 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
             onClose(); // Cierra el modal
         } catch (error) {
             console.error('Error al crear el rol:', error);
+            alert ("Nombre de rol ya registrado")
         }
+
     };
 
     // Filtrar permisos según el término de búsqueda
@@ -174,9 +180,14 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
                 </Grid>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="secondary">
+               
+                <Button 
+                onClick={onClose} 
+                color="secondary"
+                >
                     Cancelar
                 </Button>
+               
                 <Button onClick={handleSave} color="primary">
                     Crear Rol
                 </Button>

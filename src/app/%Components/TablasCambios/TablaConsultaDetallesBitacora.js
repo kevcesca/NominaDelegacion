@@ -17,6 +17,7 @@ import ColumnSelector from '../ColumnSelector/ColumnSelector';
 import theme from '../../$tema/theme';
 import styles from './TablasCambios.module.css';
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
 
 export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomina }) {
     const [data, setData] = useState([]);
@@ -40,26 +41,29 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
         { key: 'Nombre Nómina', label: 'Nombre Nómina', defaultSelected: false },
     ];
 
+    // Solo realizar la solicitud cuando todos los parámetros están definidos
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(true);
-                const response = await fetch(`${API_BASE_URL}/consultaDetallesBitacora?anio=${anio}&quincena=${quincena}&tipoNomina=${tipoNomina}`);
-                if (!response.ok) {
-                    throw new Error('Error al obtener los datos: ' + response.statusText);
+        if (anio && quincena && tipoNomina) {  // Verificar que todos los parámetros estén disponibles
+            const fetchData = async () => {
+                try {
+                    setIsLoading(true);
+                    const response = await fetch(`${API_BASE_URL}/consultaDetallesBitacora?anio=${anio}&quincena=${quincena}&tipoNomina=${tipoNomina}`);
+                    if (!response.ok) {
+                        throw new Error('Error al obtener los datos: ' + response.statusText);
+                    }
+                    const data = await response.json();
+                    setData(data);
+                } catch (error) {
+                    console.error('Error al obtener los datos:', error);
+                    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al obtener los datos', life: 3000 });
+                } finally {
+                    setIsLoading(false);
                 }
-                const data = await response.json();
-                setData(data);
-            } catch (error) {
-                console.error('Error al obtener los datos:', error);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al obtener los datos', life: 3000 });
-            } finally {
-                setIsLoading(false);
-            }
-        };
+            };
 
-        fetchData();
-    }, [anio, quincena, tipoNomina]);
+            fetchData();
+        }
+    }, [anio, quincena, tipoNomina]); // Dependencias de los parámetros
 
     useEffect(() => {
         // Inicializar las columnas visibles con las columnas predeterminadas
@@ -184,32 +188,38 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                 </Box>
 
                 <Toolbar className="mb-4" right={() => (
-                    <div className="flex align-items-center justify-content-end gap-2">
-                        <Button
+                <div className="flex align-items-center justify-content-end gap-2">
+                    <AsyncButton
                             type="button"
                             icon="pi pi-file"
                             rounded
-                            onClick={() => exportCSV()}
+                            onClick={exportCSV}
                             data-pr-tooltip="CSV"
-                        />
-                        <Button
+                        >
+                            Exportar CSV
+                        </AsyncButton>
+                        <AsyncButton
                             type="button"
                             icon="pi pi-file-excel"
                             severity="success"
                             rounded
-                            onClick={() => exportExcel()}
+                            onClick={exportExcel}
                             data-pr-tooltip="XLS"
-                        />
-                        <Button
+                        >
+                            Exportar Excel
+                        </AsyncButton>
+                        <AsyncButton
                             type="button"
                             icon="pi pi-file-pdf"
                             severity="warning"
                             rounded
-                            onClick={() => exportPdf()}
+                            onClick={exportPdf}
                             data-pr-tooltip="PDF"
-                        />
-                    </div>
-                )} />
+                        >
+                            Exportar PDF
+                        </AsyncButton>
+                </div>
+            )} />
 
                 <Collapse in={collapseOpen}>
                     <Box>
@@ -228,24 +238,15 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                         value={data}
                         paginator
                         rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
                         globalFilter={globalFilter}
                         header={header}
-                        responsiveLayout="scroll"
-                        className="p-datatable-sm p-datatable-gridlines"
+                        showGridlines
                     >
-                        {availableColumns.map(
-                            (column) =>
-                                visibleColumns[column.key] && (
-                                    <Column
-                                        key={column.key}
-                                        field={column.key}
-                                        header={column.label}
-                                        sortable
-                                        style={{ minWidth: '150px' }}
-                                    />
-                                )
-                        )}
+                        {availableColumns
+                            .filter(col => visibleColumns[col.key])
+                            .map(col => (
+                                <Column key={col.key} field={col.key} header={col.label} sortable />
+                            ))}
                     </DataTable>
                 )}
             </div>

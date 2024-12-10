@@ -25,17 +25,12 @@
     background-color: #235b4e; /* morado claro */
 }
 
-.header {
-    color: #ffffff;
-    background-color: #235b4e;
-    padding: 1rem;
-    border-radius: 4px;
-    text-align: center;
-    margin: 0;
-}
+
+
 
 .button{
     color: white;
     background-color: #9f2241;
     margin-top: 2rem;
+
 }

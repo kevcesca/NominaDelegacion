@@ -6,6 +6,7 @@ import ConfirmationModal from './ConfirmationModal'; // Importamos el componente
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import "jspdf-autotable";
+import AsyncButton from '../AsyncButton/AsyncButton';
 
 const Toolbar = ({ selectedRoles, onDeleteSelected, disableDelete, onRoleCreated }) => {
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal de creación de roles
@@ -122,14 +123,14 @@ const Toolbar = ({ selectedRoles, onDeleteSelected, disableDelete, onRoleCreated
             </Button>
 
             {/* Botón desplegable para exportar */}
-            <Button
+            <AsyncButton
                 variant="contained"
                 color="secondary"
                 onClick={handleMenuOpen}
                 disabled={!selectedRoles || !selectedRoles.length} // Botón deshabilitado si no hay roles seleccionados
             >
                 Exportar
-            </Button>
+            </AsyncButton>
 
             <Menu
                 anchorEl={menuAnchor}
@@ -141,14 +142,14 @@ const Toolbar = ({ selectedRoles, onDeleteSelected, disableDelete, onRoleCreated
                 <MenuItem onClick={handleExportPDF}>Exportar a PDF</MenuItem>
             </Menu>
 
-            <Button
+            <AsyncButton
                 variant="contained"
                 color="secondary"
                 onClick={handleDeleteRole}
                 disabled={disableDelete}
             >
                 Eliminar seleccionados
-            </Button>
+            </AsyncButton>
 
             {/* Modal de validación para crear rol */}
             <ConfirmationModal

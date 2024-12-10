@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import saveAs from 'file-saver';
 import API_BASE_URL from '../../%Config/apiConfig';
 import styles from './TablaUsuarios.module.css';
+import EmployeeDetailsModal from './EmployeeDetailsModal';
 
 export default function EmpleadosTable() {
     const [data, setData] = useState([]);
@@ -18,6 +19,9 @@ export default function EmpleadosTable() {
     const [collapseOpen, setCollapseOpen] = useState(false);
     const [globalFilter, setGlobalFilter] = useState('');
     const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
+    const [selectedEmployee, setSelectedEmployee] = useState(null); // Datos del empleado seleccionado
+    const [isModalOpen, setIsModalOpen] = useState(false); // Controla si el modal está abierto
+
 
     const availableColumns = [
         { key: 'id_empleado', label: 'ID Empleado' },
@@ -66,6 +70,11 @@ export default function EmpleadosTable() {
         }
     };
 
+    const handleRowDoubleClick = (params) => {
+        setSelectedEmployee(params.row); // Guarda los datos del empleado seleccionado
+        setIsModalOpen(true); // Abre el modal
+    };
+
     const mapColumns = (cols) =>
         cols.map((col) => ({
             field: col.key,
@@ -73,6 +82,7 @@ export default function EmpleadosTable() {
             flex: 1,
             minWidth: 150,
         }));
+
 
     useEffect(() => {
         fetchData();
@@ -270,7 +280,9 @@ export default function EmpleadosTable() {
                     pageSize={10}
                     rowsPerPageOptions={[10, 20, 50, 100]}
                     getRowId={(row) => row.id_empleado}
+                    onRowDoubleClick={handleRowDoubleClick} // Manejo del doble clic
                 />
+
             </Box>
 
             <Box marginTop="20px" display="flex" justifyContent="center" gap="20px">
@@ -318,6 +330,13 @@ export default function EmpleadosTable() {
                     </Button>
                 </Box>
             </Modal>
+
+            <EmployeeDetailsModal
+                open={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                employeeData={selectedEmployee}
+            />
+
         </Box>
     );
 }

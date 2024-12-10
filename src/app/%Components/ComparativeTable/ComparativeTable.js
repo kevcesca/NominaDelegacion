@@ -11,6 +11,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import API_BASE_URL from '../../%Config/apiConfig';
 import styles from './ComparativeTable.module.css';
+import AsyncButton from '../AsyncButton/AsyncButton';
 
 const ComparativaTable = ({ userRevision, quincena, anio }) => {  
     const [records, setRecords] = useState([]);
@@ -155,9 +156,35 @@ const ComparativaTable = ({ userRevision, quincena, anio }) => {
             
             <Toolbar className="mb-4" right={() => (
                 <div className="flex align-items-center justify-content-end gap-2">
-                    <Button type="button" icon="pi pi-file" rounded onClick={() => exportCSV()} data-pr-tooltip="CSV" />
-                    <Button type="button" icon="pi pi-file-excel" severity="success" rounded onClick={() => exportExcel()} data-pr-tooltip="XLS" />
-                    <Button type="button" icon="pi pi-file-pdf" severity="warning" rounded onClick={() => exportPdf()} data-pr-tooltip="PDF" />
+                    <AsyncButton
+                            type="button"
+                            icon="pi pi-file"
+                            rounded
+                            onClick={exportCSV}
+                            data-pr-tooltip="CSV"
+                        >
+                            Exportar CSV
+                        </AsyncButton>
+                        <AsyncButton
+                            type="button"
+                            icon="pi pi-file-excel"
+                            severity="success"
+                            rounded
+                            onClick={exportExcel}
+                            data-pr-tooltip="XLS"
+                        >
+                            Exportar Excel
+                        </AsyncButton>
+                        <AsyncButton
+                            type="button"
+                            icon="pi pi-file-pdf"
+                            severity="warning"
+                            rounded
+                            onClick={exportPdf}
+                            data-pr-tooltip="PDF"
+                        >
+                            Exportar PDF
+                        </AsyncButton>
                 </div>
             )} />
             {loading ? (
@@ -174,7 +201,15 @@ const ComparativaTable = ({ userRevision, quincena, anio }) => {
                     <Column body={approveTemplate} header="Acción" />
                 </DataTable>
             )}
-            <Button className={styles.button} label='Confirmar' type="button" icon="pi pi-check" severity="success" onClick={handleConfirm} />
+            <AsyncButton
+             className={styles.button} 
+             label='Confirmar' 
+             type="button" 
+             icon="pi pi-check" 
+             severity="success" 
+             onClick={handleConfirm} >
+                Confirmar
+                </AsyncButton>
         </div>
     );
 };

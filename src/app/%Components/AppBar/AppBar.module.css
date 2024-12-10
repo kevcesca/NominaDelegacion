@@ -1,14 +1,29 @@
+/* src/app/%Components/Wrapper/AppBar.module.css */
+
 .appBarContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
+    border: 6px solid #bc955c;
+    background-color: #235b4e !important;
+}
+
+.navbar {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.tabMenuContainer {
+    display: flex;
+    justify-content: space-between; /* Alinea los elementos en el menú de navegación */
+    width: 100%;
+    align-items: center; /* Alinea verticalmente el contenido */
 }
 
 .customTabMenu {
-    background-color: #235b4e !important;
-    width: 100%;
-    border: 6px solid #bc955c;
+    width: 80%; /* Puedes ajustar el ancho de la barra de navegación */
     border-radius: 10px;
     overflow: hidden;
 }
@@ -40,12 +55,6 @@
     padding: 1rem;
 }
 
-.navbar {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
 .image {
     width: 100%;
     height: auto;
@@ -56,4 +65,13 @@
     height: 2px;
     background-color: #bc955c;
     margin-top: 10px;
+}
+
+/* Estilos adicionales para el dropdown (menú desplegable) */
+.dropdown {
+    min-width: 150px;
+    margin-left: 20px; /* Espacio entre el menú y el dropdown */
+    background: transparent;
+    color: white !important;
+    border: none;
 }
