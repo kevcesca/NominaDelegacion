@@ -64,11 +64,10 @@
 }
 
 .btnSave {
-  background-color: #1f5841;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
-  color: white;
+  color: white !important;
   cursor: pointer;
 }
 
@@ -81,7 +80,7 @@
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
-  color: white;
+  color: white !important;
   cursor: pointer;
 }
 
