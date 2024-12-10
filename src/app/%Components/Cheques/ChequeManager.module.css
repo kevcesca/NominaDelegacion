@@ -28,8 +28,9 @@
   /* Botones principales */
   .buttons {
     display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+    justify-content: flex-start;
+    gap: 5rem;
+
   }
   
   .buttons .MuiButton-root {
@@ -114,4 +115,81 @@
   .exportButtons .MuiButton-root:hover {
     background-color: #a10000; /* Más claro al pasar el mouse */
   }
+
+  .columnSelector {
+    padding: 60px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+  }
+    
+
+ /* ChequeManager.module.css */
+
+.iconButton {
+  position: relative; /* Permite ajustar libremente la posición */
+  top: 48px; /* Ajusta la distancia desde la parte superior */
+  right: 10px; /* Ajusta la distancia desde la parte derecha */
+  background-color: #ffffff; /* Fondo blanco para el botón */
+  border-radius: 50%; /* Forma circular */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.)
+}
+
+/* Contenedor de botones de acción */
+.actionButtons {
+  display: flex;
+  justify-content: space-between; /* Los botones se distribuyen de forma uniforme */
+  align-items: center; /* Alineación vertical */
+  gap: 10px; /* Espaciado entre los botones */
+  margin-top: 20px; /* Margen superior */
+}
+
+/* Botón de "Generar Pólizas" */
+.generatePolizasButton {
+  background-color: #1976d2; /* Azul estándar */
+  color: white;
+  font-weight: bold;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
   
+}
+
+.generatePolizasButton:hover {
+  background-color: #115293; /* Azul más oscuro al pasar el mouse */
+}
+
+/* Botón de "Cambiar Tipo de Pago" */
+.secondaryButton {
+  background-color: #f44336; /* Rojo estándar */
+  color: white;
+  font-weight: bold;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+  margin-top: 2rem !important;
+  
+  
+}
+
+/* Ocultar el botón cuando no hay cheques seleccionados */
+.hidden {
+  visibility: hidden; /* Oculto pero conserva su espacio */
+}
+
+.searchSection {
+  margin-bottom: 16px;
+}
+
+.searchBar {
+  margin-bottom: 8px;
+}
+
+.tableHeader {
+  text-transform: uppercase;
+  font-weight: bold; /* Opcional para mayor énfasis */
+}
+
+.lastChequeSection {
+  margin-bottom: 16px;
+  text-align: center;
+}
