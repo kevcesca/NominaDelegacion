@@ -11,7 +11,6 @@ import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQ
 import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
 import theme from '../$tema/theme';
 import styles from './page.module.css';
-import AsyncButton from '../%Components/AsyncButton/AsyncButton';
 
 export default function CargarDatos() {
     const [quincena, setQuincena] = useState(null);
@@ -139,13 +138,13 @@ export default function CargarDatos() {
                         )}
 
                         {/* Botón para comprobar cambios */}
-                        <AsyncButton className={styles.buttonContainer}>
+                        <Box className={styles.buttonContainer}>
                             <Link href={`/Validacion?anio=${anio}&quincena=${quincena}`} passHref>
                                 <Button variant="contained" color="primary" className={styles.exportButton}>
                                     Comprobar cambios
                                 </Button>
                             </Link>
-                        </AsyncButton>
+                        </Box>
                     </div>
                 </Box>
             </ThemeProvider>

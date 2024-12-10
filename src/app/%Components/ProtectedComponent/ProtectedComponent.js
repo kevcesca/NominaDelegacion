@@ -1,51 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { API_USERS_URL } from '../../%Config/apiConfig';
+import PropTypes from 'prop-types';
 
-const ProtectedComponent = ({ requiredPermissions = [], children, hideIfNoAccess = true }) => {
-    const [hasAccess, setHasAccess] = useState(null); // `null` indica que aún no se ha verificado el acceso.
-    const router = useRouter();
+const ProtectedComponent = ({ userPermissions = [], requiredPermissions = [], children, hideIfNoAccess = true }) => {
+    // Verificar si el usuario tiene al menos uno de los permisos requeridos
+    const hasAccess = requiredPermissions.some(permission => userPermissions.includes(permission));
 
-    useEffect(() => {
-        const verifyAccess = async () => {
-            try {
-                const response = await fetch(`${API_USERS_URL}/verify-permissions`, {
-                    credentials: 'include', // Incluye cookies HttpOnly.
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                const hasRequiredPermission = requiredPermissions.some(permission =>
-                    data.permisos.includes(permission)
-                );
-
-                setHasAccess(hasRequiredPermission);
-
-                // Si no se debe ocultar, redirige al usuario sin permisos.
-                if (!hasRequiredPermission && !hideIfNoAccess) {
-                    router.push('/unauthorized');
-                }
-            } catch (error) {
-                console.error('Error al verificar permisos:', error);
-                router.push('/');
-            }
-        };
-
-        verifyAccess();
-    }, [requiredPermissions, hideIfNoAccess, router]);
-
-    // Mientras se verifica el acceso, no renderiza nada.
-    if (hasAccess === null) return null;
-
-    // Si no tiene acceso y debe ocultarse, no muestra el contenido.
-    if (!hasAccess && hideIfNoAccess) return null;
+    // Si no tiene acceso y se debe ocultar, no renderiza nada
+    if (!hasAccess && hideIfNoAccess) {
+        return null;
+    }
 
     return <>{children}</>;
+};
+
+ProtectedComponent.propTypes = {
+    userPermissions: PropTypes.arrayOf(PropTypes.string).isRequired, // Lista de permisos del usuario
+    requiredPermissions: PropTypes.arrayOf(PropTypes.string).isRequired, // Permisos requeridos para mostrar el contenido
+    children: PropTypes.node.isRequired, // Contenido protegido
+    hideIfNoAccess: PropTypes.bool, // Si debe ocultar el contenido si no hay permisos
 };
 
 export default ProtectedComponent;

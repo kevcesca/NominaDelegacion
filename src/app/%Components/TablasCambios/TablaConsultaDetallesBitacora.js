@@ -17,6 +17,7 @@ import ColumnSelector from '../ColumnSelector/ColumnSelector';
 import theme from '../../$tema/theme';
 import styles from './TablasCambios.module.css';
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
 
 export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomina }) {
     const [data, setData] = useState([]);
@@ -187,32 +188,38 @@ export default function TablaConsultaDetallesBitacora({ anio, quincena, tipoNomi
                 </Box>
 
                 <Toolbar className="mb-4" right={() => (
-                    <div className="flex align-items-center justify-content-end gap-2">
-                        <Button
+                <div className="flex align-items-center justify-content-end gap-2">
+                    <AsyncButton
                             type="button"
                             icon="pi pi-file"
                             rounded
-                            onClick={() => exportCSV()}
+                            onClick={exportCSV}
                             data-pr-tooltip="CSV"
-                        />
-                        <Button
+                        >
+                            Exportar CSV
+                        </AsyncButton>
+                        <AsyncButton
                             type="button"
                             icon="pi pi-file-excel"
                             severity="success"
                             rounded
-                            onClick={() => exportExcel()}
+                            onClick={exportExcel}
                             data-pr-tooltip="XLS"
-                        />
-                        <Button
+                        >
+                            Exportar Excel
+                        </AsyncButton>
+                        <AsyncButton
                             type="button"
                             icon="pi pi-file-pdf"
                             severity="warning"
                             rounded
-                            onClick={() => exportPdf()}
+                            onClick={exportPdf}
                             data-pr-tooltip="PDF"
-                        />
-                    </div>
-                )} />
+                        >
+                            Exportar PDF
+                        </AsyncButton>
+                </div>
+            )} />
 
                 <Collapse in={collapseOpen}>
                     <Box>
