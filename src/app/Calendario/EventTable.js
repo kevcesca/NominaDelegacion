@@ -10,6 +10,7 @@ import { saveAs } from 'file-saver';
 import API_BASE_URL from "../%Config/apiConfig";
 import ColumnSelector from '../%Components/ColumnSelector/ColumnSelector';
 import styles from './page.module.css';
+import AsyncButton from '../%Components/AsyncButton/AsyncButton';
 
 export default function EventTable({ anio, mes, onSaveEvent }) {
     const [data, setData] = useState([]); // Datos obtenidos de la API
@@ -193,30 +194,30 @@ export default function EventTable({ anio, mes, onSaveEvent }) {
                             <Typography variant="body1">No hay eventos disponibles para el mes seleccionado.</Typography>
                         ) : (
                             <>
-                                <Button
+                                <AsyncButton
                                     variant="contained"
                                     color="primary"
                                     onClick={exportPDF}
                                     style={{ margin: '10px' }}
                                 >
                                     Exportar a PDF
-                                </Button>
-                                <Button
+                                </AsyncButton>
+                                <AsyncButton
                                     variant="contained"
                                     color="primary"
                                     onClick={exportCSV}
                                     style={{ margin: '10px' }}
                                 >
                                     Exportar a CSV
-                                </Button>
-                                <Button
+                                </AsyncButton>
+                                <AsyncButton
                                     variant="contained"
                                     color="primary"
                                     onClick={exportExcel}
                                     style={{ margin: '10px' }}
                                 >
                                     Exportar a Excel
-                                </Button>
+                                </AsyncButton>
                             </>
                         )}
                     </>

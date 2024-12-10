@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@mui/material';
+import { Alert, Button } from '@mui/material';
 import styles from './page.module.css';
 import AddUserModal from './components/AddUserModal';
 import UserTableRow from './components/UserTableRow';
@@ -116,12 +116,15 @@ const UserTable = () => {
             );
 
             if (!response.ok) throw new Error('Error al actualizar los detalles del usuario');
-
+            
             console.log('Detalles actualizados exitosamente.');
             await fetchUsers(); // Refrescar la lista de usuarios
             setEditingUser(null);
             setEditedFields({});
-        } catch (error) {
+           
+        } 
+       
+        catch (error) {
             console.error('Error al confirmar la edición:', error);
         }
     };
