@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext'; // Importa el contexto de autenticación
 import { useRouter } from 'next/navigation';
 import { API_USERS_URL } from '../../%Config/apiConfig';
 
 const ProtectedView = ({ requiredPermissions = [], children }) => {
     const [hasAccess, setHasAccess] = useState(false);
+    const { logout } = useAuth(); // Usa la función logout del contexto
     const router = useRouter();
 
     useEffect(() => {
@@ -38,12 +40,14 @@ const ProtectedView = ({ requiredPermissions = [], children }) => {
                 setHasAccess(true);
             } catch (error) {
                 console.error('Error al verificar permisos:', error);
-                router.push('/'); // Redirige al inicio
+
+                // Cierra la sesión en lugar de redirigir al inicio
+                await logout();
             }
         };
 
         verifyAccess();
-    }, [requiredPermissions, router]);
+    }, [requiredPermissions, router, logout]);
 
     if (!hasAccess) return null; // Muestra nada mientras se verifica el acceso
 

@@ -137,29 +137,32 @@ export default function AppBar() {
                     style={{ width: '100%', height: 'auto' }}
                 />
             </Box>
-            <NavigationContainer>
-                <Toolbar sx={{ width: '100%', padding: 0, justifyContent: 'space-between' }}>
+            <NavigationContainer >
+                <Toolbar sx={{ width: '100%', display: 'flex', justifyContent: 'center', gap: 2 }}>
                     <Link href="/" passHref>
-                        <HomeButton startIcon={<HomeIcon />}>
+                        <HomeButton sx={{ width: '20vw' }} startIcon={<HomeIcon />}>
                             INICIO
                         </HomeButton>
                     </Link>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'center', flex: 1 }}>
+                    <Box>
                         <StyledTabs
                             value={activeIndex}
                             onChange={handleTabChange}
                             centered
+                            sx={{width: '50vw', display: 'flex', justifyContent: 'space-between' }}
                         >
                             <Tab
                                 icon={<Assessment />}
                                 label="NÓMINA"
                                 iconPosition="start"
+                                sx={{width: '35vw', marginX: '4vw'}}
                             />
                             <Tab
                                 icon={<GroupIcon />}
                                 label="EMPLEADOS"
                                 iconPosition="start"
+                                sx={{width: '35vw', marginX: '4vw'}}
                             />
                         </StyledTabs>
                     </Box>
@@ -168,6 +171,7 @@ export default function AppBar() {
                         <UserButton
                             onClick={handleMenuClick}
                             endIcon={<KeyboardArrowDownIcon />}
+                            sx={{ width: '20vw', padding: "1rem" }}
                         >
                             {currentUser.nombre_usuario}
                         </UserButton>

@@ -15,7 +15,7 @@ export default function Validacion() {
     const [tipoNomina, setTipoNomina] = useState('');
     const [anio, setAnio] = useState(''); // Estado para el año
     const [quincena, setQuincena] = useState(''); // Estado para la quincena
-    const [showTabla, setShowTabla] = useState(true); // Controla si se muestra o no la tabla
+    const [showTabla, setShowTabla] = useState(false); // Inicialmente, no mostrar la tabla
 
     // Función para manejar el cambio de año y quincena desde el DateFilter
     const handleDateChange = ({ anio, quincena }) => {
@@ -34,6 +34,12 @@ export default function Validacion() {
         }
     };
 
+    // Manejar el cambio de tipo de nómina
+    const handleTipoNominaChange = (e) => {
+        setTipoNomina(e.target.value);
+        setShowTabla(true); // Mostrar la tabla una vez que se seleccione un tipo de nómina
+    };
+
     return (
         <ProtectedView requiredPermissions={["Acceso_total", "Validacion_de_registros_consulta_bitacora"]}>
             <ThemeProvider theme={theme}>
@@ -50,7 +56,7 @@ export default function Validacion() {
                                 <InputLabel>Tipo de Nómina</InputLabel>
                                 <Select
                                     value={tipoNomina}
-                                    onChange={(e) => setTipoNomina(e.target.value)}
+                                    onChange={handleTipoNominaChange}
                                     label="Tipo de Nómina"
                                 >
                                     <MenuItem value="ESTRUCTURA">Estructura</MenuItem>
@@ -64,19 +70,23 @@ export default function Validacion() {
                     </Box>
 
                     {/* Encabezado y tabla de consulta */}
-                    <HeaderSeccion
-                        titulo="Cambios a detalle por empleado y quincena"
-                        isOpen={showTabla}
-                        onToggle={() => setShowTabla(!showTabla)}
-                    />
-                    {showTabla && (
-                        <div className={styles.tableContainer}>
-                            <TablaConsultaDetallesBitacora
-                                tipoNomina={tipoNomina}
-                                anio={anio}
-                                quincena={quincena}
+                    {tipoNomina && (
+                        <>
+                            <HeaderSeccion
+                                titulo="Cambios a detalle por empleado y quincena"
+                                isOpen={showTabla}
+                                onToggle={() => setShowTabla(!showTabla)}
                             />
-                        </div>
+                            {showTabla && (
+                                <div className={styles.tableContainer}>
+                                    <TablaConsultaDetallesBitacora
+                                        tipoNomina={tipoNomina}
+                                        anio={anio}
+                                        quincena={quincena}
+                                    />
+                                </div>
+                            )}
+                        </>
                     )}
                     {/* Botones de navegación */}
                     <div className={styles.buttonContainer}>
