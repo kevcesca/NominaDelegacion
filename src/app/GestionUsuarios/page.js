@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@mui/material';
+import { Alert, Button } from '@mui/material';
 import styles from './page.module.css';
 import AddUserModal from './components/AddUserModal';
 import UserTableRow from './components/UserTableRow';
@@ -10,7 +10,8 @@ import AssignRolesModal from './components/AssignRolesModal'; // Modal para asig
 import useUsers from './components/useUsers';
 import { useAuth } from '../context/AuthContext';
 import { API_USERS_URL } from '../%Config/apiConfig';
-import ChangePasswordModal from './components/ChangePasswordModal'; // Importa el nuevo componente
+import AsyncButton from '../%Components/AsyncButton/AsyncButton'; 
+import ChangePasswordModal from './components/ChangePasswordModal'; 
 
 const UserTable = () => {
     const { users, setUsers, fetchUsers, toggleUserStatus } = useUsers(); // Incluimos `setUsers` para actualizar la lista localmente
@@ -115,12 +116,15 @@ const UserTable = () => {
             );
 
             if (!response.ok) throw new Error('Error al actualizar los detalles del usuario');
-
+            
             console.log('Detalles actualizados exitosamente.');
             await fetchUsers(); // Refrescar la lista de usuarios
             setEditingUser(null);
             setEditedFields({});
-        } catch (error) {
+           
+        } 
+       
+        catch (error) {
             console.error('Error al confirmar la edición:', error);
         }
     };
@@ -128,18 +132,18 @@ const UserTable = () => {
     return (
         <div className={styles.container}>
             <h2 className={styles.title}>Gestión de Usuarios</h2>
-            <Button
+            <AsyncButton
                 variant="contained"
                 color="primary"
                 onClick={() => setIsModalOpen(true)}
                 style={{ marginBottom: '10px' }}
             >
                 Añadir Usuario
-            </Button>
+            </AsyncButton>
 
             {/* Botón dinámico: Solo aparece si se seleccionan 2 o más usuarios */}
             {selectedUsers.length >= 2 && (
-                <Button
+                <AsyncButton
                     variant="contained"
                     color="secondary"
                     onClick={handleToggleSelectedUsers}
@@ -148,7 +152,7 @@ const UserTable = () => {
                     {areAllSelectedUsersActive
                         ? 'Deshabilitar Usuarios'
                         : 'Habilitar Usuarios'}
-                </Button>
+                </AsyncButton>
             )}
 
             <table className={styles.table}>
@@ -203,7 +207,6 @@ const UserTable = () => {
                     ))}
                 </tbody>
             </table>
-
             <UserActionsMenu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
@@ -253,3 +256,4 @@ const UserTable = () => {
 };
 
 export default UserTable;
+ 

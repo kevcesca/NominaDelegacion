@@ -3,7 +3,6 @@ import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { RadioButton } from 'primereact/radiobutton';
-import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Toast } from 'primereact/toast';
 import 'primereact/resources/themes/saga-blue/theme.css';
@@ -11,6 +10,7 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './ComparativeTable.module.css';
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../../%Components/AsyncButton/AsyncButton'; // Importar AsyncButton
 
 const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
     const [records, setRecords] = useState([]);
@@ -24,8 +24,8 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
             const response = await axios.get(`${API_BASE_URL}/NominaCtrl/PendientesAprobados`, {
                 params: {
                     quincena,
-                    anio
-                }
+                    anio,
+                },
             });
             setRecords(response.data);
         } catch (error) {
@@ -45,9 +45,21 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
     const approveTemplate = (rowData) => {
         return (
             <div className="p-field-radiobutton">
-                <RadioButton inputId={`approve${rowData.idx}`} name={rowData.idx} value="Aprobar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Aprobar'} />
+                <RadioButton
+                    inputId={`approve${rowData.idx}`}
+                    name={rowData.idx}
+                    value="Aprobar"
+                    onChange={(e) => onRadioChange(e, rowData)}
+                    checked={rowData.status === 'Aprobar'}
+                />
                 <label htmlFor={`approve${rowData.idx}`}>Aprobar</label>
-                <RadioButton inputId={`cancel${rowData.idx}`} name={rowData.idx} value="Cancelar" onChange={(e) => onRadioChange(e, rowData)} checked={rowData.status === 'Cancelar'} />
+                <RadioButton
+                    inputId={`cancel${rowData.idx}`}
+                    name={rowData.idx}
+                    value="Cancelar"
+                    onChange={(e) => onRadioChange(e, rowData)}
+                    checked={rowData.status === 'Cancelar'}
+                />
                 <label htmlFor={`cancel${rowData.idx}`}>Cancelar</label>
             </div>
         );
@@ -55,13 +67,13 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
 
     const onRadioChange = (e, rowData) => {
         let updatedRecords = [...records];
-        let recordIndex = updatedRecords.findIndex(record => record.idx === rowData.idx);
+        let recordIndex = updatedRecords.findIndex((record) => record.idx === rowData.idx);
         updatedRecords[recordIndex] = { ...rowData, status: e.value };
         setRecords(updatedRecords);
     };
 
     const handleConfirm = async () => {
-        const confirmed = window.confirm("¿Son correctos los datos?");
+        const confirmed = window.confirm('¿Son correctos los datos?');
         if (!confirmed) {
             return;
         }
@@ -73,18 +85,28 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
             const params = new URLSearchParams({
                 cancelado: record.status === 'Cancelar',
                 aprobado: record.status === 'Aprobar',
-                user_revision: userRevision,  
-                rol_user: 'SuperAdmin',  
-                pendiente_dem: false, 
-                idx: record.idx
+                user_revision: userRevision,
+                rol_user: 'SuperAdmin',
+                pendiente_dem: false,
+                idx: record.idx,
             }).toString();
 
             try {
                 await axios.get(`${API_BASE_URL}/validarNominaCtrl2?${params}`);
-                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Estado de la nómina ${record.idx} actualizado correctamente`, life: 3000 });
+                toast.current.show({
+                    severity: 'success',
+                    summary: 'Éxito',
+                    detail: `Estado de la nómina ${record.idx} actualizado correctamente`,
+                    life: 3000,
+                });
             } catch (error) {
                 console.error('Error updating record', error);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al actualizar la nómina ${record.idx}`, life: 3000 });
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: `Error al actualizar la nómina ${record.idx}`,
+                    life: 3000,
+                });
             }
         });
 
@@ -96,14 +118,21 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
     const exportCSV = () => {
         dt.current.exportCSV();
     };
-
-    const exportPdf = () => {
+    const exportPdf = async () => {
         import('jspdf').then((jsPDF) => {
             import('jspdf-autotable').then(() => {
                 const doc = new jsPDF.default();
                 doc.autoTable({
                     head: [['Idx', 'Año', 'Quincena', 'Nombre Nómina', 'Nombre Archivo', 'Fecha Carga', 'Usuario Carga']],
-                    body: records.map(record => [record.idx, record.anio, record.quincena, record.nombre_nomina, record.nombre_archivo, record.fecha_carga, record.user_carga])
+                    body: records.map((record) => [
+                        record.idx,
+                        record.anio,
+                        record.quincena,
+                        record.nombre_nomina,
+                        record.nombre_archivo,
+                        record.fecha_carga,
+                        record.user_carga,
+                    ]),
                 });
                 doc.save('comparativa.pdf');
             });
@@ -133,15 +162,43 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
 
     return (
         <div>
-            
             <Toast ref={toast} />
-            <Toolbar className="mb-4" right={() => (
-                <div className="flex align-items-center justify-content-end gap-2">
-                    <Button type="button" icon="pi pi-file" rounded onClick={() => exportCSV()} data-pr-tooltip="CSV" />
-                    <Button type="button" icon="pi pi-file-excel" severity="success" rounded onClick={() => exportExcel()} data-pr-tooltip="XLS" />
-                    <Button type="button" icon="pi pi-file-pdf" severity="warning" rounded onClick={() => exportPdf()} data-pr-tooltip="PDF" />
-                </div>
-            )} />
+            <Toolbar
+                className="mb-4"
+                right={() => (
+                    <div className="flex align-items-center justify-content-end gap-2">
+                        <AsyncButton
+                            type="button"
+                            icon="pi pi-file"
+                            rounded
+                            onClick={exportCSV}
+                            data-pr-tooltip="CSV"
+                        >
+                            Exportar CSV
+                        </AsyncButton>
+                        <AsyncButton
+                            type="button"
+                            icon="pi pi-file-excel"
+                            severity="success"
+                            rounded
+                            onClick={exportExcel}
+                            data-pr-tooltip="XLS"
+                        >
+                            Exportar Excel
+                        </AsyncButton>
+                        <AsyncButton
+                            type="button"
+                            icon="pi pi-file-pdf"
+                            severity="warning"
+                            rounded
+                            onClick={exportPdf}
+                            data-pr-tooltip="PDF"
+                        >
+                            Exportar PDF
+                        </AsyncButton>
+                    </div>
+                )}
+            />
             {loading ? (
                 <p>Cargando...</p>
             ) : (
@@ -156,7 +213,16 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
                     <Column body={approveTemplate} header="Acción" />
                 </DataTable>
             )}
-            <Button className={styles.button} label='Confirmar' type="button" icon="pi pi-check" severity="success" onClick={handleConfirm} />
+            <AsyncButton
+                className={styles.button}
+                label="Confirmar"
+                type="button"
+                icon="pi pi-check"
+                severity="success"
+                onClick={handleConfirm}
+            >
+                Confirmar
+            </AsyncButton>
         </div>
     );
 };

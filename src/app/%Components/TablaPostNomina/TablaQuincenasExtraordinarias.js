@@ -83,7 +83,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             formData.append('extra', selectedTipo);
 
             try {
-                const response = await axios.post(`${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Extraordinarios&usuario=${session?.user?.name || 'unknown'}&extra=${selectedTipo}`, formData, {
+                const response = await axios.post(`${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Extraordinarios&usuario=${session?.nombre_usuario || 'unknown'}&extra=${selectedTipo}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -136,7 +136,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
 
     const handleProcesarNomina = async () => {
         try {
-            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
+            const usuario = session?.nombre_usuario || 'unknown';  // Obtener el nombre del usuario
             const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Extraordinarios&usuario=${usuario}&extra=${selectedTipo}`; // Ajustar endpoint y parámetros
 
             // Hacer la solicitud al endpoint de procesar nómina

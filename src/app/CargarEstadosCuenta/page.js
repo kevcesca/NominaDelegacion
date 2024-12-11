@@ -6,7 +6,7 @@ import { Toast } from 'primereact/toast';
 import styles from './page.module.css';
 import TablaEstadosCuenta from '../%Components/TablaEstadosCuenta/TablaEstadosCuenta'; // Asegúrate de que la ruta sea correcta
 import TablaRetenciones from '../%Components/TablaRetenciones/TablaRetenciones';
-import DateFilter from '../%Components/DateFilter/DateFilter'; // Importar DateFilter en lugar de DateSelector
+import DateFilter from '../%Components/DateFilter/DateFilter'; // Importar DateFilter
 import { ProgressBar } from 'primereact/progressbar'; 
 import { ThemeProvider, Box, Typography } from '@mui/material';
 import theme from '../$tema/theme'; // Importa correctamente el tema
@@ -33,6 +33,14 @@ function CargarEstadosCuenta() {
         // En este caso, el mes no lo estamos tomando directamente desde DateFilter, pero podrías actualizarlo también si lo deseas
         const fechaActual = new Date();
         setMes(fechaActual.getMonth() + 1); // Mes actual
+
+        // Mostrar un mensaje de actualización (opcional)
+        toast.current.show({
+            severity: 'info',
+            summary: 'Fecha Actualizada',
+            detail: `Año: ${anio}, Quincena: ${quincena}`,
+            life: 2000,
+        });
     };
 
     return (
@@ -78,7 +86,9 @@ function CargarEstadosCuenta() {
                         <TablaRetenciones
                             anio={anio}
                             mes={mes}
-                            quincena={quincena} // Pasar quincena como...
+                            quincena={quincena} // Pasar quincena como prop
+                            setProgress={setProgressRetenciones}
+                            setUploaded={() => {}}
                         />
                     </>
                 )}

@@ -10,6 +10,7 @@ import ComparativaTable2 from '../%Components/ComparativeTable/ComparativeTable2
 import HeaderSeccion from '../%Components/HeaderSeccion/HeaderSeccion'; // Importa el HeaderSeccion
 import { useRouter } from 'next/navigation';
 import ProtectedView from '../%Components/ProtectedView/ProtectedView'; // Importa el componente
+import AsyncButton from '../%Components/AsyncButton/AsyncButton';
 
 const AprobarCargaNomina = () => {
     const router = useRouter();
@@ -77,14 +78,14 @@ const AprobarCargaNomina = () => {
 
                     {/* Botón para regresar a la página anterior */}
                     <Box className={styles.buttonContainer}>
-                        <Button
+                        <AsyncButton
                             variant="contained"
                             color="secondary"
                             onClick={() => router.back()} // Regresa a la página anterior
                             className={styles.backButton}
                         >
                             Regresar
-                        </Button>
+                        </AsyncButton>
                     </Box>
                 </main>
             </ThemeProvider>

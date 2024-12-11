@@ -1,114 +1,66 @@
-/* GestorPolizas.module.css */
 .container {
-    max-width: 110 0px;
     margin: 20px auto;
-    background-color: white;
+    max-width: 95%; /* Centra la tabla y la ajusta a la pantalla */
     padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    width: 90%;
-    color: #9f2241;
+    background-color: #f9f9f9; /* Fondo ligero */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.imgEncabezado {
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    height: auto;
-}
-
-.h1,
-.h2 {
-    text-align: center;
-    color: #b9274b;
-}
-
-.inputGroup,
-.tableSection {
+.title {
     margin-bottom: 20px;
-}
-
-.label {
-    font-weight: bold;
-    color: #9f2241;
-}
-
-.input,
-.button {
-    padding: 10px;
-    margin-top: 5px;
-    width: 100%;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-}
-
-.button {
-    background-color: #8B2635;
-    color: white;
-    cursor: pointer;
-    margin-top: 10px;
-    border: none;
-    transition: background-color 0.3s;
-}
-
-.button:hover {
-    background-color: #711c31;
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.table th,
-.table td {
-    padding: 15px;
+    color: #800000; /* Color del título en rojo oscuro */
     text-align: center;
-    border: 1px solid #ddd;
-}
-
-.table th {
-    background-color: #8B2635;
-    color: white;
     font-weight: bold;
 }
 
-.table td {
-    background-color: #f9f9f9;
-    color: #333;
+.tableContainer {
+    margin-top: 20px;
+    border: 1px solid #800000; /* Bordes exteriores de la tabla */
+    border-radius: 8px;
 }
 
-.table tr:nth-child(even) td {
-    background-color: #f1f1f1;
+.tableHead {
+    background-color: #800000; /* Color de fondo del encabezado */
+    color: white; /* Texto blanco */
+    font-weight: bold;
 }
 
-.table tr:hover td {
-    background-color: #f0e0e0;
+.tableCell {
+    text-align: center; /* Centra el contenido de cada celda */
+    font-size: 0.95rem; /* Ajusta el tamaño de fuente */
 }
 
-.labels {
-    width: 20vw;
-    height: 6vh;
-    margin: 2rem;
+.tableCellHeader {
+    font-size: 1rem; /* Tamaño de fuente más grande para el encabezado */
+    text-transform: uppercase; /* Texto en mayúsculas */
+    font-weight: bold;
 }
 
-.buttons {
-    background-color: #8d1409 !important;
-    color: white !important;
+.tableRow:nth-of-type(odd) {
+    background-color: #f2f2f2; /* Fondo claro para filas impares */
 }
 
-.buttonsOut {
-    border-color: #8d1409 !important;
-    color: #8d1409 !important;
+.tableRow:nth-of-type(even) {
+    background-color: white; /* Fondo blanco para filas pares */
 }
 
-.inputGroup {
+.loading {
+    text-align: center;
+    margin-top: 20px;
+    color: #555;
+    font-style: italic;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #800000;
+    font-weight: bold;
+}
+
+.pagination {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
 }

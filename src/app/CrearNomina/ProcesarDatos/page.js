@@ -16,6 +16,7 @@ import API_BASE_URL from '../../%Config/apiConfig';
 import DateFilter from '../../%Components/DateFilter/DateFilter';
 import ProtectedView from '../../%Components/ProtectedView/ProtectedView';
 import HeaderSeccion from '../../%Components/HeaderSeccion/HeaderSeccion'; // Importar HeaderSeccion
+import AsyncButton from '../../%Components/AsyncButton/AsyncButton';
 
 const CargarDatos = () => {
     const router = useRouter();
@@ -188,22 +189,21 @@ const CargarDatos = () => {
                 )}
 
                 <Box className={styles.buttonContainer}>
-                    <Button
+                <AsyncButton
                         variant="contained"
                         color="secondary"
                         onClick={() => router.back()}
                         className={styles.backButton}
                     >
                         Regresar
-                    </Button>
-                    <Button
-                        className={styles.botonesExportar}
+                        </AsyncButton>
+                        <AsyncButton                        className={styles.botonesExportar}
                         variant="contained"
                         color="primary"
                         onClick={handleNavigateToAprobacion}
                     >
                         Ir a Aprobación de Nóminas
-                    </Button>
+                        </AsyncButton>
                 </Box>
             </main>
         </ThemeProvider>
