@@ -104,7 +104,7 @@ export default function NavBar() {
             >
                 <Menu
                     menuItemStyles={{
-                        subMenuContent: { width: '15vw' },
+                        subMenuContent: { width: '18rem' },
                         button: () => ({
                             '&:hover': {
                                 backgroundColor: '#9f2241',
