@@ -13,14 +13,20 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import MoneyIcon from '@mui/icons-material/Money';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import ListIcon from '@mui/icons-material/List';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import ViewListIcon from '@mui/icons-material/ViewList';
+import CreditScoreIcon from '@mui/icons-material/CreditScore';
+import PaymentsTwoToneIcon from '@mui/icons-material/PaymentsTwoTone';
+import CreditCardOffIcon from '@mui/icons-material/CreditCardOff';
 import { useMediaQuery } from '@mui/material';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import KeySharpIcon from '@mui/icons-material/KeySharp';
 import CancelPresentationSharpIcon from '@mui/icons-material/CancelPresentationSharp';
 import ProtectedComponent from '../ProtectedComponent/ProtectedComponent';
@@ -118,7 +124,7 @@ export default function NavBar() {
                     </button>
                     {collapsed ? (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Calendario" icon={<CalendarTodayIcon />}>
                                 <Link className={styles.tWhite} href="/Calendario" passHref>
@@ -130,7 +136,7 @@ export default function NavBar() {
                         </ProtectedComponent>
                     ) : (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <Link className={styles.textAlone} href="/Calendario" passHref>
                                 <MenuItem icon={<EventAvailableIcon />} onClick={handleLinkClick}>
@@ -143,7 +149,7 @@ export default function NavBar() {
 
                     {collapsed ? (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Usuarios" icon={<PeopleIcon />}>
                                 <Link className={styles.tWhite} href="/GestionUsuarios" passHref>
@@ -156,7 +162,7 @@ export default function NavBar() {
 
                     ) : (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <Link className={styles.textAlone} href="/GestionUsuarios" passHref>
                                 <MenuItem icon={<PeopleIcon />} onClick={handleLinkClick}>
@@ -168,7 +174,7 @@ export default function NavBar() {
 
                     {collapsed ? (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Roles" icon={<KeySharpIcon />}>
                                 <Link className={styles.tWhite} href="/Roles" passHref>
@@ -178,7 +184,7 @@ export default function NavBar() {
                         </ProtectedComponent>
                     ) : (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <Link className={styles.textAlone} href="/Roles" passHref>
                                 <MenuItem icon={<KeySharpIcon />} onClick={handleLinkClick}>Roles</MenuItem>
@@ -188,7 +194,7 @@ export default function NavBar() {
 
                     <ProtectedComponent userPermissions={permissions}
                         requiredPermissions={['Acceso_total']}
-                        >
+                    >
                         <SubMenu label="Proceso de Nómina" icon={<SecurityIcon />}>
                             <Link className={styles.tWhite} href="/CrearNomina" passHref>
                                 <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cargar Nómina</MenuItem>
@@ -207,7 +213,7 @@ export default function NavBar() {
 
                     <ProtectedComponent userPermissions={permissions}
                         requiredPermissions={['Acceso_total']}
-                        >
+                    >
                         <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />}>
                             <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
                                 <MenuItem icon={<ListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Conceptos</MenuItem>
@@ -216,14 +222,14 @@ export default function NavBar() {
                                 <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Universos</MenuItem>
                             </Link>
                             <Link className={styles.tWhite} href="/Configuracion/CLC" passHref>
-                                <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>CLC</MenuItem>
+                                <MenuItem icon={<PaymentsTwoToneIcon />} className={styles.bgblack} onClick={handleLinkClick}>CLC</MenuItem>
                             </Link>
                         </SubMenu>
                     </ProtectedComponent>
 
                     {collapsed ? (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Estados de cuenta" icon={<DescriptionIcon />}>
                                 <Link className={styles.tWhite} href="/CargarEstadosCuenta" passHref>
@@ -233,55 +239,18 @@ export default function NavBar() {
                         </ProtectedComponent>
                     ) : (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <Link className={styles.textAlone} href="/CargarEstadosCuenta" passHref>
                                 <MenuItem icon={<DescriptionIcon />} onClick={handleLinkClick}>Estados de cuenta</MenuItem>
                             </Link>
                         </ProtectedComponent>
                     )}
+                   
+                   
                     {collapsed ? (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
-                        >
-                            <SubMenu label="Gestión de Cheques" icon={<MoneyIcon />}>
-                                <Link className={styles.tWhite} href="/Cheques" passHref>
-                                    <MenuItem icon={<MoneyIcon />} className={styles.bgblack} onClick={handleLinkClick}>Gestión de Cheques</MenuItem>
-                                </Link>
-                            </SubMenu>
-                        </ProtectedComponent>
-
-                    ) : (
-                        <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
-                        >
-                            <Link className={styles.textAlone} href="/Cheques" passHref>
-                                <MenuItem icon={<MoneyIcon />} onClick={handleLinkClick}>Gestión de Cheques</MenuItem>
-                            </Link>
-                        </ProtectedComponent>
-                    )}
-                    {collapsed ? (
-                        <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
-                        >
-                            <SubMenu label="Cancelacion de Cheques" icon={<CancelPresentationSharpIcon />}>
-                                <Link className={styles.tWhite} href="/Cheques/Cancelacion" passHref>
-                                    <MenuItem icon={<CancelPresentationSharpIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cancelacion de Cheques</MenuItem>
-                                </Link>
-                            </SubMenu>
-                        </ProtectedComponent>
-                    ) : (
-                        <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
-                        >
-                            <Link className={styles.textAlone} href="/Cheques/Cancelacion" passHref>
-                                <MenuItem icon={<CancelPresentationSharpIcon />} onClick={handleLinkClick}>Cancelacion de Cheques</MenuItem>
-                            </Link>
-                        </ProtectedComponent>
-                    )}
-                    {collapsed ? (
-                        <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Reportes" icon={<AssessmentIcon />}>
                                 <Link className={styles.tWhite} href="/ListaReportes" passHref>
@@ -291,7 +260,7 @@ export default function NavBar() {
                         </ProtectedComponent>
                     ) : (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <Link className={styles.textAlone} href="/ListaReportes" passHref>
                                 <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Reportes</MenuItem>
@@ -301,7 +270,7 @@ export default function NavBar() {
 
                     {collapsed ? (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Nueva Contrasena" icon={<AssessmentIcon />}>
                                 <Link className={styles.tWhite} href="/NuevaContrasena" passHref>
@@ -311,32 +280,31 @@ export default function NavBar() {
                         </ProtectedComponent>
                     ) : (
                         <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
+                            requiredPermissions={['Acceso_total']}
                         >
                             <Link className={styles.textAlone} href="/NuevaContrasena" passHref>
                                 <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Nueva Contraseña</MenuItem>
                             </Link>
                         </ProtectedComponent>
                     )}
-                    {collapsed ? (
-                        <ProtectedComponent userPermissions={permissions}
+                     <ProtectedComponent userPermissions={permissions}
                         requiredPermissions={['Acceso_total']}
-                        >
-                            <SubMenu label="Estatus cheques" icon={<AssessmentIcon />}>
-                                <Link className={styles.tWhite} href="/Cheques/Status" passHref>
-                                    <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Estatus cheques</MenuItem>
-                                </Link>
-                            </SubMenu>
-                        </ProtectedComponent>
-                    ) : (
-                        <ProtectedComponent userPermissions={permissions}
-                        requiredPermissions={['Acceso_total']}
-                        >
-                            <Link className={styles.textAlone} href="/Cheques/Status" passHref>
-                                <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Estatus cheques</MenuItem>
+                    >
+                      <SubMenu label="Cheques" icon={<CreditCardIcon/>}>
+                            <Link className={styles.tWhite} href="/Cheques" passHref>
+                                <MenuItem icon={<CreateNewFolderIcon />} className={styles.bgblack} onClick={handleLinkClick}>Generador de Cheques</MenuItem>
                             </Link>
-                        </ProtectedComponent>
-                    )}
+                            <Link className={styles.tWhite} href="/Cheques/CambioPago" passHref>
+                                <MenuItem icon={<CurrencyExchangeIcon/>} className={styles.bgblack} onClick={handleLinkClick}>Cambio Tipo de Pago</MenuItem>
+                            </Link>
+                            <Link className={styles.tWhite} href="/Cheques/Cancelacion" passHref>
+                                <MenuItem icon={<CreditCardOffIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cancelación de Cheques</MenuItem>
+                            </Link>
+                            <Link className={styles.tWhite} href="/Cheques/Status" passHref>
+                                <MenuItem icon={<CreditScoreIcon />} className={styles.bgblack} onClick={handleLinkClick}>Estatus de Cheques</MenuItem>
+                            </Link>
+                        </SubMenu>
+                    </ProtectedComponent>
                 </Menu>
             </Sidebar>
         </div>

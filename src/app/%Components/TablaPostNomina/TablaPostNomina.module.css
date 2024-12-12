@@ -82,3 +82,9 @@
 .downloadButton:disabled .pi {
     color: #666666; /* Asegura que el icono también cambie de color */
 }
+
+.loadingContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

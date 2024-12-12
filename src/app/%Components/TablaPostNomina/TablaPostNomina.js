@@ -7,12 +7,14 @@ import styles from './TablaPostNomina.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
+import Image from 'next/image'; // Importamos Image para mostrar el SVG
 
 export default function TablaPostNomina({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
     const [archivos, setArchivos] = useState([]);
     const [isUploadDisabled, setIsUploadDisabled] = useState(false); // Controla si se habilita el botón de carga
     const [canProcess, setCanProcess] = useState(false); // Controla si se muestra el botón "Procesar Nómina"
+    const [isLoading, setIsLoading] = useState(false); // Controla si se está mostrando el GIF de carga
 
     useEffect(() => {
         fetchArchivosData();
@@ -58,14 +60,16 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     const handleFileUpload = async (event) => {
         const files = event.target.files; // Obtén múltiples archivos seleccionados
         if (!files.length) return;
-
+    
+        setIsLoading(true); // Mostrar el GIF de carga
+    
         for (const file of files) { // Itera sobre cada archivo seleccionado
             const formData = new FormData();
             formData.append('file', file);
             formData.append('extra', '');
-
+    
             const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Compuesta&usuario=${session?.user?.name || 'unknown'}`;
-
+    
             try {
                 const response = await axios.post(uploadURL, formData, {
                     headers: {
@@ -76,31 +80,43 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                         setProgress(progress);
                     },
                 });
-
+    
                 setProgress(100);
                 setUploaded(true);
-                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
+    
+                // **Aplicar setTimeout para SVG y toast**
+                setTimeout(() => {
+                    toast.current.show({
+                        severity: 'success',
+                        summary: 'Éxito',
+                        detail: `Archivo subido correctamente: ${response.data.message}`,
+                        life: 3000,
+                    });
+                    setIsLoading(false); // Ocultar el GIF de carga después del toast
+                }, 1000); // Retrasar 1 segundo
+    
                 fetchArchivosData(); // Refrescar la tabla después de subir el archivo
-
             } catch (error) {
                 console.error('Error uploading file', error);
-
+    
                 const errorCode = error.response?.status || 'Desconocido';
                 const errorDetails = error.response?.data || 'Error desconocido al subir el archivo.';
-
+    
                 const errorMessage = `Error al subir archivo. Código de error: ${errorCode}. Detalle: ${errorDetails}`;
-
-                console.log('Full error response:', error.response);
-
-                toast.current.show({ 
-                    severity: 'error', 
-                    summary: 'Error al Subir Archivo', 
-                    detail: errorMessage, 
-                    life: 5000 
-                });
+    
+                setTimeout(() => {
+                    toast.current.show({
+                        severity: 'error',
+                        summary: 'Error al Subir Archivo',
+                        detail: errorMessage,
+                        life: 5000,
+                    });
+                    setIsLoading(false); // Ocultar el GIF de carga después del toast de error
+                }, 3000); // Retrasar 1 segundo
             }
         }
     };
+    
 
     const handleFileDownload = async (tipoNomina, archivoNombre) => {
         const nombreSinExtension = archivoNombre.replace(/\.[^/.]+$/, "");
@@ -132,12 +148,10 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
 
     const handleProcesarNomina = async () => {
         try {
-            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
-            const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Compuesta&usuario=${usuario}&extra=gatitoverdecito`; // Ajustar endpoint y parámetros
-    
-            // Hacer la solicitud al endpoint de procesar nómina
+            const usuario = session?.user?.name || 'unknown';
+            const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Compuesta&usuario=${usuario}&extra=gatitoverdecito`;
             const response = await axios.get(endpoint);
-    
+
             if (response.status === 200) {
                 toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Nómina procesada correctamente.', life: 3000 });
             } else {
@@ -145,11 +159,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             }
         } catch (error) {
             console.error('Error al procesar la nómina:', error);
-    
-            // Capturar el mensaje de error proporcionado por el servidor
             const errorMessage = error.response?.data || 'Hubo un error al procesar la nómina.';
-    
-            // Mostrar el error detallado en un toast
             toast.current.show({ severity: 'error', summary: 'Error al procesar la nómina', detail: errorMessage, life: 5000 });
         }
     };
@@ -172,6 +182,11 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
+            {isLoading && (
+                <div className={styles.loadingContainer}>
+                    <Image src="/barraCarga.svg" alt="Barra de carga" width={150} height={150} className={styles.image} />
+                </div>
+            )}
             <DataTable value={archivos} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
                 <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
                 <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '20%' }}></Column>
@@ -187,7 +202,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                     disabled={isUploadDisabled}
                 >
                     Subir Nómina Compuesta
-                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple /> {/* Permitimos seleccionar múltiples archivos */}
+                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple />
                 </Button>
 
                 {canProcess && (
