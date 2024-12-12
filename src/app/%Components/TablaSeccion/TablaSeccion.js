@@ -11,10 +11,6 @@ export default function TablaSeccion({ titulo, isOpen, onToggle, progress, tabla
             <HeaderSeccion titulo={titulo} isOpen={isOpen} onToggle={onToggle} />
             {isOpen && (
                 <>
-                    <Box className={styles.progressContainer}>
-                        <Typography>Progreso de datos</Typography>
-                        <ProgressBar value={progress} className={styles.progressBar} />
-                    </Box>
                     {tabla}
                 </>
             )}
