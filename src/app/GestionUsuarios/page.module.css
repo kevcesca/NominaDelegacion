@@ -112,3 +112,9 @@ form .MuiButton-root {
     text-align: justify; /* Alineación justificada */
     font-weight: bold;
 }
+
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
