@@ -1,25 +1,25 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Alert } from '@mui/material'; // Importar Alert de Material-UI
 import ReporteTipoPago from "../%Components/ReporteTipoPago/ReporteTipoPago";
 import ReporteAltaBajas from "../%Components/ReporteAltasBajas/ReporteAltasBajas";
 import ReporteNominaNumCuenta from "../%Components/ReporteNominaNumCuenta/ReporteNominaNumCuenta";
 import ReporteDiferenciasLiquidoConLpad from "../%Components/ReporteDiferenciasLiquidoConLpad/ReporteDiferenciasLiquidoConLpad";
 import ReporteAbonoPorConceptoMovimientoQuincenas from "../%Components/ReporteAbonoPorConceptoMovimientoQuincenas/ReporteAbonoPorConceptoMovimientoQuincenas";
 import Reporte04 from "../%Components/Reporte04/Reporte04";
-import HeaderSeccion from "../%Components/HeaderSeccion/HeaderSeccion"; // Importar HeaderSeccion
-import ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido from "../%Components/ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido/ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido"
+import HeaderSeccion from "../%Components/HeaderSeccion/HeaderSeccion";
+import ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido from "../%Components/ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido/ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido";
 import ReporteDeNominaCuentaPorLiquidarPagoPorCheque from "../%Components/ReporteDeNominaCuentaPorLiquidarPagoPorCheque/ReporteDeNominaCuentaPorLiquidarPagoPorCheque";
 import ReporteDeNominasExtraordinarias from "../%Components/ReporteDeNominasExtraordinarias/ReporteDeNominasExtraordinarias";
 import ReporteEmisionDeCheques from "../%Components/ReporteEmisionDeCheques/ReporteEmisionDeCheques";
-import ReporteDeAltas from "../%Components/ReporteDeAltas/ReporteDeAltas"; // Importar el nuevo componente
+import ReporteDeAltas from "../%Components/ReporteDeAltas/ReporteDeAltas";
 import ReporteSaldoDiarioEnBanco from "../%Components/ReporteSaldoDiarioEnBanco/ReporteSaldoDiarioEnBanco";
 import ReporteDeHonorariosPorFecha from "../%Components/ReporteDeHonorariosPorFecha/ReporteDeHonorariosPorFecha";
 import ReporteDeMovimientoPorQuincena from "../%Components/ReporteDeMovimientoPorQuincena/ReporteDeMovimientoPorQuincena";
 
-
 export default function Page() {
-    const [showTipoPago, setShowTipoPago] = useState(true);
+    const [showTipoPago, setShowTipoPago] = useState(false);
     const [showAltaBajas, setShowAltaBajas] = useState(false);
     const [showNominaNumCuenta, setShowNominaNumCuenta] = useState(false);
     const [showDiferenciasLiquido, setShowDiferenciasLiquido] = useState(false);
@@ -36,6 +36,11 @@ export default function Page() {
 
     return (
         <div>
+            {/* Mensaje de advertencia */}
+            <Alert severity="info" sx={{ margin: '1rem' }}>
+                Presiona un click encima de la sección que deseas verificar .
+            </Alert>
+
             {/* Encabezado y ReporteTipoPago */}
             <HeaderSeccion
                 titulo="Reporte: Tipo de Pago"
