@@ -46,32 +46,40 @@ export default function ChequeTrans() {
     const idEmpleado = searchInputRef.current?.value;
 
     if (!idEmpleado) {
-      alert("Por favor, ingrese un ID de empleado.");
-      return;
+        alert("Por favor, ingrese un ID de empleado.");
+        return;
     }
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/transferenciaACheque?id_empleado=${idEmpleado}&quincena=03`
-      );
+        const response = await fetch(
+            `${API_BASE_URL}/transferenciaACheque?id_empleado=${idEmpleado}&quincena=03`
+        );
 
-      if (response.ok) {
-        const data = await response.json();
+        if (response.ok) {
+            const data = await response.json();
 
-        if (data.length > 0) {
-          setEmployeeData(data[0]);
-          setIsInitialView(false);
+            if (data.length > 0) {
+                setEmployeeData(data[0]); // Establecer datos del empleado
+                setIsInitialView(false); // Cambiar a vista de edición
+            } else {
+                // Mostrar alerta y vaciar campos
+                alert("El ID del empleado no existe. Por favor, intente nuevamente.");
+                setEmployeeData(null); // Limpiar datos del empleado
+                setIsInitialView(true); // Regresar a la vista inicial
+            }
         } else {
-          alert("El ID del empleado no existe. Por favor, intente nuevamente.");
+            alert("Error al buscar los datos del empleado.");
+            setEmployeeData(null); // Limpiar datos en caso de error
+            setIsInitialView(true); // Regresar a la vista inicial
         }
-      } else {
-        alert("Error al buscar los datos del empleado.");
-      }
     } catch (error) {
-      console.error("Error al buscar el empleado:", error);
-      alert("Hubo un error al procesar la solicitud.");
+        console.error("Error al buscar el empleado:", error);
+        alert("Hubo un error al procesar la solicitud.");
+        setEmployeeData(null); // Limpiar datos en caso de error
+        setIsInitialView(true); // Regresar a la vista inicial
     }
-  };
+};
+
 
   const validarRFC = async () => {
     if (!rfc) {

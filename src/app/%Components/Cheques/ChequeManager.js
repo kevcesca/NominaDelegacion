@@ -307,7 +307,7 @@ const ChequeManager = () => {
     <ProtectedView requiredPermissions={["Gestion_Cheques", "Acceso_total"]}>
       <ThemeProvider theme={theme}>
         <Box className={styles.container}>
-          <Typography variant="h4">Gestor de Cheques</Typography>
+          <Typography variant="h4">Generador de Cheques</Typography>
 
           {/* Sección de Inputs */}
           <Box className={styles.section}>

@@ -81,7 +81,7 @@ const ChequeTrans = () => {
           setOriginalEmployeeData(employeeData); // Guardar datos originales
           setEmployeeFound(true);
         } else {
-          alert("Empleado no encontrado. Verifique el ID.");
+          alert("El ID del empleado no existe. Por favor, intente nuevamente.");
           setEmployeeFound(false);
         }
       } else {
@@ -261,24 +261,24 @@ const ChequeTrans = () => {
       </Box>
       {/* Buscar empleado */}
       <Box className={styles.searchContainer}>
-        <Typography variant="h6">Buscar empleado por ID</Typography>
-        <TextField
-          label="ID del empleado"
-          inputRef={searchInputRef}
-          placeholder="Ingrese ID del empleado"
-          variant="outlined"
-          fullWidth
-          className={styles.searchField}
-        />
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={buscarEmpleado}
-          className={styles.searchButton}
-        >
-          Buscar
-        </Button>
-      </Box>
+            <Typography variant="h6">Buscar otro empleado por ID</Typography>
+            <Box className={styles.searchField}>
+              <TextField
+                label="ID del empleado"
+                inputRef={searchInputRef}
+                variant="outlined"
+                fullWidth
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={buscarEmpleado}
+                className={styles.searchButton}
+              >
+                Buscar
+              </Button>
+            </Box>
+          </Box>
 
       {/* Mostrar formulario si se encuentra al empleado */}
       {employeeFound && (
@@ -357,6 +357,15 @@ const ChequeTrans = () => {
               Cancelar cambio
             </Button>
           </Box>
+          <Typography
+              variant="subtitle1"
+              color="error"
+              align="center"
+              className={styles.message}
+            >
+              Los pagos empezarán a correr desde la primera quincena de{" "}
+              {fechaCambio.slice(0, 7)}.
+            </Typography>
           <Box className={styles.buttonchange}>
             <Button variant="contained" onClick={verCambiosRealizados}>
               Ver cambios realizados este mes
