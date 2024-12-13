@@ -31,6 +31,12 @@
     align-items: center;
   }
   
+  .searchButton {
+    margin-top: 10px;
+    background-color: #9b2c2c;
+    color: white;
+  }
+  
   .employeeForm {
     padding: 20px;
     background-color: #ffffff;

@@ -1,3 +1,5 @@
+
+
 .card {
     margin: 20px;
     padding: 20px;
@@ -87,10 +89,4 @@
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-
-.backButton{
-    background-color: #9f2241 !important;
-    color: white !important; 
 }
