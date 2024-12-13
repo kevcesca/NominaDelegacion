@@ -8,6 +8,7 @@ import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import { ProgressBar } from 'primereact/progressbar';  // Importa ProgressBar
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
 
 export default function TablaFiniquitos({ quincena, anio, session }) {
     const toast = useRef(null);
@@ -168,6 +169,7 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
             </DataTable>
 
             <div className={styles.uploadContainer}>
+
                 <Button
                     variant="contained"
                     component="label"
@@ -179,15 +181,17 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
                 </Button>
 
                 {canProcess && (
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleProcesarFiniquitos}
-                        className={styles.procesarButton}
-                        style={{ marginTop: '1rem' }}
-                    >
-                        Procesar Finiquitos
-                    </Button>
+                    <AsyncButton>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleProcesarFiniquitos}
+                            className={styles.procesarButton}
+                            style={{ marginTop: '1rem' }}
+                        >
+                            Procesar Finiquitos
+                        </Button>
+                    </AsyncButton>
                 )}
             </div>
         </div>

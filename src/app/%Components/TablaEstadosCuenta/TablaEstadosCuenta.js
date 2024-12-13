@@ -8,8 +8,9 @@ import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import { ProgressBar } from 'primereact/progressbar';
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
 
-export default function TablaEstadosCuenta({ anio, quincena, session, setProgress, setUploaded }) {
+export default function TablaEstadosCuenta({ anio, quincena, session, setProgress, setUploaded, mes }) {
     const toast = useRef(null);
     const [estadosCuenta, setEstadosCuenta] = useState([]);  // Estado para guardar los datos de la tabla
     const [isUploadDisabled, setIsUploadDisabled] = useState(false);  // Estado para controlar la habilitación del botón de subida
@@ -26,7 +27,7 @@ export default function TablaEstadosCuenta({ anio, quincena, session, setProgres
     // Función para obtener los datos de los estados de cuenta desde la API
     const fetchEstadosCuentaData = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/consultaEdoCta?anio=${anio}&quincena=${quincena}`);
+            const response = await axios.get(`${API_BASE_URL}/consultaEdoCta?anio=${anio}&mes=${mes}`);
             console.log('Datos de la API:', response.data);  // Verificar la estructura de los datos
             setEstadosCuenta(response.data);  // Actualizar el estado con los datos obtenidos
         } catch (error) {
@@ -54,7 +55,7 @@ export default function TablaEstadosCuenta({ anio, quincena, session, setProgres
         const usuario = session?.user?.name.replace(/\s+/g, '_') || 'unknown';
 
         try {
-            const response = await axios.post(`${API_BASE_URL}/SubirEdoCuenta?quincena=${quincena}&anio=${anio}&vuser=${usuario}&tipo_carga=EstadosCuenta`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/SubirEdoCuenta?mes=${mes}&anio=${anio}&vuser=${usuario}&tipo_carga=EstadosCuenta`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -89,6 +90,7 @@ export default function TablaEstadosCuenta({ anio, quincena, session, setProgres
             </DataTable>
 
             {/* Botón para subir un archivo */}
+            <AsyncButton>
             <Button
                 variant="contained"
                 component="label"
@@ -96,8 +98,9 @@ export default function TablaEstadosCuenta({ anio, quincena, session, setProgres
                 disabled={isUploadDisabled}  // Deshabilitar si no se puede subir el archivo
             >
                 Subir Estados de Cuenta
-                <input type="file" hidden onChange={(e) => handleFileUpload(e, 'estadoCuenta')} />
+                <input type="file" hidden onChange={(e) => handleFileUpload(e, 'estadoCuenta')} accept=".xlsx"/>
             </Button>
+            </AsyncButton>
         </div>
     );
 }

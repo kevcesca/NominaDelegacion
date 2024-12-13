@@ -8,6 +8,7 @@ import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
 import Image from 'next/image'; // Importamos Image para mostrar el SVG
+import AsyncButton from '../AsyncButton/AsyncButton';
 
 export default function TablaPostNomina({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
@@ -60,16 +61,16 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     const handleFileUpload = async (event) => {
         const files = event.target.files; // Obtén múltiples archivos seleccionados
         if (!files.length) return;
-    
+
         setIsLoading(true); // Mostrar el GIF de carga
-    
+
         for (const file of files) { // Itera sobre cada archivo seleccionado
             const formData = new FormData();
             formData.append('file', file);
             formData.append('extra', '');
-    
+
             const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Compuesta&usuario=${session?.user?.name || 'unknown'}`;
-    
+
             try {
                 const response = await axios.post(uploadURL, formData, {
                     headers: {
@@ -80,10 +81,10 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                         setProgress(progress);
                     },
                 });
-    
+
                 setProgress(100);
                 setUploaded(true);
-    
+
                 // **Aplicar setTimeout para SVG y toast**
                 setTimeout(() => {
                     toast.current.show({
@@ -94,16 +95,16 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                     });
                     setIsLoading(false); // Ocultar el GIF de carga después del toast
                 }, 1000); // Retrasar 1 segundo
-    
+
                 fetchArchivosData(); // Refrescar la tabla después de subir el archivo
             } catch (error) {
                 console.error('Error uploading file', error);
-    
+
                 const errorCode = error.response?.status || 'Desconocido';
                 const errorDetails = error.response?.data || 'Error desconocido al subir el archivo.';
-    
+
                 const errorMessage = `Error al subir archivo. Código de error: ${errorCode}. Detalle: ${errorDetails}`;
-    
+
                 setTimeout(() => {
                     toast.current.show({
                         severity: 'error',
@@ -116,7 +117,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             }
         }
     };
-    
+
 
     const handleFileDownload = async (tipoNomina, archivoNombre) => {
         const nombreSinExtension = archivoNombre.replace(/\.[^/.]+$/, "");
@@ -195,27 +196,36 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
             </DataTable>
             <div className={styles.uploadContainer}>
+
+
+                                    
                 <Button
-                    variant="contained"
-                    component="label"
-                    className={styles.uploadButton}
-                    disabled={isUploadDisabled}
+                 variant="contained"
+                 component="label"
+                 className={styles.uploadButton}
+                 disabled={isUploadDisabled}
+                 onClick={async () => { }}
                 >
                     Subir Nómina Compuesta
                     <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple />
-                </Button>
+                    </Button>
+                    
+
 
                 {canProcess && (
-                    <Button
+                    <AsyncButton>
+                        <Button 
                         variant="contained"
                         color="primary"
                         onClick={handleProcesarNomina}
                         className={styles.procesarButton}
-                        style={{ marginTop: '1rem' }}
-                    >
-                        Procesar Nómina
-                    </Button>
+                        style={{ marginTop: '1rem' }}>
+                            Procesar Nómina
+                        </Button>
+                    </AsyncButton>
                 )}
+
+
             </div>
         </div>
     );
