@@ -7,6 +7,7 @@ import styles from './TablaPostNomina.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
 
 export default function TablaPostNominaHonorarios({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
@@ -160,6 +161,8 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
             </DataTable>
             <div className={styles.uploadContainer}>
+
+
                 <Button
                     variant="contained"
                     component="label"
@@ -170,17 +173,20 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
                     <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple />  {/* Permitimos la carga de múltiples archivos */}
                 </Button>
 
+
                 {/* Mostrar el botón "Procesar Nómina" solo si se han cargado archivos suficientes */}
                 {canProcess && (
-                    <Button
+                    <AsyncButton >
+                        <Button 
                         variant="contained"
                         color="primary"
                         onClick={handleProcesarNomina}
                         className={styles.procesarButton}
                         style={{ marginTop: '1rem' }}
-                    >
-                        Procesar Nómina de Honorarios
-                    </Button>
+                        >
+                            Procesar Nómina de Honorarios
+                        </Button>
+                    </AsyncButton>
                 )}
             </div>
         </div>

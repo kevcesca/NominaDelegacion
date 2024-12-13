@@ -64,3 +64,9 @@
 .uploadButton:hover {
     background-color: var(--color-secondary-dark);
 }
+
+
+.backButton{
+    background-color: #9f2241 !important;
+    color: white !important; 
+}

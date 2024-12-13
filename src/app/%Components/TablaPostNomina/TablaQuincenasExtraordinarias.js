@@ -8,6 +8,7 @@ import styles from './TablaPostNomina.module.css';
 import { Button, Select, MenuItem } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
 
 const tiposExtraordinarios = [
     'DIA DE LA MUJER',
@@ -46,17 +47,17 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             });
 
             const data = response.data
-                .filter(item => item.nombre_nomina === 'Extraordinarios' && 
+                .filter(item => item.nombre_nomina === 'Extraordinarios' &&
                     item.extra_desc && item.extra_desc.split(',').some(tipo => tiposExtraordinarios.includes(tipo.trim())))
                 .map(item => ({
                     idx: item.idx,
                     nombreArchivo: item.nombre_archivo || 'Vacío',
                     tipoNomina: 'Extraordinarios',
                     archivoNombre: item.nombre_archivo,
-                    tipoExtraordinario: item.extra_desc || '', 
-                    userCarga: item.user_carga || 'Desconocido', 
-                    aprobado: item.aprobado, 
-                    aprobado2: item.aprobado2, 
+                    tipoExtraordinario: item.extra_desc || '',
+                    userCarga: item.user_carga || 'Desconocido',
+                    aprobado: item.aprobado,
+                    aprobado2: item.aprobado2,
                 }));
 
             setExtraordinarios(data);
@@ -194,6 +195,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                 <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
             </DataTable>
             <div className={styles.uploadContainer}>
+
                 <Button
                     variant="contained"
                     component="label"
@@ -203,6 +205,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     Subir Nómina Extraordinaria
                     <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple /> {/* Soporte para múltiples archivos */}
                 </Button>
+
                 <Select
                     value={selectedTipo}
                     onChange={(e) => setSelectedTipo(e.target.value)}
@@ -219,15 +222,16 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                 </Select>
 
                 {canProcess && (
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleProcesarNomina}
-                        className={styles.procesarButton}
-                        style={{ marginTop: '1rem' }}
-                    >
-                        Procesar Nómina Extraordinaria
-                    </Button>
+                    <AsyncButton>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleProcesarNomina}
+                            className={styles.procesarButton}
+                            style={{ marginTop: '1rem' }}>
+                            Procesar Nómina Extraordinaria
+                        </Button>
+                    </AsyncButton>
                 )}
             </div>
         </div>

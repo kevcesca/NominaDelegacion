@@ -11,6 +11,7 @@ import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQ
 import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
 import theme from '../$tema/theme';
 import styles from './page.module.css';
+import AsyncButton from '../%Components/AsyncButton/AsyncButton';
 
 export default function CargarDatos() {
     const [quincena, setQuincena] = useState(null);
@@ -23,6 +24,7 @@ export default function CargarDatos() {
     const [showFiniquitos, setShowFiniquitos] = useState(false);
     const [postNominaUploaded, setPostNominaUploaded] = useState(false);
     const [honorariosUploaded, setHonorariosUploaded] = useState(false);
+
 
     const toast = useRef(null);
 
@@ -139,10 +141,23 @@ export default function CargarDatos() {
 
                         {/* Botón para comprobar cambios */}
                         <Box className={styles.buttonContainer}>
+
                             <Link href={`/Validacion?anio=${anio}&quincena=${quincena}`} passHref>
-                                <Button variant="contained" color="primary" className={styles.exportButton}>
-                                    Comprobar cambios
-                                </Button>
+                                <AsyncButton
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={async () => {
+                                        try {
+                                            await new Promise((resolve) => setTimeout(resolve, 1000));
+                                            router.push('{`/Validacion?anio=${anio}&quincena=${quincena}`} passHref'); // Navega al enlace especificado
+                                        } catch (error) {
+                                            console.error('Error al regresar:', error);
+                                        }
+                                    }}
+                                    className={styles.backButton}
+                                >
+                                    Comprobar Cambios
+                                </AsyncButton>
                             </Link>
                         </Box>
                     </div>
