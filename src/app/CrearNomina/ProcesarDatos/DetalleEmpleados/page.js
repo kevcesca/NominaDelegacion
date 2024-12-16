@@ -1,11 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button, Alert } from '@mui/material';
-import { useSearchParams } from 'next/navigation'; // Para obtener parámetros de la URL
+import { Button, Alert, Box } from '@mui/material';
+import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import saveAs from 'file-saver';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -49,6 +53,78 @@ export default function DetalleEmpleados() {
         }
     }, [anio, quincena, nomina, banco]);
 
+    // Función para exportar a PDF
+    const exportPDF = () => {
+        const doc = new jsPDF();
+        const tableData = empleados.map((row) => [
+            row.ANIO,
+            row.QUINCENA,
+            row.NOMINA,
+            row.BANCO,
+            row.ID_EMPLEADO,
+            row.NOMBRE,
+            row.APELLIDO_1,
+            row.APELLIDO_2,
+            row.PERCEPCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            row.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            row.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+        ]);
+
+        autoTable(doc, {
+            head: [['AÑO', 'QUINCENA', 'NÓMINA', 'BANCO', 'ID EMPLEADO', 'NOMBRE', 'APELLIDO PATERNO', 'APELLIDO MATERNO', 'PERCEPCIONES', 'DEDUCCIONES', 'LÍQUIDO']],
+            body: tableData,
+        });
+
+        doc.save(`Detalle_Empleados_QNA_${quincena}_${anio}.pdf`);
+    };
+
+    // Función para exportar a Excel
+    const exportExcel = () => {
+        const worksheetData = empleados.map((row) => ({
+            AÑO: row.ANIO,
+            QUINCENA: row.QUINCENA,
+            NÓMINA: row.NOMINA,
+            BANCO: row.BANCO,
+            ID_EMPLEADO: row.ID_EMPLEADO,
+            NOMBRE: row.NOMBRE,
+            'APELLIDO PATERNO': row.APELLIDO_1,
+            'APELLIDO MATERNO': row.APELLIDO_2,
+            PERCEPCIONES: row.PERCEPCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            DEDUCCIONES: row.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            LÍQUIDO: row.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), `Detalle_Empleados_QNA_${quincena}_${anio}.xlsx`);
+    };
+
+    // Función para exportar a CSV
+    const exportCSV = () => {
+        const csvContent = [
+            ['AÑO', 'QUINCENA', 'NÓMINA', 'BANCO', 'ID EMPLEADO', 'NOMBRE', 'APELLIDO PATERNO', 'APELLIDO MATERNO', 'PERCEPCIONES', 'DEDUCCIONES', 'LÍQUIDO'].join(','),
+            ...empleados.map((row) =>
+                [
+                    row.ANIO,
+                    row.QUINCENA,
+                    row.NOMINA,
+                    row.BANCO,
+                    row.ID_EMPLEADO,
+                    row.NOMBRE,
+                    row.APELLIDO_1,
+                    row.APELLIDO_2,
+                    row.PERCEPCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                    row.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                    row.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                ].join(',')
+            ),
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `Detalle_Empleados_QNA_${quincena}_${anio}.csv`);
+    };
+
     return (
         <main className={styles.main}>
             {loading ? (
@@ -72,9 +148,21 @@ export default function DetalleEmpleados() {
                         <Column field="DEDUCCIONES" header="DEDUCCIONES" sortable body={(rowData) => rowData.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}></Column>
                         <Column field="LIQUIDO" header="LÍQUIDO" sortable body={(rowData) => rowData.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}></Column>
                     </DataTable>
+
+                    {/* Botones de Exportación */}
+                    <Box display="flex" justifyContent="space-between" marginTop="20px">
+                        <Button variant="outlined" color="primary" onClick={exportPDF}>
+                            Exportar PDF
+                        </Button>
+                        <Button variant="outlined" color="primary" onClick={exportExcel}>
+                            Exportar Excel
+                        </Button>
+                        <Button variant="outlined" color="primary" onClick={exportCSV}>
+                            Exportar CSV
+                        </Button>
+                    </Box>
                 </div>
             )}
-
 
             <Button
                 variant="contained"

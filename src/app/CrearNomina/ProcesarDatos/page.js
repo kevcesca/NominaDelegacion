@@ -126,87 +126,87 @@ const CargarDatos = () => {
 
     return (
         <ProtectedView requiredPermissions={["Resumen_nomina", "Acceso_total"]}>
-        <ThemeProvider theme={theme}>
-            <main className={styles.main}>
-                <h1 className={styles.h1}>Resumen de Nómina</h1>
+            <ThemeProvider theme={theme}>
+                <main className={styles.main}>
+                    <h1 className={styles.h1}>Resumen de Nómina</h1>
 
-                <Alert severity="info" className={styles.alert} sx={{ margin: '2rem' }}>
-                    Aquí podrás ver los resúmenes de nómina para comprobar que sean correctos.
-                </Alert>
+                    <Alert severity="info" className={styles.alert} sx={{ margin: '2rem' }}>
+                        Aquí podrás ver los resúmenes de nómina para comprobar que sean correctos.
+                    </Alert>
 
-                <Box className={styles.selectorContainer}>
-                    <DateFilter onDateChange={handleDateChange} />
-                </Box>
+                    <Box className={styles.selectorContainer}>
+                        <DateFilter onDateChange={handleDateChange} />
+                    </Box>
 
-                {/* Encabezado y tabla de Depósitos Resumen */}
-                <HeaderSeccion
-                     titulo={`Depositos Resumen QNA ${quincena}/${anio}`}
-                    onToggle={() => setShowDepositos(!showDepositos)}
-                    isOpen={showDepositos}
-                />
-                {showDepositos && (
-                    <DepositoResumen resumenData={depositoData} anio={anio} quincena={quincena} />
-                )}
+                    {/* Encabezado y tabla de Depósitos Resumen */}
+                    <HeaderSeccion
+                        titulo={`Depositos Resumen QNA ${quincena}/${anio}`}
+                        onToggle={() => setShowDepositos(!showDepositos)}
+                        isOpen={showDepositos}
+                    />
+                    {showDepositos && (
+                        <DepositoResumen resumenData={depositoData} anio={anio} quincena={quincena} />
+                    )}
 
-                {/* Encabezado y tabla de Cheques Resumen */}
-                <HeaderSeccion
-                     titulo={`Cheques Resumen QNA ${quincena}/${anio}`}
-                    onToggle={() => setShowCheques(!showCheques)}
-                    isOpen={showCheques}
-                />
-                {showCheques && (
-                    <ChequesResumen resumenData={chequesData} anio={anio} quincena={quincena} />
-                )}
+                    {/* Encabezado y tabla de Cheques Resumen */}
+                    <HeaderSeccion
+                        titulo={`Cheques Resumen QNA ${quincena}/${anio}`}
+                        onToggle={() => setShowCheques(!showCheques)}
+                        isOpen={showCheques}
+                    />
+                    {showCheques && (
+                        <ChequesResumen resumenData={chequesData} anio={anio} quincena={quincena} />
+                    )}
 
-                {/* Encabezado y tabla de Totales */}
-                <HeaderSeccion
-                     titulo={`Totales QNA ${quincena}/${anio}`}
-                    onToggle={() => setShowTotales(!showTotales)}
-                    isOpen={showTotales}
-                />
-                {showTotales && (
-                    <Totales resumenData={totalesData} anio={anio} quincena={quincena} />
-                )}
+                    {/* Encabezado y tabla de Totales */}
+                    <HeaderSeccion
+                        titulo={`Totales QNA ${quincena}/${anio}`}
+                        onToggle={() => setShowTotales(!showTotales)}
+                        isOpen={showTotales}
+                    />
+                    {showTotales && (
+                        <Totales resumenData={totalesData} anio={anio} quincena={quincena} />
+                    )}
 
-                {/* Encabezado y tabla de Percepciones */}
-                <HeaderSeccion
-                    titulo={`Percepciones QNA ${quincena}/${anio}`}
-                    onToggle={() => setShowPercepciones(!showPercepciones)}
-                    isOpen={showPercepciones}
-                />
-                {showPercepciones && (
-                    <PercepcionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
-                )}
+                    {/* Encabezado y tabla de Percepciones */}
+                    <HeaderSeccion
+                        titulo={`Percepciones QNA ${quincena}/${anio}`}
+                        onToggle={() => setShowPercepciones(!showPercepciones)}
+                        isOpen={showPercepciones}
+                    />
+                    {showPercepciones && (
+                        <PercepcionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
+                    )}
 
-                {/* Encabezado y tabla de Deducciones */}
-                <HeaderSeccion
-                    titulo={`Deducciones QNA ${quincena}/${anio}`}
-                    onToggle={() => setShowDeducciones(!showDeducciones)}
-                    isOpen={showDeducciones}
-                />
-                {showDeducciones && (
-                    <DeduccionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
-                )}
+                    {/* Encabezado y tabla de Deducciones */}
+                    <HeaderSeccion
+                        titulo={`Deducciones QNA ${quincena}/${anio}`}
+                        onToggle={() => setShowDeducciones(!showDeducciones)}
+                        isOpen={showDeducciones}
+                    />
+                    {showDeducciones && (
+                        <DeduccionesTabla anio={anio} quincena={quincena} nombreNomina={nombreNomina} />
+                    )}
 
-                <Box className={styles.buttonContainer}>
-                <AsyncButton
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => router.back()}
-                        className={styles.backButton}
-                    >
-                        Regresar
+                    <Box className={styles.buttonContainer}>
+                        <AsyncButton
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => router.back()}
+                            className={styles.backButton}
+                        >
+                            Regresar
                         </AsyncButton>
-                        <AsyncButton                        className={styles.botonesExportar}
-                        variant="contained"
-                        color="primary"
-                        onClick={handleNavigateToAprobacion}
-                    >
-                        Ir a Aprobación de Nóminas
+                        <AsyncButton className={styles.botonesExportar}
+                            variant="contained"
+                            color="primary"
+                            onClick={handleNavigateToAprobacion}
+                        >
+                            Ir a Aprobación de Nóminas
                         </AsyncButton>
-                </Box>
-            </main>
-        </ThemeProvider>
+                    </Box>
+                </main>
+            </ThemeProvider>
         </ProtectedView>
     );
 };
