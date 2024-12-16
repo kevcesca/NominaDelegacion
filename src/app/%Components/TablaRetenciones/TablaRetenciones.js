@@ -104,7 +104,7 @@ export default function TablaDispersiones({ anio, quincena, session, setProgress
 
             {/* Botón para subir un archivo */}
             <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-               <AsyncButton>
+               
                 <Button
                     variant="contained"
                     component="label"
@@ -114,7 +114,7 @@ export default function TablaDispersiones({ anio, quincena, session, setProgress
                     Subir nuevo archivo
                     <input type="file" hidden onChange={(e) => handleFileUpload(e, 'dispersión')} accept=".xlsx, .xlx" />
                 </Button>
-                </AsyncButton>
+                
             </div>
         </div>
     );

@@ -1,18 +1,23 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation'; // Importamos useRouter
+import { useRouter } from 'next/navigation';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import saveAs from 'file-saver';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import { Button, Box } from '@mui/material';
 import styles from './Tablas.module.css';
 
 export default function DepositoResumen({ resumenData, anio, quincena }) {
-    const router = useRouter(); // Instancia de useRouter
+    const router = useRouter();
 
-    // Limpia los datos para eliminar espacios en blanco y asegurar que las claves coincidan
+    // Limpia y normaliza los datos
     const limpiarDatos = (data) => {
         return data.map((item) => ({
             ANIO: (item.ANIO || '').trim(),
@@ -25,14 +30,6 @@ export default function DepositoResumen({ resumenData, anio, quincena }) {
             EMPLEADOS: parseInt((item.empleados || '0').trim(), 10),
         }));
     };
-
-    // Depuración: detectar datos problemáticos
-    const problematicItems = resumenData.filter((item) =>
-        Object.values(item).some((value) => value === null || value === undefined)
-    );
-    if (problematicItems.length > 0) {
-        console.warn('Datos problemáticos detectados:', problematicItems);
-    }
 
     const depositoData = limpiarDatos(resumenData);
     const datosNormales = depositoData.filter((item) => item.BANCO !== 'Total');
@@ -62,17 +59,79 @@ export default function DepositoResumen({ resumenData, anio, quincena }) {
         );
     };
 
+    // Combina todos los datos (normales y totales) para exportación
+    const allDataForExport = [...datosNormales, ...datosTotales];
+
+    // Función para exportar a PDF
+    const exportPDF = () => {
+        const doc = new jsPDF();
+        const tableData = allDataForExport.map((row) => [
+            row.ANIO,
+            row.QUINCENA,
+            row.NOMINA,
+            row.BANCO,
+            row.PERCEPCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            row.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            row.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            row.EMPLEADOS,
+        ]);
+
+        autoTable(doc, {
+            head: [['AÑO', 'QUINCENA', 'NÓMINA', 'BANCO', 'PERCEPCIONES', 'DEDUCCIONES', 'LÍQUIDO', 'EMPLEADOS']],
+            body: tableData,
+        });
+
+        doc.save(`Deposito_Resumen_QNA_${quincena}_${anio}.pdf`);
+    };
+
+    // Función para exportar a Excel
+    const exportExcel = () => {
+        const worksheetData = allDataForExport.map((row) => ({
+            AÑO: row.ANIO,
+            QUINCENA: row.QUINCENA,
+            NÓMINA: row.NOMINA,
+            BANCO: row.BANCO,
+            PERCEPCIONES: row.PERCEPCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            DEDUCCIONES: row.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            LÍQUIDO: row.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            EMPLEADOS: row.EMPLEADOS,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), `Deposito_Resumen_QNA_${quincena}_${anio}.xlsx`);
+    };
+
+    // Función para exportar a CSV
+    const exportCSV = () => {
+        const csvContent = [
+            ['AÑO', 'QUINCENA', 'NÓMINA', 'BANCO', 'PERCEPCIONES', 'DEDUCCIONES', 'LÍQUIDO', 'EMPLEADOS'].join(','),
+            ...allDataForExport.map((row) =>
+                [
+                    row.ANIO,
+                    row.QUINCENA,
+                    row.NOMINA,
+                    row.BANCO,
+                    row.PERCEPCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                    row.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                    row.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                    row.EMPLEADOS,
+                ].join(',')
+            ),
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `Deposito_Resumen_QNA_${quincena}_${anio}.csv`);
+    };
+
     return (
         <div className={`card ${styles.card}`}>
             {/* Tabla de datos normales */}
-            <DataTable
-                value={datosNormales}
-                paginator={false}
-                rows={10}
-            >
+            <DataTable value={datosNormales} paginator={false} rows={10}>
                 <Column field="ANIO" header="AÑO" sortable></Column>
                 <Column field="QUINCENA" header="QUINCENA" sortable></Column>
-                <Column field="NOMINA" header="NOMINA" sortable body={tipoNominaTemplate}></Column>
+                <Column field="NOMINA" header="NÓMINA" sortable body={tipoNominaTemplate}></Column>
                 <Column field="BANCO" header="BANCO" sortable></Column>
                 <Column field="PERCEPCIONES" header="BRUTO" sortable body={(rowData) => currencyTemplate(rowData, 'PERCEPCIONES')}></Column>
                 <Column field="DEDUCCIONES" header="DEDUCCIONES" sortable body={(rowData) => currencyTemplate(rowData, 'DEDUCCIONES')}></Column>
@@ -80,20 +139,14 @@ export default function DepositoResumen({ resumenData, anio, quincena }) {
                 <Column field="EMPLEADOS" header="EMPLEADOS" sortable body={empleadosTemplate}></Column>
             </DataTable>
 
-            {/* Separador */}
             <hr className={styles.separador} />
 
             {/* Tabla de datos totales */}
             <div className={styles.totalTable}>
-                <DataTable
-                    value={datosTotales}
-                    paginator={false}
-                    rows={10}
-                    className="p-datatable-sm"
-                >
+                <DataTable value={datosTotales} paginator={false} rows={10} className="p-datatable-sm">
                     <Column field="ANIO" header="AÑO" sortable></Column>
                     <Column field="QUINCENA" header="QUINCENA" sortable></Column>
-                    <Column field="NOMINA" header="NOMINA" sortable body={tipoNominaTemplate}></Column>
+                    <Column field="NOMINA" header="NÓMINA" sortable body={tipoNominaTemplate}></Column>
                     <Column field="BANCO" header="BANCO" sortable></Column>
                     <Column field="PERCEPCIONES" header="BRUTO" sortable body={(rowData) => currencyTemplate(rowData, 'PERCEPCIONES')}></Column>
                     <Column field="DEDUCCIONES" header="DEDUCCIONES" sortable body={(rowData) => currencyTemplate(rowData, 'DEDUCCIONES')}></Column>
@@ -101,6 +154,19 @@ export default function DepositoResumen({ resumenData, anio, quincena }) {
                     <Column field="EMPLEADOS" header="EMPLEADOS" sortable></Column>
                 </DataTable>
             </div>
+
+            {/* Botones de Exportación */}
+            <Box display="flex" justifyContent="space-between" marginTop="20px">
+                <Button variant="outlined" color="primary" onClick={exportPDF}>
+                    Exportar PDF
+                </Button>
+                <Button variant="outlined" color="primary" onClick={exportExcel}>
+                    Exportar Excel
+                </Button>
+                <Button variant="outlined" color="primary" onClick={exportCSV}>
+                    Exportar CSV
+                </Button>
+            </Box>
         </div>
     );
 }
