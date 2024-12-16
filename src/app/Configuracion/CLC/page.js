@@ -249,18 +249,50 @@ const ClcPage = () => {
           placeholder="Introduce el número de identificación de la CLC"
         />
       </div>
-      
+
       <div className={styles.formGroup}>
-        <label>Fecha de operacion</label>
+        <label>Cantidad de claves presupuestarias:</label>
         <input
           type="text"
-          name="id"
-          value={formData.id}
-          onChange={handleInputChange}
-          placeholder="Introduce el número de identificación de la CLC"
+          min="1"
+          value={numClaves}
+          onChange={(e) => {
+            const newNumClaves = parseInt(e.target.value, 10) || 0;
+            setNumClaves(newNumClaves);
+            setClavesPresupuestarias(Array(newNumClaves).fill({}));
+          }}
+          placeholder="Introduce el número de claves presupuestarias"
         />
       </div>
 
+      {Array.from({ length: numClaves }).map((_, index) => (
+        <div key={index} className={styles.row}>
+          {/* Columna de clave presupuestaria */}
+          <div className={styles.column}>
+            <label>Clave presupuestaria {index + 1}:</label>
+            <input
+              type="text"
+              name="clave"
+              value={clavesPresupuestarias[index]?.clave || ""}
+              onChange={(e) => handleClaveChange(index, e)}
+              placeholder={`Introduce la clave presupuestaria ${index + 1}`}
+
+            />
+          </div>
+          {/* Columna de monto (habilitado solo si hay una clave) */}
+          <div className={styles.column}>
+            <label>Monto:</label>
+            <input
+              type="text"
+              name="monto"
+              value={clavesPresupuestarias[index]?.monto || ""}
+              onChange={(e) => handleMontoChange(index, e)}
+              placeholder={'Introduce el monto de la clave ${index + 1}'}
+              disabled={!clavesPresupuestarias[index]?.clave} // Deshabilitado hasta que haya una clave
+            />
+          </div>
+        </div>
+      ))}
 
       <div className={styles.row}>
         {/* Columna de Monto bruto */}
@@ -277,7 +309,7 @@ const ClcPage = () => {
 
         {/* Columna de Total */}
         <div className={styles.column}>
-          <label>Codigo CLC</label>
+          <label>Total:</label>
           <input
             type="text"
             name="total"
@@ -286,17 +318,6 @@ const ClcPage = () => {
             placeholder="Total de las claves presupuestarias"
           />
         </div>
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Descripción de gastos CLCs</label>
-        <input
-          type="text"
-          name="id"
-          value={formData.id}
-          onChange={handleInputChange}
-          placeholder="Introduce el número de identificación de la CLC"
-        />
       </div>
 
       <div className={styles.formGroup}>
