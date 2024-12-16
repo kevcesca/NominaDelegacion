@@ -1,0 +1,66 @@
+.container {
+    margin: 20px auto;
+    max-width: 95%;
+    padding: 20px;
+    background-color: #f9f9f9; /* Fondo de contenedor */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+}
+
+.title {
+    margin-bottom: 20px;
+    color: #800000; /* Título en rojo oscuro */
+    text-align: center;
+    font-weight: bold;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.tableContainer {
+    margin-top: 20px;
+    border: 1px solid #800000; /* Borde rojo oscuro */
+    border-radius: 8px;
+    overflow-x: auto; /* Desplazamiento horizontal para pantallas pequeñas */
+}
+
+.tableHead {
+    background-color: #800000; /* Fondo rojo oscuro para el encabezado */
+    color: white; /* Texto blanco */
+    font-weight: bold;
+    text-align: center; /* Centrar el texto del encabezado */
+    font-size: 1rem;
+    text-transform: uppercase; /* Mayúsculas en encabezados */
+}
+
+.tableCell {
+    text-align: center; /* Centrar el contenido */
+    font-size: 0.95rem; /* Ajustar tamaño de texto */
+    padding: 10px; /* Espaciado interno */
+    border-bottom: 1px solid #ddd; /* Líneas de separación */
+}
+
+.tableRowOdd {
+    background-color: #f2f2f2; /* Fondo claro para filas impares */
+}
+
+.tableRowEven {
+    background-color: white; /* Fondo blanco para filas pares */
+}
+
+.loading {
+    text-align: center;
+    margin-top: 20px;
+    color: #555;
+    font-style: italic;
+}
+
+.noData {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: bold;
+    color: #800000;
+}
