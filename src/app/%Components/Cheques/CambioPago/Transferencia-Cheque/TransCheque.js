@@ -18,6 +18,7 @@ import {
   TableRow,
   Paper,
   Checkbox,
+  TablePagination,
 } from "@mui/material";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -35,6 +36,9 @@ export default function ChequeTrans() {
   const [changesData, setChangesData] = useState([]);
   const [isInitialView, setIsInitialView] = useState(true);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [warningOpen, setWarningOpen] = useState(false);
 
   useEffect(() => {
     const fechaActual = new Date();
@@ -42,125 +46,170 @@ export default function ChequeTrans() {
     setFechaCambio(fechaISO);
   }, []);
 
+  // Buscar empleado por ID
   const buscarEmpleado = async () => {
     const idEmpleado = searchInputRef.current?.value;
-
+  
     if (!idEmpleado) {
-        alert("Por favor, ingrese un ID de empleado.");
-        return;
+      alert("Por favor, ingrese un ID de empleado.");
+      return;
     }
-
+  
     try {
-        const response = await fetch(
-            `${API_BASE_URL}/transferenciaACheque?id_empleado=${idEmpleado}&quincena=03`
-        );
-
-        if (response.ok) {
-            const data = await response.json();
-
-            if (data.length > 0) {
-                setEmployeeData(data[0]); // Establecer datos del empleado
-                setIsInitialView(false); // Cambiar a vista de edición
-            } else {
-                // Mostrar alerta y vaciar campos
-                alert("El ID del empleado no existe. Por favor, intente nuevamente.");
-                setEmployeeData(null); // Limpiar datos del empleado
-                setIsInitialView(true); // Regresar a la vista inicial
-            }
+      const response = await fetch(
+        `${API_BASE_URL}/transferenciaACheque?id_empleado=${idEmpleado}&quincena=03`
+      );
+  
+      if (response.ok) {
+        const data = await response.json();
+  
+        if (data.length > 0) {
+          const empleado = data[0];
+  
+          // Guardar los datos del empleado
+          setEmployeeData({
+            id_empleado: empleado.id_empleado,
+            nombre_completo: empleado.nombre_completo,
+            tipo_pago_actual: empleado.tipo_pago_actual, // Asegurarse de incluir este campo
+            monto: empleado.monto,
+            referencia: empleado.referencia,
+            banco: empleado.banco,
+            titular_cuenta: empleado.titular_cuenta,
+          });
+  
+          setIsInitialView(false); // Cambiar a vista de edición
         } else {
-            alert("Error al buscar los datos del empleado.");
-            setEmployeeData(null); // Limpiar datos en caso de error
-            setIsInitialView(true); // Regresar a la vista inicial
+          alert("El ID del empleado no existe. Por favor, intente nuevamente.");
+          setEmployeeData(null);
+          setIsInitialView(true);
         }
+      } else {
+        alert("Error al buscar los datos del empleado.");
+        setEmployeeData(null);
+        setIsInitialView(true);
+      }
     } catch (error) {
-        console.error("Error al buscar el empleado:", error);
-        alert("Hubo un error al procesar la solicitud.");
-        setEmployeeData(null); // Limpiar datos en caso de error
-        setIsInitialView(true); // Regresar a la vista inicial
+      console.error("Error al buscar el empleado:", error);
+      alert("Hubo un error al procesar la solicitud.");
+      setEmployeeData(null);
+      setIsInitialView(true);
     }
-};
+  };
+ 
 
-
+  // Validar RFC
   const validarRFC = async () => {
     if (!rfc) {
-      alert("Por favor, ingrese un RFC válido.");
+      alert("Ingrese un RFC válido.");
       return false;
     }
-
+  
     try {
       const response = await fetch(
         `${API_BASE_URL}/validacionIdentidad?id_legal=${rfc}&id_empleado=${employeeData.id_empleado}`
       );
-
+  
       if (response.ok) {
         const data = await response.json();
         if (data[0]?.mensaje === "Es correcto") {
           return true;
         } else {
-          alert("El RFC ingresado no es válido. Por favor, vuelva a ingresarlo.");
+          alert("El RFC ingresado no es válido. Intente nuevamente.");
           return false;
         }
       } else {
-        alert("Error al validar el RFC. Por favor, inténtelo nuevamente.");
+        alert("Error al validar el RFC.");
         return false;
       }
     } catch (error) {
       console.error("Error al validar el RFC:", error);
-      alert("Hubo un error al procesar la validación del RFC.");
+      alert("Hubo un error al procesar la validación.");
       return false;
     }
   };
+  
 
-  const confirmarCambio = async () => {
-    const esRFCValido = await validarRFC();
-
-    if (esRFCValido) {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/actualizarTipoPago/2?tipoPagoActual=Cheque&cambio=true&autorizadoPor=${rfc}&idEmpleado=${employeeData.id_empleado}`,
-          {
-            method: "GET",
-          }
-        );
-
-        if (response.ok) {
-          const result = await response.text();
-          alert(result);
-          setShowModal(false);
-          setRfc("");
-        } else {
-          alert("Hubo un error al realizar el cambio. Inténtelo nuevamente.");
+  const actualizarTipoPago = async () => {
+    // Validar tipo de pago antes de enviar la solicitud
+    if (employeeData.tipo_pago_actual?.trim().toLowerCase() === "cheque") {
+      console.error("Intento bloqueado: el tipo de pago ya es 'Cheque'.");
+      alert("El empleado ya tiene como tipo de pago 'Cheque'. No se realizó el cambio.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/actualizarTipoPago/2?tipoPagoActual=Cheque&referencia=${employeeData.referencia}&cambio=true&autorizadoPor=${rfc}&idEmpleado=${employeeData.id_empleado}&banco=${employeeData.banco}&titular=${employeeData.titular_cuenta}`,
+        {
+          method: "GET",
         }
-      } catch (error) {
-        console.error("Error al confirmar el cambio:", error);
-        alert("Hubo un error al procesar la solicitud.");
+      );
+  
+      // Validar respuesta del servidor
+      if (response.ok) {
+        alert("¡El cambio fue realizado exitosamente!");
+        setShowModal(false);
+        setEmployeeData(null);
+        setIsInitialView(true);
+      } else {
+        const errorData = await response.json();
+        console.error("Error desde el servidor:", errorData);
+  
+        if (errorData.mensaje === "El empleado ya tiene el tipo de pago Cheque") {
+          alert("El empleado ya tiene como tipo de pago 'Cheque'. No se realizó el cambio.");
+        } else {
+          alert("Hubo un error al realizar el cambio. Intente más tarde.");
+        }
       }
+    } catch (error) {
+      console.error("Error al realizar el cambio:", error);
+      alert("Hubo un error al procesar la solicitud. Intente nuevamente.");
     }
   };
+  
+  
+  
 
+  const confirmarCambio = async () => {
+    try {
+      // Validar RFC antes de proceder
+      const esRFCValido = await validarRFC();
+      if (!esRFCValido) return;
+  
+      // Actualizar tipo de pago
+      await actualizarTipoPago();
+    } catch (error) {
+      console.error("Error al confirmar el cambio:", error);
+      alert("Hubo un error al procesar la solicitud.");
+    }
+  };
+  
+
+  const handleHacerCambio = async () => {
+    if (!employeeData.id_empleado) {
+      alert("Debe buscar un empleado antes de realizar el cambio.");
+      return;
+    }
+  
+    if (employeeData.tipo_pago_actual === "Cheque") {
+      alert("El empleado ya tiene como tipo de pago 'Cheque'. No se puede realizar el cambio.");
+      return;
+    }
+  
+    setShowModal(true); // Mostrar modal de confirmación
+  };
+  
+  
+  
+    
+  // Cancelar el cambio y volver a la vista inicial
   const cancelarCambio = () => {
     setEmployeeData(null);
     setIsInitialView(true);
   };
 
-  const handleSelectAll = (isSelected) => {
-    setSelectedRows(isSelected ? changesData.map((row) => row.id_empleado) : []);
-  };
-
-  const handleRowSelect = (rowId) => {
-    setSelectedRows((prevSelected) =>
-      prevSelected.includes(rowId)
-        ? prevSelected.filter((id) => id !== rowId)
-        : [...prevSelected, rowId]
-    );
-  };
-
+  // Exportar datos
   const exportToCSV = () => {
-    if (selectedRows.length === 0) {
-      alert("Seleccione al menos una fila para exportar.");
-      return;
-    }
-
     const selectedData = changesData.filter((row) =>
       selectedRows.includes(row.id_empleado)
     );
@@ -179,18 +228,16 @@ export default function ChequeTrans() {
     const selectedData = changesData.filter((row) =>
       selectedRows.includes(row.id_empleado)
     );
+
     const worksheet = XLSX.utils.json_to_sheet(selectedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Cambios");
+
+    // Descargar archivo Excel
     XLSX.writeFile(workbook, "CambiosRealizados.xlsx");
   };
 
   const exportToPDF = () => {
-    if (selectedRows.length === 0) {
-      alert("Seleccione al menos una fila para exportar.");
-      return;
-    }
-
     const selectedData = changesData.filter((row) =>
       selectedRows.includes(row.id_empleado)
     );
@@ -224,7 +271,15 @@ export default function ChequeTrans() {
     doc.save("CambiosRealizados.pdf");
   };
 
-  
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  // Cambiar filas por página
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reiniciar a la primera página
+  };
 
   // Mostrar cambios realizados este mes
   const verCambiosRealizados = async () => {
@@ -262,6 +317,11 @@ export default function ChequeTrans() {
               inputRef={searchInputRef}
               variant="outlined"
               fullWidth
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                    buscarEmpleado();
+                }
+            }}
             />
             <Button
               variant="contained"
@@ -434,13 +494,15 @@ export default function ChequeTrans() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {changesData.map((row) => (
-                  <TableRow key={row.id_empleado}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedRows.includes(row.id_empleado)}
-                        onChange={() => handleRowSelect(row.id_empleado)}
-                      />
+              {changesData
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow key={row.id_empleado}>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selectedRows.includes(row.id_empleado)}
+                          onChange={() => handleRowSelect(row.id_empleado)}
+                        />
                     </TableCell>
                     <TableCell>{row.id_empleado}</TableCell>
                     <TableCell>{row.nombre_completo}</TableCell>
@@ -457,6 +519,16 @@ export default function ChequeTrans() {
 
             </Table>
           </TableContainer>
+           {/* Paginación */}
+           <TablePagination
+            rowsPerPageOptions={[5, 10, 15]}
+            component="div"
+            count={changesData.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setChangesModalOpen(false)} color="primary">
@@ -490,6 +562,23 @@ export default function ChequeTrans() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Modal de advertencia */}
+      <Dialog open={warningOpen} onClose={() => setWarningOpen(false)}>
+  <DialogTitle>Advertencia</DialogTitle>
+  <DialogContent>
+    <DialogContentText>
+      No se puede realizar el cambio porque el tipo de pago actual ya es "Cheque".
+    </DialogContentText>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setWarningOpen(false)} color="primary">
+      Cerrar
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
     </Box>
   );
 }

@@ -6,6 +6,7 @@ import {
     Button,
     Select,
     MenuItem,
+    TextField,
 } from "@mui/material";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -27,6 +28,7 @@ const StatusCheques = () => {
     const [selectedCheques, setSelectedCheques] = useState([]); // Registros seleccionados
     const [recordsPerPage, setRecordsPerPage] = useState(10); // Registros por página
     const [currentParams, setCurrentParams] = useState({ anio: "", quincena: "" }); // Parámetros actuales: año y quincena
+    const [searchTerm, setSearchTerm] = useState("");
 
     // Obtener datos desde el servicio
     const fetchChequeData = async (anio, quincena) => {
@@ -136,6 +138,23 @@ const StatusCheques = () => {
         );
     };
 
+     // Filtrar datos por término de búsqueda
+     const handleSearch = (event) => {
+        const term = event.target.value.toLowerCase();
+        setSearchTerm(term);
+
+        if (term.trim() === "") {
+            setFilteredData(chequeData); // Restaurar datos originales si el campo está vacío
+        } else {
+            const filtered = chequeData.filter((item) =>
+                Object.values(item).some((value) =>
+                    value?.toString().toLowerCase().includes(term)
+                )
+            );
+            setFilteredData(filtered);
+        }
+    };
+
     const exportToPDF = () => {
         const doc = new jsPDF();
         doc.setFontSize(18);
@@ -239,6 +258,16 @@ const StatusCheques = () => {
                     <MenuItem value={10}>10</MenuItem>
                     <MenuItem value={15}>15</MenuItem>
                 </Select>
+            </Box>
+
+            <Box className={styles.searchBar}>
+            <TextField 
+                    sx={{width:"50vw"}}
+                    variant="outlined"
+                    placeholder="Buscar en todas las propiedades"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                />
             </Box>
 
            

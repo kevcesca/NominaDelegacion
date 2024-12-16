@@ -128,3 +128,10 @@
 .select:focus {
     border-color: #80bdff;
 }
+
+.searchBar {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  
+}
