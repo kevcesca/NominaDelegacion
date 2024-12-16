@@ -246,8 +246,8 @@ export default function NavBar() {
                             </Link>
                         </ProtectedComponent>
                     )}
-                   
-                   
+
+
                     {collapsed ? (
                         <ProtectedComponent userPermissions={permissions}
                             requiredPermissions={['Acceso_total']}
@@ -287,15 +287,15 @@ export default function NavBar() {
                             </Link>
                         </ProtectedComponent>
                     )}
-                     <ProtectedComponent userPermissions={permissions}
+                    <ProtectedComponent userPermissions={permissions}
                         requiredPermissions={['Acceso_total']}
                     >
-                      <SubMenu label="Cheques" icon={<CreditCardIcon/>}>
+                        <SubMenu label="Cheques" icon={<CreditCardIcon />}>
                             <Link className={styles.tWhite} href="/Cheques" passHref>
                                 <MenuItem icon={<CreateNewFolderIcon />} className={styles.bgblack} onClick={handleLinkClick}>Generador de Cheques</MenuItem>
                             </Link>
                             <Link className={styles.tWhite} href="/Cheques/CambioPago" passHref>
-                                <MenuItem icon={<CurrencyExchangeIcon/>} className={styles.bgblack} onClick={handleLinkClick}>Cambio Tipo de Pago</MenuItem>
+                                <MenuItem icon={<CurrencyExchangeIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cambio Tipo de Pago</MenuItem>
                             </Link>
                             <Link className={styles.tWhite} href="/Cheques/Cancelacion" passHref>
                                 <MenuItem icon={<CreditCardOffIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cancelación de Cheques</MenuItem>

@@ -1,0 +1,15 @@
+/* src/app/comparative/page.module.css */
+.main {
+    padding: 20px;
+    overflow-x: auto;
+    min-height: 100vh;
+}
+
+.h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: white;
+    background-color: #bc955c;
+    padding: 1rem;
+    border-radius: 10px;
+}
