@@ -7,6 +7,7 @@ import styles from './TablaRetenciones.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
 
 export default function TablaDispersiones({ anio, quincena, session, setProgress, setUploaded }) {
     const toast = useRef(null);
@@ -15,7 +16,7 @@ export default function TablaDispersiones({ anio, quincena, session, setProgress
     useEffect(() => {
         // Llamar a la función de obtener los datos cuando cambian anio o quincena
         fetchDispersionesData();
-    }, [anio, quincena]);  // Ahora usamos quincena en lugar de mes
+    }, [anio, quincena]);
 
     // Función para obtener los datos de las dispersiones
     const fetchDispersionesData = async () => {
@@ -23,7 +24,7 @@ export default function TablaDispersiones({ anio, quincena, session, setProgress
             // Verificar los valores de anio y quincena
             console.log(`Fetching data for anio: ${anio}, quincena: ${quincena}`);
 
-            const response = await axios.get(`${API_BASE_URL}/listArchivos?anio=${anio}&quincena=${quincena}&tipo=Dispersión`);
+            const response = await axios.get(`${API_BASE_URL}/consultaDispersion?anio=${anio}&quincena=${quincena}`);
             
             // Asignar los datos de la API directamente al estado
             setDispersiones(response.data.map(item => ({
@@ -56,11 +57,10 @@ export default function TablaDispersiones({ anio, quincena, session, setProgress
         formData.append('file', file);
         formData.append('extra', '');  // Siempre enviar el parámetro extra
 
-        // Reemplazar espacios en el nombre de usuario por '_'
         const usuario = session?.user?.name.replace(/\s+/g, '_') || 'unknown';
 
         try {
-            const response = await axios.post(`${API_BASE_URL}/SubirEdoCuenta?quincena=${quincena}&anio=${anio}&vuser=${usuario}&tipo_carga=Dispersion`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/SubirDisperciones?quincena=${quincena}&anio=${anio}&vuser=${usuario}&tipo_carga=Dispersion`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -69,13 +69,22 @@ export default function TablaDispersiones({ anio, quincena, session, setProgress
                     setProgress(progress);
                 },
             });
+
             setProgress(100);
             setUploaded(true);
-            console.log('File uploaded successfully', response.data);
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
 
-            // Recargar los datos después de subir el archivo
-            fetchDispersionesData();
+            // Verificar el código de estado 202 Accept
+            if (response.status === 202) {
+                const message = response.data?.message?.includes('archivo incompatible')
+                    ? 'Archivo no compatible'
+                    : 'Archivo ya cargado';
+                toast.current.show({ severity: 'warn', summary: 'Atención', detail: message, life: 4000 });
+            } else {
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
+            }
+
+            fetchDispersionesData(); // Recargar los datos
+
         } catch (error) {
             console.error('Error uploading file', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
@@ -89,12 +98,13 @@ export default function TablaDispersiones({ anio, quincena, session, setProgress
             {/* Tabla que muestra los datos de dispersiones */}
             <DataTable value={dispersiones} sortMode="multiple" className={styles.dataTable}>
                 <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '50%' }}></Column>
-                <Column field="paramTipoEstado" header="TIPO DE ESTADO" sortable style={{ width: '25%' }}></Column>
+                
                 <Column field="quincena" header="QUINCENA" sortable style={{ width: '25%' }}></Column>
             </DataTable>
 
             {/* Botón para subir un archivo */}
             <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+               
                 <Button
                     variant="contained"
                     component="label"
@@ -102,8 +112,9 @@ export default function TablaDispersiones({ anio, quincena, session, setProgress
                     disabled={!quincena}  // Deshabilitar si no se seleccionó quincena
                 >
                     Subir nuevo archivo
-                    <input type="file" hidden onChange={(e) => handleFileUpload(e, 'dispersión')} accept=".xlsx" />
+                    <input type="file" hidden onChange={(e) => handleFileUpload(e, 'dispersión')} accept=".xlsx, .xlx" />
                 </Button>
+                
             </div>
         </div>
     );

@@ -20,6 +20,7 @@ import {
   Checkbox,
   Select,
   row,
+  TablePagination,
 } from "@mui/material";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -44,7 +45,12 @@ const ChequeTrans = () => {
   const [changesData, setChangesData] = useState([]);
   const [changesModalOpen, setChangesModalOpen] = useState(false); // Modal para la tabla de cambios
   const searchInputRef = useRef();
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]); // Filas seleccionadas
+  const [page, setPage] = useState(0); // Página actual
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Filas por página
+  const [warningOpen, setWarningOpen] = useState(false);
+
+
   // Inicializar la fecha al montar el componente
   useEffect(() => {
     const fechaActual = new Date();
@@ -52,55 +58,63 @@ const ChequeTrans = () => {
     setFechaCambio(fechaISO);
   }, []);
 
-  // Buscar empleado por ID
-  const buscarEmpleado = async () => {
-    const id = searchInputRef.current.value;
-    if (!id) {
-      alert("Por favor, ingrese un ID válido.");
-      return;
-    }
+// Buscar empleado por ID
+const buscarEmpleado = async () => {
+  const id = searchInputRef.current.value;
+  if (!id) {
+    alert("Por favor, ingrese un ID válido.");
+    return;
+  }
 
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/chequeATransferencia?id_empleado=${id}&quincena=03`
-      );
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/chequeATransferencia?id_empleado=${id}&quincena=03`
+    );
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.length > 0) {
-          const empleado = data[0];
-          const employeeData = {
-            id: empleado.id_empleado,
-            nombre: empleado.nombre_completo,
-            monto: empleado.monto,
-            numCuenta: "",
-            banco: "",
-            titular: "",
-          };
-          setEmployeeData(employeeData);
-          setOriginalEmployeeData(employeeData); // Guardar datos originales
-          setEmployeeFound(true);
-        } else {
-          alert("El ID del empleado no existe. Por favor, intente nuevamente.");
-          setEmployeeFound(false);
-        }
+    if (response.ok) {
+      const data = await response.json();
+      if (data.length > 0) {
+        const empleado = data[0];
+        const employeeData = {
+          id: empleado.id_empleado,
+          nombre: empleado.nombre_completo,
+          monto: empleado.monto,
+          tipoPagoActual: empleado.tipo_pago_actual, // Asegurar que este campo esté presente
+          numCuenta: "",
+          banco: "",
+          titular: "",
+        };
+        setEmployeeData(employeeData);
+        setOriginalEmployeeData(employeeData); // Guardar datos originales
+        setEmployeeFound(true);
       } else {
-        alert("Error al buscar el empleado. Intente más tarde.");
+        alert("El ID del empleado no existe. Por favor, intente nuevamente.");
+        setEmployeeFound(false);
       }
-    } catch (error) {
-      console.error("Error al buscar el empleado:", error);
-      alert("Error al buscar el empleado. Intente nuevamente.");
+    } else {
+      alert("Error al buscar el empleado. Intente más tarde.");
     }
-  };
+  } catch (error) {
+    console.error("Error al buscar el empleado:", error);
+    alert("Error al buscar el empleado. Intente nuevamente.");
+  }
+};
 
-  // Abrir modal de confirmación
-  const handleHacerCambio = () => {
-    if (!employeeData.id) {
-      alert("Debe buscar un empleado antes de realizar el cambio.");
-      return;
-    }
-    setModalOpen(true);
-  };
+
+// Abrir modal de confirmación
+const handleHacerCambio = () => {
+  if (!employeeData.id) {
+    alert("Debe buscar un empleado antes de realizar el cambio.");
+    return;
+  }
+
+  if (employeeData.tipoPagoActual === "Transferencia") {
+    setWarningOpen(true); // Mostrar advertencia
+    return;
+  }
+
+  setModalOpen(true); // Permitir cambio si el tipo de pago no es transferencia
+};
 
   // Cancelar cambios y restaurar datos originales
   const cancelarCambio = () => {
@@ -144,30 +158,34 @@ const ChequeTrans = () => {
   // Actualizar tipo de pago usando el servicio
   const actualizarTipoPago = async () => {
     try {
-      const referencia = "564846846846";
-      const autorizadoPor = "Kevin";
-      const tipoPagoActual = "Transferencia";
-      const banco = employeeData.banco;
-
       const response = await fetch(
-        `${API_BASE_URL}/actualizarTipoPago?tipoPagoActual=${tipoPagoActual}&referencia=${referencia}&cambio=true&autorizadoPor=${autorizadoPor}&idEmpleado=${employeeData.id}&banco=${banco}`
+        `${API_BASE_URL}/actualizarTipoPago?tipoPagoActual=Cheque&referencia=${employeeData.numCuenta}&cambio=true&autorizadoPor=${rfc}&idEmpleado=${employeeData.id}&banco=${employeeData.banco}&titular=${employeeData.titular}`,
+        {
+          method: "GET",
+        }
       );
 
       if (response.ok) {
-        const data = await response.text();
-        if (data === "Actualización exitosa") {
-          alert("¡El cambio fue realizado exitosamente!");
-        } else {
-          alert("Error al actualizar el tipo de pago. Intente más tarde.");
-        }
+        alert("¡El cambio fue realizado exitosamente!");
       } else {
-        alert("Error al conectar con el servicio. Intente más tarde.");
+        alert("Error al actualizar el tipo de pago. Intente más tarde.");
       }
     } catch (error) {
       console.error("Error al actualizar el tipo de pago:", error);
       alert("Error al realizar el cambio. Intente nuevamente.");
     }
   };
+  // Cambiar página
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  // Cambiar filas por página
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reiniciar a la primera página
+  };
+
 
   const handleRowSelect = (rowId) => {
     setSelectedRows((prevSelected) =>
@@ -189,14 +207,23 @@ const ChequeTrans = () => {
   };
 
   const exportToExcel = () => {
+    if (selectedRows.length === 0) {
+      alert("Seleccione al menos una fila para exportar.");
+      return;
+    }
+
     const selectedData = changesData.filter((row) =>
       selectedRows.includes(row.id_empleado)
     );
+
     const worksheet = XLSX.utils.json_to_sheet(selectedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Cambios");
+
+    // Descargar archivo Excel
     XLSX.writeFile(workbook, "CambiosRealizados.xlsx");
   };
+
 
   const exportToPDF = () => {
     const selectedData = changesData.filter((row) =>
@@ -261,24 +288,30 @@ const ChequeTrans = () => {
       </Box>
       {/* Buscar empleado */}
       <Box className={styles.searchContainer}>
-            <Typography variant="h6">Buscar otro empleado por ID</Typography>
-            <Box className={styles.searchField}>
-              <TextField
-                label="ID del empleado"
-                inputRef={searchInputRef}
-                variant="outlined"
-                fullWidth
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={buscarEmpleado}
-                className={styles.searchButton}
-              >
-                Buscar
-              </Button>
-            </Box>
-          </Box>
+        <Typography variant="h6">Buscar otro empleado por ID</Typography>
+        <Box className={styles.searchField}>
+          <TextField
+            label="ID del empleado"
+            inputRef={searchInputRef}
+            variant="outlined"
+            fullWidth
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                buscarEmpleado();
+              }
+            }}
+
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={buscarEmpleado}
+            className={styles.searchButton}
+          >
+            Buscar
+          </Button>
+        </Box>
+      </Box>
 
       {/* Mostrar formulario si se encuentra al empleado */}
       {employeeFound && (
@@ -358,14 +391,14 @@ const ChequeTrans = () => {
             </Button>
           </Box>
           <Typography
-              variant="subtitle1"
-              color="error"
-              align="center"
-              className={styles.message}
-            >
-              Los pagos empezarán a correr desde la primera quincena de{" "}
-              {fechaCambio.slice(0, 7)}.
-            </Typography>
+            variant="subtitle1"
+            color="error"
+            align="center"
+            className={styles.message}
+          >
+            Los pagos empezarán a correr desde la primera quincena de{" "}
+            {fechaCambio.slice(0, 7)}.
+          </Typography>
           <Box className={styles.buttonchange}>
             <Button variant="contained" onClick={verCambiosRealizados}>
               Ver cambios realizados este mes
@@ -383,6 +416,7 @@ const ChequeTrans = () => {
       >
         <DialogTitle>Cambios realizados este mes</DialogTitle>
         <DialogContent>
+          {/* Botones de exportación */}
           <Box className={styles.exportButtons}>
             <Button variant="contained" onClick={exportToCSV}>
               Exportar CSV
@@ -394,8 +428,9 @@ const ChequeTrans = () => {
               Exportar PDF
             </Button>
           </Box>
-          <TableContainer component={Paper} className={styles.tableContainer}>
 
+          {/* Tabla con paginación */}
+          <TableContainer component={Paper} className={styles.tableContainer}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -405,9 +440,7 @@ const ChequeTrans = () => {
                         selectedRows.length > 0 &&
                         selectedRows.length < changesData.length
                       }
-                      checked={
-                        selectedRows.length === changesData.length
-                      }
+                      checked={selectedRows.length === changesData.length}
                       onChange={(e) =>
                         setSelectedRows(
                           e.target.checked
@@ -429,29 +462,43 @@ const ChequeTrans = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {changesData.map((row) => (
-                  <TableRow key={row.id_empleado}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedRows.includes(row.id_empleado)}
-                        onChange={() => handleRowSelect(row.id_empleado)}
-                      />
-                    </TableCell>
-                    <TableCell>{row.id_empleado}</TableCell>
-                    <TableCell>{row.nombre_completo}</TableCell>
-                    <TableCell>{row.salario}</TableCell>
-                    <TableCell>{new Date(row.fecha_cambio).toLocaleDateString()}</TableCell>
-                    <TableCell>{row.tipo_pago_anterior}</TableCell>
-                    <TableCell>{row.tipo_pago_actual}</TableCell>
-                    <TableCell>{row.referencia}</TableCell>
-                    <TableCell>{row.Banco}</TableCell>
-                    <TableCell>{row.titular_cuenta}</TableCell>
-                  </TableRow>
-                ))}
+                {changesData
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <TableRow key={row.id_empleado}>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selectedRows.includes(row.id_empleado)}
+                          onChange={() => handleRowSelect(row.id_empleado)}
+                        />
+                      </TableCell>
+                      <TableCell>{row.id_empleado}</TableCell>
+                      <TableCell>{row.nombre_completo}</TableCell>
+                      <TableCell>{row.salario}</TableCell>
+                      <TableCell>
+                        {new Date(row.fecha_cambio).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>{row.tipo_pago_anterior}</TableCell>
+                      <TableCell>{row.tipo_pago_actual}</TableCell>
+                      <TableCell>{row.referencia}</TableCell>
+                      <TableCell>{row.Banco}</TableCell>
+                      <TableCell>{row.titular_cuenta}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
-
             </Table>
           </TableContainer>
+
+          {/* Paginación */}
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 15]}
+            component="div"
+            count={changesData.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setChangesModalOpen(false)} color="primary">
@@ -478,11 +525,27 @@ const ChequeTrans = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setModalOpen(false)} color="error">
+          <Button onCli ck={() => setModalOpen(false)} color="error">
             Cancelar
           </Button>
           <Button onClick={validarRFC} color="success">
             Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal de advertencia */}
+      <Dialog open={warningOpen} onClose={() => setWarningOpen(false)}>
+        <DialogTitle>Advertencia</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            No se puede realizar el cambio porque el tipo de pago actual ya es
+            transferencia.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setWarningOpen(false)} color="primary">
+            Cerrar
           </Button>
         </DialogActions>
       </Dialog>

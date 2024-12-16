@@ -53,6 +53,7 @@ const ChequeManager = () => {
   const [ultimoFolioGenerado, setUltimoFolioGenerado] = useState(0);
   const [tipoNomina, setTipoNomina] = useState(""); // Estado para el tipo de nómina
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
 
   const [visibleColumns, setVisibleColumns] = useState({
@@ -111,14 +112,18 @@ const ChequeManager = () => {
     }
   };
 
-  const filterData = (data) => {
-    if (!searchQuery.trim()) return data; // Si no hay búsqueda, devolver todos los datos.
-    return data.filter((empleado) =>
-      Object.keys(visibleColumns)
-        .filter((key) => visibleColumns[key]) // Solo columnas visibles.
-        .some((key) => String(empleado[key]) === searchQuery.trim()) // Coincidencia exacta.
-    );
-  };
+  // Filtrar datos dinámicamente según el término de búsqueda
+  const filteredData = empleadosGenerados.filter((empleado) => {
+    if (!searchTerm.trim()) return true;
+    return Object.keys(visibleColumns)
+      .filter((key) => visibleColumns[key])
+      .some((key) =>
+        String(empleado[key])
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      );
+  });
+
 
   const capitalizeFirstLetter = (str) => {
     if (!str) return "";
@@ -274,6 +279,12 @@ const ChequeManager = () => {
   };
 
 
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value); // Actualiza el término de búsqueda
+  };
+
+
   const handleColumnSelectionChange = (selectedColumns) => {
     setVisibleColumns(selectedColumns);
   };
@@ -368,24 +379,27 @@ const ChequeManager = () => {
 
           <Box className={styles.searchSection}>
             <TextField
+
               label="Buscar"
               placeholder="Ingrese un término para buscar"
               variant="outlined"
               fullWidth
-              onChange={(e) => setSearchQuery(e.target.value.trim())}
+              value={searchTerm}
+              onChange={handleSearch}
               className={styles.searchBar}
             />
+
           </Box>
 
           <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => window.location.href = "/Cheques/CambioPago"}
-                className={`${styles.secondaryButton} ${selectedRows.length === 0 ? styles.hidden : ""
-                  }`}
-              >
-                Cambiar Tipo de Pago
-              </Button>
+            variant="contained"
+            color="secondary"
+            onClick={() => window.location.href = "/Cheques/CambioPago"}
+            className={`${styles.secondaryButton} ${selectedRows.length === 0 ? styles.hidden : ""
+              }`}
+          >
+            Cambiar Tipo de Pago
+          </Button>
 
 
           {/* Selector de columnas */}
@@ -438,7 +452,7 @@ const ChequeManager = () => {
             )}
           </Box>
 
-          
+
 
           {/* Tabla de datos */}
           <Box className={styles.tableSection}>
@@ -477,7 +491,7 @@ const ChequeManager = () => {
 
 
                 <TableBody>
-                  {filterData(empleadosGenerados)
+                  {filteredData
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((empleado) => (
                       <TableRow key={empleado.numFolio}>
@@ -489,11 +503,14 @@ const ChequeManager = () => {
                         </TableCell>
                         {Object.keys(visibleColumns).map(
                           (key) =>
-                            visibleColumns[key] && <TableCell key={key}>{empleado[key]}</TableCell>
+                            visibleColumns[key] && (
+                              <TableCell key={key}>{empleado[key]}</TableCell>
+                            )
                         )}
                       </TableRow>
                     ))}
                 </TableBody>
+
 
 
 
@@ -537,9 +554,9 @@ const ChequeManager = () => {
             {/* Botones adicionales */}
             <Box className={styles.actionButtons}>
               {/* Este botón estará oculto cuando no haya cheques seleccionados */}
-              
 
-              
+
+
             </Box>
           </Box>
 
@@ -549,12 +566,12 @@ const ChequeManager = () => {
               Generar
             </Button>
             <Button
-                variant="contained"
-                onClick={() => window.location.href = "/Cheques/Poliza"}
-                className={styles.generatePolizasButton}
-              >
-                Generar Pólizas
-              </Button>
+              variant="contained"
+              onClick={() => window.location.href = "/Cheques/Poliza"}
+              className={styles.generatePolizasButton}
+            >
+              Generar Pólizas
+            </Button>
           </Box>
 
           {/* Modal de Éxito */}

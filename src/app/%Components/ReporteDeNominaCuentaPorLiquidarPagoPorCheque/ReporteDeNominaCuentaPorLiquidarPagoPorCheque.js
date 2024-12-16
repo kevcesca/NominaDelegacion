@@ -267,16 +267,51 @@ export default function ReporteDeHonorariosPorFecha() {
             </Box>
 
             <Box marginTop="20px" display="flex" gap="10px">
-                <Button variant="contained" color="secondary" onClick={() => handleExport('csv')}>
+                <Button
+                    variant="outlined"
+                    onClick={() => handleExport('csv')}
+                    sx={{
+                        borderColor: '#b9274b', // Rojo más tenue
+                        color: '#b9274b',       // Texto del mismo color
+                        '&:hover': {
+                            borderColor: '#b9274b', // Un tono más claro al hacer hover
+                            color: '#b9274b',
+                        },
+                    }}
+                >
                     Exportar CSV
                 </Button>
-                <Button variant="contained" color="info" onClick={() => handleExport('excel')}>
+                <Button
+                    variant="outlined"
+                    onClick={() => handleExport('excel')}
+                    sx={{
+                        borderColor: '#b9274b',
+                        color: '#b9274b',
+                        '&:hover': {
+                            borderColor: '#b9274b',
+                            color: '#b9274b',
+                        },
+                    }}
+                >
                     Exportar Excel
                 </Button>
-                <Button variant="contained" color="error" onClick={() => handleExport('pdf')}>
+                <Button
+                    variant="outlined"
+                    onClick={() => handleExport('pdf')}
+                    sx={{
+                        borderColor: '#b9274b',
+                        color: '#b9274b',
+                        '&:hover': {
+                            borderColor: '##b9274b',
+                            color: '#b9274b',
+                        },
+                    }}
+                >
                     Exportar PDF
                 </Button>
             </Box>
+
+
 
             <Modal
                 open={showModal}
