@@ -125,20 +125,22 @@ export default function TablaEstadosCuenta({ anio, quincena, session, setUploade
                 </DataTable>
 
                 {/* Botón para subir un archivo */}
-                <Button
-                    variant="contained"
-                    component="label"
-                    className={styles.uploadButton}
-                    disabled={isUploadDisabled}
-                >
-                    Subir Estados de Cuenta
-                    <input
-                        type="file"
-                        hidden
-                        onChange={(e) => handleFileUpload(e, 'estadoCuenta')}
-                        accept=".xlsx"
-                    />
-                </Button>
+                <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+                    <Button
+                        variant="contained"
+                        component="label"
+                        className={styles.uploadButton}
+                        disabled={isUploadDisabled}
+                    >
+                        Subir Estados de Cuenta
+                        <input
+                            type="file"
+                            hidden
+                            onChange={(e) => handleFileUpload(e, 'estadoCuenta')}
+                            accept=".xlsx"
+                        />
+                    </Button>
+                </div>
             </div>
         </LoadingOverlay>
     );
