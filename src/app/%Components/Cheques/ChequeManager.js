@@ -136,13 +136,13 @@ const ChequeManager = () => {
       alert("Por favor, completa todos los campos para generar cheques.");
       return;
     }
-  
+
     const tiposNomina = nominaMap[tipoNomina] || [];
-  
+
     try {
       setOpenSuccessDialog(false);
       setOpenErrorDialog(false);
-  
+
       const responses = await Promise.all(
         tiposNomina.map((tipo) => {
           const params = new URLSearchParams({
@@ -152,11 +152,11 @@ const ChequeManager = () => {
             fecha: selectedDate.toISOString().split("T")[0],
             tipoNominaSeleccionado: capitalizeFirstLetter(tipo),
           });
-  
+
           return axios.get(`${API_BASE_URL}/generarCheques?${params.toString()}`);
         })
       );
-  
+
       // Procesar las respuestas basadas en texto plano
       const chequesGenerados = responses.flatMap((response) => {
         // Verificar si la respuesta es texto plano indicando éxito
@@ -168,7 +168,7 @@ const ChequeManager = () => {
             throw new Error(`Respuesta del servidor: ${response.data}`);
           }
         }
-  
+
         // Si la respuesta es un arreglo, procesar los cheques normalmente
         if (Array.isArray(response.data)) {
           return response.data.map((cheque) => ({
@@ -184,20 +184,20 @@ const ChequeManager = () => {
             tipoPago: cheque.tipo_pago,
           }));
         }
-  
+
         // Si no es un formato válido, lanzar un error
         throw new Error("Formato de respuesta desconocido.");
       });
-  
+
       // Actualización de estado solo si hay datos
       setEmpleadosGenerados((prev) => [...prev, ...chequesGenerados]);
-  
+
       const ultimoCheque = folios + numCheques - 1;
       setUltimoFolioGenerado(ultimoCheque);
-  
+
       // Guardar en localStorage
       localStorage.setItem("ultimoFolioGenerado", ultimoCheque.toString());
-  
+
       // Mostrar diálogo de éxito
       setOpenSuccessDialog(true);
     } catch (error) {
@@ -206,14 +206,6 @@ const ChequeManager = () => {
       setOpenErrorDialog(true);
     }
   };
-  
-
-  useEffect(() => {
-    const ultimoChequeGuardado = localStorage.getItem("ultimoFolioGenerado");
-    if (ultimoChequeGuardado) {
-      setUltimoFolioGenerado(parseInt(ultimoChequeGuardado, 10));
-    }
-  }, []);
 
 
 
@@ -412,17 +404,6 @@ const ChequeManager = () => {
 
           </Box>
 
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => window.location.href = "/Cheques/CambioPago"}
-            className={`${styles.secondaryButton} ${selectedRows.length === 0 ? styles.hidden : ""
-              }`}
-          >
-            Cambiar Tipo de Pago
-          </Button>
-
-
           {/* Selector de columnas */}
           <Box>
             <IconButton
@@ -464,15 +445,6 @@ const ChequeManager = () => {
               Exportar CSV
             </Button>
           </Box>
-
-          <Box className={styles.lastChequeSection}>
-            {ultimoFolioGenerado > 0 && (
-              <Typography variant="h6" color="textSecondary">
-                Último cheque generado: {ultimoFolioGenerado}
-              </Typography>
-            )}
-          </Box>
-
 
 
           {/* Tabla de datos */}
@@ -573,12 +545,7 @@ const ChequeManager = () => {
             />
 
             {/* Botones adicionales */}
-            <Box className={styles.actionButtons}>
-              {/* Este botón estará oculto cuando no haya cheques seleccionados */}
 
-
-
-            </Box>
           </Box>
 
           {/* Botón de generar */}

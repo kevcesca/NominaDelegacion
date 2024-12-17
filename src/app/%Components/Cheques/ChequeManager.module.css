@@ -160,16 +160,7 @@
 }
 
 /* Botón de "Cambiar Tipo de Pago" */
-.secondaryButton {
-  background-color: #f44336; /* Rojo estándar */
-  color: white;
-  font-weight: bold;
-  padding: 8px 16px;
-  transition: all 0.3s ease;
-  margin-top: 2rem !important;
-  
-  
-}
+
 
 /* Ocultar el botón cuando no hay cheques seleccionados */
 .hidden {
