@@ -147,6 +147,30 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         }
     };
 
+    const handleProcesarNomina = async () => {
+        try {
+            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
+            const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Compuesta&usuario=${usuario}&extra=gatitoverdecito`; // Ajustar endpoint y parámetros
+
+            // Hacer la solicitud al endpoint de procesar nómina
+            const response = await axios.get(endpoint);
+
+            if (response.status === 200) {
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Nómina procesada correctamente.', life: 3000 });
+            } else {
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al procesar la nómina.', life: 3000 });
+            }
+        } catch (error) {
+            console.error('Error al procesar la nómina:', error);
+
+            // Capturar el mensaje de error proporcionado por el servidor
+            const errorMessage = error.response?.data || 'Hubo un error al procesar la nómina.';
+
+            // Mostrar el error detallado en un toast
+            toast.current.show({ severity: 'error', summary: 'Error al procesar la nómina', detail: errorMessage, life: 5000 });
+        }
+    };
+
     const descargaTemplate = (rowData) => {
         const isDisabled = rowData.aprobado !== true || rowData.aprobado2 !== true;
 
@@ -188,7 +212,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                         <Button
                             variant="contained"
                             color="primary"
-                            onClick={() => console.log('Procesar nómina')}
+                            onClick={handleProcesarNomina}
                             className={styles.procesarButton}
                             style={{ marginTop: '1rem' }}
                         >

@@ -136,13 +136,13 @@ const ChequeManager = () => {
       alert("Por favor, completa todos los campos para generar cheques.");
       return;
     }
-
+  
     const tiposNomina = nominaMap[tipoNomina] || [];
-
+  
     try {
       setOpenSuccessDialog(false);
       setOpenErrorDialog(false);
-
+  
       const responses = await Promise.all(
         tiposNomina.map((tipo) => {
           const params = new URLSearchParams({
@@ -152,40 +152,61 @@ const ChequeManager = () => {
             fecha: selectedDate.toISOString().split("T")[0],
             tipoNominaSeleccionado: capitalizeFirstLetter(tipo),
           });
-
+  
           return axios.get(`${API_BASE_URL}/generarCheques?${params.toString()}`);
         })
       );
-
-      const chequesGenerados = responses.flatMap((response) =>
-        response.data.map((cheque) => ({
-          idEmpleado: cheque.id_empleado,
-          numFolio: cheque.num_folio,
-          nombre: cheque.nombre,
-          tipoNomina: cheque.tipo_nomina,
-          fechaCheque: new Date(cheque.fecha_cheque).toLocaleDateString(),
-          monto: parseFloat(cheque.monto).toFixed(2),
-          estadoCheque: cheque.estado_cheque,
-          fechaEmision: new Date(cheque.fecha).toLocaleDateString(),
-          quincena: cheque.quincena,
-          tipoPago: cheque.tipo_pago,
-        }))
-      );
-
+  
+      // Procesar las respuestas basadas en texto plano
+      const chequesGenerados = responses.flatMap((response) => {
+        // Verificar si la respuesta es texto plano indicando éxito
+        if (typeof response.data === "string") {
+          if (response.data.includes("exitosamente")) {
+            console.log("Servidor:", response.data);
+            return []; // No hay datos adicionales que procesar
+          } else {
+            throw new Error(`Respuesta del servidor: ${response.data}`);
+          }
+        }
+  
+        // Si la respuesta es un arreglo, procesar los cheques normalmente
+        if (Array.isArray(response.data)) {
+          return response.data.map((cheque) => ({
+            idEmpleado: cheque.id_empleado,
+            numFolio: cheque.num_folio,
+            nombre: cheque.nombre,
+            tipoNomina: cheque.tipo_nomina,
+            fechaCheque: new Date(cheque.fecha_cheque).toLocaleDateString(),
+            monto: parseFloat(cheque.monto).toFixed(2),
+            estadoCheque: cheque.estado_cheque,
+            fechaEmision: new Date(cheque.fecha).toLocaleDateString(),
+            quincena: cheque.quincena,
+            tipoPago: cheque.tipo_pago,
+          }));
+        }
+  
+        // Si no es un formato válido, lanzar un error
+        throw new Error("Formato de respuesta desconocido.");
+      });
+  
+      // Actualización de estado solo si hay datos
       setEmpleadosGenerados((prev) => [...prev, ...chequesGenerados]);
-
+  
       const ultimoCheque = folios + numCheques - 1;
       setUltimoFolioGenerado(ultimoCheque);
-
+  
       // Guardar en localStorage
       localStorage.setItem("ultimoFolioGenerado", ultimoCheque.toString());
-
+  
+      // Mostrar diálogo de éxito
       setOpenSuccessDialog(true);
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || "Error al generar los cheques.");
+      console.error("Error al generar cheques:", error.message);
+      setErrorMessage(error.message || "Error inesperado al generar los cheques.");
       setOpenErrorDialog(true);
     }
   };
+  
 
   useEffect(() => {
     const ultimoChequeGuardado = localStorage.getItem("ultimoFolioGenerado");
