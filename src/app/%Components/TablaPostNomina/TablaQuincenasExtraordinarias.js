@@ -3,12 +3,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { ProgressBar } from 'primereact/progressbar';
 import styles from './TablaPostNomina.module.css';
 import { Button, Select, MenuItem } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
 import AsyncButton from '../AsyncButton/AsyncButton';
+import LoadingOverlay from '../../%Components/LoadingOverlay/LoadingOverlay'; // Importamos LoadingOverlay
 
 const tiposExtraordinarios = [
     'DIA DE LA MUJER',
@@ -27,10 +27,10 @@ const tiposExtraordinarios = [
 export default function TablaQuincenasExtraordinarias({ quincena, anio, session }) {
     const toast = useRef(null);
     const [extraordinarios, setExtraordinarios] = useState([]);
-    const [progress, setProgress] = useState(0);
     const [selectedTipo, setSelectedTipo] = useState('');
-    const [files, setFiles] = useState([]); // Almacena múltiples archivos
-    const [canProcess, setCanProcess] = useState(false); // Controla si se puede procesar la nómina extraordinaria
+    const [files, setFiles] = useState([]);
+    const [canProcess, setCanProcess] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // Estado para el LoadingOverlay
 
     useEffect(() => {
         fetchExtraordinariosData();
@@ -61,15 +61,14 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                 }));
 
             setExtraordinarios(data);
-            setCanProcess(data.length > 0); // Habilita el botón "Procesar" si hay archivos subidos
+            setCanProcess(data.length > 0); // Habilitar botón "Procesar" si hay archivos cargados
         } catch (error) {
-            console.error('Error fetching extraordinarios data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos', life: 3000 });
         }
     };
 
     const handleFileUpload = async (event) => {
-        const selectedFiles = event.target.files; // Permite múltiples archivos
+        const selectedFiles = event.target.files;
         setFiles(selectedFiles);
 
         if (selectedFiles.length === 0 || !selectedTipo) {
@@ -77,8 +76,9 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             return;
         }
 
-        for (const file of selectedFiles) { // Iterar y subir cada archivo
-            setProgress(0);
+        setIsLoading(true); // Activar el overlay al iniciar la subida
+
+        for (const file of selectedFiles) {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('extra', selectedTipo);
@@ -88,20 +88,16 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
-                    onUploadProgress: (progressEvent) => {
-                        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        setProgress(progress);
-                    },
                 });
 
-                setProgress(100);
                 toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
-                fetchExtraordinariosData();
+                fetchExtraordinariosData(); // Recargar tabla tras la subida
                 setFiles([]);
             } catch (error) {
-                console.error('Error uploading file', error);
                 const errorMessage = `Error al subir el archivo: ${error.response?.data?.message || error.message}`;
                 toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+            } finally {
+                setTimeout(() => setIsLoading(false), 2000); // Simular carga por 2 segundos al finalizar
             }
         }
     };
@@ -130,9 +126,28 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             link.parentNode.removeChild(link);
             toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Archivo descargado correctamente', life: 3000 });
         } catch (error) {
-            console.error('Error downloading file', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`,
+                life: 3000,
+            });
         }
+    };
+
+    const descargaTemplate = (rowData) => {
+        const isDisabled = rowData.aprobado !== true || rowData.aprobado2 !== true;
+
+        return (
+            <button
+                className={styles.downloadButton}
+                onClick={() => handleFileDownload(rowData.archivoNombre, rowData.tipoExtraordinario)}
+                disabled={isDisabled}
+                title={isDisabled ? 'No se puede descargar, aún no está aprobado' : ''}
+            >
+                <i className="pi pi-download"></i>
+            </button>
+        );
     };
 
     const handleProcesarNomina = async () => {
@@ -156,84 +171,58 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
         }
     };
 
-    const descargaTemplate = (rowData) => {
-        const isDisabled = rowData.aprobado !== true || rowData.aprobado2 !== true;
-
-        return (
-            <button
-                className={styles.downloadButton}
-                onClick={() => handleFileDownload(rowData.archivoNombre, rowData.tipoExtraordinario)}
-                disabled={isDisabled}
-                title={isDisabled ? 'No se puede descargar, aún no está aprobado' : ''}
-            >
-                <i className="pi pi-download"></i>
-            </button>
-        );
-    };
-
-    const tipoExtraordinarioTemplate = (rowData) => (
-        <span>{rowData.tipoExtraordinario}</span>
-    );
-
-    const userCargaTemplate = (rowData) => (
-        <span>{rowData.userCarga}</span>
-    );
-
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
-            {progress > 0 && (
-                <div className={styles.progressContainer}>
-                    <ProgressBar value={progress} className={styles.progressBar} />
+            <LoadingOverlay isLoading={isLoading}> {/* LoadingOverlay solo para la subida */}
+                <DataTable value={extraordinarios} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
+                    <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
+                    <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '20%' }}></Column>
+                    <Column field="tipoExtraordinario" header="TIPO EXTRAORDINARIO" style={{ width: '25%' }}></Column>
+                    <Column field="userCarga" header="USUARIO" style={{ width: '15%' }}></Column>
+                    <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
+                </DataTable>
+                <div className={styles.uploadContainer}>
+                    <Button
+                        variant="contained"
+                        component="label"
+                        className={styles.uploadButton}
+                        disabled={!selectedTipo}
+                    >
+                        Subir Nómina Extraordinaria
+                        <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple />
+                    </Button>
+
+                    <Select
+                        value={selectedTipo}
+                        onChange={(e) => setSelectedTipo(e.target.value)}
+                        variant="outlined"
+                        displayEmpty
+                        className={styles.select}
+                    >
+                        <MenuItem value="" disabled>
+                            Selecciona tipo extraordinario para subir
+                        </MenuItem>
+                        {tiposExtraordinarios.map((tipo, index) => (
+                            <MenuItem key={index} value={tipo}>{tipo}</MenuItem>
+                        ))}
+                    </Select>
+
+                    {canProcess && (
+                        <AsyncButton>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleProcesarNomina}
+                                className={styles.procesarButton}
+                                style={{ marginTop: '1rem' }}>
+
+                                Procesar Nómina Extraordinaria
+                            </Button>
+                        </AsyncButton>
+                    )}
                 </div>
-            )}
-            <DataTable value={extraordinarios} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
-                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
-                <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '20%' }}></Column>
-                <Column body={tipoExtraordinarioTemplate} header="TIPO EXTRAORDINARIO" style={{ width: '25%' }}></Column>
-                <Column body={userCargaTemplate} header="USUARIO" style={{ width: '15%' }}></Column>
-                <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
-            </DataTable>
-            <div className={styles.uploadContainer}>
-
-                <Button
-                    variant="contained"
-                    component="label"
-                    className={styles.uploadButton}
-                    disabled={!selectedTipo}
-                >
-                    Subir Nómina Extraordinaria
-                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple /> {/* Soporte para múltiples archivos */}
-                </Button>
-
-                <Select
-                    value={selectedTipo}
-                    onChange={(e) => setSelectedTipo(e.target.value)}
-                    variant="outlined"
-                    displayEmpty
-                    className={styles.select}
-                >
-                    <MenuItem value="" disabled>
-                        Selecciona tipo extraordinario para subir
-                    </MenuItem>
-                    {tiposExtraordinarios.map((tipo, index) => (
-                        <MenuItem key={index} value={tipo}>{tipo}</MenuItem>
-                    ))}
-                </Select>
-
-                {canProcess && (
-                    <AsyncButton>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={handleProcesarNomina}
-                            className={styles.procesarButton}
-                            style={{ marginTop: '1rem' }}>
-                            Procesar Nómina Extraordinaria
-                        </Button>
-                    </AsyncButton>
-                )}
-            </div>
+            </LoadingOverlay>
         </div>
     );
 }

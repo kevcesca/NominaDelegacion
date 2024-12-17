@@ -10,7 +10,7 @@ export default function LoadingOverlay({ isLoading, children }) {
             {isLoading && (
                 <div className={styles.loadingContainer}>
                     <Image
-                        src="/barraCarga.svg"
+                        src="/carga.svg"
                         alt="Barra de carga"
                         width={150}
                         height={150}
