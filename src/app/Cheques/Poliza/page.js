@@ -18,7 +18,7 @@ export default function PolizasGeneradas() {
     const fetchPolizas = async ({ anio, quincena, fecha }) => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/poliza?quincena=${quincena}&fecha=${fecha}`);
+            const response = await fetch(`${API_BASE_URL}/poliza?quincena=${quincena}&anio=${anio}`);
             if (!response.ok) throw new Error('Error al obtener las pólizas');
             const data = await response.json();
             setPolizas(data);

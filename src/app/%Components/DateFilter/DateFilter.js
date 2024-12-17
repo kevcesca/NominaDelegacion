@@ -32,11 +32,13 @@ export default function DateFilter({ onDateChange }) {
             setQuincenaTexto(textoQuincena);
             setAnio(anioSeleccionado);
 
-            // Notificar al componente padre el año y el número de la quincena
+            // Notificar al componente padre el año, quincena y la fecha seleccionada (formato ISO)
             if (onDateChange) {
                 onDateChange({ 
                     anio: anioSeleccionado, 
-                    quincena: numeroQuincena 
+                    quincena: numeroQuincena,
+                    fechaSeleccionada: fechaActual, // Mantiene compatibilidad con el valor anterior
+                    fechaISO: fechaActual.toISOString().split('T')[0] // Nueva propiedad
                 });
             }
         } else {
