@@ -10,7 +10,20 @@ import {
 } from '@mui/material';
 import styles from '../page.module.css';
 
-export default function CancelacionesTable({ cancelaciones, loading }) {
+// Función para construir la URL de descarga
+const getDownloadURL = (quincena, anio, nombreEvidencia) => {
+    const nombreSinExtension = removeFileExtension(nombreEvidencia);
+    return `http://192.168.100.25:7080/Nomina/download/evidencias?quincena=${quincena}&anio=${anio}&tipo=Evidencias&nombre=${encodeURIComponent(
+        nombreSinExtension
+    )}`;
+};
+
+// Función para remover la extensión del archivo
+const removeFileExtension = (fileName) => {
+    return fileName.split('.').slice(0, -1).join('.') || fileName; // Elimina la última parte después del punto
+};
+
+export default function CancelacionesTable({ cancelaciones, loading, fechaSeleccionada }) {
     return (
         <TableContainer component={Paper} className={styles.tableContainer}>
             <Table>
@@ -43,7 +56,24 @@ export default function CancelacionesTable({ cancelaciones, loading }) {
                                 <TableCell>{item.motivo_cancelacion}</TableCell>
                                 <TableCell>{item.fecha_cancelacion}</TableCell>
                                 <TableCell>{`$${item.monto.toFixed(2)}`}</TableCell>
-                                <TableCell>{item.evidencia}</TableCell>
+                                <TableCell>
+                                    {item.evidencia ? (
+                                        <a
+                                            href={getDownloadURL(
+                                                fechaSeleccionada.quincena,
+                                                fechaSeleccionada.anio,
+                                                item.evidencia
+                                            )}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ color: '#1976D2', textDecoration: 'underline' }}
+                                        >
+                                            {removeFileExtension(item.evidencia)}
+                                        </a>
+                                    ) : (
+                                        'No disponible'
+                                    )}
+                                </TableCell>
                             </TableRow>
                         ))
                     ) : (
