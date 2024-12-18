@@ -92,6 +92,9 @@ const CancelacionCheques = () => {
       if (!cancelacionResponse.ok) throw new Error("Error al cancelar el cheque");
       const cancelacionMessage = await cancelacionResponse.text();
       alert(`Cheque cancelado correctamente: ${cancelacionMessage}`);
+
+      // Actualizar la tabla de cancelaciones
+      fetchCancelaciones();
     } catch (error) {
       console.error("Error en el proceso:", error);
       alert(`Error: ${error.message}`);
@@ -102,7 +105,9 @@ const CancelacionCheques = () => {
   const fetchCancelaciones = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/listarCancelacionesCheques`);
+      const response = await fetch(
+        `${API_BASE_URL}/chequesCancelados/tabla?quincena=${fechaSeleccionada.quincena}&anio=${fechaSeleccionada.anio}`
+      );
       if (!response.ok) throw new Error("Error al obtener cancelaciones");
       const data = await response.json();
       setCancelaciones(data);
@@ -117,8 +122,10 @@ const CancelacionCheques = () => {
   };
 
   useEffect(() => {
-    fetchCancelaciones();
-  }, []);
+    if (fechaSeleccionada.anio && fechaSeleccionada.quincena) {
+      fetchCancelaciones();
+    }
+  }, [fechaSeleccionada]);
 
   // Búsqueda en la tabla
   const handleSearch = (e) => {
@@ -181,7 +188,11 @@ const CancelacionCheques = () => {
         fullWidth
         margin="normal"
       />
-      <CancelacionesTable cancelaciones={paginatedData} loading={loading} />
+      <CancelacionesTable
+        cancelaciones={paginatedData}
+        loading={loading}
+        fechaSeleccionada={fechaSeleccionada} // Pasamos la quincena y el año
+      />
       <Pagination
         count={Math.ceil(filteredCancelaciones.length / rowsPerPage)}
         page={currentPage}

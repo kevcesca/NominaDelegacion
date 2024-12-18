@@ -24,7 +24,7 @@ export default function GenerateChequesForm({ quincena, fecha, tipoNomina }) {
                 const { num_folio } = response.data;
 
                 setUltimoFolio(num_folio); // Guardar el último folio
-                setFolioInicial(num_folio); // Prellenar el campo de folio inicial
+                setFolioInicial(num_folio + 1); // Prellenar el campo de folio inicial sumando 1
             } catch (error) {
                 console.error("Error al obtener el último folio de cheque:", error);
                 alert("No se pudo obtener el último folio de cheque. Inténtalo más tarde.");
@@ -92,7 +92,7 @@ export default function GenerateChequesForm({ quincena, fecha, tipoNomina }) {
             <Typography variant="h6" sx={{ marginBottom: 2, color: "#800000" }}>
                 Generar Cheques
             </Typography>
-            {ultimoFolio && (
+            {ultimoFolio !== null && (
                 <Typography
                     variant="body1"
                     sx={{ marginBottom: 2, color: "#235b4e", textAlign: "center" }}

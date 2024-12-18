@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
             setIsLoading(false); // Deja de mostrar el loader
         } else {
             // Si no está en localStorage, verificar el token
-            const checkAuth = async (retryCount = 3, delay = 1000) => {
+            const checkAuth = async (retryCount = 3, delay = 500) => {
                 let attempts = 0;
         
                 const attemptVerification = async () => {
