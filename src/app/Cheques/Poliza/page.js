@@ -1,33 +1,43 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Pagination, Button } from '@mui/material';
-import DateFilter from '../../%Components/DateFilter/DateFilter'; // Ajusta la ruta si es necesario
-import PolizasTable from './components/PolizasTable'; // Ajusta la ruta si es necesario
+import {
+    Box,
+    Typography,
+    TextField,
+    Pagination,
+    Button,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+} from '@mui/material';
+import DateFilter from '../../%Components/DateFilter/DateFilter';
+import PolizasTable from './components/PolizasTable';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import styles from './page.module.css';
 import API_BASE_URL from '../../%Config/apiConfig';
 
 export default function PolizasGeneradas() {
     const [polizas, setPolizas] = useState([]);
-    const [filteredPolizas, setFilteredPolizas] = useState([]); // Para la búsqueda
+    const [filteredPolizas, setFilteredPolizas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 5; // Número de filas por página
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [selectedData, setSelectedData] = useState({ anio: '', quincena: '', fechaISO: '' });
 
-    // Estados adicionales para generación manual
-    const [manualQuincena, setManualQuincena] = useState(''); // Quincena manual
-    const [manualFecha, setManualFecha] = useState(''); // Fecha manual
-
-    // Función existente para traer pólizas
-    const fetchPolizas = async ({ anio, quincena, fecha }) => {
+    const fetchPolizas = async ({ anio, quincena }) => {
         setLoading(true);
         try {
             const response = await fetch(`${API_BASE_URL}/poliza?quincena=${quincena}&anio=${anio}`);
             if (!response.ok) throw new Error('Error al obtener las pólizas');
             const data = await response.json();
             setPolizas(data);
-            setFilteredPolizas(data); // Inicializar la búsqueda
+            setFilteredPolizas(data);
         } catch (error) {
             console.error(error);
             setPolizas([]);
@@ -36,39 +46,128 @@ export default function PolizasGeneradas() {
             setLoading(false);
         }
     };
+    const exportToPDF = (selectedRows) => {
+        if (selectedRows.length === 0) {
+            alert('No hay registros seleccionados para exportar.');
+            return;
+        }
+    
+        const doc = new jsPDF();
+        const title = 'Reporte de Pólizas Generadas';
+        const headers = [
+            ['ID Empleado', 'Folio Cheque', 'Folio Póliza', 'Concepto de Pago', 'Percepciones', 'Deducciones', 'Líquido'],
+        ];
+    
+        const data = selectedRows.map((row) => [
+            row.id_empleado,
+            row.folio_cheque,
+            row.folio_poliza,
+            row.concepto_pago,
+            `$${row.percepciones.toFixed(2)}`,
+            `$${row.deducciones.toFixed(2)}`,
+            `$${row.liquido.toFixed(2)}`,
+        ]);
+    
+        // Configurar estilos del PDF
+        doc.setFontSize(16);
+        doc.text(title, 14, 15);
+    
+        doc.autoTable({
+            startY: 20,
+            head: headers,
+            body: data,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [128, 0, 0],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                halign: 'center',
+            },
+            bodyStyles: { halign: 'center' },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+        });
+    
+        doc.save('polizas_generadas.pdf');
+    };
 
-    // Nueva función para generar pólizas
-    const generarPolizas = async () => {
-        if (!manualQuincena || !manualFecha) {
-            alert('Por favor ingresa la quincena y la fecha.');
+    const exportToExcel = (selectedRows) => {
+        if (selectedRows.length === 0) {
+            alert('No hay registros seleccionados para exportar.');
+            return;
+        }
+    
+        const worksheet = XLSX.utils.json_to_sheet(
+            selectedRows.map((row) => ({
+                'ID Empleado': row.id_empleado,
+                'Folio Cheque': row.folio_cheque,
+                'Folio Póliza': row.folio_poliza,
+                'Concepto de Pago': row.concepto_pago,
+                Percepciones: row.percepciones.toFixed(2),
+                Deducciones: row.deducciones.toFixed(2),
+                Líquido: row.liquido.toFixed(2),
+            }))
+        );
+    
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Pólizas Generadas');
+        XLSX.writeFile(workbook, 'polizas_generadas.xlsx');
+    };
+
+    const exportToCSV = (selectedRows) => {
+        if (selectedRows.length === 0) {
+            alert('No hay registros seleccionados para exportar.');
+            return;
+        }
+    
+        const headers = [
+            'ID Empleado,Folio Cheque,Folio Póliza,Concepto de Pago,Percepciones,Deducciones,Líquido',
+        ];
+        const rows = selectedRows.map((row) => [
+            row.id_empleado,
+            row.folio_cheque,
+            row.folio_poliza,
+            row.concepto_pago,
+            row.percepciones.toFixed(2),
+            row.deducciones.toFixed(2),
+            row.liquido.toFixed(2),
+        ]);
+    
+        const csvContent = [headers, ...rows.map((r) => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'polizas_generadas.csv');
+        link.click();
+    };
+
+    const generatePolizas = async () => {
+        const { quincena, fechaISO } = selectedData;
+        if (!quincena || !fechaISO) {
+            alert('Por favor seleccione una fecha válida.');
             return;
         }
 
+        setLoading(true);
         try {
-            setLoading(true);
-            const url = `${API_BASE_URL}/generarPolizas?quincena=${manualQuincena}&fecha=${manualFecha}`;
-            console.log("URL de generación de pólizas:", url);
-
-            const response = await fetch(url, { method: 'GET' });
+            const response = await fetch(
+                `${API_BASE_URL}/generarPolizas?quincena=${quincena}&fecha=${fechaISO}`,
+                { method: 'GET' }
+            );
 
             if (!response.ok) throw new Error('Error al generar las pólizas');
-
-            alert('Pólizas generadas correctamente.');
+            alert('Pólizas generadas con éxito');
         } catch (error) {
-            console.error('Error al generar las pólizas:', error);
-            alert('Error al generar las pólizas. Verifique los datos.');
+            console.error(error);
+            alert('Error al generar las pólizas');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDateChange = (date) => {
-        const { anio, quincena } = date;
-        const fechaSeleccionada = new Date(anio, Math.floor((quincena - 1) / 2), quincena % 2 === 0 ? 15 : 1)
-            .toISOString()
-            .split('T')[0]; // Convertir a formato "yyyy-mm-dd"
-
-        fetchPolizas({ anio, quincena, fecha: fechaSeleccionada });
+    const handleDateChange = ({ anio, quincena, fechaISO }) => {
+        setSelectedData({ anio, quincena, fechaISO });
+        fetchPolizas({ anio, quincena });
     };
 
     const handleSearch = (e) => {
@@ -80,86 +179,87 @@ export default function PolizasGeneradas() {
         );
 
         setFilteredPolizas(filtered);
-        setCurrentPage(1); // Reiniciar a la primera página al filtrar
+        setCurrentPage(1);
     };
 
-    // Obtener los datos actuales de la página
-    const paginatedData = filteredPolizas.slice(
-        (currentPage - 1) * rowsPerPage,
-        currentPage * rowsPerPage
-    );
+    const handleExport = (format) => {
+        if (selectedRows.length === 0) {
+            alert('No hay registros seleccionados para exportar.');
+            return;
+        }
 
-    const handlePageChange = (event, value) => {
-        setCurrentPage(value);
+        // Simula la exportación de datos
+        alert(`Exportando ${selectedRows.length} registros a ${format}`);
     };
 
     return (
         <Box className={styles.container}>
-            <Typography variant="h5" className={
-styles.title}>
-Pólizas Generadas
-</Typography>
+            <Typography variant="h5" className={styles.title}>
+                Pólizas Generadas
+            </Typography>
 
-{/* DateFilter para traer pólizas existentes */}
-<DateFilter onDateChange={handleDateChange} />
+            {/* Filtro de fecha */}
+            <DateFilter onDateChange={handleDateChange} />
 
-{/* Campos adicionales para generar nuevas pólizas */}
-<Box display="flex" flexDirection="column" gap={2} marginTop={4}>
-<Typography variant="h6">Generar Nuevas Pólizas</Typography>
+            <Box className={styles.generar}> {/* Botón Generar Pólizas */}
+            <Button 
+                variant="contained"
+                color="primary"
+                onClick={generatePolizas}
+                sx={{ margin: '1rem 0' }}
+            >
+                Generar Pólizas
+            </Button>
+            </Box>
 
-{/* Campo para ingresar manualmente la quincena */}
-<TextField
-    label="Número de Quincena"
-    placeholder="Ejemplo: 01, 02, 03, 04"
-    variant="outlined"
-    value={manualQuincena}
-    onChange={(e) => setManualQuincena(e.target.value)}
-    fullWidth
-/>
+            {/* Botones de Exportación */}
+            <Box className={styles.exportacion}>
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    disabled={selectedRows.length === 0}
+                    onClick={() => exportToPDF(selectedRows)}
+                >
+                    Exportar a PDF
+                </Button>
+                <Button
+                  variant="contained"
+                  color="success"
+                  disabled={selectedRows.length === 0}
+                  onClick={() => exportToExcel(selectedRows)}
+                >
+                    Exportar a Excel
+                </Button>
+                <Button
+                    variant="contained"
+                    color="info"
+                    disabled={selectedRows.length === 0}
+                    onClick={() => exportToCSV(selectedRows)}
+                >
+                    Exportar a CSV
+                </Button>
+            </Box>
 
-{/* Campo para ingresar la fecha */}
-<TextField
-    label="Fecha"
-    type="date"
-    variant="outlined"
-    InputLabelProps={{ shrink: true }}
-    value={manualFecha}
-    onChange={(e) => setManualFecha(e.target.value)}
-    fullWidth
-/>
+            {/* Búsqueda */}
+            <TextField
+                variant="outlined"
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={handleSearch}
+                fullWidth
+                margin="normal"
+            />
 
-{/* Botón para generar las pólizas */}
-<Button
-    variant="contained"
-    color="primary"
-    onClick={generarPolizas}
->
-    Generar Pólizas
-</Button>
-</Box>
-
-{/* Campo de búsqueda existente */}
-<TextField
-variant="outlined"
-placeholder="Buscar..."
-value={searchQuery}
-onChange={handleSearch}
-fullWidth
-margin="normal"
-sx={{ marginTop: '6rem' }}
-/>
-
-{/* Tabla existente */}
-<PolizasTable polizas={paginatedData} loading={loading} />
-
-{/* Paginación existente */}
-<Pagination
-count={Math.ceil(filteredPolizas.length / rowsPerPage)}
-page={currentPage}
-onChange={handlePageChange}
-color="primary"
-className={styles.pagination}
-/>
-</Box>
-);
+            {/* Tabla */}
+            <PolizasTable
+                polizas={filteredPolizas}
+                loading={loading}
+                onRowSelectionChange={setSelectedRows}
+                rowsPerPage={rowsPerPage}
+                setRowsPerPage={setRowsPerPage}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+            />
+        </Box>
+    );
 }

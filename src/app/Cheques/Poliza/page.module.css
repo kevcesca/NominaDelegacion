@@ -64,3 +64,16 @@
     justify-content: center;
     margin-top: 20px;
 }
+
+.exportacion {
+    display: flex;
+    justify-content: right;
+    margin-top: -3rem;
+    gap: 3px;
+}
+
+.generar {
+    display: flex;
+    justify-content: left;
+    margin-top: 2rem;
+}
