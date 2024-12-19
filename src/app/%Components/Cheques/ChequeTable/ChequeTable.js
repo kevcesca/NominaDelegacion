@@ -23,6 +23,7 @@ export default function ChequeTable() {
         anio,
         quincena,
         fechaCompleta,
+        refreshCheques, // Función para recargar los datos
     } = useChequeTable();
 
     // Estados para la búsqueda y paginación
@@ -59,6 +60,19 @@ export default function ChequeTable() {
             {/* Barra de búsqueda */}
             <ChequeSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
+            {/* Botón para actualizar la tabla */}
+            
+            {/* Botón para actualizar después de generar nuevos cheques */}
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => refreshCheques()} // Refresca manualmente
+                sx={{ marginBottom: 2 }}
+            >
+                Actualizar Cheques
+            </Button>
+
+
             {/* Tabla de cheques */}
             <ChequeTableSection
                 cheques={cheques}
@@ -80,7 +94,7 @@ export default function ChequeTable() {
             <Button
                 color="primary"
                 variant="contained"
-                onClick={() => window.location.href = "/Cheques/Poliza"}
+                onClick={() => (window.location.href = "/Cheques/Poliza")}
                 sx={{ marginTop: "2rem" }}
             >
                 Visualizar Pólizas

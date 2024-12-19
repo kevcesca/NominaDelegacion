@@ -36,12 +36,13 @@ const StatusCheques = () => {
             alert("Por favor selecciona un año y una quincena.");
             return;
         }
-
+    
         try {
+            // Nueva URL del servicio reemplazada correctamente
             const response = await fetch(
                 `${API_BASE_URL}/estadoCheques?quincena=${quincena}&anio=${anio}`
             );
-
+    
             if (response.ok) {
                 const data = await response.json();
                 setChequeData(data); // Guarda los datos en el estado
@@ -54,6 +55,35 @@ const StatusCheques = () => {
             alert("No se pudo conectar con el servicio.");
         }
     };
+    
+    // Función para insertar nuevos datos (mantener el servicio existente)
+const insertChequeData = async (anio, quincena) => {
+    if (!anio || !quincena) {
+        alert("Por favor selecciona un año y una quincena.");
+        return;
+    }
+
+    try {
+        // Servicio que inserta nuevos datos
+        const response = await fetch(
+            `${API_BASE_URL}/NominaCtrl/EstadoCheques?anio=${anio}&quincena=${quincena}`,
+            { method: "GET" }
+        );
+
+        if (response.ok) {
+            const message = await response.text();
+            alert(message); // Mostrar mensaje de éxito del backend
+
+            // Después de insertar, llamar al servicio que recupera los datos
+            fetchChequeData(anio, quincena); // Refrescar la tabla automáticamente
+        } else {
+            alert("Error al insertar los datos.");
+        }
+    } catch (error) {
+        console.error("Error al insertar los datos:", error);
+        alert("No se pudo conectar con el servicio.");
+    }
+};
 
     // Manejar cambios en el filtro de fecha y quincena
     const handleDateChange = ({ anio, quincena }) => {

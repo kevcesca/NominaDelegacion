@@ -17,7 +17,6 @@ export default function useChequeTable() {
 
     const handleTipoNominaChange = (event) => setTipoNomina(event.target.value);
 
-    // Modificación: Manejar el cambio de fecha completa sin afectar anio y quincena
     const handleDateChange = ({ anio, quincena, fechaISO }) => {
         setAnio(anio);
         setQuincena(quincena);
@@ -26,9 +25,13 @@ export default function useChequeTable() {
         }
     };
 
-    // Modificación: Incluir fechaCompleta como parámetro opcional
+    // Obtener cheques desde la API
     const obtenerCheques = async () => {
-        if (!anio || !quincena || !tipoNomina) return;
+        if (!anio || !quincena || !tipoNomina) {
+            console.log("Faltan parámetros para obtener los cheques.");
+            return;
+        }
+
         setLoading(true);
         try {
             const response = await axios.get(`${API_BASE_URL}/NominaCtrl/Cheques`, {
@@ -36,12 +39,10 @@ export default function useChequeTable() {
                     anio, 
                     quincena, 
                     tipo_nomina: tipoNomina,
-                    fecha: fechaCompleta || undefined // Enviar fecha completa si existe
+                    fecha: fechaCompleta || undefined,
                 },
             });
             setCheques(response.data);
-            setSelectedRows([]);
-            setSelectAll(false);
         } catch (error) {
             console.error("Error al obtener los cheques:", error);
         } finally {
@@ -49,11 +50,17 @@ export default function useChequeTable() {
         }
     };
 
+    // Refrescar manualmente los cheques (para usar con el botón de actualización)
+    const refreshCheques = async () => {
+        console.log("Refrescando cheques...");
+        await obtenerCheques();
+    };
+
+    // Efecto para cargar cheques automáticamente cuando cambian los filtros
     useEffect(() => {
-        if (anio && quincena && tipoNomina) {
-            obtenerCheques();
-        }
-    }, [anio, quincena, tipoNomina, fechaCompleta]); // Incluimos fechaCompleta como dependencia
+        console.log("Cargando cheques automáticamente...");
+        obtenerCheques();
+    }, [anio, quincena, tipoNomina, fechaCompleta]);
 
     const handleRowSelect = (cheque) => {
         setSelectedRows((prevSelected) =>
@@ -69,14 +76,14 @@ export default function useChequeTable() {
     };
 
     const exportToExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(selectedRows);
+        const worksheet = XLSX.utils.json_to_sheet(selectedRows.length > 0 ? selectedRows : cheques);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Cheques");
         XLSX.writeFile(workbook, "cheques.xlsx");
     };
 
     const exportToCSV = () => {
-        const worksheet = XLSX.utils.json_to_sheet(selectedRows);
+        const worksheet = XLSX.utils.json_to_sheet(selectedRows.length > 0 ? selectedRows : cheques);
         const csv = XLSX.utils.sheet_to_csv(worksheet);
         const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
         const link = document.createElement("a");
@@ -88,7 +95,7 @@ export default function useChequeTable() {
     const exportToPDF = () => {
         const doc = new jsPDF();
         const tableColumn = ["ID Empleado", "Folio Cheque", "Estado Cheque", "Monto", "Fecha"];
-        const tableRows = selectedRows.map((cheque) => [
+        const tableRows = (selectedRows.length > 0 ? selectedRows : cheques).map((cheque) => [
             cheque.id_empleado,
             cheque.num_folio,
             cheque.estado_cheque,
@@ -96,7 +103,7 @@ export default function useChequeTable() {
             cheque.fecha_cheque,
         ]);
 
-        doc.text("Cheques Seleccionados", 14, 15);
+        doc.text("Cheques", 14, 15);
         doc.autoTable({ head: [tableColumn], body: tableRows, startY: 20 });
         doc.save("cheques.pdf");
     };
@@ -109,7 +116,7 @@ export default function useChequeTable() {
         selectAll,
         anio,
         quincena,
-        fechaCompleta, // Exportamos fechaCompleta para su uso
+        fechaCompleta,
         handleTipoNominaChange,
         handleDateChange,
         handleRowSelect,
@@ -117,5 +124,6 @@ export default function useChequeTable() {
         exportToExcel,
         exportToCSV,
         exportToPDF,
+        refreshCheques, // Exportamos refreshCheques para que pueda ser usado en el botón
     };
 }
