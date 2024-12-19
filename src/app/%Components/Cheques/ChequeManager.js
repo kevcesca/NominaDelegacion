@@ -18,78 +18,57 @@ import {
   InputLabel,
   FormControl,
   ThemeProvider,
-  Checkbox,
   TablePagination,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
-  Collapse,
-  IconButton,
 } from "@mui/material";
 import { Calendar } from "primereact/calendar";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
 import theme from "../../$tema/theme";
 import ProtectedView from "../ProtectedView/ProtectedView";
 import axios from "axios";
-import API_BASE_URL, { API_USERS_URL } from "../../%Config/apiConfig";
-import ColumnSelector from "../../%Components/ColumnSelector/ColumnSelector";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import API_BASE_URL from "../../%Config/apiConfig";
 
 const ChequeManager = () => {
   const [folios, setFolios] = useState(0);
   const [numCheques, setNumCheques] = useState(0);
   const [quincena, setQuincena] = useState("");
   const [empleadosGenerados, setEmpleadosGenerados] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [tipoNomina, setTipoNomina] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [ultimoFolioGenerado, setUltimoFolioGenerado] = useState(0);
-  const [tipoNomina, setTipoNomina] = useState(""); // Estado para el tipo de nómina
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
 
-
-  const [visibleColumns, setVisibleColumns] = useState({
-    idEmpleado: true,
-    numFolio: true,
-    nombre: true,
-    tipoNomina: true,
-    fechaCheque: true,
-    monto: true,
-    estadoCheque: true,
-    fechaEmision: true,
-    quincena: true,
-    tipoPago: true,
-  });
-  const [columnSelectorOpen, setColumnSelectorOpen] = useState(false);
+  const nominaMap = {
+    compuesta: ["COMPUESTA"],
+    extraordinarios: ["EXTRAORDINARIOS"],
+    finiquitos: ["FINIQUITOS"],
+    honorarios: ["HONORARIOS"],
+  };
 
   const fetchCheques = async () => {
-    if (!quincena || !tipoNomina) return; // Validar campos necesarios
+    if (!quincena || !tipoNomina) {
+      alert("Selecciona una quincena y tipo de nómina para actualizar los datos.");
+      return;
+    }
 
-    // Obtener los tipos de nómina asociados a la selección
-    const tiposNomina = nominaMap[tipoNomina] || [];
+    setIsLoading(true); // Mostrar indicador de carga
 
     try {
+      const tiposNomina = nominaMap[tipoNomina] || [];
       const responses = await Promise.all(
         tiposNomina.map((tipo) =>
           axios.get(`${API_BASE_URL}/NominaCtrl/Cheques`, {
-            params: {
-              anio: new Date().getFullYear(),
-              quincena,
-              tipo_nomina: tipo, // Enviar cada tipo de nómina
-            },
+            params: { anio: new Date().getFullYear(), quincena, tipo_nomina: tipo },
           })
         )
       );
 
-      // Combinar los resultados de todas las solicitudes
       const cheques = responses.flatMap((response) =>
         response.data.map((cheque) => ({
           idEmpleado: cheque.id_empleado,
@@ -107,29 +86,13 @@ const ChequeManager = () => {
 
       setEmpleadosGenerados(cheques);
     } catch (error) {
-      setErrorMessage("Error al obtener los cheques");
+      console.error("Error al cargar cheques:", error);
+      setErrorMessage("Error al cargar los cheques desde el servidor.");
       setOpenErrorDialog(true);
+    } finally {
+      setIsLoading(false); // Ocultar indicador de carga
     }
   };
-
-  // Filtrar datos dinámicamente según el término de búsqueda
-  const filteredData = empleadosGenerados.filter((empleado) => {
-    if (!searchTerm.trim()) return true;
-    return Object.keys(visibleColumns)
-      .filter((key) => visibleColumns[key])
-      .some((key) =>
-        String(empleado[key])
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      );
-  });
-
-
-  const capitalizeFirstLetter = (str) => {
-    if (!str) return "";
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  };
-
 
   const generarCheques = async () => {
     if (!folios || !numCheques || !quincena || !selectedDate || !tipoNomina) {
@@ -142,6 +105,7 @@ const ChequeManager = () => {
     try {
       setOpenSuccessDialog(false);
       setOpenErrorDialog(false);
+      setIsLoading(true);
 
       const responses = await Promise.all(
         tiposNomina.map((tipo) => {
@@ -150,162 +114,24 @@ const ChequeManager = () => {
             totalCheques: numCheques,
             quincena,
             fecha: selectedDate.toISOString().split("T")[0],
-            tipoNominaSeleccionado: capitalizeFirstLetter(tipo),
+            tipoNominaSeleccionado: tipo,
           });
 
           return axios.get(`${API_BASE_URL}/generarCheques?${params.toString()}`);
         })
       );
 
-      // Procesar las respuestas basadas en texto plano
-      const chequesGenerados = responses.flatMap((response) => {
-        // Verificar si la respuesta es texto plano indicando éxito
-        if (typeof response.data === "string") {
-          if (response.data.includes("exitosamente")) {
-            console.log("Servidor:", response.data);
-            return []; // No hay datos adicionales que procesar
-          } else {
-            throw new Error(`Respuesta del servidor: ${response.data}`);
-          }
-        }
-
-        // Si la respuesta es un arreglo, procesar los cheques normalmente
-        if (Array.isArray(response.data)) {
-          return response.data.map((cheque) => ({
-            idEmpleado: cheque.id_empleado,
-            numFolio: cheque.num_folio,
-            nombre: cheque.nombre,
-            tipoNomina: cheque.tipo_nomina,
-            fechaCheque: new Date(cheque.fecha_cheque).toLocaleDateString(),
-            monto: parseFloat(cheque.monto).toFixed(2),
-            estadoCheque: cheque.estado_cheque,
-            fechaEmision: new Date(cheque.fecha).toLocaleDateString(),
-            quincena: cheque.quincena,
-            tipoPago: cheque.tipo_pago,
-          }));
-        }
-
-        // Si no es un formato válido, lanzar un error
-        throw new Error("Formato de respuesta desconocido.");
-      });
-
-      // Actualización de estado solo si hay datos
-      setEmpleadosGenerados((prev) => [...prev, ...chequesGenerados]);
-
-      const ultimoCheque = folios + numCheques - 1;
-      setUltimoFolioGenerado(ultimoCheque);
-
-      // Guardar en localStorage
-      localStorage.setItem("ultimoFolioGenerado", ultimoCheque.toString());
-
-      // Mostrar diálogo de éxito
+      console.log("Cheques generados:", responses);
       setOpenSuccessDialog(true);
+
+      await fetchCheques();
     } catch (error) {
-      console.error("Error al generar cheques:", error.message);
-      setErrorMessage(error.message || "Error inesperado al generar los cheques.");
+      console.error("Error al generar cheques:", error);
+      setErrorMessage("No se pudieron generar los cheques.");
       setOpenErrorDialog(true);
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-
-
-  const calcularQuincena = (fecha) => {
-    const fechaInicioAnio = new Date(fecha.getFullYear(), 0, 1);
-    const diffDias = Math.floor((fecha - fechaInicioAnio) / (1000 * 60 * 60 * 24));
-    const quincenaActual = Math.floor(diffDias / 14) + 1;
-    return quincenaActual.toString().padStart(2, "0");
-  };
-
-  const actualizarQuincena = (fecha) => {
-    setSelectedDate(fecha);
-    const quincenaCalculada = calcularQuincena(fecha);
-    setQuincena(quincenaCalculada);
-  };
-
-  const exportToPDF = () => {
-    try {
-      const dataToExport = getSelectedData();
-      const doc = new jsPDF();
-      autoTable(doc, {
-        head: [Object.keys(visibleColumns).filter((key) => visibleColumns[key])],
-        body: dataToExport.map((empleado) =>
-          Object.keys(visibleColumns)
-            .filter((key) => visibleColumns[key])
-            .map((key) => empleado[key])
-        ),
-      });
-      doc.save("reporte_cheques.pdf");
-    } catch (error) {
-      console.error("Error al exportar a PDF:", error);
-    }
-  };
-  const exportToExcel = () => {
-    try {
-      const dataToExport = getSelectedData();
-      const worksheet = XLSX.utils.json_to_sheet(
-        dataToExport.map((empleado) =>
-          Object.keys(visibleColumns)
-            .filter((key) => visibleColumns[key])
-            .reduce((acc, key) => {
-              acc[key] = empleado[key];
-              return acc;
-            }, {})
-        )
-      );
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Cheques");
-      XLSX.writeFile(workbook, "reporte_cheques.xlsx");
-    } catch (error) {
-      console.error("Error al exportar a Excel:", error);
-    }
-  };
-
-  const exportToCSV = () => {
-    try {
-      const dataToExport = getSelectedData();
-      const csvRows = [
-        Object.keys(visibleColumns).filter((key) => visibleColumns[key]).join(","),
-        ...dataToExport.map((empleado) =>
-          Object.keys(visibleColumns)
-            .filter((key) => visibleColumns[key])
-            .map((key) => empleado[key])
-            .join(",")
-        ),
-      ].join("\n");
-
-      const blob = new Blob([csvRows], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.setAttribute("href", url);
-      a.setAttribute("download", "reporte_cheques.csv");
-      a.click();
-    } catch (error) {
-      console.error("Error al exportar a CSV:", error);
-    }
-  };
-
-  const nominaMap = {
-    compuesta: ["COMPUESTA"], // Tipos asociados a "Compuesta"
-    extraordinarios: ["EXTRAORDINARIOS"], // Tipo único
-    finiquitos: ["FINIQUITOS"], // Tipo único
-    honorarios: ["HONORARIOS"], // Tipo único
-  };
-
-
-
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value); // Actualiza el término de búsqueda
-  };
-
-
-  const handleColumnSelectionChange = (selectedColumns) => {
-    setVisibleColumns(selectedColumns);
-  };
-
-  const handleCheckboxChange = (id) => {
-    setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
-    );
   };
 
   const handleChangePage = (event, newPage) => setPage(newPage);
@@ -315,34 +141,25 @@ const ChequeManager = () => {
     setPage(0);
   };
 
-  const getSelectedData = () => {
-    if (selectedRows.length > 0) {
-      return empleadosGenerados.filter((empleado) =>
-        selectedRows.includes(empleado.numFolio)
-      );
-    }
-    return empleadosGenerados;
+  const actualizarQuincena = (fecha) => {
+    setSelectedDate(fecha);
+    const diffDias = Math.floor((fecha - new Date(fecha.getFullYear(), 0, 1)) / (1000 * 60 * 60 * 24));
+    const quincenaCalculada = Math.floor(diffDias / 14) + 1;
+    setQuincena(quincenaCalculada.toString().padStart(2, "0"));
   };
 
-  useEffect(() => {
-    fetchCheques();
-  }, [quincena, tipoNomina]);
   return (
     <ProtectedView requiredPermissions={["Gestion_Cheques", "Acceso_total"]}>
       <ThemeProvider theme={theme}>
         <Box className={styles.container}>
           <Typography variant="h4">Generador de Cheques</Typography>
 
-          {/* Sección de Inputs */}
-          <Box className={styles.section}>
-
-            <FormControl className={styles.labels}>
+          <Box className={styles.formSection}>
+            <FormControl className={styles.formControl}>
               <InputLabel>Tipo de Nómina</InputLabel>
               <Select
-                id="nomina"
-                label="Tipo de Nómina"
-                value={tipoNomina} // Vincula con el estado
-                onChange={(e) => setTipoNomina(e.target.value)} // Actualiza el estado
+                value={tipoNomina}
+                onChange={(e) => setTipoNomina(e.target.value)}
               >
                 <MenuItem value="compuesta">Compuesta</MenuItem>
                 <MenuItem value="extraordinarios">Extraordinarios</MenuItem>
@@ -351,218 +168,97 @@ const ChequeManager = () => {
               </Select>
             </FormControl>
 
-
-
-            <FormControl>
+            <FormControl className={styles.formControl}>
               <Calendar
                 dateFormat="dd-mm-yy"
-                id="fechaActual"
                 onChange={(e) => actualizarQuincena(e.value)}
-                placeholder="Seleccione una fecha"
-                className={styles.labels}
+                placeholder="Selecciona una fecha"
               />
             </FormControl>
 
             <TextField
               label="Quincena"
               value={quincena}
-              placeholder="Quincena automática"
               InputProps={{ readOnly: true }}
-              className={styles.labels}
+              className={styles.formControl}
             />
-          </Box>
 
-          {/* Inputs adicionales */}
-          <Box className={styles.section}>
             <TextField
               label="Folio Inicial"
               type="number"
               value={folios}
               onChange={(e) => setFolios(e.target.value)}
-              className={styles.labels}
+              className={styles.formControl}
             />
+
             <TextField
               label="Número de Cheques"
               type="number"
               value={numCheques}
               onChange={(e) => setNumCheques(e.target.value)}
-              className={styles.labels}
+              className={styles.formControl}
             />
           </Box>
 
-          <Box className={styles.searchSection}>
-            <TextField
-
-              label="Buscar"
-              placeholder="Ingrese un término para buscar"
-              variant="outlined"
-              fullWidth
-              value={searchTerm}
-              onChange={handleSearch}
-              className={styles.searchBar}
-            />
-
-          </Box>
-
-          {/* Selector de columnas */}
-          <Box>
-            <IconButton
-              className={styles.iconButton}
-              onClick={() => setColumnSelectorOpen(!columnSelectorOpen)}
+          <Box className={styles.buttons}>
+            <Button
+              variant="contained"
               color="primary"
+              onClick={generarCheques}
+              className={styles.button}
             >
-              <FilterAltIcon />
-            </IconButton>
-            <Collapse in={columnSelectorOpen}>
-              <ColumnSelector
-                availableColumns={[
-                  { key: "idEmpleado", label: "ID Empleado" },
-                  { key: "numFolio", label: "Folio" },
-                  { key: "nombre", label: "Nombre" },
-                  { key: "tipoNomina", label: "Tipo Nómina" },
-                  { key: "fechaCheque", label: "Fecha Cheque" },
-                  { key: "monto", label: "Monto" },
-                  { key: "estadoCheque", label: "Estado Cheque" },
-                  { key: "fechaEmision", label: "Fecha Emisión" },
-                  { key: "quincena", label: "Quincena" },
-                  { key: "tipoPago", label: "Tipo Pago" },
-                ]}
-                onSelectionChange={handleColumnSelectionChange}
-              />
-            </Collapse>
-          </Box>
-
-
-          {/* Botones de exportación */}
-          <Box className={styles.exportButtons}>
-            <Button variant="contained" color="primary" onClick={exportToPDF}>
-              Exportar PDF
+              Generar Cheques
             </Button>
-            <Button variant="contained" color="primary" onClick={exportToExcel}>
-              Exportar Excel
-            </Button>
-            <Button variant="contained" color="primary" onClick={exportToCSV}>
-              Exportar CSV
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={fetchCheques}
+              className={styles.button}
+            >
+              Actualizar
             </Button>
           </Box>
 
-
-          {/* Tabla de datos */}
-          <Box className={styles.tableSection}>
-            <TableContainer component={Paper}>
+          {isLoading ? (
+            <Typography variant="h6">Cargando datos...</Typography>
+          ) : (
+            <TableContainer component={Paper} className={styles.tableContainer}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        indeterminate={
-                          selectedRows.length > 0 &&
-                          selectedRows.length < empleadosGenerados.length
-                        }
-                        checked={selectedRows.length === empleadosGenerados.length}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedRows(
-                              empleadosGenerados.map((empleado) => empleado.numFolio)
-                            );
-                          } else {
-                            setSelectedRows([]);
-                          }
-                        }}
-                      />
-                    </TableCell>
-                    {Object.keys(visibleColumns).map(
-                      (key) =>
-                        visibleColumns[key] && (
-                          <TableCell key={key} className={styles.tableHeader}>
-                            {key}
-                          </TableCell>
-                        )
-                    )}
+                    <TableCell>ID Empleado</TableCell>
+                    <TableCell>Folio</TableCell>
+                    <TableCell>Nombre</TableCell>
+                    <TableCell>Monto</TableCell>
+                    <TableCell>Estado</TableCell>
                   </TableRow>
                 </TableHead>
-
-
                 <TableBody>
-                  {filteredData
+                  {empleadosGenerados
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((empleado) => (
                       <TableRow key={empleado.numFolio}>
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            checked={selectedRows.includes(empleado.numFolio)}
-                            onChange={() => handleCheckboxChange(empleado.numFolio)}
-                          />
-                        </TableCell>
-                        {Object.keys(visibleColumns).map(
-                          (key) =>
-                            visibleColumns[key] && (
-                              <TableCell key={key}>{empleado[key]}</TableCell>
-                            )
-                        )}
-                      </TableRow>
-                    ))}
-                </TableBody>
-
-
-
-
-                <TableBody>
-                  {empleadosGenerados
-                    .slice(
-                      page * rowsPerPage,
-                      page * rowsPerPage + rowsPerPage
-                    )
-                    .map((empleado) => (
-                      <TableRow key={empleado.numFolio}>
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            checked={selectedRows.includes(empleado.numFolio)}
-                            onChange={() =>
-                              handleCheckboxChange(empleado.numFolio)
-                            }
-                          />
-                        </TableCell>
-                        {Object.keys(visibleColumns).map(
-                          (key) =>
-                            visibleColumns[key] && (
-                              <TableCell key={key}>{empleado[key]}</TableCell>
-                            )
-                        )}
+                        <TableCell>{empleado.idEmpleado}</TableCell>
+                        <TableCell>{empleado.numFolio}</TableCell>
+                        <TableCell>{empleado.nombre}</TableCell>
+                        <TableCell>{empleado.monto}</TableCell>
+                        <TableCell>{empleado.estadoCheque}</TableCell>
                       </TableRow>
                     ))}
                 </TableBody>
               </Table>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={empleadosGenerados.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
             </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={empleadosGenerados.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
+          )}
 
-            {/* Botones adicionales */}
-
-          </Box>
-
-          {/* Botón de generar */}
-          <Box className={styles.buttons}>
-            <Button variant="contained" color="primary" onClick={generarCheques}>
-              Generar
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => window.location.href = "/Cheques/Poliza"}
-              className={styles.generatePolizasButton}
-            >
-              Generar Pólizas
-            </Button>
-          </Box>
-
-          {/* Modal de Éxito */}
           <Dialog open={openSuccessDialog} onClose={() => setOpenSuccessDialog(false)}>
             <DialogContent>
               <DialogContentText>Cheques generados con éxito.</DialogContentText>
@@ -574,7 +270,6 @@ const ChequeManager = () => {
             </DialogActions>
           </Dialog>
 
-          {/* Modal de Error */}
           <Dialog open={openErrorDialog} onClose={() => setOpenErrorDialog(false)}>
             <DialogContent>
               <DialogContentText>{errorMessage}</DialogContentText>

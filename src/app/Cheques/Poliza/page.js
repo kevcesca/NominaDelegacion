@@ -51,13 +51,13 @@ export default function PolizasGeneradas() {
             alert('No hay registros seleccionados para exportar.');
             return;
         }
-    
+
         const doc = new jsPDF();
         const title = 'Reporte de Pólizas Generadas';
         const headers = [
             ['ID Empleado', 'Folio Cheque', 'Folio Póliza', 'Concepto de Pago', 'Percepciones', 'Deducciones', 'Líquido'],
         ];
-    
+
         const data = selectedRows.map((row) => [
             row.id_empleado,
             row.folio_cheque,
@@ -67,11 +67,11 @@ export default function PolizasGeneradas() {
             `$${row.deducciones.toFixed(2)}`,
             `$${row.liquido.toFixed(2)}`,
         ]);
-    
+
         // Configurar estilos del PDF
         doc.setFontSize(16);
         doc.text(title, 14, 15);
-    
+
         doc.autoTable({
             startY: 20,
             head: headers,
@@ -86,7 +86,7 @@ export default function PolizasGeneradas() {
             bodyStyles: { halign: 'center' },
             alternateRowStyles: { fillColor: [240, 240, 240] },
         });
-    
+
         doc.save('polizas_generadas.pdf');
     };
 
@@ -95,7 +95,7 @@ export default function PolizasGeneradas() {
             alert('No hay registros seleccionados para exportar.');
             return;
         }
-    
+
         const worksheet = XLSX.utils.json_to_sheet(
             selectedRows.map((row) => ({
                 'ID Empleado': row.id_empleado,
@@ -107,7 +107,7 @@ export default function PolizasGeneradas() {
                 Líquido: row.liquido.toFixed(2),
             }))
         );
-    
+
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Pólizas Generadas');
         XLSX.writeFile(workbook, 'polizas_generadas.xlsx');
@@ -118,7 +118,7 @@ export default function PolizasGeneradas() {
             alert('No hay registros seleccionados para exportar.');
             return;
         }
-    
+
         const headers = [
             'ID Empleado,Folio Cheque,Folio Póliza,Concepto de Pago,Percepciones,Deducciones,Líquido',
         ];
@@ -131,10 +131,10 @@ export default function PolizasGeneradas() {
             row.deducciones.toFixed(2),
             row.liquido.toFixed(2),
         ]);
-    
+
         const csvContent = [headers, ...rows.map((r) => r.join(','))].join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    
+
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.setAttribute('download', 'polizas_generadas.csv');
@@ -202,14 +202,14 @@ export default function PolizasGeneradas() {
             <DateFilter onDateChange={handleDateChange} />
 
             <Box className={styles.generar}> {/* Botón Generar Pólizas */}
-            <Button 
-                variant="contained"
-                color="primary"
-                onClick={generatePolizas}
-                sx={{ margin: '1rem 0' }}
-            >
-                Generar Pólizas
-            </Button>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={generatePolizas}
+                    sx={{ margin: '1rem 0' }}
+                >
+                    Generar Pólizas
+                </Button>
             </Box>
 
             {/* Botones de Exportación */}
@@ -223,10 +223,10 @@ export default function PolizasGeneradas() {
                     Exportar a PDF
                 </Button>
                 <Button
-                  variant="contained"
-                  color="success"
-                  disabled={selectedRows.length === 0}
-                  onClick={() => exportToExcel(selectedRows)}
+                    variant="contained"
+                    color="success"
+                    disabled={selectedRows.length === 0}
+                    onClick={() => exportToExcel(selectedRows)}
                 >
                     Exportar a Excel
                 </Button>
@@ -260,6 +260,16 @@ export default function PolizasGeneradas() {
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
             />
+
+            <Box className={styles.conciliacion}>
+                <Button
+                    variant="contained"
+                    onClick={() => window.location.href = "/Cheques/Poliza/Conciliacion"}
+                >
+                    Consolidar informacion
+                </Button>
+            </Box>
         </Box>
+
     );
 }
