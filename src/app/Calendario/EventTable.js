@@ -4,6 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { Button, Typography, Box, Collapse, Modal, FormControlLabel, Checkbox } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import API_BASE_URL from '../%Config/apiConfig';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import saveAs from 'file-saver';
 import styles from './page.module.css';
 
 export default function EventTable({ anio, mes }) {
@@ -84,13 +88,52 @@ export default function EventTable({ anio, mes }) {
         setCollapseOpen(false); // Cerrar el colapso
     };
 
+    // Función para exportar datos
+    const handleExport = (type) => {
+        if (data.length === 0) {
+            setShowModal(true); // Mostrar modal si no hay datos para exportar
+            return;
+        }
+
+        const exportData = data.map((row) => {
+            const filteredRow = {};
+            Object.keys(visibleColumns).forEach((key) => {
+                if (visibleColumns[key]) {
+                    filteredRow[key] = row[key];
+                }
+            });
+            return filteredRow;
+        });
+
+        if (type === 'pdf') {
+            const doc = new jsPDF();
+            const tableColumns = Object.keys(visibleColumns).filter((key) => visibleColumns[key]);
+            const tableRows = exportData.map((row) =>
+                tableColumns.map((col) => row[col])
+            );
+            autoTable(doc, { head: [tableColumns], body: tableRows });
+            doc.save('eventos_del_mes.pdf');
+        } else if (type === 'csv') {
+            const csvContent = [
+                Object.keys(visibleColumns).filter((key) => visibleColumns[key]).join(','),
+                ...exportData.map((row) => Object.values(row).join(',')),
+            ].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            saveAs(blob, 'eventos_del_mes.csv');
+        } else if (type === 'excel') {
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), 'eventos_del_mes.xlsx');
+        }
+    };
+
     return (
         <Box className={styles.tableContainer}>
-            {/* Título con margen */}
             <Typography
                 variant="h4"
                 className={styles.title}
-                sx={{ marginBottom: '20px' }} // Agregar margen inferior
+                sx={{ marginBottom: '20px' }}
             >
                 Eventos del Mes
             </Typography>
@@ -199,6 +242,52 @@ export default function EventTable({ anio, mes }) {
                         </tbody>
                     </table>
                 )}
+            </Box>
+
+            {/* Botones de Exportación */}
+            <Box marginTop="20px" display="flex" justifyContent="center" gap="10px">
+                <Button
+                    variant="outlined"
+                    onClick={() => handleExport('csv')}
+                    sx={{
+                        borderColor: '#b9274b',
+                        color: '#b9274b',
+                        '&:hover': {
+                            borderColor: '#b9274b',
+                            color: '#b9274b',
+                        },
+                    }}
+                >
+                    Exportar CSV
+                </Button>
+                <Button
+                    variant="outlined"
+                    onClick={() => handleExport('excel')}
+                    sx={{
+                        borderColor: '#b9274b',
+                        color: '#b9274b',
+                        '&:hover': {
+                            borderColor: '#b9274b',
+                            color: '#b9274b',
+                        },
+                    }}
+                >
+                    Exportar Excel
+                </Button>
+                <Button
+                    variant="outlined"
+                    onClick={() => handleExport('pdf')}
+                    sx={{
+                        borderColor: '#b9274b',
+                        color: '#b9274b',
+                        '&:hover': {
+                            borderColor: '#b9274b',
+                            color: '#b9274b',
+                        },
+                    }}
+                >
+                    Exportar PDF
+                </Button>
             </Box>
 
             {/* Modal de advertencia */}

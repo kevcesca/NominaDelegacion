@@ -16,6 +16,7 @@ export default function CLCForm({
     <Box>
       {/* Campo de Concepto de CLC */}
       <TextField
+        sx={{marginTop:"2rem"}}
         select
         label="Concepto de CLC"
         value={selectedCLC} // Aquí se mantiene sincronizado el valor seleccionado

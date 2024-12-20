@@ -97,7 +97,7 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
       });
       return;
     }
-
+  
     const [year, month, day] = selectedDate.split('-');
     const monthName = new Date(selectedDate).toLocaleString('en-US', { month: 'long' });
     const monthInSpanish = getMonthInSpanish(monthName); // Convertir mes a español
@@ -105,34 +105,18 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
     const dayInSpanish = getDayInSpanish(dayName); // Convertir día a español
     const esLaboral = true;
     const estadoEvento = 'Pendiente';
-
+  
     try {
-      const url = `${API_BASE_URL}/insertarEventos?fecha=${selectedDate}&diaSemana=${dayInSpanish}&mes=${monthInSpanish}&anio=${year}&esLaboral=${esLaboral}&dia=${day}&tituloEvento=${encodeURIComponent(eventTitle)}&descripcion=${encodeURIComponent(eventDescription)}&estadoEvento=${estadoEvento}`;
-
-      const response = await fetch(url, {
+      // Solicitud para guardar el evento
+      const saveUrl = `${API_BASE_URL}/insertarEventos?fecha=${selectedDate}&diaSemana=${dayInSpanish}&mes=${monthInSpanish}&anio=${year}&esLaboral=${esLaboral}&dia=${day}&tituloEvento=${encodeURIComponent(eventTitle)}&descripcion=${encodeURIComponent(eventDescription)}&estadoEvento=${estadoEvento}`;
+      const saveResponse = await fetch(saveUrl, {
         method: 'GET',
       });
-
-      if (!response.ok) {
+  
+      if (!saveResponse.ok) {
         throw new Error('Error al guardar el evento');
       }
-
-      // Nuevo evento guardado
-      const newEvent = {
-        titulo_evento: eventTitle,
-        descripcion: eventDescription,
-        dia: day,
-        mes: monthInSpanish,
-        anio: year,
-        dia_del_evento: dayInSpanish,
-      };
-
-      // Actualizar los eventos en el componente padre (calendario)
-      onSaveEvent(newEvent);
-
-      // Añadir el nuevo evento a la lista de eventos del día seleccionado
-      setEvents((prevEvents) => [...prevEvents, newEvent]);
-
+  
       // Mostrar notificación de éxito
       toastRef.current.show({
         severity: 'success',
@@ -140,10 +124,37 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
         detail: 'El evento se ha guardado exitosamente.',
         life: 3000,
       });
-
+  
       // Reiniciar los campos del formulario
       setEventTitle('');
       setEventDescription('');
+  
+      // Nuevo evento creado (inicial, antes de la solicitud de actualización)
+      const newEvent = {
+        titulo_evento: eventTitle,
+        descripcion: eventDescription,
+        dia: day,
+        mes: monthInSpanish,
+        anio: year,
+        dia_del_evento: `${dayInSpanish}, ${day} de ${monthInSpanish} ${year}`,
+      };
+  
+      // Actualizar los eventos en el componente padre (calendario)
+      onSaveEvent(newEvent);
+  
+      // Solicitud para traer los eventos actualizados
+      const fetchUrl = `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthInSpanish}`;
+      const fetchResponse = await fetch(fetchUrl);
+  
+      if (fetchResponse.ok) {
+        const updatedEvents = await fetchResponse.json();
+  
+        // Actualizar los eventos tanto en la barra lateral como en el calendario
+        setEvents(updatedEvents);
+        updatedEvents.forEach((event) => onSaveEvent(event)); // Asegura que los eventos actualizados reflejen también en el calendario
+      } else {
+        console.error('Error al actualizar los eventos:', fetchResponse.statusText);
+      }
     } catch (error) {
       console.error('Error al guardar el evento:', error);
       // Mostrar notificación de error
@@ -155,6 +166,8 @@ export default function Sidebar({ selectedDate, onSaveEvent }) {
       });
     }
   };
+  
+  
 
   return (
     <aside className={styles.sidebar}>
