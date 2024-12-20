@@ -166,7 +166,7 @@ export default function ChequeTrans() {
         alert("¡El cambio fue realizado exitosamente!");
         setShowModal(false);
         setEmployeeData(null);
-        setIsInitialView(true);
+        //setIsInitialView(true);
       } else {
         const errorData = await response.json();
         console.error("Error desde el servidor:", errorData);
@@ -320,7 +320,7 @@ export default function ChequeTrans() {
     <Box className={styles.container}>
       <Box className={styles.header}>
         <Typography variant="h5" className={styles.title}>
-          Cambio de transferencia a cheque
+          Cambio de Transferencia a Cheque
         </Typography>
       </Box>
 

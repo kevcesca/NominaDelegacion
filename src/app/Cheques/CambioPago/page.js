@@ -24,10 +24,10 @@ export default function MyComponent() {
 
         {/* Enlaces a las rutas de cambio de método de pago */}
         <Link href="/Cheques/CambioPago/Cheque-Trans" className={styles.optionButton}>
-          Cheque a transferencias
+          Cheque a Transferencia
         </Link>
         <Link href="/Cheques/CambioPago/Trans-Cheque" className={styles.optionButton}>
-          Transferencia a cheque
+          Transferencia a Cheque
         </Link>
       </div>
     </div>
