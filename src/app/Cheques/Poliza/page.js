@@ -157,6 +157,9 @@ export default function PolizasGeneradas() {
 
             if (!response.ok) throw new Error('Error al generar las pólizas');
             alert('Pólizas generadas con éxito');
+
+            // Refresca la tabla automáticamente
+            await fetchPolizas({ anio: selectedData.anio, quincena: selectedData.quincena });
         } catch (error) {
             console.error(error);
             alert('Error al generar las pólizas');
@@ -164,6 +167,22 @@ export default function PolizasGeneradas() {
             setLoading(false);
         }
     };
+
+    const handleRefreshTable = async () => {
+        if (!selectedData.anio || !selectedData.quincena) {
+            alert('Por favor seleccione un filtro de fecha antes de actualizar.');
+            return;
+        }
+        setLoading(true);
+        try {
+            await fetchPolizas({ anio: selectedData.anio, quincena: selectedData.quincena });
+        } catch (error) {
+            console.error('Error al actualizar la tabla:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const handleDateChange = ({ anio, quincena, fechaISO }) => {
         setSelectedData({ anio, quincena, fechaISO });
@@ -201,7 +220,7 @@ export default function PolizasGeneradas() {
             {/* Filtro de fecha */}
             <DateFilter onDateChange={handleDateChange} />
 
-            <Box className={styles.generar}> {/* Botón Generar Pólizas */}
+            <Box className={styles.actions}>
                 <Button
                     variant="contained"
                     color="primary"
@@ -210,7 +229,16 @@ export default function PolizasGeneradas() {
                 >
                     Generar Pólizas
                 </Button>
+                <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={handleRefreshTable}
+                    sx={{ marginLeft: '1rem' }}
+                >
+                    Actualizar Tabla
+                </Button>
             </Box>
+
 
             {/* Botones de Exportación */}
             <Box className={styles.exportacion}>

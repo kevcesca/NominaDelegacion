@@ -25,6 +25,8 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import styles from "./TransCheque.module.css";
 import API_BASE_URL from "../../../../%Config/apiConfig";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 
 export default function ChequeTrans() {
   const [employeeData, setEmployeeData] = useState(null);
@@ -49,23 +51,23 @@ export default function ChequeTrans() {
   // Buscar empleado por ID
   const buscarEmpleado = async () => {
     const idEmpleado = searchInputRef.current?.value;
-  
+
     if (!idEmpleado) {
       alert("Por favor, ingrese un ID de empleado.");
       return;
     }
-  
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/transferenciaACheque?id_empleado=${idEmpleado}&quincena=03`
       );
-  
+
       if (response.ok) {
         const data = await response.json();
-  
+
         if (data.length > 0) {
           const empleado = data[0];
-  
+
           // Guardar los datos del empleado
           setEmployeeData({
             id_empleado: empleado.id_empleado,
@@ -76,7 +78,7 @@ export default function ChequeTrans() {
             banco: empleado.banco,
             titular_cuenta: empleado.titular_cuenta,
           });
-  
+
           setIsInitialView(false); // Cambiar a vista de edición
         } else {
           alert("El ID del empleado no existe. Por favor, intente nuevamente.");
@@ -95,7 +97,7 @@ export default function ChequeTrans() {
       setIsInitialView(true);
     }
   };
- 
+
 
   // Validar RFC
   const validarRFC = async () => {
@@ -103,12 +105,12 @@ export default function ChequeTrans() {
       alert("Ingrese un RFC válido.");
       return false;
     }
-  
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/validacionIdentidad?id_legal=${rfc}&id_empleado=${employeeData.id_empleado}`
       );
-  
+
       if (response.ok) {
         const data = await response.json();
         if (data[0]?.mensaje === "Es correcto") {
@@ -127,7 +129,21 @@ export default function ChequeTrans() {
       return false;
     }
   };
-  
+
+  const BackButton = ({ text = "Volver", href = "/", className }) => {
+    return (
+        <Box className={className}>
+            <Button
+                variant="contained"
+                color="primary"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => (window.location.href = href)}
+            >
+                {text}
+            </Button>
+        </Box>
+    );
+};
 
   const actualizarTipoPago = async () => {
     // Validar tipo de pago antes de enviar la solicitud
@@ -136,7 +152,7 @@ export default function ChequeTrans() {
       alert("El empleado ya tiene como tipo de pago 'Cheque'. No se realizó el cambio.");
       return;
     }
-  
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/actualizarTipoPago/2?tipoPagoActual=Cheque&referencia=${employeeData.referencia}&cambio=true&autorizadoPor=${rfc}&idEmpleado=${employeeData.id_empleado}&banco=${employeeData.banco}&titular=${employeeData.titular_cuenta}`,
@@ -144,7 +160,7 @@ export default function ChequeTrans() {
           method: "GET",
         }
       );
-  
+
       // Validar respuesta del servidor
       if (response.ok) {
         alert("¡El cambio fue realizado exitosamente!");
@@ -154,7 +170,7 @@ export default function ChequeTrans() {
       } else {
         const errorData = await response.json();
         console.error("Error desde el servidor:", errorData);
-  
+
         if (errorData.mensaje === "El empleado ya tiene el tipo de pago Cheque") {
           alert("El empleado ya tiene como tipo de pago 'Cheque'. No se realizó el cambio.");
         } else {
@@ -166,16 +182,16 @@ export default function ChequeTrans() {
       alert("Hubo un error al procesar la solicitud. Intente nuevamente.");
     }
   };
-  
-  
-  
+
+
+
 
   const confirmarCambio = async () => {
     try {
       // Validar RFC antes de proceder
       const esRFCValido = await validarRFC();
       if (!esRFCValido) return;
-  
+
       // Actualizar tipo de pago
       await actualizarTipoPago();
     } catch (error) {
@@ -183,25 +199,25 @@ export default function ChequeTrans() {
       alert("Hubo un error al procesar la solicitud.");
     }
   };
-  
+
 
   const handleHacerCambio = async () => {
     if (!employeeData.id_empleado) {
       alert("Debe buscar un empleado antes de realizar el cambio.");
       return;
     }
-  
+
     if (employeeData.tipo_pago_actual === "Cheque") {
       alert("El empleado ya tiene como tipo de pago 'Cheque'. No se puede realizar el cambio.");
       return;
     }
-  
+
     setShowModal(true); // Mostrar modal de confirmación
   };
-  
-  
-  
-    
+
+
+
+
   // Cancelar el cambio y volver a la vista inicial
   const cancelarCambio = () => {
     setEmployeeData(null);
@@ -319,9 +335,9 @@ export default function ChequeTrans() {
               fullWidth
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                    buscarEmpleado();
+                  buscarEmpleado();
                 }
-            }}
+              }}
             />
             <Button
               variant="contained"
@@ -332,6 +348,9 @@ export default function ChequeTrans() {
               Buscar
             </Button>
           </Box>
+
+          <BackButton className={styles.volver} href="/Cheques/CambioPago"/> 
+
         </Box>
       ) : (
         <Box>
@@ -352,8 +371,14 @@ export default function ChequeTrans() {
               >
                 Buscar
               </Button>
+
             </Box>
+
           </Box>
+
+          <Box>
+
+            </Box>
 
           <Box className={styles.employeeForm}>
             <Box className={styles.row}>
@@ -433,6 +458,10 @@ export default function ChequeTrans() {
                 Ver cambios realizados este mes
               </Button>
             </Box>
+            <Box >
+              <BackButton  href="/Cheques/CambioPago" />
+            </Box>
+
           </Box>
         </Box>
       )}
@@ -494,7 +523,7 @@ export default function ChequeTrans() {
                 </TableRow>
               </TableHead>
               <TableBody>
-              {changesData
+                {changesData
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => (
                     <TableRow key={row.id_empleado}>
@@ -503,24 +532,24 @@ export default function ChequeTrans() {
                           checked={selectedRows.includes(row.id_empleado)}
                           onChange={() => handleRowSelect(row.id_empleado)}
                         />
-                    </TableCell>
-                    <TableCell>{row.id_empleado}</TableCell>
-                    <TableCell>{row.nombre_completo}</TableCell>
-                    <TableCell>{row.salario}</TableCell>
-                    <TableCell>{new Date(row.fecha_cambio).toLocaleDateString()}</TableCell>
-                    <TableCell>{row.tipo_pago_anterior}</TableCell>
-                    <TableCell>{row.tipo_pago_actual}</TableCell>
-                    <TableCell>{row.referencia}</TableCell>
-                    <TableCell>{row.Banco}</TableCell>
-                    <TableCell>{row.titular_cuenta}</TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>{row.id_empleado}</TableCell>
+                      <TableCell>{row.nombre_completo}</TableCell>
+                      <TableCell>{row.salario}</TableCell>
+                      <TableCell>{new Date(row.fecha_cambio).toLocaleDateString()}</TableCell>
+                      <TableCell>{row.tipo_pago_anterior}</TableCell>
+                      <TableCell>{row.tipo_pago_actual}</TableCell>
+                      <TableCell>{row.referencia}</TableCell>
+                      <TableCell>{row.Banco}</TableCell>
+                      <TableCell>{row.titular_cuenta}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
 
             </Table>
           </TableContainer>
-           {/* Paginación */}
-           <TablePagination
+          {/* Paginación */}
+          <TablePagination
             rowsPerPageOptions={[5, 10, 15]}
             component="div"
             count={changesData.length}
@@ -565,18 +594,18 @@ export default function ChequeTrans() {
 
       {/* Modal de advertencia */}
       <Dialog open={warningOpen} onClose={() => setWarningOpen(false)}>
-  <DialogTitle>Advertencia</DialogTitle>
-  <DialogContent>
-    <DialogContentText>
-      No se puede realizar el cambio porque el tipo de pago actual ya es "Cheque".
-    </DialogContentText>
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setWarningOpen(false)} color="primary">
-      Cerrar
-    </Button>
-  </DialogActions>
-</Dialog>
+        <DialogTitle>Advertencia</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            No se puede realizar el cambio porque el tipo de pago actual ya es "Cheque".
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setWarningOpen(false)} color="primary">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
 
     </Box>
