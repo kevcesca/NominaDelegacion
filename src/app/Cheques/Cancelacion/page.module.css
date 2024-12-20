@@ -1,5 +1,5 @@
 .container {
-    width: 60vw;
+    width: 80vw;
     margin: 20px auto;
     padding: 20px;
     border-radius: 8px;
@@ -25,4 +25,8 @@
 
 .submitButton {
     margin-top: 20px;
+}
+
+.exportButtons {
+    gap: 5px;
 }

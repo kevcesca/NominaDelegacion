@@ -34,9 +34,45 @@ export default function GenerateChequesForm({ quincena, fecha, tipoNomina }) {
         fetchUltimoFolio();
     }, []);
 
+
+    const insertChequeData = async (anio, quincena) => {
+            if (!anio || !quincena) {
+                alert("Por favor selecciona un año y una quincena.");
+                return;
+            }
+        
+            try {
+                // Servicio que inserta nuevos datos
+                const response = await fetch(
+                    `${API_BASE_URL}/NominaCtrl/InsertEstadoCheques?anio=${anio}&quincena=${quincena}`,
+                    { method: "GET" }
+                );
+        
+                if (response.ok) {
+                    const message = await response.text();
+                    alert(message); // Mostrar mensaje de éxito del backend
+        
+                    // Después de insertar, llamar al servicio que recupera los datos
+                    //fetchChequeData(anio, quincena); // Refrescar la tabla automáticamente
+                } else {
+                    alert("Error al insertar los datos.");
+                }
+            } catch (error) {
+                console.error("Error al insertar los datos:", error);
+                alert("No se pudo conectar con el servicio.");
+            }
+        };
+
+        const handleDateChange = ({ anio, quincena }) => {
+            insertChequeData(anio, quincena);
+        };
+    
+
     // Manejar el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+
 
         // Aplicamos la transformación al tipo de nómina
         const tipoNominaFormateado = capitalizeFirstLetter(tipoNomina);
@@ -48,6 +84,16 @@ export default function GenerateChequesForm({ quincena, fecha, tipoNomina }) {
             fecha,
             tipoNomina: tipoNominaFormateado,
         }); // Depuración
+
+         // Extraer el año de la fecha
+    let anio;
+    try {
+        anio = new Date(fecha).getFullYear(); // Esto asume que `fecha` es válida
+    } catch (error) {
+        console.error("Fecha inválida:", error);
+        alert("Fecha proporcionada es inválida.");
+        return;
+    }
 
         if (!folioInicial || !totalCheques || !quincena || !fecha || !tipoNomina) {
             alert(
@@ -69,6 +115,7 @@ export default function GenerateChequesForm({ quincena, fecha, tipoNomina }) {
 
             setSuccessMessage("¡Cheques generados exitosamente!");
             console.log("Respuesta del servidor:", response.data);
+            await insertChequeData(anio, quincena)
         } catch (error) {
             console.error("Error al generar los cheques:", error);
             alert("Ocurrió un error al generar los cheques. Inténtalo nuevamente.");
@@ -106,6 +153,7 @@ export default function GenerateChequesForm({ quincena, fecha, tipoNomina }) {
                 value={folioInicial}
                 onChange={(e) => setFolioInicial(e.target.value)}
                 fullWidth
+                InputProps={{ readOnly: true }}
                 required
                 sx={{ marginBottom: 2 }}
             />
@@ -124,6 +172,7 @@ export default function GenerateChequesForm({ quincena, fecha, tipoNomina }) {
                 color="primary"
                 fullWidth
                 disabled={loading}
+                
             >
                 {loading ? "Generando..." : "Generar Cheques"}
             </Button>

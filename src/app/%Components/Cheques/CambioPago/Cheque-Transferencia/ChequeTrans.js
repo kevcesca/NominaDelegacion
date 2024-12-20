@@ -27,6 +27,8 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import styles from "./ChequeTrans.module.css";
 import API_BASE_URL from "../../../../%Config/apiConfig";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 
 const ChequeTrans = () => {
   const [employeeFound, setEmployeeFound] = useState(false);
@@ -155,11 +157,26 @@ const handleHacerCambio = () => {
     }
   };
 
+  const BackButton = ({ text = "Volver", href = "/", className }) => {
+    return (
+        <Box className={className}>
+            <Button
+                variant="contained"
+                color="primary"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => (window.location.href = href)}
+            >
+                {text}
+            </Button>
+        </Box>
+    );
+};
+
   // Actualizar tipo de pago usando el servicio
   const actualizarTipoPago = async () => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/actualizarTipoPago?tipoPagoActual=Cheque&referencia=${employeeData.numCuenta}&cambio=true&autorizadoPor=${rfc}&idEmpleado=${employeeData.id}&banco=${employeeData.banco}&titular=${employeeData.titular}`,
+        `${API_BASE_URL}/actualizarTipoPago?tipoPagoActual=Transferencia&referencia=${employeeData.numCuenta}&cambio=true&autorizadoPor=${rfc}&idEmpleado=${employeeData.id}&banco=${employeeData.banco}&titular=${employeeData.titular}`,
         {
           method: "GET",
         }
@@ -262,21 +279,25 @@ const handleHacerCambio = () => {
   // Mostrar cambios realizados este mes
   const verCambiosRealizados = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/cambiosTipoPago?tipo_pago_anterior=Cheque&tipo_pago_actual=Transferencia&cambio=true&quincena=03`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setChangesData(data);
-        setChangesModalOpen(true);
-      } else {
-        alert("Error al obtener los cambios realizados. Intente más tarde.");
-      }
+        const response = await fetch(
+            `${API_BASE_URL}/cambiosTipoPago?tipo_pago_anterior=Cheque&tipo_pago_actual=Transferencia&cambio=true&quincena=03`
+        );
+
+        if (response.ok) {
+            const data = await response.json();
+            setChangesData(data);
+            setChangesModalOpen(true);
+        } else {
+            const error = await response.text();
+            console.error("Error al obtener los cambios:", error);
+            alert(`Error: ${error}`);
+        }
     } catch (error) {
-      console.error("Error al obtener los cambios:", error);
-      alert("Error al conectar con el servicio. Intente más tarde.");
+        console.error("Error al obtener los cambios:", error);
+        alert("Error al conectar con el servicio. Intente más tarde.");
     }
-  };
+};
+
 
   return (
     <Box className={styles.container}>
@@ -289,7 +310,9 @@ const handleHacerCambio = () => {
       {/* Buscar empleado */}
       <Box className={styles.searchContainer}>
         <Typography variant="h6">Buscar otro empleado por ID</Typography>
+        
         <Box className={styles.searchField}>
+          
           <TextField
             label="ID del empleado"
             inputRef={searchInputRef}
@@ -302,6 +325,7 @@ const handleHacerCambio = () => {
             }}
 
           />
+
           <Button
             variant="contained"
             color="primary"
@@ -310,7 +334,12 @@ const handleHacerCambio = () => {
           >
             Buscar
           </Button>
+
+              
         </Box>
+        <BackButton className={styles.volver} href="/Cheques/CambioPago" /> 
+              
+        
       </Box>
 
       {/* Mostrar formulario si se encuentra al empleado */}
@@ -404,7 +433,12 @@ const handleHacerCambio = () => {
               Ver cambios realizados este mes
             </Button>
           </Box>
+
+          <Box >
+              <BackButton  href="/Cheques/CambioPago" />
+            </Box>
         </Box>
+        
       )}
 
       {/* Modal con la tabla de cambios */}
@@ -475,9 +509,7 @@ const handleHacerCambio = () => {
                       <TableCell>{row.id_empleado}</TableCell>
                       <TableCell>{row.nombre_completo}</TableCell>
                       <TableCell>{row.salario}</TableCell>
-                      <TableCell>
-                        {new Date(row.fecha_cambio).toLocaleDateString()}
-                      </TableCell>
+                      <TableCell>{new Date(row.fecha_cambio).toLocaleDateString()}</TableCell>
                       <TableCell>{row.tipo_pago_anterior}</TableCell>
                       <TableCell>{row.tipo_pago_actual}</TableCell>
                       <TableCell>{row.referencia}</TableCell>

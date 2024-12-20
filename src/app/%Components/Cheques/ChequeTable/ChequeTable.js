@@ -38,6 +38,7 @@ export default function ChequeTable() {
         )
     );
 
+    
     // Manejar la paginación
     const handleChangePage = (event, newPage) => setPage(newPage);
     const handleChangeRowsPerPage = (event) => {
