@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ThemeProvider, Box, Typography, Alert, Button } from '@mui/material';
 import Link from 'next/link';
@@ -12,8 +13,10 @@ import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
 import theme from '../$tema/theme';
 import styles from './page.module.css';
 import AsyncButton from '../%Components/AsyncButton/AsyncButton';
+import { useAuth } from '../context/AuthContext'
 
 export default function CargarDatos() {
+    const { user: currentUser } = useAuth(); // Recuperamos el usuario actual del contexto
     const [quincena, setQuincena] = useState(null);
     const [anio, setAnio] = useState(null);
     const [progressPostNomina, setProgressPostNomina] = useState(0);
@@ -72,7 +75,7 @@ export default function CargarDatos() {
                                     <TablaPostNomina
                                         quincena={quincena}
                                         anio={anio}
-                                        session={true}
+                                        session={currentUser.nombre_usuario} // Pasamos la información del usuario actual
                                         setProgress={setProgressPostNomina}
                                         setUploaded={setPostNominaUploaded}
                                         extra=""
@@ -92,7 +95,7 @@ export default function CargarDatos() {
                                     <TablaPostNominaHonorarios
                                         quincena={quincena}
                                         anio={anio}
-                                        session={true}
+                                        session={currentUser.nombre_usuario}
                                         setProgress={setProgressHonorarios}
                                         setUploaded={setHonorariosUploaded}
                                     />
@@ -111,7 +114,7 @@ export default function CargarDatos() {
                                     <TablaQuincenasExtraordinarias
                                         quincena={quincena}
                                         anio={anio}
-                                        session={true}
+                                        session={currentUser.nombre_usuario}
                                         setProgress={setProgressPostNomina}
                                         setUploaded={setPostNominaUploaded}
                                     />
@@ -130,7 +133,7 @@ export default function CargarDatos() {
                                     <TablaFiniquitos
                                         quincena={quincena}
                                         anio={anio}
-                                        session={true}
+                                        session={currentUser.nombre_usuario}
                                         setProgress={setProgressPostNomina}
                                         setUploaded={setPostNominaUploaded}
                                         extra=""

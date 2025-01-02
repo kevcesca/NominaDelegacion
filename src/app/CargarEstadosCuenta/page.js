@@ -11,8 +11,10 @@ import { ProgressBar } from 'primereact/progressbar';
 import { ThemeProvider, Box, Typography } from '@mui/material';
 import theme from '../$tema/theme';
 import HeaderSeccion from '../%Components/HeaderSeccion/HeaderSeccion';
+import { useAuth } from '../context/AuthContext'
 
 function CargarEstadosCuenta() {
+    const { user: currentUser } = useAuth();
     const [mes, setMes] = useState('');
     const [anio, setAnio] = useState('');
     const [quincena, setQuincena] = useState('');
@@ -68,6 +70,7 @@ function CargarEstadosCuenta() {
                         quincena={quincena}
                         setProgress={setProgressEstadosCuenta}
                         setUploaded={() => {}}
+                        session={currentUser.nombre_usuario}
                     />
                 )}
 
@@ -88,6 +91,7 @@ function CargarEstadosCuenta() {
                             quincena={quincena}
                             setProgress={setProgressRetenciones}
                             setUploaded={() => {}}
+                            session={currentUser.nombre_usuario}
                         />
                     </>
                 )}
