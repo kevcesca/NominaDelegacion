@@ -308,138 +308,137 @@ const handleHacerCambio = () => {
         </Typography>
       </Box>
       {/* Buscar empleado */}
+      
       <Box className={styles.searchContainer}>
-        <Typography variant="h6">Buscar otro empleado por ID</Typography>
-        
-        <Box className={styles.searchField}>
-          
-          <TextField
-            label="ID del empleado"
-            inputRef={searchInputRef}
-            variant="outlined"
-            fullWidth
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                buscarEmpleado();
-              }
-            }}
+  <Typography variant="h6">Buscar otro empleado por ID</Typography>
 
-          />
+  <Box className={styles.searchField}>
+    <TextField
+      label="ID del empleado"
+      inputRef={searchInputRef}
+      variant="outlined"
+      fullWidth
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          buscarEmpleado();
+        }
+      }}
+    />
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={buscarEmpleado}
+      className={styles.searchButton}
+    >
+      Buscar
+    </Button>
+  </Box>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={buscarEmpleado}
-            className={styles.searchButton}
-          >
-            Buscar
-          </Button>
+  {/* Render BackButton dependiendo del estado */}
+  {!employeeFound && (
+    <BackButton className={styles.volver} href="/Cheques/CambioPago" />
+  )}
+</Box>
 
-              
-        </Box>
-        <BackButton className={styles.volver} href="/Cheques/CambioPago" /> 
-              
-        
-      </Box>
+{/* Mostrar formulario si se encuentra al empleado */}
+{employeeFound && (
+  <Box className={styles.employeeForm}>
+    <Box className={styles.row}>
+      <TextField
+        label="ID Empleado"
+        value={employeeData.id}
+        InputProps={{ readOnly: true }}
+        variant="outlined"
+        className={styles.input}
+      />
+      <TextField
+        label="Nombre"
+        value={employeeData.nombre}
+        InputProps={{ readOnly: true }}
+        variant="outlined"
+        className={styles.input}
+      />
+    </Box>
+    <Box className={styles.row}>
+      <TextField
+        label="Monto"
+        value={employeeData.monto}
+        InputProps={{ readOnly: true }}
+        variant="outlined"
+        className={styles.input}
+      />
+      <TextField
+        label="Fecha de cambio"
+        value={fechaCambio}
+        InputProps={{ readOnly: true }}
+        variant="outlined"
+        className={styles.input}
+      />
+    </Box>
+    <Box className={styles.row}>
+      <TextField
+        label="Número de cuenta actual"
+        value={employeeData.numCuenta}
+        placeholder="Ingrese el número de cuenta"
+        onChange={(e) =>
+          setEmployeeData({ ...employeeData, numCuenta: e.target.value })
+        }
+        variant="outlined"
+        className={styles.input}
+      />
+      <TextField
+        label="Banco"
+        value={employeeData.banco}
+        placeholder="Ingrese el nombre del banco"
+        onChange={(e) =>
+          setEmployeeData({ ...employeeData, banco: e.target.value })
+        }
+        variant="outlined"
+        className={styles.input}
+      />
+    </Box>
+    <Box className={styles.row}>
+      <TextField
+        label="Titular de la cuenta"
+        value={employeeData.titular}
+        placeholder="Ingrese el titular de la cuenta"
+        onChange={(e) =>
+          setEmployeeData({ ...employeeData, titular: e.target.value })
+        }
+        variant="outlined"
+        fullWidth
+      />
+    </Box>
+    <Box className={styles.buttonContainer}>
+      <Button variant="contained" color="success" onClick={handleHacerCambio}>
+        Hacer cambio
+      </Button>
+      <Button variant="contained" color="error" onClick={cancelarCambio}>
+        Cancelar cambio
+      </Button>
+    </Box>
+    <Typography
+      variant="subtitle1"
+      color="error"
+      align="center"
+      className={styles.message}
+    >
+      Los pagos empezarán a correr desde la primera quincena de{" "}
+      {fechaCambio.slice(0, 7)}.
+    </Typography>
+    <Box className={styles.buttonchange}>
+      <Button variant="contained" onClick={verCambiosRealizados}>
+        Ver cambios realizados este mes
+      </Button>
+    </Box>
 
-      {/* Mostrar formulario si se encuentra al empleado */}
-      {employeeFound && (
-        <Box className={styles.employeeForm}>
-          <Box className={styles.row}>
-            <TextField
-              label="ID Empleado"
-              value={employeeData.id}
-              InputProps={{ readOnly: true }}
-              variant="outlined"
-              className={styles.input}
-            />
-            <TextField
-              label="Nombre"
-              value={employeeData.nombre}
-              InputProps={{ readOnly: true }}
-              variant="outlined"
-              className={styles.input}
-            />
-          </Box>
-          <Box className={styles.row}>
-            <TextField
-              label="Monto"
-              value={employeeData.monto}
-              InputProps={{ readOnly: true }}
-              variant="outlined"
-              className={styles.input}
-            />
-            <TextField
-              label="Fecha de cambio"
-              value={fechaCambio}
-              InputProps={{ readOnly: true }}
-              variant="outlined"
-              className={styles.input}
-            />
-          </Box>
-          <Box className={styles.row}>
-            <TextField
-              label="Número de cuenta actual"
-              value={employeeData.numCuenta}
-              placeholder="Ingrese el número de cuenta"
-              onChange={(e) =>
-                setEmployeeData({ ...employeeData, numCuenta: e.target.value })
-              }
-              variant="outlined"
-              className={styles.input}
-            />
-            <TextField
-              label="Banco"
-              value={employeeData.banco}
-              placeholder="Ingrese el nombre del banco"
-              onChange={(e) =>
-                setEmployeeData({ ...employeeData, banco: e.target.value })
-              }
-              variant="outlined"
-              className={styles.input}
-            />
-          </Box>
-          <Box className={styles.row}>
-            <TextField
-              label="Titular de la cuenta"
-              value={employeeData.titular}
-              placeholder="Ingrese el titular de la cuenta"
-              onChange={(e) =>
-                setEmployeeData({ ...employeeData, titular: e.target.value })
-              }
-              variant="outlined"
-              fullWidth
-            />
-          </Box>
-          <Box className={styles.buttonContainer}>
-            <Button variant="contained" color="success" onClick={handleHacerCambio}>
-              Hacer cambio
-            </Button>
-            <Button variant="contained" color="error" onClick={cancelarCambio}>
-              Cancelar cambio
-            </Button>
-          </Box>
-          <Typography
-            variant="subtitle1"
-            color="error"
-            align="center"
-            className={styles.message}
-          >
-            Los pagos empezarán a correr desde la primera quincena de{" "}
-            {fechaCambio.slice(0, 7)}.
-          </Typography>
-          <Box className={styles.buttonchange}>
-            <Button variant="contained" onClick={verCambiosRealizados}>
-              Ver cambios realizados este mes
-            </Button>
-          </Box>
+    {/* BackButton ahora está al final cuando se encuentra al empleado */}
+    <Box>
+      <BackButton className={styles.volver} href="/Cheques/CambioPago" />
+    </Box>
+  </Box>
+)}
 
-          <Box >
-              <BackButton  href="/Cheques/CambioPago" />
-            </Box>
-        </Box>
-        
-      )}
 
       {/* Modal con la tabla de cambios */}
       <Dialog
@@ -530,6 +529,7 @@ const handleHacerCambio = () => {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
           />
         </DialogContent>
         <DialogActions>

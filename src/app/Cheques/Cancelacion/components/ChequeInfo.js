@@ -20,7 +20,7 @@ const ChequeInfo = ({ chequeInfo }) => (
         <TextField
             label="Tipo de Nómina"
             value={chequeInfo ? chequeInfo.tipo_nomina : ""}
-            InputProps={{ readOnly: true }}
+            InputProps={{ readOnly: true }}                   
             fullWidth
             margin="normal"
         />
