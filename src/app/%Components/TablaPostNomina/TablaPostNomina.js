@@ -70,7 +70,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             formData.append('file', file);
             formData.append('extra', '');
 
-            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Compuesta&usuario=${session?.user?.name || 'unknown'}`;
+            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Compuesta&usuario=${session || 'unknown'}`;
 
             try {
                 const response = await axios.post(uploadURL, formData, {
@@ -149,7 +149,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
 
     const handleProcesarNomina = async () => {
         try {
-            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
+            const usuario = session|| 'unknown';  // Obtener el nombre del usuario
             const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Compuesta&usuario=${usuario}&extra=gatitoverdecito`; // Ajustar endpoint y parámetros
 
             // Hacer la solicitud al endpoint de procesar nómina

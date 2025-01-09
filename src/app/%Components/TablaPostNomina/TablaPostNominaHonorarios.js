@@ -60,7 +60,7 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
             formData.append('file', file);
             formData.append('extra', '');
 
-            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Honorarios&usuario=${session?.nombre_usuario || 'unknown'}`;
+            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Honorarios&usuario=${session || 'unknown'}`;
 
             try {
                 const response = await axios.post(uploadURL, formData, {
@@ -123,7 +123,7 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
 
     const handleProcesarNomina = async () => {
         try {
-            const usuario = session?.nombre_usuario || 'unknown';
+            const usuario = session || 'unknown';
             const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Honorarios&usuario=${usuario}&extra=gatitoverdecito`;
 
             const response = await axios.get(endpoint);

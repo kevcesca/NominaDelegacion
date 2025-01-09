@@ -58,7 +58,7 @@ export default function TablaEstadosCuenta({ anio, quincena, session, setUploade
         formData.append('file', file);
         formData.append('extra', ''); // Parámetro extra (si se requiere)
 
-        const usuario = session?.user?.name.replace(/\s+/g, '_') || 'unknown';
+        const usuario = session || 'unknown';
 
         try {
             // Subida del archivo

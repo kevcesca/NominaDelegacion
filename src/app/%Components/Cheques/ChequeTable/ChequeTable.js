@@ -5,6 +5,8 @@ import useChequeTable from "./useChequeTable";
 import ChequeFilterSection from "./ChequeFilterSection";
 import ChequeSearchBar from "./ChequeSearchBar";
 import ChequeTableSection from "./ChequeTableSection";
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { IconButton } from '@mui/material';
 
 export default function ChequeTable() {
     const {
@@ -38,7 +40,7 @@ export default function ChequeTable() {
         )
     );
 
-    
+
     // Manejar la paginación
     const handleChangePage = (event, newPage) => setPage(newPage);
     const handleChangeRowsPerPage = (event) => {
@@ -62,16 +64,16 @@ export default function ChequeTable() {
             <ChequeSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
             {/* Botón para actualizar la tabla */}
-            
+
             {/* Botón para actualizar después de generar nuevos cheques */}
-            <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => refreshCheques()} // Refresca manualmente
-                sx={{ marginBottom: 2 }}
+
+            <IconButton
+                onClick={() => refreshCheques()}
+                aria-label="refresh"
+                size="large" // Opciones: "small", "medium", "large"
             >
-                Actualizar Cheques
-            </Button>
+                <RefreshIcon fontSize="medium" /> {/* Opciones: "small", "medium", "large" */}
+            </IconButton>
 
 
             {/* Tabla de cheques */}

@@ -62,7 +62,7 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
             formData.append('file', file);
             formData.append('extra', ''); // Enviar el parámetro `extra` vacío
 
-            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&usuario=${session?.nombre_usuario || 'unknown'}`;
+            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&usuario=${session || 'unknown'}`;
 
             try {
                 const response = await axios.post(uploadURL, formData, {
@@ -121,7 +121,7 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
 
     const handleProcesarFiniquitos = async () => {
         try {
-            const usuario = session?.nombre_usuario || 'unknown';
+            const usuario = session || 'unknown';
             const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Finiquitos&usuario=${usuario}&extra=gatitoverdecito`;
 
             const response = await axios.get(endpoint);

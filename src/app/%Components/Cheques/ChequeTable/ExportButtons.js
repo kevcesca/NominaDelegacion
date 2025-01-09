@@ -1,18 +1,42 @@
-import React from "react";
-import { Box, Button } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Button, Menu, MenuItem } from "@mui/material";
 
-export default function ExportButtons({ onExportExcel, onExportCSV, onExportPDF, disabled }) {
+export default function ExportDropdown({ onExportExcel, onExportCSV, onExportPDF, disabled }) {
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
     return (
-        <Box sx={{ marginTop: "2rem", display: "flex", gap: 2 }}>
-            <Button variant="contained" color="primary" onClick={onExportExcel} disabled={disabled}>
-                Exportar a Excel
+        <Box sx={{ marginTop: "2rem" }}>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={handleClick}
+                disabled={disabled}
+            >
+                Exportar
             </Button>
-            <Button variant="contained" color="secondary" onClick={onExportCSV} disabled={disabled}>
-                Exportar a CSV
-            </Button>
-            <Button variant="contained" color="success" onClick={onExportPDF} disabled={disabled}>
-                Exportar a PDF
-            </Button>
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+            >
+                <MenuItem onClick={() => { handleClose(); onExportExcel(); }}>
+                    Exportar a Excel
+                </MenuItem>
+                <MenuItem onClick={() => { handleClose(); onExportCSV(); }}>
+                    Exportar a CSV
+                </MenuItem>
+                <MenuItem onClick={() => { handleClose(); onExportPDF(); }}>
+                    Exportar a PDF
+                </MenuItem>
+            </Menu>
         </Box>
     );
 }

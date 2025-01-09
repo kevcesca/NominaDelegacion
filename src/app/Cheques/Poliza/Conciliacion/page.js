@@ -7,6 +7,7 @@ import InformacionTable from './InformacionTable';
 import styles from './page.module.css';
 import API_BASE_URL from '../../../%Config/apiConfig';
 import { useRouter } from 'next/navigation';
+import TablePagination from '@mui/material/TablePagination';
 
 export default function ConsolidacionInformacion() {
     const [informacion, setInformacion] = useState([]);
@@ -92,13 +93,27 @@ export default function ConsolidacionInformacion() {
 
             <InformacionTable data={paginatedData} loading={loading} />
 
-            <Pagination
-                count={Math.ceil(filteredData.length / rowsPerPage)}
-                page={currentPage}
-                onChange={handlePageChange}
-                color="primary"
-                className={styles.pagination}
-            />
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'right',
+                    alignItems: 'center',
+                    marginTop: '1rem',
+                }}
+            >
+                {/* Paginación */}
+                <TablePagination
+                    component="div"
+                    count={Math.ceil(filteredData.length / rowsPerPage)}
+                    page={currentPage - 1} // page en TablePagination es base 0
+                    onPageChange={(e, newPage) => setCurrentPage(newPage + 1)} // Ajuste para base 1
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={(e) => handleRowsPerPageChange(e)}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    labelRowsPerPage="Filas por página"
+                />
+            </Box>
+
 
             {/* Botón para exportar */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>

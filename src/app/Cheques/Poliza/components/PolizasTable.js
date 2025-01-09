@@ -16,6 +16,7 @@ import {
     Box,
 } from '@mui/material';
 import styles from '../page.module.css';
+import TablePagination from '@mui/material/TablePagination';
 
 export default function PolizasTable({
     polizas,
@@ -217,29 +218,21 @@ export default function PolizasTable({
             <Box
                 sx={{
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justifyContent: 'right',
                     alignItems: 'center',
                     marginTop: '1rem',
                 }}
             >
-                <FormControl sx={{ minWidth: 120 }}>
-                    <InputLabel>Rows per page</InputLabel>
-                    <Select
-                        value={rowsPerPage}
-                        onChange={handleRowsPerPageChange}
-                        label="Rows per page"
-                    >
-                        <MenuItem value={5}>5</MenuItem>
-                        <MenuItem value={10}>10</MenuItem>
-                        <MenuItem value={20}>20</MenuItem>
-                    </Select>
-                </FormControl>
-
-                <Pagination
-                    count={Math.ceil(polizas.length / rowsPerPage)}
-                    page={currentPage}
-                    onChange={(e, value) => setCurrentPage(value)}
-                    color="primary"
+                {/* Paginación */}
+                <TablePagination
+                    component="div"
+                    count={polizas.length} // Total de registros
+                    page={currentPage - 1} // page en TablePagination es base 0
+                    onPageChange={(e, newPage) => setCurrentPage(newPage + 1)} // Ajuste para base 1
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={(e) => handleRowsPerPageChange(e)}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    labelRowsPerPage="Filas por página"
                 />
             </Box>
         </Box>

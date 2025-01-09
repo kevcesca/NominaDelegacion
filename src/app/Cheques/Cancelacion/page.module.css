@@ -28,5 +28,7 @@
 }
 
 .exportButtons {
-    gap: 5px;
+margin-bottom: 2rem;    
+margin-top: 2rem
+;
 }
