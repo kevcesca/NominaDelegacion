@@ -62,7 +62,7 @@ export default function TablaRetenciones({ anio, quincena, session, setUploaded 
         formData.append('file', file);
         formData.append('extra', ''); // Parámetro extra obligatorio
 
-        const usuario = session?.user?.name.replace(/\s+/g, '_') || 'unknown';
+        const usuario = session || 'unknown';
 
         try {
             const response = await axios.post(
