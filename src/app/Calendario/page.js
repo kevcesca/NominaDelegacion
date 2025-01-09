@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import Calendar from './Calendar';
-import Sidebar from './Sidebar';
 import EventTable from './EventTable';
 import styles from './page.module.css';
 import API_BASE_URL from '../%Config/apiConfig';
+import { Alert } from '@mui/material'; // Importar Alert de Material-UI
 
 export default function Calendario() {
   const [selectedDate, setSelectedDate] = useState(null); // Fecha seleccionada
@@ -158,7 +158,7 @@ export default function Calendario() {
             default: return monthName;
           }
         };
-  
+
         try {
           const monthInSpanish = getMonthInSpanish(monthName);
           const response = await fetch(
@@ -170,7 +170,7 @@ export default function Calendario() {
           console.error('Error al obtener los eventos actualizados:', error);
         }
       };
-  
+
       fetchUpdatedEvents(); // Llamada para actualizar los eventos después de guardar
     }
   };
@@ -181,6 +181,11 @@ export default function Calendario() {
       <div className={styles.title}>
         <h1>CALENDARIO</h1>
       </div>
+
+      {/* Mensaje de advertencia */}
+      <Alert severity="info" sx={{ width: "37.5vw", textAlign: "center"}}>
+        Al cambiar el mes se actualizará en automatico en "Eventos del mes".
+      </Alert>
 
       {/* Contenido del calendario */}
       <div className={styles.containerContent}>
@@ -196,12 +201,6 @@ export default function Calendario() {
             onNextMonth={handleNextMonth}
           />
 
-          {/* Barra lateral */}
-          <Sidebar
-            selectedDate={selectedDate}
-            events={events}
-            onSaveEvent={handleSaveEvent} // Pasamos la función que guarda el evento
-          />
         </div>
 
         {/* Tabla resumen */}

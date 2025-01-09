@@ -1,67 +1,81 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
+import { Modal, Typography, Box } from '@mui/material';
 import styles from './page.module.css';
 
 export default function Calendar({
-  selectedDate, events, onDateSelect, emptyDates, currentMonth, currentYear, onPrevMonth, onNextMonth
+  selectedDate,
+  events,
+  onDateSelect,
+  currentMonth,
+  currentYear,
+  onPrevMonth,
+  onNextMonth,
 }) {
-  const [currentDate, setCurrentDate] = useState(new Date(currentYear, currentMonth)); // Controla la fecha actual del calendario
+  const [currentDate, setCurrentDate] = useState(new Date(currentYear, currentMonth));
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    setCurrentDate(new Date(currentYear, currentMonth)); // Actualiza la fecha cuando cambie el mes
-  }, [currentMonth, currentYear]);
+  const today = new Date(); // Día actual
 
-  // Fecha actual para resaltar el día actual
-  const today = new Date();
   const isToday = (day) =>
     today.getDate() === day &&
     today.getMonth() === currentDate.getMonth() &&
     today.getFullYear() === currentDate.getFullYear();
 
-  const currentMonthName = currentDate.toLocaleString('es', { month: 'long' });
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-  // Detectar el día actual si no hay uno seleccionado
   useEffect(() => {
-    if (!selectedDate) {
-      const todayFormatted = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      onDateSelect(todayFormatted); // Seleccionar el día actual
-    }
-  }, [selectedDate, onDateSelect]);
+    setCurrentDate(new Date(currentYear, currentMonth));
+  }, [currentMonth, currentYear]);
+
+  const formatDate = (date) => {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(date).toLocaleDateString('es-ES', options);
+  };
 
   const renderDays = () => {
-    const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7; // Garantiza celdas completas en la cuadrícula
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
     const cells = [];
 
     for (let i = 0; i < totalCells; i++) {
       const day = i - firstDayOfMonth + 1;
 
       if (i < firstDayOfMonth || day > daysInMonth) {
-        // Celdas vacías (antes o después del mes)
         cells.push(<td key={i} className={styles.emptyCell}></td>);
       } else {
-        // Días del mes
         const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const isSelected = selectedDate === formattedDate; // Verificar si el día está seleccionado
-        const dayEvents = events.filter(event => event.dia === day); // Obtener eventos para este día
+        const dayEvents = events.filter(event => event.dia === day); // Filtrar eventos por día
 
         cells.push(
           <td
             key={i}
-            className={`${styles.day} ${isToday(day) ? styles.today : ''} ${isSelected ? styles.selected : ''}`}
-            onClick={() => onDateSelect(formattedDate)} // Llamar a onDateSelect al hacer clic
+            className={`${styles.day} ${isToday(day) ? styles.today : ''} ${
+              selectedDate === formattedDate ? styles.selectedDay : ''
+            }`} // Aplicar clase al día seleccionado
+            onClick={() => onDateSelect(formattedDate)} // Seleccionar día
           >
-            <div className={styles.dayNumber}>{day}</div>
-            {dayEvents.length > 0 && (
-              <ul className={styles.eventList}>
+            <div className={`${styles.dayNumber} ${isToday(day) ? styles.circleToday : ''}`}>
+              {day}
+            </div>
+
+            {/* Mostrar eventos solo si el día está seleccionado */}
+            {selectedDate === formattedDate && (
+              <div className={styles.eventContainer}>
                 {dayEvents.map((event, index) => (
-                  <li key={index} className={styles.eventItem}>
+                  <div
+                    key={index}
+                    className={styles.eventTag}
+                    title={event.titulo_evento} // Tooltip con el título del evento
+                    onClick={(e) => {
+                      e.stopPropagation(); // Evitar que el clic seleccione el día
+                      setSelectedEvent({ ...event, fecha: formatDate(formattedDate) });
+                      setIsModalOpen(true); // Abrir modal con detalles del evento
+                    }}
+                  >
                     {event.titulo_evento}
-                  </li>
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
           </td>
         );
@@ -74,16 +88,11 @@ export default function Calendar({
   return (
     <section className={styles.calendar}>
       <h2 className={styles.header}>
-        <button className={styles.navButton} onClick={onPrevMonth}>
-          &lt;
-        </button>
-        {`${currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1)} ${currentYear}`}
-        <button className={styles.navButton} onClick={onNextMonth}>
-          &gt;
-        </button>
+        <button className={styles.navButton} onClick={onPrevMonth}>&lt;</button>
+        {`${currentDate.toLocaleString('es', { month: 'long' })} ${currentYear}`}
+        <button className={styles.navButton} onClick={onNextMonth}>&gt;</button>
       </h2>
 
-      {/* Tabla del calendario */}
       <table className={styles.calendarTable}>
         <thead>
           <tr>
@@ -104,6 +113,28 @@ export default function Calendar({
           ))}
         </tbody>
       </table>
+
+      {/* Modal para mostrar los detalles del evento */}
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <Box className={styles.modal}>
+          {selectedEvent && (
+            <>
+              <Typography id="modal-title" variant="h6" className={styles.modalTitle}>
+                Detalles del Evento
+              </Typography>
+              <Typography><strong>Título:</strong> {selectedEvent.titulo_evento}</Typography>
+              <Typography><strong>Descripción:</strong> {selectedEvent.descripcion}</Typography>
+              <Typography><strong>Quincena:</strong> {selectedEvent.quincena}</Typography>
+              <Typography><strong>Fecha:</strong> {selectedEvent.fecha}</Typography>
+            </>
+          )}
+        </Box>
+      </Modal>
     </section>
   );
 }

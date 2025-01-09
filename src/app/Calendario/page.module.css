@@ -276,3 +276,156 @@
 .table th {
   background-color: #f4f4f4;
 }
+
+.calendarContainer {
+  display: flex;
+  justify-content: center; /* Centramos el calendario */
+  align-items: center;
+}
+
+.calendarTable td {
+  height: 120px; /* Aumentamos la altura */
+  position: relative;
+}
+
+/*Desde aqui*/
+
+/* Contenedor de los eventos en cada día */
+.eventContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 3px; /* Separación entre eventos */
+  margin-top: 5px;
+}
+
+/* Etiquetas de los eventos */
+.eventTag {
+  background-color: #FFD700;
+  color: black;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  padding: 3px 6px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.eventTag:hover {
+  background-color: #FFC107;
+}
+
+/* Estilo para la tabla */
+.calendarTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.calendarTable td {
+  width: 14.28%;
+  height: 120px; /* Celdas más grandes */
+  vertical-align: top;
+  position: relative;
+  padding: 5px;
+  border: 1px solid #ddd;
+}
+
+/* Estilo de los días del calendario */
+.day {
+  background-color: #f9f9f9;
+  transition: background-color 0.2s ease;
+}
+
+.day:hover {
+  background-color: #f0e6d1;
+}
+
+/* Número del día */
+.dayNumber {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+/* Celdas vacías */
+.emptyCell {
+  background-color: #f9f9f9;
+}
+
+/* Estilo del modal */
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  max-width: 400px;
+  width: 100%;
+  text-align: left;
+}
+
+.modalTitle {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #1f5841;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.modal p {
+  margin: 10px 0;
+}
+
+/* Estilo del día actual */
+.today {
+  background-color: transparent; /* Fondo transparente */
+}
+
+/* Día seleccionado */
+.selectedDay {
+  background-color: #FFEFD5; /* Sombreado claro */
+  border: 2px solid #FFD700; /* Borde amarillo */
+  border-radius: 5px;
+  transition: background-color 0.3s ease, border 0.3s ease;
+}
+
+/* Día actual */
+.circleToday {
+  display: inline-block;
+  background-color: #ADD8E6;
+  color: black;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Contenedor de los eventos */
+.eventContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 5px;
+}
+
+/* Etiquetas de los eventos */
+.eventTag {
+  background-color: #FFD700; /* Amarillo */
+  color: black;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+.eventTag:hover {
+  background-color: #FFC107; /* Más brillante */
+}
+
+
