@@ -19,6 +19,8 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import styles from './page.module.css';
 import API_BASE_URL from '../../%Config/apiConfig';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { IconButton } from '@mui/material';
 
 export default function PolizasGeneradas() {
     const [polizas, setPolizas] = useState([]);
@@ -229,14 +231,7 @@ export default function PolizasGeneradas() {
                 >
                     Generar Pólizas
                 </Button>
-                <Button
-                    variant="outlined"
-                    color="secondary"
-                    onClick={handleRefreshTable}
-                    sx={{ marginLeft: '1rem' }}
-                >
-                    Actualizar Tabla
-                </Button>
+
             </Box>
 
 
@@ -277,6 +272,14 @@ export default function PolizasGeneradas() {
                 fullWidth
                 margin="normal"
             />
+
+            <IconButton
+                onClick={handleRefreshTable}
+                aria-label="refresh"
+                size="large" // Opciones: "small", "medium", "large"
+            >
+                <RefreshIcon fontSize="medium" /> {/* Opciones: "small", "medium", "large" */}
+            </IconButton>
 
             {/* Tabla */}
             <PolizasTable

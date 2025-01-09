@@ -9,6 +9,8 @@ import MotivoCancelacion from "./components/MotivoCancelacion";
 import CancelacionesTable from "./components/CancelacionesTable";
 import styles from "./page.module.css";
 import API_BASE_URL, { API_USERS_URL } from "../../%Config/apiConfig";
+import TablePagination from "@mui/material/TablePagination";
+
 
 const CancelacionCheques = () => {
   // Estados principales
@@ -26,6 +28,8 @@ const CancelacionCheques = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [page, setPage] = useState(0); // Página inicial
 
   // Fetch de empleados
   useEffect(() => {
@@ -148,6 +152,17 @@ const CancelacionCheques = () => {
     setCurrentPage(value);
   };
 
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reiniciar a la primera página
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+
+
   return (
     <Box className={styles.container}>
       {/* Filtros y formulario */}
@@ -193,13 +208,18 @@ const CancelacionCheques = () => {
         loading={loading}
         fechaSeleccionada={fechaSeleccionada} // Pasamos la quincena y el año
       />
-      <Pagination
+      <TablePagination
+        component="div"
         count={Math.ceil(filteredCancelaciones.length / rowsPerPage)}
-        page={currentPage}
-        onChange={handlePageChange}
-        color="primary"
-        className={styles.pagination}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        labelRowsPerPage="Filas por página"
       />
+
+
     </Box>
   );
 };

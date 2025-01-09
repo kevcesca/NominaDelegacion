@@ -557,6 +557,7 @@ export default function ChequeTrans() {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
           />
         </DialogContent>
         <DialogActions>

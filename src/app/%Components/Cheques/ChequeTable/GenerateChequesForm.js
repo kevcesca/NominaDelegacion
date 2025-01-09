@@ -23,8 +23,22 @@ export default function GenerateChequesForm({ quincena, fecha, tipoNomina }) {
                 const response = await axios.get(`${API_BASE_URL}/ultimoFolioCheque`);
                 const { num_folio } = response.data;
 
-                setUltimoFolio(num_folio); // Guardar el último folio
-                setFolioInicial(num_folio + 1); // Prellenar el campo de folio inicial sumando 1
+                if (num_folio / 2) {
+                    setUltimoFolio(num_folio);
+                    console.log("Entre a la division" + num_folio) 
+                    setFolioInicial(num_folio + 1);
+                  
+
+                } else {
+
+                    setUltimoFolio(0);
+                    console.log("No fui una division" + num_folio)
+                    setFolioInicial(1);
+
+                }
+                
+              // Prellenar el campo de folio inicial sumando 1
+             console.log("El num folio es" + num_folio)
             } catch (error) {
                 console.error("Error al obtener el último folio de cheque:", error);
                 alert("No se pudo obtener el último folio de cheque. Inténtalo más tarde.");
