@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@mui/material';
+import { TextField, Button, Pagination } from '@mui/material';
 import styles from './page.module.css';
 import AddUserModal from './components/AddUserModal';
 import UserTableRow from './components/UserTableRow';
@@ -10,7 +10,8 @@ import AssignRolesModal from './components/AssignRolesModal'; // Modal para asig
 import useUsers from './components/useUsers';
 import { useAuth } from '../context/AuthContext';
 import { API_USERS_URL } from '../%Config/apiConfig';
-import ChangePasswordModal from './components/ChangePasswordModal'; // Importa el nuevo componente
+import AsyncButton from '../%Components/AsyncButton/AsyncButton';
+import ChangePasswordModal from './components/ChangePasswordModal';
 
 const UserTable = () => {
     const { users, setUsers, fetchUsers, toggleUserStatus } = useUsers(); // Incluimos `setUsers` para actualizar la lista localmente
@@ -23,8 +24,36 @@ const UserTable = () => {
     const [isRolesModalOpen, setIsRolesModalOpen] = useState(false); // Estado del modal de roles
     const [selectedUsers, setSelectedUsers] = useState([]); // Manejo de selección de usuarios
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState(users);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10; // Número de usuarios por página
 
     const openMenu = Boolean(anchorEl);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
+    };
+
+    const handleSearchChange = (event) => {
+        const query = event.target.value.toLowerCase();
+        setSearchQuery(query); // Actualizar el término de búsqueda
+        setFilteredUsers(
+            users.filter(
+                (user) =>
+                    user['Nombre Empleado'].toLowerCase().includes(query) ||
+                    user['Nombre de Usuario'].toLowerCase().includes(query) ||
+                    user.Email.toLowerCase().includes(query)
+            )
+        );
+        setCurrentPage(1); // Reiniciar a la primera página
+    };
+
+
 
     // Función para abrir el modal de cambio de contraseña
     const handleChangePassword = () => {
@@ -120,26 +149,33 @@ const UserTable = () => {
             await fetchUsers(); // Refrescar la lista de usuarios
             setEditingUser(null);
             setEditedFields({});
-        } catch (error) {
+
+        }
+
+        catch (error) {
             console.error('Error al confirmar la edición:', error);
         }
     };
 
+    React.useEffect(() => {
+        setFilteredUsers(users);
+    }, [users]);
+
     return (
         <div className={styles.container}>
             <h2 className={styles.title}>Gestión de Usuarios</h2>
-            <Button
+            <AsyncButton
                 variant="contained"
                 color="primary"
                 onClick={() => setIsModalOpen(true)}
                 style={{ marginBottom: '10px' }}
             >
                 Añadir Usuario
-            </Button>
+            </AsyncButton>
 
             {/* Botón dinámico: Solo aparece si se seleccionan 2 o más usuarios */}
             {selectedUsers.length >= 2 && (
-                <Button
+                <AsyncButton
                     variant="contained"
                     color="secondary"
                     onClick={handleToggleSelectedUsers}
@@ -148,8 +184,20 @@ const UserTable = () => {
                     {areAllSelectedUsersActive
                         ? 'Deshabilitar Usuarios'
                         : 'Habilitar Usuarios'}
-                </Button>
+                </AsyncButton>
             )}
+
+            <div className={styles.searchBar}>
+                <TextField
+                    label="Buscar usuario"
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    className={styles.searchField}
+                />
+            </div>
 
             <table className={styles.table}>
                 <thead>
@@ -173,7 +221,7 @@ const UserTable = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {users.map((user) => (
+                    {currentItems.map((user) => (
                         <UserTableRow
                             key={user['ID Empleado']}
                             user={user}
@@ -187,7 +235,6 @@ const UserTable = () => {
                                 setSelectedUser(user);
                             }}
                             onRolesUpdated={(userId, newRoles) => {
-                                // Actualización de roles
                                 setUsers((prevUsers) =>
                                     prevUsers.map((u) =>
                                         u['ID Empleado'] === userId
@@ -195,7 +242,7 @@ const UserTable = () => {
                                             : u
                                     )
                                 );
-                                fetchUsers(); // Refrescar usuarios después de actualizar roles
+                                fetchUsers();
                             }}
                             isSelected={selectedUsers.includes(user['ID Empleado'])}
                             onToggleSelect={() => handleSelectUser(user['ID Empleado'])}
@@ -203,7 +250,6 @@ const UserTable = () => {
                     ))}
                 </tbody>
             </table>
-
             <UserActionsMenu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
@@ -247,6 +293,14 @@ const UserTable = () => {
                     );
                     fetchUsers(); // Refrescar usuarios después de actualizar roles
                 }}
+            />
+
+            <Pagination
+                count={Math.ceil(filteredUsers.length / itemsPerPage)} // Número total de páginas
+                page={currentPage} // Página actual
+                onChange={handlePageChange} // Manejador del cambio de página
+                color="primary"
+                className={styles.pagination}
             />
         </div>
     );

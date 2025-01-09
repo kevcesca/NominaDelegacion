@@ -1,143 +1,162 @@
+/* Estilos Generales */
 .container {
-    max-width: 1400px;
-    background-color: white;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    margin: 20px auto;
-  }
-  
-  .imgEncabezado {
-    display: block;
-    margin: 0 auto 20px auto;
-  }
-  
-  .h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
-  }
-  
-  .generateReset {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .label {
-    font-weight: bold;
-  }
+  max-width: 1400px;
+  background-color: white;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  margin: 20px auto;
+}
 
+.imgEncabezado {
+  display: block;
+  margin: 0 auto 20px auto;
+}
 
-  .filtersAndActions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-  }
-  
-  .filtersAndActions div {
-    margin-right: 15px;
-  }
-  
-  .buttons button {
-    background-color:  #8B2635; 
-    color:#fdfbfb;
-    padding: 2px;
-    margin-left: 20px;
-    position: relative;
-    right: 230px;
-    top: 10px;
-  }
-  
-  .recordCount {
-    font-weight: bold;
-  }
+.h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
 
-  .recordCount {
-    font-size: 14px;
-    font-weight: normal;
-    color: #333;
-    
-  }
-  
-  
-  
-  .button {
-    padding: 8px 16px;
-    margin-left: 10px;
-    background-color:  #8B2635; 
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .button:hover {
-    background-color:  #8B2635; 
-  }
-  
-  .input[type="date"],
-  .select {
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-  
-  .chequeTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-  }
-  
-  .chequeTable th,
-  .chequeTable td {
-    border: 1px solid #dedede;
-    padding: 8px;
-    text-align: center;
-  }
-  
-  .chequeTable th {
-    background-color:  #8B2635; 
-    font-weight: bold;
-    color: #f1f1f1;
-  }
-  
-  .chequeTable tr:hover {
-    background-color: #f1f1f1;
-  }
-  
-  .pagination {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .pagination button {
-    padding: 8px 16px;
-    background-color:  #8B2635; 
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .pagination button:hover {
-    background-color: #0f9236;
-  }
-  
-  #selectedCountDisplay {
-    text-align: center;
-    font-weight: bold;
-    margin-top: 10px;
-  }
-  
-  #noRecordsMessage {
-    display: none;
-    color: red;
-    font-weight: bold;
-  }
-  
+.generateReset {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.filtersAndActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.filtersAndActions div {
+  margin-right: 15px;
+}
+
+.recordCount {
+  font-size: 14px;
+  font-weight: normal;
+  color: #333;
+}
+
+/* Estilos para Botones */
+.button {
+  padding: 10px 20px;
+  margin-left: 10px;
+  background-color: #8B2635; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: bold;
+  font-size: 16px;
+  text-transform: none;
+}
+
+.button:hover {
+  background-color: #b81c2c; /* Color más oscuro para el hover */
+}
+
+.button:focus {
+  outline: none;
+}
+
+/* Estilos para Inputs y Selects */
+.input[type="date"],
+.select {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+/* Estilos para la Tabla */
+.chequeTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.chequeTable th,
+.chequeTable td {
+  border: 1px solid #dedede;
+  padding: 8px;
+  text-align: center;
+}
+
+.chequeTable th {
+  background-color: #8B2635;
+  font-weight: bold;
+  color: #f1f1f1;
+}
+
+.chequeTable tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Paginación */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background-color: #8B2635; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pagination button:hover {
+  background-color: #0f9236;
+}
+
+/* Mensajes de Estado */
+#selectedCountDisplay {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+#noRecordsMessage {
+  display: none;
+  color: red;
+  font-weight: bold;
+}
+
+/* page.module.css */
+/* Estilo para los botones de exportación */
+.button {
+  background-color: #8B2635;  /* Color de fondo rojo */
+  color: white;               /* Color de texto blanco */
+  font-weight: bold;          /* Texto en negrita */
+  font-size: 16px;            /* Tamaño de fuente */
+  padding: 10px 20px;         /* Relleno interno */
+  border-radius: 5px;         /* Bordes redondeados */
+  margin-right: 10px;         /* Margen derecho */
+  cursor: pointer;           /* Cambiar cursor a puntero */
+  transition: background-color 0.3s; /* Transición suave */
+  text-transform: none;       /* No poner el texto en mayúsculas */
+}
+
+/* Efecto hover: color más oscuro para el fondo */
+.button:hover {
+  background-color: #b81c2c;  /* Fondo rojo más oscuro */
+}
+
+/* Efecto focus: sin borde cuando el botón es presionado */
+.button:focus {
+  outline: none;
+}

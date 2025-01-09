@@ -1,184 +1,32 @@
-.body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(180deg, #fff, #F6F1F1, #D8C1A3);
-    flex-direction: column;
-}
-
 .container {
-    background-color: #ffffff;
+    width: 80vw;
+    margin: 20px auto;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 77vw;
-    position: relative;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.h1, .h2 {
+.title {
     text-align: center;
-    color: #8B2635;
-    font-weight: bolder;
+    color: #800000;
     margin-bottom: 20px;
 }
 
-.label {
-    font-weight: bold;
-    color: #8B2635;
-    margin-bottom: 10px;
-    display: block;
+.uploadButton {
+    margin: 10px 0;
 }
 
-.input, .select, .textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.textarea {
-    resize: vertical;
-}
-
-.actions {
-    background-color: #8B2635 !important;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin-top: 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.actions:hover {
-    background-color: #BB905B;
-}
-
-/* Barra de búsqueda */
-.searchBar {
-    display: flex;
-    justify-content: flex-start;
-    margin-bottom: 15px;
-}
-
-.searchInput {
-    padding: 8px;
+.fileName {
+    margin: 10px 0;
+    color: #888;
     font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 300px;
-    margin-right: 10px;
 }
 
-.searchInput:focus {
-    outline: none;
-    border-color: #8B2635;
-}
-
-/* Tabla */
-.tableSection {
-    margin-top: 30px;
-    overflow-x: auto;
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
+.submitButton {
     margin-top: 20px;
-    font-size: 14px;
 }
 
-.table th,
-.table td {
-    padding: 12px;
-    text-align: left;
-    border: 1px solid #ddd;
+.exportButtons {
+    gap: 5px;
 }
-
-.table th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 14px;
-}
-
-.table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.table tr:hover {
-    background-color: #f1f1f1;
-}
-
-.table input[type="checkbox"] {
-    margin: 0 auto;
-    display: block;
-    cursor: pointer;
-}
-.pagination {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 10px;
-    gap: 20px; /* Espaciado entre bloques */
-    padding-right: 10px;
-  }
-  
-  .paginationControl {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Espaciado entre "Rows per page:" y el selector */
-  }
-  
-  .rowsText {
-    font-size: 14px;
-    color: #333;
-    white-space: nowrap; /* Evita que el texto se parta en dos líneas */
-  }
-  
-  .select {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 3px 8px;
-    font-size: 14px;
-    height: 30px;
-    min-width: 60px; /* Asegura que no se encimen opciones largas */
-  }
-  
-  .range {
-    font-size: 14px;
-    color: #333;
-  }
-  
-  .paginationButton {
-    background: none;
-    border: none;
-    font-size: 16px;
-    color: #333;
-    cursor: pointer;
-  }
-  
-  .paginationButton:disabled {
-    color: #aaa;
-    cursor: not-allowed;
-  }
-  .exportButtons {
-    display: flex;
-    position: relative;
-    left: 908px;
-    top: 60px;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    
-  }
-  
-  .exportButton {
-    padding: 0.5rem 3rem;
-    font-size: 0.5rem;
-    cursor: pointer;
-  }
-    

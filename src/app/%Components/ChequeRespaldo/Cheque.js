@@ -4,7 +4,7 @@ import { Box, Typography, Grid } from '@mui/material';
 import styles from './Cheque.module.css';
 import Image from 'next/image';
 
-const Cheque = ({
+function Cheque ({
     polizaNo,
     noDe,
     noEmpleado,
@@ -18,7 +18,7 @@ const Cheque = ({
     liquido,
     nombre,
     fecha
-}) => {
+}){
     return (
         <Box className={styles.container}>
             <Grid container spacing={2} className={styles.header}>

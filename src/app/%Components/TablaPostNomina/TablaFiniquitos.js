@@ -6,15 +6,16 @@ import { Column } from 'primereact/column';
 import styles from './TablaPostNomina.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
-import { ProgressBar } from 'primereact/progressbar';  // Importa ProgressBar
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
+import LoadingOverlay from '../../%Components/LoadingOverlay/LoadingOverlay'; // Importamos LoadingOverlay
 
 export default function TablaFiniquitos({ quincena, anio, session }) {
     const toast = useRef(null);
     const [finiquitos, setFiniquitos] = useState([]);
-    const [progress, setProgress] = useState(0);  // Estado para manejar el progreso de la carga
-    const [isUploadDisabled, setIsUploadDisabled] = useState(false);  // Estado para deshabilitar el botón de carga
-    const [canProcess, setCanProcess] = useState(false);  // Estado para mostrar el botón "Procesar Finiquitos"
+    const [isUploadDisabled, setIsUploadDisabled] = useState(false); // Estado para deshabilitar el botón de carga
+    const [canProcess, setCanProcess] = useState(false); // Estado para mostrar el botón "Procesar Finiquitos"
+    const [isLoading, setIsLoading] = useState(false); // Estado para manejar el overlay de carga
 
     useEffect(() => {
         fetchFiniquitosData();
@@ -29,58 +30,54 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
                 },
             });
 
-            // Filtrando los datos para solo incluir los archivos de "Finiquitos"
             const data = response.data
                 .filter(item => item.nombre_nomina === 'Finiquitos')
                 .map(item => ({
                     idx: item.idx,
                     nombreArchivo: item.nombre_archivo || 'Vacío',
-                    tipoNomina: 'Finiquitos',  // Fijo a "Finiquitos"
+                    tipoNomina: 'Finiquitos',
                     archivoNombre: item.nombre_archivo,
                     fechaCarga: item.fecha_carga,
                     userCarga: item.user_carga,
-                    aprobado: item.aprobado,  // Nueva columna para aprobación
-                    aprobado2: item.aprobado2,  // Nueva columna para segunda aprobación
+                    aprobado: item.aprobado,
+                    aprobado2: item.aprobado2,
                 }));
 
             setFiniquitos(data);
-            setIsUploadDisabled(data.length >= 2);  // Desactivar botón de carga si hay 2 o más archivos
-            setCanProcess(data.length >= 2);  // Habilitar botón de "Procesar Finiquitos" si hay archivos suficientes
+            setIsUploadDisabled(data.length >= 2); // Desactivar botón de carga si hay 2 o más archivos
+            setCanProcess(data.length >= 2); // Habilitar botón de "Procesar Finiquitos" si hay archivos suficientes
         } catch (error) {
-            console.error('Error fetching finiquitos data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos de finiquitos', life: 3000 });
         }
     };
 
     const handleFileUpload = async (event) => {
-        const files = event.target.files;  // Permitir la carga de múltiples archivos
+        const files = event.target.files;
         if (!files.length) return;
 
-        for (const file of files) {  // Iterar sobre los archivos seleccionados
-            setProgress(0);  // Reiniciar el progreso a 0 cuando comienza la carga
+        setIsLoading(true); // Mostrar overlay durante la carga
+
+        for (const file of files) {
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('extra', '');  // Mandar el parámetro extra como string vacío
+            formData.append('extra', ''); // Enviar el parámetro `extra` vacío
 
-            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&usuario=${session?.user?.name || 'unknown'}`;
+            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Finiquitos&usuario=${session || 'unknown'}`;
 
             try {
                 const response = await axios.post(uploadURL, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
-                    onUploadProgress: (progressEvent) => {
-                        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        setProgress(progress);  // Actualizar el estado del progreso
-                    },
                 });
-                setProgress(100);  // Asegurarse de que la barra de progreso se establece al 100%
-                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
 
-                fetchFiniquitosData();  // Refrescar la tabla después de subir el archivo
+                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
+                fetchFiniquitosData(); // Recargar tabla tras la subida
             } catch (error) {
-                console.error('Error uploading file', error);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+                const errorMessage = `Error al subir el archivo: ${error.response?.data?.message || error.message}`;
+                toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+            } finally {
+                setTimeout(() => setIsLoading(false), 2000); // Simular carga por 2 segundos tras finalizar
             }
         }
     };
@@ -88,7 +85,6 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
     const handleFileDownload = async (archivoNombre) => {
         if (!archivoNombre) {
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'No se ha definido un archivo para descargar', life: 3000 });
-            console.error('No se ha definido un archivo para descargar');
             return;
         }
 
@@ -102,7 +98,7 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
                     tipo: 'Finiquitos',
                     nombre: nombreSinExtension,
                 },
-                responseType: 'blob', // Indica que la respuesta será un blob para manejar archivos binarios
+                responseType: 'blob',
             });
 
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -114,14 +110,18 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
             link.parentNode.removeChild(link);
             toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Archivo descargado correctamente', life: 3000 });
         } catch (error) {
-            console.error('Error downloading file', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`,
+                life: 3000,
+            });
         }
     };
 
     const handleProcesarFiniquitos = async () => {
         try {
-            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
+            const usuario = session || 'unknown';
             const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Finiquitos&usuario=${usuario}&extra=gatitoverdecito`;
 
             const response = await axios.get(endpoint);
@@ -132,7 +132,6 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
                 toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un problema al procesar los finiquitos.', life: 3000 });
             }
         } catch (error) {
-            console.error('Error al procesar los finiquitos:', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Hubo un error al procesar los finiquitos.', life: 3000 });
         }
     };
@@ -144,7 +143,7 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
             <button
                 className={styles.downloadButton}
                 onClick={() => handleFileDownload(rowData.archivoNombre)}
-                disabled={isDisabled}  // Deshabilitar el botón si no hay doble aprobación
+                disabled={isDisabled}
                 title={isDisabled ? 'No se puede descargar, aún no está aprobado' : ''}
             >
                 <i className="pi pi-download"></i>
@@ -155,41 +154,40 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
-            {progress > 0 && (
-                <div className={styles.progressContainer}>
-                    <ProgressBar value={progress} className={styles.progressBar} />
-                </div>
-            )}
-            <DataTable value={finiquitos} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
-                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '40%' }}></Column>
-                <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '30%' }}></Column>
-                <Column field="userCarga" header="USUARIO" sortable style={{ width: '20%' }}></Column>
-                <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
-            </DataTable>
+            <LoadingOverlay isLoading={isLoading}> {/* Overlay para la subida */}
+                <DataTable value={finiquitos} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
+                    <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '40%' }}></Column>
+                    <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '30%' }}></Column>
+                    <Column field="userCarga" header="USUARIO" sortable style={{ width: '20%' }}></Column>
+                    <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
+                </DataTable>
 
-            <div className={styles.uploadContainer}>
-                <Button
-                    variant="contained"
-                    component="label"
-                    className={styles.uploadButton}
-                    disabled={isUploadDisabled}  // Deshabilitar si hay 2 o más archivos
-                >
-                    Subir Nómina de Finiquitos
-                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple />  {/* Permitimos seleccionar múltiples archivos */}
-                </Button>
-
-                {canProcess && (
+                <div className={styles.uploadContainer}>
                     <Button
                         variant="contained"
-                        color="primary"
-                        onClick={handleProcesarFiniquitos}
-                        className={styles.procesarButton}
-                        style={{ marginTop: '1rem' }}
+                        component="label"
+                        className={styles.uploadButton}
+                        disabled={isUploadDisabled}
                     >
-                        Procesar Finiquitos
+                        Subir Nómina de Finiquitos
+                        <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple />
                     </Button>
-                )}
-            </div>
+
+                    {canProcess && (
+                        <AsyncButton>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleProcesarFiniquitos}
+                                className={styles.procesarButton}
+                                style={{ marginTop: '1rem' }}
+                            >
+                                Procesar Finiquitos
+                            </Button>
+                        </AsyncButton>
+                    )}
+                </div>
+            </LoadingOverlay>
         </div>
     );
 }

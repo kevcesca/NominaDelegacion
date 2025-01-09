@@ -1,200 +1,236 @@
 'use client';
-import React, { useState } from 'react';
-import ProtectedView from "../../%Components/ProtectedView/ProtectedView"; // Ajusta la ruta según tu estructura
+
+import React, { useState, useEffect, useRef } from 'react';
+import { ThemeProvider, Typography, Box } from '@mui/material';
+import { Toast } from 'primereact/toast';
+import theme from '../../$tema/theme';
 import styles from './page.module.css';
+import CLCForm from './CLCForm';
+import CLCDataTable from './CLCDataTable';
+import DateFilter from '../../%Components/DateFilter/DateFilter';;
+import API_BASE_URL from '../../%Config/apiConfig';
 
-const datosIniciales = [
-    { id: 'CLC001', clave: 'KP123456', monto: '5000.00', evidencia: '', estado: 'Correcto' },
-];
+export default function VerificacionCLC() {
+  const [data, setData] = useState([]);
+  const [conceptos, setConceptos] = useState([]);
+  const [selectedCLC, setSelectedCLC] = useState('');
+  const [dateData, setDateData] = useState({
+    anio: new Date().getFullYear(),
+    mes: (new Date().getMonth() + 1).toString().padStart(2, '0'),
+  });
 
-const ClcPage = () => {
-    const [clcs, setClcs] = useState(datosIniciales);
-    const [detalle, setDetalle] = useState(null);
-    const [formData, setFormData] = useState({
-        id: '',
-        clave: '',
-        monto: '',
-        evidencia: null,
-    });
+  const [formData, setFormData] = useState({
+    id: '',
+    fechaOperacion: '',
+    codigo: '',
+    montoBruto: '',
+    comentario: '',
+    evidencia: null,
+    evidenciaNombre: 'No se ha seleccionado ningún archivo',
+  });
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
+  const toast = useRef(null);
 
-    const handleFileChange = (e) => {
-        setFormData((prevData) => ({
-            ...prevData,
-            evidencia: e.target.files[0],
-        }));
-    };
+  // Servicio para obtener los conceptos disponibles
+  const fetchConceptos = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/CLC/visualizar?concepto=CLC`);
+      if (!response.ok) throw new Error('Error al obtener conceptos');
+      const result = await response.json();
+      setConceptos(result.map((item) => item.concepto.trim()));
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: error.message });
+    }
+  };
 
-    const agregarCLC = () => {
-        const { id, clave, monto, evidencia } = formData;
-        if (id && clave && monto && evidencia) {
-            const newClc = {
-                id,
-                clave,
-                monto,
-                evidencia: URL.createObjectURL(evidencia),
-                estado: 'Pendiente',
-            };
-            setClcs([newClc, ...clcs]);
-            setFormData({ id: '', clave: '', monto: '', evidencia: null });
-        } else {
-            alert("Por favor, completa todos los campos y sube un archivo PDF.");
+  // Servicio para obtener los detalles del concepto seleccionado
+  const fetchCLCDetails = async (concepto) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/CLC/visualizar?concepto=${concepto}`);
+      if (!response.ok) throw new Error('Error al obtener detalles del concepto CLC');
+      const result = await response.json();
+      const clc = result.find((item) => item.concepto.trim() === concepto);
+
+      if (!clc) throw new Error('Concepto CLC no encontrado.');
+
+      setFormData((prevData) => ({
+        ...prevData,
+        id: clc.id_edocta,
+        fechaOperacion: clc.fecha_operacion,
+        codigo: clc.codigo.trim(),
+        montoBruto: clc.monto_bruto,
+      }));
+      setSelectedCLC(concepto);
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: error.message });
+    }
+  };
+
+  // Servicio para obtener los datos de la tabla en base al calendario
+  const fetchCLCData = async ({ anio, mes }) => {
+    try {
+      const response = await fetch(
+        `http://192.168.100.25:7080/Nomina/verificacionClc?mes=${mes}&anio=${anio}`
+      );
+
+      if (!response.ok) throw new Error('Error al obtener datos de verificación CLC.');
+
+      const result = await response.json();
+
+      const formattedData = result.map((item) => ({
+        id: item.id_edocta,
+        fecha_operacion: item.fecha_op,
+        codigo: item.codigo,
+        monto_bruto: item.monto_bruto,
+        concepto: item.concepto,
+        fecha_registro: new Date(item.fecha_registro).toISOString().split('T')[0],
+        comentario: item.descripcion,
+        evidencia: item.evidencia_pdf, // Ruta completa al archivo
+      }));
+
+      setData(formattedData);
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: error.message });
+    }
+  };
+
+  // Actualizar datos al cambiar la fecha
+  const handleDateChange = (dateInfo) => {
+    const mes = (dateInfo.fechaSeleccionada.getMonth() + 1).toString().padStart(2, '0');
+    const anio = dateInfo.anio;
+    setDateData({ anio, mes });
+    fetchCLCData({ anio, mes });
+  };
+
+  const handleFieldChange = (field, value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      setFormData((prevData) => ({
+        ...prevData,
+        evidencia: e.target.files[0],
+        evidenciaNombre: e.target.files[0].name,
+      }));
+    }
+  };
+
+  const handleAgregarCLC = async () => {
+    if (!formData.evidencia) {
+      toast.current.show({ severity: 'warn', summary: 'Validación', detail: 'Selecciona un archivo' });
+      return;
+    }
+
+    try {
+      const { anio, mes } = dateData;
+      const formDataToSend = new FormData();
+      formDataToSend.append('file', formData.evidencia);
+
+      // Servicio para subir el archivo
+      const uploadResponse = await fetch(
+        `http://192.168.100.25:7080/Nomina/SubirCLCs?quincena=${mes}&anio=${anio}&vuser=kevin&tipo_carga=CLC`,
+        {
+          method: 'POST',
+          body: formDataToSend,
         }
-    };
+      );
 
-    const mostrarDetalle = (clc) => {
-        setDetalle({
-            id: clc.id,
-            clave: clc.clave,
-            monto: clc.monto,
-            motivo: 'Compra de Material',
-            formaPago: 'Transferencia',
-            pagadoA: 'Proveedor ABC',
-            descripcion: 'Material de oficina',
-            importeTotal: '1500.00',
-            fecha: '2024-11-07'
-        });
-    };
+      if (!uploadResponse.ok) throw new Error('Error al subir el archivo.');
 
-    const exportTo = (format) => {
-        alert(`Exportando en formato ${format}`);
-    };
+      const uploadResult = await uploadResponse.json();
+      const { fileName } = uploadResult;
 
-    return (
-        <div className={styles.container}>
-            <h2 className={styles.h2}>Verificación de CLC</h2>
+      // Servicio para validar el archivo
+      const parametroBusqueda = `${selectedCLC}`;
+      const descripcion = formData.comentario;
 
-            <div className={styles.formGroup}>
-                <label>Número de identificación de la CLC:</label>
-                <input
-                    type="text"
-                    name="id"
-                    value={formData.id}
-                    onChange={handleInputChange}
-                    placeholder="Introduce el número de identificación de la CLC"
-                />
-            </div>
-            <div className={styles.formGroup}>
-                <label>Clave presupuestaria:</label>
-                <input
-                    type="text"
-                    name="clave"
-                    value={formData.clave}
-                    onChange={handleInputChange}
-                    placeholder="Introduce la clave presupuestaria"
-                />
-            </div>
-            <div className={styles.formGroup}>
-                <label>Monto bruto:</label>
-                <input
-                    type="text"
-                    name="monto"
-                    value={formData.monto}
-                    onChange={handleInputChange}
-                    placeholder="Introduce el monto bruto"
-                />
-            </div>
-            <div className={styles.formGroup}>
-                <label>Evidencia de la CLC (archivo PDF):</label>
-                <input
-                    type="file"
-                    onChange={handleFileChange}
-                    accept="application/pdf"
-                />
-            </div>
-            <button className={styles.btn} onClick={agregarCLC}>Agregar CLC</button>
+      const validateResponse = await fetch(
+        `http://192.168.100.25:7080/Nomina/validarEdocta?parametroBusqueda=${encodeURIComponent(
+          parametroBusqueda
+        )}&descripcion=${encodeURIComponent(descripcion)}&evidenciaPdf=${encodeURIComponent(fileName)}`,
+        {
+          method: 'GET',
+        }
+      );
 
-            <h2 className={styles.h2}>Reporte de Verificación de CLC</h2>
-            <table className={styles.table}>
-                <thead>
-                    <tr className={styles.tr}>
-                        <th className={styles.th}>ID CLC</th>
-                        <th className={styles.th}>Clave presupuestaria</th>
-                        <th className={styles.th}>Monto bruto</th>
-                        <th className={styles.th}>Evidencia</th>
-                        <th className={styles.th}>Estado</th>
-                        <th className={styles.th}>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {clcs.map((clc, index) => (
-                        <tr key={index}>
-                            <td className={styles.td}>{clc.id}</td>
-                            <td className={styles.td}>{clc.clave}</td>
-                            <td className={styles.td}>{clc.monto}</td>
-                            <td className={styles.td}><a href={clc.evidencia} target="_blank" rel="noopener noreferrer">Ver PDF</a></td>
-                            <td className={styles.td}>
-                                <select
-                                    value={clc.estado}
-                                    onChange={(e) => {
-                                        const updatedClcs = [...clcs];
-                                        updatedClcs[index].estado = e.target.value;
-                                        setClcs(updatedClcs);
-                                    }}
-                                >
-                                    <option value="Correcto">Correcto</option>
-                                    <option value="Pendiente">Pendiente</option>
-                                </select>
-                            </td>
-                            <td className={styles.td}>
-                                <button className={styles.btn} onClick={() => mostrarDetalle(clc)}>Desglosar tabla</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+      if (!validateResponse.ok) throw new Error('Error al validar el archivo.');
 
-            {detalle && (
-                <div className={styles.detalleClc}>
-                    <h2 className={styles.h2}>Gestión de CLC - Distribución de Dinero</h2>
-                    <div className={styles.iconosExportacion}>
-                        <div className={styles.iconoExportacion}><a href="#" onClick={() => exportTo('pdf')}><img src="/pdf.png" alt="PDF" /></a></div>
-                        <div className={styles.iconoExportacion}><a href="#" onClick={() => exportTo('excel')}><img src="/excel.png" alt="Excel" /></a></div>
-                        <div className={styles.iconoExportacion}><a href="#" onClick={() => exportTo('csv')}><img src="/csv.png" alt="CSV" /></a></div>
-                    </div>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr className={styles.tr}>
-                                <th className={styles.th}>Fecha</th>
-                                <th className={styles.th}>Clave presupuestaria</th>
-                                <th className={styles.th}>CLC correspondiente</th>
-                                <th className={styles.th}>Motivo</th>
-                                <th className={styles.th}>Forma de Pago</th>
-                                <th className={styles.th}>Pagado a</th>
-                                <th className={styles.th}>Descripción</th>
-                                <th className={styles.th}>Importe Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr className={styles.tr}>
-                                <td className={styles.td}>{detalle.fecha}</td>
-                                <td className={styles.td}>{detalle.clave}</td>
-                                <td className={styles.td}>{detalle.id}</td>
-                                <td className={styles.td}>{detalle.motivo}</td>
-                                <td className={styles.td}>{detalle.formaPago}</td>
-                                <td className={styles.td}>{detalle.pagadoA}</td>
-                                <td className={styles.td}>{detalle.descripcion}</td>
-                                <td className={styles.td}>{detalle.importeTotal}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </div>
-    );
-};
+      const newRecord = {
+        ...formData,
+        evidencia: URL.createObjectURL(formData.evidencia),
+        fecha_registro: new Date().toISOString().split('T')[0],
+        evidenciaNombre: fileName,
+      };
 
-const ProtectedClcPage = () => (
-    <ProtectedView requiredPermissions={["CLC", "Acceso_total"]}>
-        <ClcPage />
-    </ProtectedView>
-);
+      setData([...data, newRecord]);
 
-export default ProtectedClcPage;
+      toast.current.show({
+        severity: 'success',
+        summary: 'CLC Agregada',
+        detail: 'Archivo subido y validado correctamente.',
+      });
+
+      // Limpiar el formulario
+      setFormData({
+        id: '',
+        fechaOperacion: '',
+        codigo: '',
+        montoBruto: '',
+        comentario: '',
+        evidencia: null,
+        evidenciaNombre: 'No se ha seleccionado ningún archivo',
+      });
+      setSelectedCLC('');
+      // Refrescar los datos de la tabla antes de proceder
+      refreshTable();
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: 'Error', detail: error.message });
+    }
+  };
+
+  const refreshTable = async () => {
+    await fetchCLCData(dateData);
+  };
+
+  useEffect(() => {
+    fetchConceptos();
+    fetchCLCData(dateData); // Cargar datos de la tabla al iniciar
+  }, []);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <div className={styles.container}>
+        <Toast ref={toast} />
+        <Typography variant="h4" gutterBottom>
+          Verificación de CLC
+        </Typography>
+
+        {/* Componente de filtro de fecha */}
+        <DateFilter onDateChange={handleDateChange} />
+
+        {/* Formulario para agregar CLC */}
+        <CLCForm
+          conceptos={conceptos}
+          selectedCLC={selectedCLC}
+          onConceptoChange={fetchCLCDetails}
+          onFieldChange={handleFieldChange}
+          formData={formData}
+          onFileChange={handleFileChange}
+          handleAgregarCLC={handleAgregarCLC}
+        />
+
+        {/* Tabla de datos */}
+        <Box mt={4}>
+          <Typography variant="h5" gutterBottom>
+            Lista de CLCs
+          </Typography>
+          <CLCDataTable data={data} dateData={dateData} refreshTable={refreshTable} />
+        </Box>
+      </div>
+    </ThemeProvider>
+  );
+}

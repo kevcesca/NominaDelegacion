@@ -1,159 +1,303 @@
-"use client";
-import { useState, useEffect } from 'react';
-import styles from '../Poliza/page.module.css';
-import { Box, Typography, Button, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import ProtectedView from '../../%Components/ProtectedView/ProtectedView';
+'use client';
 
-// Aquí deberías obtener los folios generados en la vista anterior, puede ser de un contexto, API o almacenamiento local
-// Supondré que los folios se pasan a través de props o contexto (en este caso están simulados)
+import React, { useState } from 'react';
+import {
+    Box,
+    Typography,
+    TextField,
+    Pagination,
+    Button,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+} from '@mui/material';
+import DateFilter from '../../%Components/DateFilter/DateFilter';
+import PolizasTable from './components/PolizasTable';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import styles from './page.module.css';
+import API_BASE_URL from '../../%Config/apiConfig';
 
-const empleados = [
-    { id: 13515, nombre: "Juan Pérez", tipoNomina: "Estructura", percepciones: "$5200", deducciones: "$200", liquido: "$5000", estadoCheque: "Creado" },
-    { id: 13516, nombre: "Ana Gómez", tipoNomina: "Nómina 8", percepciones: "$4700", deducciones: "$200", liquido: "$4500", estadoCheque: "Creado" },
-    { id: 13517, nombre: "Luis Ramírez", tipoNomina: "Base", percepciones: "$4200", deducciones: "$200", liquido: "$4000", estadoCheque: "Creado" },
-];
+export default function PolizasGeneradas() {
+    const [polizas, setPolizas] = useState([]);
+    const [filteredPolizas, setFilteredPolizas] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [selectedData, setSelectedData] = useState({ anio: '', quincena: '', fechaISO: '' });
 
-export default function GestorPolizas() {
-    const [inicioFolioCheque, setInicioFolioCheque] = useState('');
-    const [finalFolioCheque, setFinalFolioCheque] = useState('');
-    const [polizasGeneradas, setPolizasGeneradas] = useState([]);
-    const [mostrarConsolidacion, setMostrarConsolidacion] = useState(false);
-
-    useEffect(() => {
-        // Simulamos que recibimos los folios generados de la vista anterior.
-        // Esto puede venir de un almacenamiento local, contexto o props.
-        const foliosGenerados = [135468, 135469, 135470]; // Por ejemplo, los folios generados.
-        
-        if (foliosGenerados.length > 0) {
-            setInicioFolioCheque(foliosGenerados[0]); // Asignamos el primer folio generado al inicio
-            setFinalFolioCheque(foliosGenerados[foliosGenerados.length - 1]); // Asignamos el último folio generado al final
+    const fetchPolizas = async ({ anio, quincena }) => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/poliza?quincena=${quincena}&anio=${anio}`);
+            if (!response.ok) throw new Error('Error al obtener las pólizas');
+            const data = await response.json();
+            setPolizas(data);
+            setFilteredPolizas(data);
+        } catch (error) {
+            console.error(error);
+            setPolizas([]);
+            setFilteredPolizas([]);
+        } finally {
+            setLoading(false);
         }
-    }, []);
-
-    const generarPolizas = () => {
-        if (!inicioFolioCheque || !finalFolioCheque || inicioFolioCheque >= finalFolioCheque) {
-            alert("Ingrese un rango de folios válido.");
+    };
+    const exportToPDF = (selectedRows) => {
+        if (selectedRows.length === 0) {
+            alert('No hay registros seleccionados para exportar.');
             return;
         }
 
-        let folioPoliza = 2000;
-        const cantidadCheques = Math.min(finalFolioCheque - inicioFolioCheque + 1, empleados.length);
-        const nuevasPolizas = [];
+        const doc = new jsPDF();
+        const title = 'Reporte de Pólizas Generadas';
+        const headers = [
+            ['ID Empleado', 'Folio Cheque', 'Folio Póliza', 'Concepto de Pago', 'Percepciones', 'Deducciones', 'Líquido'],
+        ];
 
-        for (let i = 0; i < cantidadCheques; i++) {
-            const empleado = empleados[i];
-            const conceptoPago = `Quincena 2da - ${empleado.tipoNomina}`;
-            nuevasPolizas.push({
-                ...empleado,
-                folioCheque: parseInt(inicioFolioCheque) + i,
-                folioPoliza: folioPoliza++,
-                conceptoPago,
-            });
-        }
-        setPolizasGeneradas(nuevasPolizas);
+        const data = selectedRows.map((row) => [
+            row.id_empleado,
+            row.folio_cheque,
+            row.folio_poliza,
+            row.concepto_pago,
+            `$${row.percepciones.toFixed(2)}`,
+            `$${row.deducciones.toFixed(2)}`,
+            `$${row.liquido.toFixed(2)}`,
+        ]);
+
+        // Configurar estilos del PDF
+        doc.setFontSize(16);
+        doc.text(title, 14, 15);
+
+        doc.autoTable({
+            startY: 20,
+            head: headers,
+            body: data,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [128, 0, 0],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                halign: 'center',
+            },
+            bodyStyles: { halign: 'center' },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+        });
+
+        doc.save('polizas_generadas.pdf');
     };
 
-    const consolidarInformacion = () => {
-        setMostrarConsolidacion(true);
+    const exportToExcel = (selectedRows) => {
+        if (selectedRows.length === 0) {
+            alert('No hay registros seleccionados para exportar.');
+            return;
+        }
+
+        const worksheet = XLSX.utils.json_to_sheet(
+            selectedRows.map((row) => ({
+                'ID Empleado': row.id_empleado,
+                'Folio Cheque': row.folio_cheque,
+                'Folio Póliza': row.folio_poliza,
+                'Concepto de Pago': row.concepto_pago,
+                Percepciones: row.percepciones.toFixed(2),
+                Deducciones: row.deducciones.toFixed(2),
+                Líquido: row.liquido.toFixed(2),
+            }))
+        );
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Pólizas Generadas');
+        XLSX.writeFile(workbook, 'polizas_generadas.xlsx');
+    };
+
+    const exportToCSV = (selectedRows) => {
+        if (selectedRows.length === 0) {
+            alert('No hay registros seleccionados para exportar.');
+            return;
+        }
+
+        const headers = [
+            'ID Empleado,Folio Cheque,Folio Póliza,Concepto de Pago,Percepciones,Deducciones,Líquido',
+        ];
+        const rows = selectedRows.map((row) => [
+            row.id_empleado,
+            row.folio_cheque,
+            row.folio_poliza,
+            row.concepto_pago,
+            row.percepciones.toFixed(2),
+            row.deducciones.toFixed(2),
+            row.liquido.toFixed(2),
+        ]);
+
+        const csvContent = [headers, ...rows.map((r) => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'polizas_generadas.csv');
+        link.click();
+    };
+
+    const generatePolizas = async () => {
+        const { quincena, fechaISO } = selectedData;
+        if (!quincena || !fechaISO) {
+            alert('Por favor seleccione una fecha válida.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/generarPolizas?quincena=${quincena}&fecha=${fechaISO}`,
+                { method: 'GET' }
+            );
+
+            if (!response.ok) throw new Error('Error al generar las pólizas');
+            alert('Pólizas generadas con éxito');
+
+            // Refresca la tabla automáticamente
+            await fetchPolizas({ anio: selectedData.anio, quincena: selectedData.quincena });
+        } catch (error) {
+            console.error(error);
+            alert('Error al generar las pólizas');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRefreshTable = async () => {
+        if (!selectedData.anio || !selectedData.quincena) {
+            alert('Por favor seleccione un filtro de fecha antes de actualizar.');
+            return;
+        }
+        setLoading(true);
+        try {
+            await fetchPolizas({ anio: selectedData.anio, quincena: selectedData.quincena });
+        } catch (error) {
+            console.error('Error al actualizar la tabla:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const handleDateChange = ({ anio, quincena, fechaISO }) => {
+        setSelectedData({ anio, quincena, fechaISO });
+        fetchPolizas({ anio, quincena });
+    };
+
+    const handleSearch = (e) => {
+        const query = e.target.value.toLowerCase();
+        setSearchQuery(query);
+
+        const filtered = polizas.filter((poliza) =>
+            Object.values(poliza).some((value) => value.toString().toLowerCase().includes(query))
+        );
+
+        setFilteredPolizas(filtered);
+        setCurrentPage(1);
+    };
+
+    const handleExport = (format) => {
+        if (selectedRows.length === 0) {
+            alert('No hay registros seleccionados para exportar.');
+            return;
+        }
+
+        // Simula la exportación de datos
+        alert(`Exportando ${selectedRows.length} registros a ${format}`);
     };
 
     return (
-        <ProtectedView requiredPermissions={["Generacion_Polizas", "Acceso_total"]}>
-            <Box className={styles.container}>
-                <Typography variant="h4" gutterBottom>Gestor de Pólizas</Typography>
+        <Box className={styles.container}>
+            <Typography variant="h5" className={styles.title}>
+                Pólizas Generadas
+            </Typography>
 
-                <Box className={styles.inputGroup}>
-                    <TextField
-                        label="Folio de Cheque Inicial"
-                        type="number"
-                        value={inicioFolioCheque}
-                        onChange={(e) => setInicioFolioCheque(e.target.value)}
-                        placeholder="Ejemplo: 135468"
-                        className={styles.labels}
-                    />
-                    <TextField
-                        label="Folio de Cheque Final"
-                        type="number"
-                        value={finalFolioCheque}
-                        onChange={(e) => setFinalFolioCheque(e.target.value)}
-                        placeholder="Ejemplo: 135471"
-                        className={styles.labels}
-                    />
-                    <Button variant="contained" color="primary" onClick={generarPolizas} className={styles.buttons}>Generar</Button>
-                </Box>
+            {/* Filtro de fecha */}
+            <DateFilter onDateChange={handleDateChange} />
 
-                <Box className={styles.tableSection}>
-                    <Typography variant="h5" gutterBottom>Pólizas Generadas</Typography>
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow className={styles.table}>
-                                    <TableCell>ID Empleado</TableCell>
-                                    <TableCell>Nombre</TableCell>
-                                    <TableCell>Folio Cheque</TableCell>
-                                    <TableCell>Folio Póliza</TableCell>
-                                    <TableCell>Concepto de Pago</TableCell>
-                                    <TableCell>Percepciones</TableCell>
-                                    <TableCell>Deducciones</TableCell>
-                                    <TableCell>Líquido</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {polizasGeneradas.length > 0 ? (
-                                    polizasGeneradas.map((poliza, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{poliza.id}</TableCell>
-                                            <TableCell>{poliza.nombre}</TableCell>
-                                            <TableCell>{poliza.folioCheque}</TableCell>
-                                            <TableCell>{poliza.folioPoliza}</TableCell>
-                                            <TableCell>{poliza.conceptoPago}</TableCell>
-                                            <TableCell>{poliza.percepciones}</TableCell>
-                                            <TableCell>{poliza.deducciones}</TableCell>
-                                            <TableCell>{poliza.liquido}</TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={8} align="center">
-                                            <Typography variant="body1" color="textSecondary">
-                                                Actualmente no existen pólizas
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Box>
-
-                <Button variant="contained" color="secondary" onClick={consolidarInformacion} className={styles.buttons} style={{ marginTop: '20px' }}>
-                    Consolidar Información
+            <Box className={styles.actions}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={generatePolizas}
+                    sx={{ margin: '1rem 0' }}
+                >
+                    Generar Pólizas
                 </Button>
-
-                {mostrarConsolidacion && (
-                    <Box className={styles.tableSection} style={{ marginTop: '30px' }}>
-                        <Typography variant="h5" gutterBottom>Consolidación de Información Cheque-Poliza</Typography>
-                        <TableContainer component={Paper}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow className={styles.table}>
-                                        <TableCell>Folio Cheque</TableCell>
-                                        <TableCell>Folio Póliza</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {polizasGeneradas.map((poliza, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{poliza.folioCheque}</TableCell>
-                                            <TableCell>{poliza.folioPoliza}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Box>
-                )}
+                <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={handleRefreshTable}
+                    sx={{ marginLeft: '1rem' }}
+                >
+                    Actualizar Tabla
+                </Button>
             </Box>
-        </ProtectedView>
+
+
+            {/* Botones de Exportación */}
+            <Box className={styles.exportacion}>
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    disabled={selectedRows.length === 0}
+                    onClick={() => exportToPDF(selectedRows)}
+                >
+                    Exportar a PDF
+                </Button>
+                <Button
+                    variant="contained"
+                    color="success"
+                    disabled={selectedRows.length === 0}
+                    onClick={() => exportToExcel(selectedRows)}
+                >
+                    Exportar a Excel
+                </Button>
+                <Button
+                    variant="contained"
+                    color="info"
+                    disabled={selectedRows.length === 0}
+                    onClick={() => exportToCSV(selectedRows)}
+                >
+                    Exportar a CSV
+                </Button>
+            </Box>
+
+            {/* Búsqueda */}
+            <TextField
+                variant="outlined"
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={handleSearch}
+                fullWidth
+                margin="normal"
+            />
+
+            {/* Tabla */}
+            <PolizasTable
+                polizas={filteredPolizas}
+                loading={loading}
+                onRowSelectionChange={setSelectedRows}
+                rowsPerPage={rowsPerPage}
+                setRowsPerPage={setRowsPerPage}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+            />
+
+            <Box className={styles.conciliacion}>
+                <Button
+                    variant="contained"
+                    onClick={() => window.location.href = "/Cheques/Poliza/Conciliacion"}
+                >
+                    Consolidar informacion
+                </Button>
+            </Box>
+        </Box>
+
     );
 }

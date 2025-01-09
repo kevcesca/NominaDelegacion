@@ -13,44 +13,59 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // Para deshabilitar el botón mientras se procesa
     const router = useRouter();
-    const { setUser, checkPasswordForEmployee } = useAuth();  // Usamos el contexto de autenticación para guardar el usuario y la función de comprobación
+    const { setUser, checkPasswordForEmployee } = useAuth();
 
     const handleLogin = async (e) => {
         e.preventDefault();
+
+        // Validación del lado del cliente
+        if (!email || !password) {
+            setError('Por favor, complete todos los campos');
+            return;
+        }
+
+        setIsLoading(true); // Activa el estado de carga
+        setError(''); // Reinicia los errores
+
         try {
             const response = await fetch(`${API_USERS_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     correo_usuario: email,
-                    contrasena_usuario: password
+                    contrasena_usuario: password,
                 }),
-                credentials: 'include',  // Incluir las cookies en la solicitud
+                credentials: 'include',
             });
 
-            const data = await response.json();
-            if (response.ok) {
-                // Guardar los datos del usuario en el contexto de sesión
-                setUser(data.user);  // Asumiendo que `data.user` contiene la información del usuario
-
-                // Después de hacer login, verificamos la contraseña
-                const idEmpleado = data.user.id_empleado;  // Asumiendo que `data.user.id_empleado` está disponible
-                const isPasswordCorrect = await checkPasswordForEmployee(idEmpleado);
-                console.log('¿La contraseña es correcta?', isPasswordCorrect);
-
-                // Redirigir al usuario a la página de nueva contraseña si la contraseña es correcta
-                if (isPasswordCorrect) {
-                    router.push('/NuevaContrasena');
-                } else {
-                    setError('Contraseña incorrecta');
-                }
-            } else {
-                setError(data.message || 'Error de autenticación');
+            // Si la respuesta no es exitosa (código 4xx o 5xx)
+            if (!response.ok) {
+                const errorMessage = await response.text(); // Leer como texto plano
+                setError(errorMessage || 'Error de autenticación'); // Usar el mensaje del servidor si existe
+                return;
             }
-        } catch (error) {
-            console.error("Login error:", error);
-            setError('Error de autenticación');
+
+            const data = await response.json();
+
+            // Guardar los datos del usuario en el contexto de sesión
+            setUser(data.user);
+
+            // Verificar si se requiere un cambio de contraseña
+            const idEmpleado = data.user.id_empleado; // Ajusta según la estructura de `data.user`
+            const isPasswordCorrect = await checkPasswordForEmployee(idEmpleado);
+
+            if (isPasswordCorrect) {
+                router.push('/NuevaContrasena'); // Redirige a la página de cambio de contraseña
+            } else {
+                setError('Contraseña incorrecta');
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            setError('Ocurrió un error inesperado. Por favor, intente nuevamente.');
+        } finally {
+            setIsLoading(false); // Desactiva el estado de carga
         }
     };
 
@@ -66,8 +81,9 @@ const Login = () => {
                         alignItems: 'center',
                     }}
                 >
-                    <Image src="/logo.png" alt="Logotipo Alcaldia Azcapotzalco" width={1000} height={500} className={styles.image} />
-                    <Box className={styles.card}
+                    <Image src="/logo.png" alt="Logotipo Alcaldía Azcapotzalco" width={1000} height={500} className={styles.image} />
+                    <Box
+                        className={styles.card}
                         sx={{
                             marginTop: 8,
                             display: 'flex',
@@ -85,26 +101,26 @@ const Login = () => {
                                 required
                                 fullWidth
                                 id="email"
-                                label="Email Address"
+                                label="Correo electrónico"
                                 name="email"
                                 autoComplete="email"
                                 autoFocus
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Email Address"
+                                placeholder="Correo electrónico"
                             />
                             <TextField
                                 margin="normal"
                                 required
                                 fullWidth
                                 name="password"
-                                label="Password"
+                                label="Contraseña"
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Password"
+                                placeholder="Contraseña"
                             />
                             {error && (
                                 <Typography color="error" align="center" sx={{ mt: 2 }}>
@@ -117,8 +133,9 @@ const Login = () => {
                                 variant="contained"
                                 color="primary"
                                 sx={{ mt: 3, mb: 2 }}
+                                disabled={isLoading} // Deshabilita el botón mientras se procesa
                             >
-                                Iniciar
+                                {isLoading ? 'Iniciando...' : 'Iniciar'}
                             </Button>
                         </Box>
                     </Box>

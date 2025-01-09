@@ -7,12 +7,15 @@ import styles from './TablaPostNomina.module.css';
 import { Button } from '@mui/material';
 import { Toast } from 'primereact/toast';
 import API_BASE_URL from '../../%Config/apiConfig';
+import AsyncButton from '../AsyncButton/AsyncButton';
+import LoadingOverlay from '../../%Components/LoadingOverlay/LoadingOverlay'; // Importamos LoadingOverlay
 
 export default function TablaPostNominaHonorarios({ quincena, anio, session, setProgress, setUploaded }) {
     const toast = useRef(null);
     const [archivos, setArchivos] = useState([]);
-    const [isUploadDisabled, setIsUploadDisabled] = useState(false); // Estado para deshabilitar la carga
-    const [canProcess, setCanProcess] = useState(false); // Controla si se puede procesar la nómina
+    const [isUploadDisabled, setIsUploadDisabled] = useState(false);
+    const [canProcess, setCanProcess] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // Estado para el overlay de carga
 
     useEffect(() => {
         fetchArchivosData();
@@ -20,22 +23,16 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
 
     const fetchArchivosData = async () => {
         try {
-            // Realizamos la solicitud a consultaNominaCtrl
             const response = await axios.get(`${API_BASE_URL}/consultaNominaCtrl/filtro`, {
-                params: {
-                    anio: anio,
-                    quincena: quincena,
-                    // Puedes incluir otros parámetros si lo deseas
-                },
+                params: { anio, quincena },
             });
 
-            // Filtrar solo los resultados donde nombre_nomina sea "Honorarios"
             const data = response.data
-                .filter(item => item.nombre_nomina === 'Honorarios') // Aplicar el filtro aquí
+                .filter(item => item.nombre_nomina === 'Honorarios')
                 .map(item => ({
                     idx: item.idx,
                     nombreArchivo: item.nombre_archivo || 'Vacío',
-                    tipoNomina: 'Honorarios', // Asegurar que siempre sea "Honorarios"
+                    tipoNomina: 'Honorarios',
                     archivoNombre: item.nombre_archivo,
                     fechaCarga: item.fecha_carga,
                     userCarga: item.user_carga,
@@ -44,8 +41,8 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
                 }));
 
             setArchivos(data);
-            setIsUploadDisabled(data.length >= 1); // Desactivar botón de carga si hay 2 o más archivos
-            setCanProcess(data.length >= 1); // Habilitar el botón "Procesar Nómina" cuando hay 2 archivos o más
+            setIsUploadDisabled(data.length >= 1);
+            setCanProcess(data.length >= 1);
         } catch (error) {
             console.error('Error fetching archivos data', error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al cargar los archivos', life: 3000 });
@@ -56,21 +53,18 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
         const files = event.target.files;
         if (!files.length) return;
 
-        setProgress(0);
-        setUploaded(false);
+        setIsLoading(true); // Activar el overlay de carga
 
         for (const file of files) {
             const formData = new FormData();
-            formData.append('file', file);  // Añadir el archivo al FormData
-            formData.append('extra', '');   // El campo `extra` está vacío
+            formData.append('file', file);
+            formData.append('extra', '');
 
-            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Honorarios&usuario=${session?.user?.name || 'unknown'}`;
+            const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Honorarios&usuario=${session || 'unknown'}`;
 
             try {
                 const response = await axios.post(uploadURL, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
+                    headers: { 'Content-Type': 'multipart/form-data' },
                     onUploadProgress: (progressEvent) => {
                         const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                         setProgress(progress);
@@ -79,12 +73,22 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
 
                 setProgress(100);
                 setUploaded(true);
-                toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
-                fetchArchivosData();  // Refrescar la tabla tras cargar el archivo
 
+                setTimeout(() => {
+                    toast.current.show({ severity: 'success', summary: 'Éxito', detail: `Archivo subido correctamente: ${response.data.message}`, life: 3000 });
+                    setIsLoading(false); // Desactivar el overlay
+                }, 1000);
+
+                fetchArchivosData();
             } catch (error) {
                 console.error('Error uploading file', error);
-                toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`, life: 5000 });
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Error al Subir Archivo',
+                    detail: `Error al subir el archivo: ${error.response?.data?.message || error.message}`,
+                    life: 5000,
+                });
+                setIsLoading(false); // Desactivar el overlay en caso de error
             }
         }
     };
@@ -94,12 +98,7 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
 
         try {
             const response = await axios.get(`${API_BASE_URL}/download`, {
-                params: {
-                    quincena: quincena,
-                    anio: anio,
-                    tipo: tipoNomina, // Filtrado por tipo de nómina "Honorarios"
-                    nombre: nombreSinExtension,
-                },
+                params: { quincena, anio, tipo: tipoNomina, nombre: nombreSinExtension },
                 responseType: 'blob',
             });
 
@@ -113,13 +112,18 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
             toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Archivo descargado correctamente', life: 3000 });
         } catch (error) {
             console.error('Error downloading file', error);
-            toast.current.show({ severity: 'error', summary: 'Error', detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`, life: 3000 });
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: `Error al descargar el archivo: ${error.response?.data?.message || error.message}`,
+                life: 3000,
+            });
         }
     };
 
     const handleProcesarNomina = async () => {
         try {
-            const usuario = session?.user?.name || 'unknown';  // Obtener el nombre del usuario
+            const usuario = session || 'unknown';
             const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Honorarios&usuario=${usuario}&extra=gatitoverdecito`;
 
             const response = await axios.get(endpoint);
@@ -153,36 +157,38 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
     return (
         <div className={`card ${styles.card}`}>
             <Toast ref={toast} />
-            <DataTable value={archivos} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
-                <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '40%' }}></Column>
-                <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '30%' }}></Column>
-                <Column field="userCarga" header="USUARIO" sortable style={{ width: '20%' }}></Column>
-                <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
-            </DataTable>
-            <div className={styles.uploadContainer}>
-                <Button
-                    variant="contained"
-                    component="label"
-                    className={styles.uploadButton}
-                    disabled={isUploadDisabled}  // Deshabilitar el botón de carga si ya hay 2 archivos
-                >
-                    Subir Nómina de Honorarios
-                    <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple />  {/* Permitimos la carga de múltiples archivos */}
-                </Button>
-
-                {/* Mostrar el botón "Procesar Nómina" solo si se han cargado archivos suficientes */}
-                {canProcess && (
+            <LoadingOverlay isLoading={isLoading}> {/* Componente LoadingOverlay */}
+                <DataTable value={archivos} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
+                    <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '40%' }}></Column>
+                    <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '30%' }}></Column>
+                    <Column field="userCarga" header="USUARIO" sortable style={{ width: '20%' }}></Column>
+                    <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
+                </DataTable>
+                <div className={styles.uploadContainer}>
                     <Button
                         variant="contained"
-                        color="primary"
-                        onClick={handleProcesarNomina}
-                        className={styles.procesarButton}
-                        style={{ marginTop: '1rem' }}
+                        component="label"
+                        className={styles.uploadButton}
+                        disabled={isUploadDisabled}
                     >
-                        Procesar Nómina de Honorarios
+                        Subir Nómina de Honorarios
+                        <input type="file" hidden onChange={handleFileUpload} accept=".xlsx" multiple />
                     </Button>
-                )}
-            </div>
+                    {canProcess && (
+                        <AsyncButton>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleProcesarNomina}
+                                className={styles.procesarButton}
+                                style={{ marginTop: '1rem' }}
+                            >
+                                Procesar Nómina de Honorarios
+                            </Button>
+                        </AsyncButton>
+                    )}
+                </div>
+            </LoadingOverlay>
         </div>
     );
 }

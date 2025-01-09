@@ -4,9 +4,14 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import saveAs from 'file-saver';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import { Button, Box } from '@mui/material';
 import styles from './Tablas.module.css';
 
 export default function ChequesResumen({ resumenData, anio, quincena }) {
@@ -54,10 +59,74 @@ export default function ChequesResumen({ resumenData, anio, quincena }) {
         );
     };
 
+    // Combina todos los datos (normales y totales) para exportación
+    const allDataForExport = [...datosNormales, ...datosTotales];
+
+    // Función para exportar a PDF
+    const exportPDF = () => {
+        const doc = new jsPDF();
+        const tableData = allDataForExport.map((row) => [
+            row.ANIO,
+            row.QUINCENA,
+            row.NOMINA,
+            row.BANCO,
+            row.PERCEPCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            row.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            row.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            row.EMPLEADOS,
+        ]);
+
+        autoTable(doc, {
+            head: [['AÑO', 'QUINCENA', 'NÓMINA', 'BANCO', 'PERCEPCIONES', 'DEDUCCIONES', 'LÍQUIDO', 'EMPLEADOS']],
+            body: tableData,
+        });
+
+        doc.save(`Cheques_Resumen_QNA_${quincena}_${anio}.pdf`);
+    };
+
+    // Función para exportar a Excel
+    const exportExcel = () => {
+        const worksheetData = allDataForExport.map((row) => ({
+            AÑO: row.ANIO,
+            QUINCENA: row.QUINCENA,
+            NÓMINA: row.NOMINA,
+            BANCO: row.BANCO,
+            PERCEPCIONES: row.PERCEPCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            DEDUCCIONES: row.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            LÍQUIDO: row.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            EMPLEADOS: row.EMPLEADOS,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), `Cheques_Resumen_QNA_${quincena}_${anio}.xlsx`);
+    };
+
+    // Función para exportar a CSV
+    const exportCSV = () => {
+        const csvContent = [
+            ['AÑO', 'QUINCENA', 'NÓMINA', 'BANCO', 'PERCEPCIONES', 'DEDUCCIONES', 'LÍQUIDO', 'EMPLEADOS'].join(','),
+            ...allDataForExport.map((row) =>
+                [
+                    row.ANIO,
+                    row.QUINCENA,
+                    row.NOMINA,
+                    row.BANCO,
+                    row.PERCEPCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                    row.DEDUCCIONES.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                    row.LIQUIDO.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                    row.EMPLEADOS,
+                ].join(',')
+            ),
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `Cheques_Resumen_QNA_${quincena}_${anio}.csv`);
+    };
+
     return (
         <div className={`card ${styles.card}`}>
-            
-
             {/* Tabla de datos normales */}
             <DataTable
                 value={datosNormales}
@@ -75,7 +144,6 @@ export default function ChequesResumen({ resumenData, anio, quincena }) {
                 <Column field="EMPLEADOS" header="EMPLEADOS" sortable body={empleadosTemplate}></Column>
             </DataTable>
 
-            {/* Separador */}
             <hr className={styles.separador} />
 
             {/* Tabla de datos totales */}
@@ -96,6 +164,19 @@ export default function ChequesResumen({ resumenData, anio, quincena }) {
                     <Column field="EMPLEADOS" header="EMPLEADOS" sortable></Column>
                 </DataTable>
             </div>
+
+            {/* Botones de Exportación */}
+            <Box display="flex" justifyContent="space-between" marginTop="20px">
+                <Button variant="outlined" color="primary" onClick={exportPDF}>
+                    Exportar PDF
+                </Button>
+                <Button variant="outlined" color="primary" onClick={exportExcel}>
+                    Exportar Excel
+                </Button>
+                <Button variant="outlined" color="primary" onClick={exportCSV}>
+                    Exportar CSV
+                </Button>
+            </Box>
         </div>
     );
 }

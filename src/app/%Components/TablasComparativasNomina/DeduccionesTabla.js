@@ -1,4 +1,3 @@
-// src/app/%Components/TablasComparativasNomina/DeduccionesTabla.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -7,11 +6,25 @@ import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { FilterMatchMode, FilterService } from 'primereact/api';
 import axios from 'axios';
+import { Button, Box } from '@mui/material';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import saveAs from 'file-saver';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import styles from './Tablas.module.css';
 import API_BASE_URL from '../../%Config/apiConfig';
+
+// Registrar filtro personalizado
+FilterService.register('custom_range', (value, filter) => {
+    const [from, to] = filter ?? [null, null];
+    if (from === null && to === null) return true;
+    if (from !== null && to === null) return from <= value;
+    if (from === null && to !== null) return value <= to;
+    return from <= value && value <= to;
+});
 
 export default function DeduccionesTabla({ anio, quincena, nombreNomina }) {
     const [data, setData] = useState([]);
@@ -22,7 +35,7 @@ export default function DeduccionesTabla({ anio, quincena, nombreNomina }) {
         nomina: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
         id_concepto1: { value: null, matchMode: FilterMatchMode.EQUALS },
         nombre_concepto: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        deducciones: { value: null, matchMode: FilterMatchMode.CUSTOM }
+        deducciones: { value: null, matchMode: FilterMatchMode.CUSTOM },
     });
     const [globalFilterValue, setGlobalFilterValue] = useState('');
 
@@ -59,11 +72,10 @@ export default function DeduccionesTabla({ anio, quincena, nombreNomina }) {
 
     const onGlobalFilterChange = (e) => {
         const value = e.target.value;
-        let _filters = { ...filters };
-
-        _filters['global'].value = value;
-
-        setFilters(_filters);
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            global: { ...prevFilters.global, value },
+        }));
         setGlobalFilterValue(value);
     };
 
@@ -84,18 +96,84 @@ export default function DeduccionesTabla({ anio, quincena, nombreNomina }) {
 
     const header = renderHeader();
 
+    // Función para exportar a PDF
+    const exportPDF = () => {
+        const doc = new jsPDF();
+        const tableData = data.map(row => [
+            row.sectpres,
+            row.nomina,
+            row.id_concepto1,
+            row.nombre_concepto,
+            parseFloat(row.deducciones.replace(/,/g, '')).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+        ]);
+
+        autoTable(doc, {
+            head: [['Sector Presupuestal', 'Nómina', 'ID Concepto', 'Nombre Concepto', 'Deducciones']],
+            body: tableData,
+        });
+
+        // Añadir el total de deducciones
+        doc.text(`Total Deducciones: ${totalDeducciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`, 14, doc.lastAutoTable.finalY + 10);
+
+        doc.save(`Deducciones_QNA_${quincena}_${anio}.pdf`);
+    };
+
+    // Función para exportar a Excel
+    const exportExcel = () => {
+        const worksheetData = data.map(row => ({
+            'Sector Presupuestal': row.sectpres,
+            Nómina: row.nomina,
+            'ID Concepto': row.id_concepto1,
+            'Nombre Concepto': row.nombre_concepto,
+            Deducciones: parseFloat(row.deducciones.replace(/,/g, '')).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+        }));
+
+        // Añadir el total como última fila
+        worksheetData.push({
+            'Sector Presupuestal': '',
+            Nómina: '',
+            'ID Concepto': '',
+            'Nombre Concepto': 'Total',
+            Deducciones: totalDeducciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), `Deducciones_QNA_${quincena}_${anio}.xlsx`);
+    };
+
+    // Función para exportar a CSV
+    const exportCSV = () => {
+        const csvContent = [
+            ['Sector Presupuestal', 'Nómina', 'ID Concepto', 'Nombre Concepto', 'Deducciones'].join(','),
+            ...data.map(row =>
+                [
+                    row.sectpres,
+                    row.nomina,
+                    row.id_concepto1,
+                    row.nombre_concepto,
+                    parseFloat(row.deducciones.replace(/,/g, '')).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+                ].join(',')
+            ),
+            ['', '', '', 'Total', totalDeducciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })],
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `Deducciones_QNA_${quincena}_${anio}.csv`);
+    };
+
     return (
         <div className={`card ${styles.card}`}>
-            
-            <DataTable 
-                value={data} 
-                paginator 
-                rows={10} 
+            <DataTable
+                value={data}
+                paginator
+                rows={10}
                 loading={loading}
-                filters={filters} 
-                filterDisplay="row" 
-                globalFilterFields={['sectpres', 'nomina', 'nombre_concepto']} 
-                header={header} 
+                filters={filters}
+                filterDisplay="row"
+                globalFilterFields={['sectpres', 'nomina', 'nombre_concepto']}
+                header={header}
                 emptyMessage="No se encontraron datos."
                 className="p-datatable-sm"
             >
@@ -105,10 +183,24 @@ export default function DeduccionesTabla({ anio, quincena, nombreNomina }) {
                 <Column field="nombre_concepto" header="Nombre Concepto" filter filterPlaceholder="Buscar..." sortable />
                 <Column field="deducciones" header="Deducciones" body={currencyTemplate} sortable />
             </DataTable>
+
             {/* Sección de total */}
             <div className={styles.totalContainer}>
                 <h3>Total Deducciones: {totalDeducciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</h3>
             </div>
+
+            {/* Botones de Exportación */}
+            <Box display="flex" justifyContent="space-between" marginTop="20px">
+                <Button variant="outlined" color="primary" onClick={exportPDF}>
+                    Exportar PDF
+                </Button>
+                <Button variant="outlined" color="primary" onClick={exportExcel}>
+                    Exportar Excel
+                </Button>
+                <Button variant="outlined" color="primary" onClick={exportCSV}>
+                    Exportar CSV
+                </Button>
+            </Box>
         </div>
     );
 }

@@ -1,5 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { ThemeProvider, Box, Typography, Alert, Button } from '@mui/material';
 import Link from 'next/link';
 import ProtectedView from '../%Components/ProtectedView/ProtectedView';
@@ -11,8 +12,11 @@ import TablaQuincenasExtraordinarias from '../%Components/TablaPostNomina/TablaQ
 import TablaFiniquitos from '../%Components/TablaPostNomina/TablaFiniquitos';
 import theme from '../$tema/theme';
 import styles from './page.module.css';
+import AsyncButton from '../%Components/AsyncButton/AsyncButton';
+import { useAuth } from '../context/AuthContext'
 
 export default function CargarDatos() {
+    const { user: currentUser } = useAuth(); // Recuperamos el usuario actual del contexto
     const [quincena, setQuincena] = useState(null);
     const [anio, setAnio] = useState(null);
     const [progressPostNomina, setProgressPostNomina] = useState(0);
@@ -21,6 +25,23 @@ export default function CargarDatos() {
     const [showNominaHonorarios, setShowNominaHonorarios] = useState(false);
     const [showExtraordinarias, setShowExtraordinarias] = useState(false);
     const [showFiniquitos, setShowFiniquitos] = useState(false);
+    const [postNominaUploaded, setPostNominaUploaded] = useState(false);
+    const [honorariosUploaded, setHonorariosUploaded] = useState(false);
+
+
+    const toast = useRef(null);
+
+    // Efecto para validar que anio y quincena no sean null antes de pasar a las tablas
+    useEffect(() => {
+        if (anio && quincena) {
+            // Aquí podemos hacer un log o alguna otra acción si es necesario
+        }
+    }, [anio, quincena]);
+
+    // Asegurándonos de que los valores son válidos
+    const isValid = (value) => {
+        return value !== null && value !== undefined;
+    };
 
     return (
         <ProtectedView requiredPermissions={["Carga_de_Nomina", "Acceso_total"]}>
@@ -44,75 +65,102 @@ export default function CargarDatos() {
                         </Alert>
 
                         {/* Tabla Nómina Compuesta */}
-                        <TablaSeccion
-                            titulo="Nómina Compuesta"
-                            isOpen={showNominaCompuesta}
-                            onToggle={() => setShowNominaCompuesta(!showNominaCompuesta)}
-                            progress={progressPostNomina}
-                            tabla={
-                                <TablaPostNomina
-                                    quincena={quincena}
-                                    anio={anio}
-                                    setProgress={setProgressPostNomina}
-                                    setUploaded={() => {}}
-                                />
-                            }
-                        />
+                        {isValid(anio) && isValid(quincena) && (
+                            <TablaSeccion
+                                titulo="Nómina Compuesta"
+                                isOpen={showNominaCompuesta}
+                                onToggle={() => setShowNominaCompuesta(!showNominaCompuesta)}
+                                progress={progressPostNomina}
+                                tabla={
+                                    <TablaPostNomina
+                                        quincena={quincena}
+                                        anio={anio}
+                                        session={currentUser.nombre_usuario} // Pasamos la información del usuario actual
+                                        setProgress={setProgressPostNomina}
+                                        setUploaded={setPostNominaUploaded}
+                                        extra=""
+                                    />
+                                }
+                            />
+                        )}
 
                         {/* Tabla Nómina Honorarios */}
-                        <TablaSeccion
-                            titulo="Nómina Honorarios"
-                            isOpen={showNominaHonorarios}
-                            onToggle={() => setShowNominaHonorarios(!showNominaHonorarios)}
-                            progress={progressHonorarios}
-                            tabla={
-                                <TablaPostNominaHonorarios
-                                    quincena={quincena}
-                                    anio={anio}
-                                    setProgress={setProgressHonorarios}
-                                    setUploaded={() => {}}
-                                />
-                            }
-                        />
+                        {isValid(anio) && isValid(quincena) && (
+                            <TablaSeccion
+                                titulo="Nómina Honorarios"
+                                isOpen={showNominaHonorarios}
+                                onToggle={() => setShowNominaHonorarios(!showNominaHonorarios)}
+                                progress={progressHonorarios}
+                                tabla={
+                                    <TablaPostNominaHonorarios
+                                        quincena={quincena}
+                                        anio={anio}
+                                        session={currentUser.nombre_usuario}
+                                        setProgress={setProgressHonorarios}
+                                        setUploaded={setHonorariosUploaded}
+                                    />
+                                }
+                            />
+                        )}
 
                         {/* Tabla Quincenas Extraordinarias */}
-                        <TablaSeccion
-                            titulo="Quincenas Extraordinarias"
-                            isOpen={showExtraordinarias}
-                            onToggle={() => setShowExtraordinarias(!showExtraordinarias)}
-                            progress={0}
-                            tabla={
-                                <TablaQuincenasExtraordinarias
-                                    quincena={quincena}
-                                    anio={anio}
-                                    setProgress={() => {}}
-                                    setUploaded={() => {}}
-                                />
-                            }
-                        />
+                        {isValid(anio) && isValid(quincena) && (
+                            <TablaSeccion
+                                titulo="Quincenas Extraordinarias"
+                                isOpen={showExtraordinarias}
+                                onToggle={() => setShowExtraordinarias(!showExtraordinarias)}
+                                progress={0}
+                                tabla={
+                                    <TablaQuincenasExtraordinarias
+                                        quincena={quincena}
+                                        anio={anio}
+                                        session={currentUser.nombre_usuario}
+                                        setProgress={setProgressPostNomina}
+                                        setUploaded={setPostNominaUploaded}
+                                    />
+                                }
+                            />
+                        )}
 
                         {/* Tabla Finiquitos */}
-                        <TablaSeccion
-                            titulo="Finiquitos"
-                            isOpen={showFiniquitos}
-                            onToggle={() => setShowFiniquitos(!showFiniquitos)}
-                            progress={0}
-                            tabla={
-                                <TablaFiniquitos
-                                    quincena={quincena}
-                                    anio={anio}
-                                    setProgress={() => {}}
-                                    setUploaded={() => {}}
-                                />
-                            }
-                        />
+                        {isValid(anio) && isValid(quincena) && (
+                            <TablaSeccion
+                                titulo="Finiquitos"
+                                isOpen={showFiniquitos}
+                                onToggle={() => setShowFiniquitos(!showFiniquitos)}
+                                progress={0}
+                                tabla={
+                                    <TablaFiniquitos
+                                        quincena={quincena}
+                                        anio={anio}
+                                        session={currentUser.nombre_usuario}
+                                        setProgress={setProgressPostNomina}
+                                        setUploaded={setPostNominaUploaded}
+                                        extra=""
+                                    />
+                                }
+                            />
+                        )}
 
                         {/* Botón para comprobar cambios */}
                         <Box className={styles.buttonContainer}>
+
                             <Link href={`/Validacion?anio=${anio}&quincena=${quincena}`} passHref>
-                                <Button variant="contained" color="primary" className={styles.exportButton}>
-                                    Comprobar cambios
-                                </Button>
+                                <AsyncButton
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={async () => {
+                                        try {
+                                            await new Promise((resolve) => setTimeout(resolve, 1000));
+                                            router.push('{`/Validacion?anio=${anio}&quincena=${quincena}`} passHref'); // Navega al enlace especificado
+                                        } catch (error) {
+                                            console.error('Error al regresar:', error);
+                                        }
+                                    }}
+                                    className={styles.backButton}
+                                >
+                                    Comprobar Cambios
+                                </AsyncButton>
                             </Link>
                         </Box>
                     </div>

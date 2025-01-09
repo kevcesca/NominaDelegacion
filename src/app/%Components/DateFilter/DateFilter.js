@@ -20,10 +20,10 @@ export default function DateFilter({ onDateChange }) {
         let numeroQuincena = null;
         let textoQuincena = '';
 
-        if (dia >= 1 && dia <= 14) {
+        if (dia >= 1 && dia <= 15) {
             numeroQuincena = ((parseInt(mesNumero) * 2) - 1).toString().padStart(2, '0'); // Quincena impar con dos dígitos
             textoQuincena = `1ra quincena de ${mesTexto}`;
-        } else if (dia >= 15 && dia <= 31) {
+        } else if (dia >= 16 && dia <= 31) {
             numeroQuincena = (parseInt(mesNumero) * 2).toString().padStart(2, '0'); // Quincena par con dos dígitos
             textoQuincena = `2da quincena de ${mesTexto}`;
         }
@@ -32,11 +32,13 @@ export default function DateFilter({ onDateChange }) {
             setQuincenaTexto(textoQuincena);
             setAnio(anioSeleccionado);
 
-            // Notificar al componente padre el año y el número de la quincena
+            // Notificar al componente padre el año, quincena y la fecha seleccionada (formato ISO)
             if (onDateChange) {
                 onDateChange({ 
                     anio: anioSeleccionado, 
-                    quincena: numeroQuincena 
+                    quincena: numeroQuincena,
+                    fechaSeleccionada: fechaActual, // Mantiene compatibilidad con el valor anterior
+                    fechaISO: fechaActual.toISOString().split('T')[0] // Nueva propiedad
                 });
             }
         } else {
