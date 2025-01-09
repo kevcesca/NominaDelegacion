@@ -5,7 +5,7 @@ import styles from "../ReusableTable.module.css";
 
 const TableHeaderRow = ({ columns, deletable, data, selectedRows, setSelectedRows }) => (
     <TableRow>
-        <TableCell padding="checkbox">
+        <TableCell padding="checkbox" className={styles.tableCell}>
             <Checkbox
                 indeterminate={
                     selectedRows.length > 0 && selectedRows.length < data.length
@@ -17,11 +17,10 @@ const TableHeaderRow = ({ columns, deletable, data, selectedRows, setSelectedRow
             />
         </TableCell>
         {columns.map((col, index) => (
-            <TableCell key={index} className={styles.tableHeader}>
+            <TableCell key={index} className={`${styles.tableCell} ${styles.tableHeader}`}>
                 {col.label || col}
             </TableCell>
         ))}
-        {deletable && <TableCell>Acciones</TableCell>}
     </TableRow>
 );
 
