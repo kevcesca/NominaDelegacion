@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import * as XLSX from "xlsx"; // Biblioteca para Excel
 import * as Papa from "papaparse"; // Biblioteca para CSV
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Dialog,
   DialogActions,
@@ -21,22 +21,37 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Typography,
   ThemeProvider,
 } from "@mui/material";
+import { Toast } from "primereact/toast"; // Toast para mensajes de advertencia
 import styles from "../ReusableTableCalendar.module.css";
 import theme from "../../../$tema/theme";
 
 const ExportModal = ({ open, onClose, selectedRows, columns }) => {
   const [selectedColumns, setSelectedColumns] = useState(columns.map((col) => col.accessor));
   const [exportFormat, setExportFormat] = useState("");
+  const toastRef = useRef(null); // Toast para mensajes
 
+  // Manejar el cambio de selección de columnas
   const handleColumnToggle = (accessor) => {
     setSelectedColumns((prev) =>
       prev.includes(accessor) ? prev.filter((col) => col !== accessor) : [...prev, accessor]
     );
   };
 
+  // Función de exportación
   const handleExport = () => {
+    if (selectedColumns.length === 0) {
+      toastRef.current.show({
+        severity: "warn",
+        summary: "Advertencia",
+        detail: "Selecciona al menos una columna para exportar.",
+        life: 3000,
+      });
+      return;
+    }
+
     if (exportFormat === "pdf") {
       const doc = new jsPDF();
       doc.setFontSize(16);
@@ -100,12 +115,18 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
       document.body.removeChild(link);
 
     } else {
-      alert("Selecciona un formato válido para exportar.");
+      toastRef.current.show({
+        severity: "warn",
+        summary: "Advertencia",
+        detail: "Selecciona un formato válido para exportar.",
+        life: 3000,
+      });
     }
   };
 
   return (
     <ThemeProvider theme={theme}>
+      <Toast ref={toastRef} />
       <Dialog
         open={open}
         onClose={onClose}
@@ -194,7 +215,7 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
             onClick={handleExport}
             variant="contained"
             color="primary"
-            disabled={!exportFormat}
+            disabled={!exportFormat || selectedColumns.length === 0}
           >
             Exportar
           </Button>

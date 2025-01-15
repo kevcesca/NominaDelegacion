@@ -47,7 +47,7 @@ export default function ReusableTableCalendar({ API_BASE_URL, anio, mes }) {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isExportModalOpen, setExportModalOpen] = useState(false);

@@ -1,11 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Typography, Box, IconButton, Button, TextField } from '@mui/material';
+import { Modal, Typography, Box, IconButton, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import styles from './page.module.css';
 import API_BASE_URL from '../%Config/apiConfig';
 import { Toast } from 'primereact/toast';
+
+// Tu código restante...
+
+
 
 export default function Calendar({
   currentMonth,
@@ -23,6 +27,14 @@ export default function Calendar({
   const [newEvent, setNewEvent] = useState({ titulo_evento: '', descripcion: '' });
   const [isEditing, setIsEditing] = useState(false);
   const toastRef = useRef(null);
+  const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
+  const today = new Date();
+  const todayYear = today.getFullYear();
+const todayMonth = today.getMonth();
+const todayDate = today.getDate();
+
+
 
   useEffect(() => {
     fetchEventsForMonth();
@@ -53,29 +65,29 @@ export default function Calendar({
     const [year, month, day] = selectedDate.split('-');
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  
+
     const monthNameInSpanish = monthNames[parseInt(month, 10) - 1];
     const dateObj = new Date(selectedDate);
     const dayNameInSpanish = dayNames[dateObj.getDay()];
     const esLaboral = true;  // Campo constante
     const estadoEvento = 'Pendiente';  // Estado por defecto
-  
+
     // **Campos del nuevo evento, limpiados**
     const cleanedTitle = newEvent.titulo_evento.trim();  // Limpia espacios
     const cleanedDescription = newEvent.descripcion.trim();
-  
+
     if (!cleanedTitle || !cleanedDescription) {
       toastRef.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'El título y la descripción no pueden estar vacíos.', life: 3000 });
       return;
     }
-  
+
     const idEmpleado = 101;  // Cambia según sea necesario
     const saveUrl = `${API_BASE_URL}/insertarEventos?fecha=${selectedDate}&diaSemana=${dayNameInSpanish}&mes=${monthNameInSpanish}&anio=${year}&esLaboral=true&id_empleado=${idEmpleado}&tituloEvento=${encodeURIComponent(cleanedTitle)}&descripcion=${encodeURIComponent(cleanedDescription)}&estadoEvento=${estadoEvento}`;
-  
+
     try {
       const response = await fetch(saveUrl, { method: 'GET' });
       const data = await response.json().catch(() => null);
-  
+
       if (response.ok) {
         if (data?.id) {
           const savedEvent = {
@@ -87,7 +99,7 @@ export default function Calendar({
         } else {
           await fetchEventsForMonth();  // Recargar si no devuelve el ID
         }
-  
+
         setIsAddEventModalOpen(false);
         setNewEvent({ titulo_evento: '', descripcion: '' });
         toastRef.current.show({ severity: 'success', summary: 'Evento Guardado', detail: 'El evento se ha guardado correctamente.', life: 3000 });
@@ -99,10 +111,18 @@ export default function Calendar({
       toastRef.current.show({ severity: 'error', summary: 'Error al guardar', detail: 'No se pudo guardar el evento.', life: 3000 });
     }
   };
-  
 
 
 
+  // Funciones para abrir/cerrar el modal
+  const openConfirmDeleteModal = (event) => {
+    setEventToDelete(event);
+    setIsConfirmDeleteModalOpen(true);
+  };
+
+  const closeConfirmDeleteModal = () => {
+    setIsConfirmDeleteModalOpen(false);
+  };
 
   // Abrir modal de "X más" para ver eventos del día con un clic
   const handleDayClick = (date) => {
@@ -121,21 +141,34 @@ export default function Calendar({
 
   // Eliminar evento
   // Eliminar evento
-  const handleDeleteEvent = async (id) => {
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete?.id) return;
+
     try {
-      const response = await fetch(`${API_BASE_URL}/eliminarEvento?id=${id}`, { method: 'GET' });
+      const response = await fetch(`${API_BASE_URL}/eliminarEvento?id=${eventToDelete.id}`, { method: 'GET' });
+
       if (response.ok) {
-        // Actualiza tanto el estado general como el de los eventos del día
-        setEvents((prev) => prev.filter((event) => event.id !== id));
-        setSelectedDayEvents((prev) => prev.filter((event) => event.id !== id)); // Actualizar el modal "X más"
+        setEvents((prev) => prev.filter((event) => event.id !== eventToDelete.id));
         setIsEventDetailModalOpen(false);
-        toastRef.current.show({ severity: 'success', summary: 'Evento Eliminado', detail: 'Evento eliminado correctamente.', life: 3000 });
+        closeConfirmDeleteModal(); // Cerrar modal
+
+        toastRef.current.show({
+          severity: 'success',
+          summary: 'Evento Eliminado',
+          detail: 'Evento eliminado correctamente.',
+          life: 3000,
+        });
       } else {
         throw new Error('Error al eliminar el evento');
       }
     } catch (error) {
       console.error('Error al eliminar el evento:', error);
-      toastRef.current.show({ severity: 'error', summary: 'Error al eliminar', detail: 'No se pudo eliminar el evento.', life: 3000 });
+      toastRef.current.show({
+        severity: 'error',
+        summary: 'Error al eliminar',
+        detail: 'No se pudo eliminar el evento.',
+        life: 3000,
+      });
     }
   };
 
@@ -190,12 +223,18 @@ export default function Calendar({
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
     const cells = [];
-
+  
     for (let i = 0; i < totalCells; i++) {
       const day = i - firstDayOfMonth + 1;
       const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const dayEvents = events.filter((event) => event.fecha === formattedDate);
-
+  
+      // Verificar si es el día actual
+      const isToday =
+        currentYear === todayYear &&
+        currentMonth === todayMonth &&
+        day === todayDate;
+  
       cells.push(
         <td
           key={i}
@@ -204,7 +243,9 @@ export default function Calendar({
         >
           {day > 0 && day <= daysInMonth && (
             <>
-              <div className={styles.dayNumber}>{day}</div>
+              <div className={`${styles.dayNumber} ${isToday ? styles.circleToday : ''}`}>
+                {day}
+              </div>
               <div className={styles.eventContainer}>
                 {dayEvents.slice(0, 3).map((event, index) => (
                   <div
@@ -232,7 +273,7 @@ export default function Calendar({
         </td>
       );
     }
-
+  
     return cells;
   };
 
@@ -380,15 +421,33 @@ export default function Calendar({
                     Guardar Cambios
                   </Button>
                 )}
-                <Button variant="outlined" color="error" onClick={() => handleDeleteEvent(selectedEvent.id)}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => openConfirmDeleteModal(selectedEvent)}
+                >
                   Borrar Evento
                 </Button>
+
               </Box>
             </>
           )}
         </Box>
       </Modal>
-
+      <Dialog open={isConfirmDeleteModalOpen} onClose={closeConfirmDeleteModal}>
+                  <DialogTitle>Confirmación de Eliminación</DialogTitle>
+                  <DialogContent>
+                    <Typography>¿Estás seguro de que quieres eliminar este evento?</Typography>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={closeConfirmDeleteModal} variant="outlined" color="secondary">
+                      Cancelar
+                    </Button>
+                    <Button onClick={handleDeleteEvent} variant="contained" color="error">
+                      Eliminar
+                    </Button>
+                  </DialogActions>
+                </Dialog>
     </section>
   );
 }
