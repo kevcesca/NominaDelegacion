@@ -1,55 +1,72 @@
 "use client";
-import React, { useState } from "react";
-import { Box, Button } from "@mui/material";
+import React, { useState, useRef, useEffect } from "react"; // Importar useEffect
+import { Box, Button, IconButton } from "@mui/material";
 import useChequeTable from "./useChequeTable";
 import ChequeFilterSection from "./ChequeFilterSection";
 import ChequeSearchBar from "./ChequeSearchBar";
-import ChequeTableSection from "./ChequeTableSection";
+import ReusableTable from "../../ReusableTable/ReusableTable"; // Importar ReusableTable
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { IconButton } from '@mui/material';
+import { Toast } from 'primereact/toast'; // Importar Toast de PrimeReact
 
 export default function ChequeTable() {
     const {
         tipoNomina,
         cheques,
+        setCheques,
+        fetchCheques,
         loading,
-        selectedRows,
-        selectAll,
-        handleTipoNominaChange,
-        handleDateChange,
-        handleRowSelect,
-        handleSelectAll,
-        exportToExcel,
-        exportToCSV,
-        exportToPDF,
         anio,
         quincena,
         fechaCompleta,
-        refreshCheques, // Función para recargar los datos
+        handleTipoNominaChange,
+        handleDateChange,
+        updateCheque // Asegúrate de que esta función esté en useChequeTable
     } = useChequeTable();
 
-    // Estados para la búsqueda y paginación
-    const [searchTerm, setSearchTerm] = useState("");
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const toast = useRef(null);
 
-    // Filtrar los cheques según el término de búsqueda
+    const [searchTerm, setSearchTerm] = useState("");
+
+    // Definir las columnas para ReusableTable
+    const columns = [
+        { label: "ID Empleado", accessor: "id_empleado" },
+        { label: "Nombre", accessor: "nombre" },
+        { label: "Tipo de Nomina", accessor: "tipo_nomina" },
+        { label: "Fecha Cheque", accessor: "fecha_cheque" },
+        { label: "Monto", accessor: "monto" },
+        { label: "Estado Cheque", accessor: "estado_cheque" },
+        { label: "Quincena", accessor: "quincena" },
+        { label: "Fecha", accessor: "fecha" },
+        { label: "Tipo de Pago", accessor: "tipo_pago" },
+        { label: "Num Folio", accessor: "num_folio" },
+        { label: "Descripción", accessor: "descripcion_nomina" }
+    ];
+
+    // Filtrar los cheques - esto podría ir dentro de un useMemo si es costoso
     const filteredCheques = cheques.filter((cheque) =>
-        Object.values(cheque).some((value) =>
-            (value ?? "").toString().toLowerCase().includes(searchTerm.toLowerCase())
+        columns.some((col) =>
+            (cheque[col.accessor] ?? "")
+                .toString()
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
         )
     );
 
+    // Llamar a fetchCheques solo cuando cambian los filtros relevantes
+    useEffect(() => {
+        if (anio && quincena && tipoNomina) {
+            fetchCheques();
+        }
+    }, [anio, quincena, tipoNomina, fechaCompleta]);
 
-    // Manejar la paginación
-    const handleChangePage = (event, newPage) => setPage(newPage);
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
+    // Función para refrescar los cheques
+    const handleRefreshCheques = () => {
+        fetchCheques();
     };
 
     return (
         <Box sx={{ padding: 2 }}>
+            <Toast ref={toast} />
             {/* Sección de filtros */}
             <ChequeFilterSection
                 tipoNomina={tipoNomina}
@@ -60,38 +77,11 @@ export default function ChequeTable() {
                 anio={anio}
             />
 
-            {/* Barra de búsqueda */}
-            <ChequeSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-
-            {/* Botón para actualizar la tabla */}
-
-            {/* Botón para actualizar después de generar nuevos cheques */}
-
-            <IconButton
-                onClick={() => refreshCheques()}
-                aria-label="refresh"
-                size="large" // Opciones: "small", "medium", "large"
-            >
-                <RefreshIcon fontSize="medium" /> {/* Opciones: "small", "medium", "large" */}
-            </IconButton>
-
-
-            {/* Tabla de cheques */}
-            <ChequeTableSection
-                cheques={cheques}
-                filteredCheques={filteredCheques}
-                loading={loading}
-                selectedRows={selectedRows}
-                selectAll={selectAll}
-                onRowSelect={handleRowSelect}
-                onSelectAll={handleSelectAll}
-                onExportExcel={exportToExcel}
-                onExportCSV={exportToCSV}
-                onExportPDF={exportToPDF}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                handleChangePage={handleChangePage}
-                handleChangeRowsPerPage={handleChangeRowsPerPage}
+            {/* Tabla de cheques usando ReusableTable */}
+            <ReusableTable
+                columns={columns}
+                fetchData={fetchCheques}
+                data={filteredCheques}
             />
 
             <Button

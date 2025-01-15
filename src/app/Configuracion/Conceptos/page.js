@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import ReusableTable from '../../%Components/ReusableTable/ReusableTable'; // Ajusta la ruta según sea necesario
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Importar estilos
-
-const API_BASE_URL = 'http://192.168.100.25:7080/Nomina';
+import API_BASE_URL from '../../%Config/apiConfig';
 
 const ConceptosPage = () => {
     const [data, setData] = useState([]);
