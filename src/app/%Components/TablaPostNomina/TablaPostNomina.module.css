@@ -1,10 +1,13 @@
-
+.customHeader {
+    background-color: #9f2241  !important; /* Color de fondo rojo */
+    color: white !important; /* Opcional: texto blanco */
+}
 
 .card {
     margin: 20px;
     padding: 20px;
     border-radius: 8px;
-    background-color: #fff;
+    background-color: ;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -24,9 +27,9 @@
 }
 
 .dataTable .p-datatable-thead > tr > th {
-    background-color: #0D375C;
-    color: white;
-    border: 1px solid #0D375C;
+    background-color: #9f2241 !important;
+    color: #9f2241 !important;
+    border: 1px solid #9f2241 !important
 }
 
 .headerText {
@@ -48,7 +51,7 @@
 }
 
 .p-datatable-tbody > tr > td {
-    border: 1px solid #ccc;
+    border: 1px solid #9f2241 !important;
 }
 
 .Espacio{
@@ -64,7 +67,7 @@
 }
 
 .downloadButton {
-    background-color: #004085; /* Color de fondo por defecto */
+    background-color: #9f2241 !important; /* Color de fondo por defecto */
     border: none;
     padding: 8px;
     border-radius: 4px;
@@ -76,8 +79,8 @@
 }
 
 .downloadButton:disabled {
-    background-color: #cccccc; /* Color de fondo cuando está deshabilitado */
-    color: #666666; /* Color del icono cuando está deshabilitado */
+    background-color: #cccccc !important; /* Color de fondo cuando está deshabilitado */
+    color: #666666 !important; /* Color del icono cuando está deshabilitado */
     cursor: not-allowed; /* Cambia el cursor a not-allowed */
 }
 
@@ -89,4 +92,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.deleteButton{
+background-color: #9f2241 !important; /* Color de fondo por defecto */
+border: none;
+padding: 8px;
+border-radius: 4px;
+color: white;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
 }

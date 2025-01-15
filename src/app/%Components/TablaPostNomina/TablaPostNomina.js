@@ -21,10 +21,11 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     }, [anio, quincena]);
 
     const fetchArchivosData = async () => {
-        try {
+        try {  
             const response = await axios.get(`${API_BASE_URL}/consultaNominaCtrl/filtro`, {
                 params: { anio, quincena },
             });
+            
 
             const data = response.data
                 .filter(item => item.nombre_nomina === 'Compuesta')
@@ -85,8 +86,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                 setUploaded(true);
 
                 setTimeout(() => {
-                    toast.current.show({
-                        severity: 'success',
+                    toast.current.show({severity: 'success',
                         summary: 'Éxito',
                         detail: `Archivo subido correctamente: ${response.data.message}`,
                         life: 3000,
@@ -191,11 +191,11 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             <Toast ref={toast} />
             <LoadingOverlay isLoading={isLoading}>
                 <DataTable value={archivos} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
-                    <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
-                    <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '20%' }}></Column>
-                    <Column field="userCarga" header="USUARIO" sortable style={{ width: '20%' }}></Column>
-                    <Column field="fechaCarga" header="FECHA DE CARGA" sortable body={(rowData) => formatDate(rowData.fechaCarga)} style={{ width: '20%' }}></Column>
-                    <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
+                    <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO"  style={{ width: '30%' }}headerClassName={styles.customHeader}></Column>
+                    <Column field="tipoNomina" header="TIPO DE NÓMINA"  style={{ width: '20%' }}headerClassName={styles.customHeader}></Column>
+                    <Column field="userCarga" header="USUARIO"  style={{ width: '20%' }}headerClassName={styles.customHeader}></Column>
+                    <Column field="fechaCarga" header="FECHA DE CARGA" body={(rowData) => formatDate(rowData.fechaCarga)} style={{ width: '20%' }}headerClassName={styles.customHeader}></Column>
+                    <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}headerClassName={styles.customHeader}></Column>
                 </DataTable>
                 <div className={styles.uploadContainer}>
                     <Button

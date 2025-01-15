@@ -13,7 +13,7 @@ const RolesTable = ({
 }) => {
     const [searchTerm, setSearchTerm] = useState(''); // Estado para la búsqueda
     const [page, setPage] = useState(0); // Estado para la página actual
-    const [rowsPerPage, setRowsPerPage] = useState(5); // Estado para las filas por página
+    const [rowsPerPage, setRowsPerPage] = useState(10); // Estado para las filas por página
     const [editingRoleId, setEditingRoleId] = useState(null); // ID del rol en edición
     const [editValues, setEditValues] = useState({ name: '', description: '' }); // Valores en edición
 

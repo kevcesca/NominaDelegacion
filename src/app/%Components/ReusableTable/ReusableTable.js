@@ -68,22 +68,30 @@ const ReusableTable = ({
     // Guardar la nueva fila
     const handleSaveNewRow = (newRow) => {
         if (onInsert) {
-            onInsert(newRow)
-                .then(() => {
-                    fetchData().then((response) => setData(response));
-                    setCreatingRow(false);
-                    setNewRowData({});
-                    setEditingRow(null);
-                    toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Elemento creado correctamente', life: 3000 });
-                })
-                .catch((error) => {
-                    console.error("Error al insertar:", error);
-                    showErrorToast(error);
-                });
+          onInsert(newRow)
+            .then(() => {
+              fetchData().then((response) => {
+                setData(response);
+                setSelectedRows([]); // Limpia la selección al crear un nuevo concepto
+              });
+              setCreatingRow(false);
+              setNewRowData({});
+              setEditingRow(null);
+              toast.current.show({
+                severity: "success",
+                summary: "Éxito",
+                detail: "Elemento creado correctamente",
+                life: 3000,
+              });
+            })
+            .catch((error) => {
+              console.error("Error al insertar:", error);
+              showErrorToast(error);
+            });
         } else {
-            console.error("onInsert prop is not defined");
+          console.error("onInsert prop is not defined");
         }
-    };
+      };
 
     const handleCancelNewRow = () => {
         setCreatingRow(false);
@@ -116,29 +124,40 @@ const ReusableTable = ({
         setEditedData({});
     };
 
-    // Manejar la eliminación de filas seleccionadas
-    const handleDeleteSelected = () => {
-        if (onDelete && selectedRows.length > 0) {
-            const deletePromises = selectedRows.map((id) => onDelete(id));
-            Promise.all(deletePromises)
-                .then((results) => {
-                    const allDeleted = results.every((result) => result);
-                    if (allDeleted) {
-                        toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Elementos eliminados correctamente', life: 3000 });
-                    } else {
-                        toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'Algunos elementos no se pudieron eliminar', life: 3000 });
-                    }
-                    fetchData().then((response) => setData(response));
-                    setSelectedRows([]);
-                })
-                .catch((error) => {
-                    console.error("Error deleting rows:", error);
-                    showErrorToast(error);
-                });
-        } else {
-            console.error("onDelete prop is not defined or no rows selected");
-        }
-    };
+   // Función para eliminar filas seleccionadas
+const handleDeleteSelected = () => {
+    if (onDelete && selectedRows.length > 0) {
+      const deletePromises = selectedRows.map((row) => onDelete(row.id_concepto || row.id)); // Extrae solo el ID
+  
+      Promise.all(deletePromises)
+        .then((results) => {
+          const allDeleted = results.every((result) => result); // Verifica si todos se eliminaron correctamente
+          if (allDeleted) {
+            toast.current.show({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Elementos eliminados correctamente',
+              life: 3000,
+            });
+          } else {
+            toast.current.show({
+              severity: 'warn',
+              summary: 'Advertencia',
+              detail: 'Algunos elementos no se pudieron eliminar',
+              life: 3000,
+            });
+          }
+          fetchData().then((response) => setData(response)); // Refresca los datos
+          setSelectedRows([]); // Limpia la selección
+        })
+        .catch((error) => {
+          console.error("Error deleting rows:", error);
+          showErrorToast(error); // Muestra mensaje de error
+        });
+    } else {
+      console.error("onDelete prop is not defined or no rows selected");
+    }
+  };
 
     // Manejar la apertura y cierre del modal de exportación
     const handleExportModalOpen = () => {
@@ -154,19 +173,23 @@ const ReusableTable = ({
     };
 
     const handleSelectRow = (row) => {
-        const id = row.id_concepto || row.id;
-        setSelectedRows((prevSelected) =>
-            prevSelected.includes(id) ? prevSelected.filter((selectedId) => selectedId !== id) : [...prevSelected, id]
-        );
-    };
-
-    const handleSelectAll = (event) => {
-        if (event.target.checked) {
-            setSelectedRows(data.map((row) => row.id_concepto || row.id));
+        const isSelected = selectedRows.some((selected) => selected.id === row.id);
+        if (isSelected) {
+          // Si ya está seleccionada, la quitamos
+          setSelectedRows((prev) => prev.filter((selected) => selected.id !== row.id));
         } else {
-            setSelectedRows([]);
+          // Si no está seleccionada, la agregamos
+          setSelectedRows([row]); // Solo permite seleccionar una fila
         }
-    };
+      };
+
+      const handleSelectAll = (event) => {
+        if (event.target.checked) {
+          setSelectedRows(filteredData); // Selecciona todas las filas
+        } else {
+          setSelectedRows([]); // Deselecciona todas
+        }
+      };
 
     // Filtrar datos según la búsqueda
     const filteredData = data.filter((row) =>

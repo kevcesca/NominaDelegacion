@@ -176,11 +176,11 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             <Toast ref={toast} />
             <LoadingOverlay isLoading={isLoading}> {/* LoadingOverlay solo para la subida */}
                 <DataTable value={extraordinarios} sortMode="multiple" className={styles.dataTable} paginator rows={10}>
-                    <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO" sortable style={{ width: '30%' }}></Column>
-                    <Column field="tipoNomina" header="TIPO DE NÓMINA" sortable style={{ width: '20%' }}></Column>
-                    <Column field="tipoExtraordinario" header="TIPO EXTRAORDINARIO" style={{ width: '25%' }}></Column>
-                    <Column field="userCarga" header="USUARIO" style={{ width: '15%' }}></Column>
-                    <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}></Column>
+                    <Column field="nombreArchivo" header="NOMBRE DE ARCHIVO"  style={{ width: '30%' }}headerClassName={styles.customHeader}></Column>
+                    <Column field="tipoNomina" header="TIPO DE NÓMINA" style={{ width: '20%' }}headerClassName={styles.customHeader}></Column>
+                    <Column field="tipoExtraordinario" header="TIPO EXTRAORDINARIO" style={{ width: '25%' }}headerClassName={styles.customHeader}></Column>
+                    <Column field="userCarga" header="USUARIO" style={{ width: '15%' }}headerClassName={styles.customHeader}></Column>
+                    <Column body={descargaTemplate} header="DESCARGA" style={{ width: '10%' }}headerClassName={styles.customHeader}></Column>
                 </DataTable>
                 <div className={styles.uploadContainer}>
                     <Button
