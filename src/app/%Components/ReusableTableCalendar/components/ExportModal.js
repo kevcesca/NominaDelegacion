@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx"; // Biblioteca para Excel
+import * as Papa from "papaparse"; // Biblioteca para CSV
+import React, { useState, useRef } from "react";
 import {
   Dialog,
   DialogActions,
@@ -17,82 +21,112 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Typography,
   ThemeProvider,
 } from "@mui/material";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
-import * as Papa from "papaparse";
-import styles from "../ReusableTable.module.css";
+import { Toast } from "primereact/toast"; // Toast para mensajes de advertencia
+import styles from "../ReusableTableCalendar.module.css";
 import theme from "../../../$tema/theme";
 
 const ExportModal = ({ open, onClose, selectedRows, columns }) => {
   const [selectedColumns, setSelectedColumns] = useState(columns.map((col) => col.accessor));
   const [exportFormat, setExportFormat] = useState("");
+  const toastRef = useRef(null); // Toast para mensajes
 
+  // Manejar el cambio de selección de columnas
   const handleColumnToggle = (accessor) => {
     setSelectedColumns((prev) =>
       prev.includes(accessor) ? prev.filter((col) => col !== accessor) : [...prev, accessor]
     );
   };
 
+  // Función de exportación
   const handleExport = () => {
-    if (!exportFormat) {
-      alert("Selecciona un formato válido para exportar.");
+    if (selectedColumns.length === 0) {
+      toastRef.current.show({
+        severity: "warn",
+        summary: "Advertencia",
+        detail: "Selecciona al menos una columna para exportar.",
+        life: 3000,
+      });
       return;
     }
 
-    const filteredData = selectedRows.map((row) =>
-      selectedColumns.reduce((acc, accessor) => {
-        acc[accessor] = row[accessor] || "-";
-        return acc;
-      }, {})
-    );
+    if (exportFormat === "pdf") {
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("Exportación de Eventos", 14, 15);
 
-    switch (exportFormat) {
-      case "pdf":
-        const doc = new jsPDF();
-        const tableColumns = selectedColumns.map(
+      const tableColumnHeaders = selectedColumns.map(
+        (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
+      );
+
+      const tableRows = selectedRows.map((row) =>
+        selectedColumns.map((accessor) => row[accessor] || "-")
+      );
+
+      doc.autoTable({
+        head: [tableColumnHeaders],
+        body: tableRows,
+        startY: 25,
+        styles: { halign: "center", fontSize: 10 },
+        theme: "striped",
+        headStyles: {
+          fillColor: [155, 29, 29],
+          textColor: [255, 255, 255],
+        },
+        margin: { left: 10, right: 10 },
+      });
+
+      doc.save("eventos.pdf");
+
+    } else if (exportFormat === "excel") {
+      const worksheetData = [
+        selectedColumns.map(
           (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
-        );
-        const tableData = filteredData.map((row) => selectedColumns.map((accessor) => row[accessor]));
+        ),
+        ...selectedRows.map((row) =>
+          selectedColumns.map((accessor) => row[accessor] || "-")
+        ),
+      ];
 
-        autoTable(doc, {
-          head: [tableColumns],
-          body: tableData,
-          margin: { top: 20 },
-          headStyles: {
-            fillColor: [155, 29, 29],
-            textColor: "#ffffff",
-          },
-        });
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Eventos");
+      XLSX.writeFile(workbook, "eventos.xlsx");
 
-        doc.save("export.pdf");
-        break;
+    } else if (exportFormat === "csv") {
+      const csvData = [
+        selectedColumns.map(
+          (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
+        ),
+        ...selectedRows.map((row) =>
+          selectedColumns.map((accessor) => row[accessor] || "-")
+        ),
+      ];
 
-      case "excel":
-        const worksheet = XLSX.utils.json_to_sheet(filteredData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-        XLSX.writeFile(workbook, "export.xlsx");
-        break;
+      const csvString = Papa.unparse(csvData);
+      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "eventos.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-      case "csv":
-        const csvData = Papa.unparse(filteredData);
-        const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "export.csv";
-        link.click();
-        break;
-
-      default:
-        break;
+    } else {
+      toastRef.current.show({
+        severity: "warn",
+        summary: "Advertencia",
+        detail: "Selecciona un formato válido para exportar.",
+        life: 3000,
+      });
     }
   };
 
   return (
     <ThemeProvider theme={theme}>
+      <Toast ref={toastRef} />
       <Dialog
         open={open}
         onClose={onClose}
@@ -100,8 +134,8 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
         maxWidth="lg"
         sx={{
           "& .MuiDialog-paper": {
-            height: "85vh",
-            maxWidth: "95%",
+            height: "80vh",
+            maxWidth: "90%",
             padding: "16px",
           },
         }}
@@ -109,13 +143,9 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
         <DialogTitle>Exportar Datos</DialogTitle>
         <DialogContent
           className={styles.dialogContent}
-          sx={{
-            display: "flex",
-            gap: "1.5rem",
-            width: "100%",
-          }}
+          sx={{ display: "flex", flexDirection: "row", gap: "1.5rem" }}
         >
-          {/* Columna de opciones */}
+          {/* Selección de formato y columnas */}
           <div style={{ flex: 1 }}>
             <FormControl fullWidth>
               <InputLabel>Formato</InputLabel>
@@ -145,17 +175,8 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
           </div>
 
           {/* Vista previa */}
-          <TableContainer
-            sx={{
-              flex: 2,
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              padding: "1rem",
-              maxHeight: "70vh",
-              overflowY: "auto",
-            }}
-          >
-            <h3 style={{ textAlign: "center", fontWeight: "bold" }}>Vista Previa</h3>
+          <TableContainer sx={{ flex: 2, maxHeight: "70vh", overflowY: "auto" }}>
+            <h3>Vista Previa</h3>
             <Table>
               <TableHead>
                 <TableRow>
@@ -165,6 +186,7 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
                       sx={{
                         backgroundColor: "#9b1d1d",
                         color: "white",
+                        fontWeight: "bold",
                         textAlign: "center",
                       }}
                     >
@@ -186,14 +208,14 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
           </TableContainer>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} variant="outlined" color="error">
+          <Button onClick={onClose} variant="contained" color="secondary">
             Cancelar
           </Button>
           <Button
             onClick={handleExport}
             variant="contained"
             color="primary"
-            disabled={!exportFormat}
+            disabled={!exportFormat || selectedColumns.length === 0}
           >
             Exportar
           </Button>
