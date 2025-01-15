@@ -1,3 +1,7 @@
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx"; // Biblioteca para Excel
+import * as Papa from "papaparse"; // Biblioteca para CSV
 import React, { useState } from "react";
 import {
   Dialog,
@@ -19,11 +23,7 @@ import {
   InputLabel,
   ThemeProvider,
 } from "@mui/material";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
-import * as Papa from "papaparse";
-import styles from "../ReusableTable.module.css";
+import styles from "../ReusableTableCalendar.module.css";
 import theme from "../../../$tema/theme";
 
 const ExportModal = ({ open, onClose, selectedRows, columns }) => {
@@ -37,57 +37,70 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
   };
 
   const handleExport = () => {
-    if (!exportFormat) {
-      alert("Selecciona un formato válido para exportar.");
-      return;
-    }
+    if (exportFormat === "pdf") {
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("Exportación de Eventos", 14, 15);
 
-    const filteredData = selectedRows.map((row) =>
-      selectedColumns.reduce((acc, accessor) => {
-        acc[accessor] = row[accessor] || "-";
-        return acc;
-      }, {})
-    );
+      const tableColumnHeaders = selectedColumns.map(
+        (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
+      );
 
-    switch (exportFormat) {
-      case "pdf":
-        const doc = new jsPDF();
-        const tableColumns = selectedColumns.map(
+      const tableRows = selectedRows.map((row) =>
+        selectedColumns.map((accessor) => row[accessor] || "-")
+      );
+
+      doc.autoTable({
+        head: [tableColumnHeaders],
+        body: tableRows,
+        startY: 25,
+        styles: { halign: "center", fontSize: 10 },
+        theme: "striped",
+        headStyles: {
+          fillColor: [155, 29, 29],
+          textColor: [255, 255, 255],
+        },
+        margin: { left: 10, right: 10 },
+      });
+
+      doc.save("eventos.pdf");
+
+    } else if (exportFormat === "excel") {
+      const worksheetData = [
+        selectedColumns.map(
           (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
-        );
-        const tableData = filteredData.map((row) => selectedColumns.map((accessor) => row[accessor]));
+        ),
+        ...selectedRows.map((row) =>
+          selectedColumns.map((accessor) => row[accessor] || "-")
+        ),
+      ];
 
-        autoTable(doc, {
-          head: [tableColumns],
-          body: tableData,
-          margin: { top: 20 },
-          headStyles: {
-            fillColor: [155, 29, 29],
-            textColor: "#ffffff",
-          },
-        });
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Eventos");
+      XLSX.writeFile(workbook, "eventos.xlsx");
 
-        doc.save("export.pdf");
-        break;
+    } else if (exportFormat === "csv") {
+      const csvData = [
+        selectedColumns.map(
+          (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
+        ),
+        ...selectedRows.map((row) =>
+          selectedColumns.map((accessor) => row[accessor] || "-")
+        ),
+      ];
 
-      case "excel":
-        const worksheet = XLSX.utils.json_to_sheet(filteredData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-        XLSX.writeFile(workbook, "export.xlsx");
-        break;
+      const csvString = Papa.unparse(csvData);
+      const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "eventos.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-      case "csv":
-        const csvData = Papa.unparse(filteredData);
-        const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "export.csv";
-        link.click();
-        break;
-
-      default:
-        break;
+    } else {
+      alert("Selecciona un formato válido para exportar.");
     }
   };
 
@@ -100,8 +113,8 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
         maxWidth="lg"
         sx={{
           "& .MuiDialog-paper": {
-            height: "85vh",
-            maxWidth: "95%",
+            height: "80vh",
+            maxWidth: "90%",
             padding: "16px",
           },
         }}
@@ -109,13 +122,9 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
         <DialogTitle>Exportar Datos</DialogTitle>
         <DialogContent
           className={styles.dialogContent}
-          sx={{
-            display: "flex",
-            gap: "1.5rem",
-            width: "100%",
-          }}
+          sx={{ display: "flex", flexDirection: "row", gap: "1.5rem" }}
         >
-          {/* Columna de opciones */}
+          {/* Selección de formato y columnas */}
           <div style={{ flex: 1 }}>
             <FormControl fullWidth>
               <InputLabel>Formato</InputLabel>
@@ -145,17 +154,8 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
           </div>
 
           {/* Vista previa */}
-          <TableContainer
-            sx={{
-              flex: 2,
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              padding: "1rem",
-              maxHeight: "70vh",
-              overflowY: "auto",
-            }}
-          >
-            <h3 style={{ textAlign: "center", fontWeight: "bold" }}>Vista Previa</h3>
+          <TableContainer sx={{ flex: 2, maxHeight: "70vh", overflowY: "auto" }}>
+            <h3>Vista Previa</h3>
             <Table>
               <TableHead>
                 <TableRow>
@@ -165,6 +165,7 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
                       sx={{
                         backgroundColor: "#9b1d1d",
                         color: "white",
+                        fontWeight: "bold",
                         textAlign: "center",
                       }}
                     >
@@ -186,7 +187,7 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
           </TableContainer>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} variant="outlined" color="error">
+          <Button onClick={onClose} variant="contained" color="secondary">
             Cancelar
           </Button>
           <Button

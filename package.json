@@ -32,6 +32,7 @@
     "next": "14.2.3",
     "next-auth": "^4.24.7",
     "numero-a-letras": "^1.0.6",
+    "papaparse": "^5.5.1",
     "primeicons": "^7.0.0",
     "primereact": "^10.6.6",
     "properties-reader": "^2.3.0",
