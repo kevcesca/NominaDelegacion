@@ -346,6 +346,8 @@
 .dayNumber {
   font-weight: bold;
   margin-bottom: 5px;
+  overflow: hidden; /* Evitar que el texto de los números desborde */
+  text-overflow: ellipsis;
 }
 
 /* Celdas vacías */
@@ -416,19 +418,20 @@
 }
 
 .eventTag {
-  background-color: #FFD700; /* Amarillo */
-  color: black;
+  background-color: #711c31;
+  color: white;
   border-radius: 5px;
   font-size: 0.8rem;
   padding: 5px 10px;
-  margin-bottom: 5px;
   text-align: center;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  white-space: nowrap; /* No permitir múltiples líneas */
+  overflow: hidden; /* Ocultar desbordamiento */
+  text-overflow: ellipsis; /* Mostrar "..." */
 }
 
 .eventTag:hover {
-  background-color: #FFC107; /* Más brillante */
+  background-color: #9f2241; /* Más brillante */
 }
 
 .viewMoreTag {

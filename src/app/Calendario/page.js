@@ -236,8 +236,8 @@ export default function Calendario() {
           </div>
 
           {/* Mensaje de advertencia */}
-          <Alert severity="info" sx={{ width: "28.5vw", textAlign: "center" }}>
-            "Para actualizar la tabla se debe presionar el icono de refrescar". 
+          <Alert severity="info" sx={{ width: "39.7vw", textAlign: "center" }}>
+            "Al insertar un nuevo evento en el calendario  se podra ver en la tabla al presionar el icono de refrescar. 
           </Alert>
 
           {/* Pasar correctamente el año y mes al componente de tabla */}

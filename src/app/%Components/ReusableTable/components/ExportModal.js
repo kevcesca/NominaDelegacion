@@ -29,6 +29,7 @@ import theme from "../../../$tema/theme";
 const ExportModal = ({ open, onClose, selectedRows, columns }) => {
   const [selectedColumns, setSelectedColumns] = useState(columns.map((col) => col.accessor));
   const [exportFormat, setExportFormat] = useState("");
+  const isExportDisabled = !exportFormat || selectedColumns.length === 0; // Validación
 
   const handleColumnToggle = (accessor) => {
     setSelectedColumns((prev) =>
@@ -193,7 +194,7 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
             onClick={handleExport}
             variant="contained"
             color="primary"
-            disabled={!exportFormat}
+            disabled={isExportDisabled}
           >
             Exportar
           </Button>
