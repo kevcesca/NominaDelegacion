@@ -31,8 +31,8 @@ export default function Calendar({
   const [eventToDelete, setEventToDelete] = useState(null);
   const today = new Date();
   const todayYear = today.getFullYear();
-const todayMonth = today.getMonth();
-const todayDate = today.getDate();
+  const todayMonth = today.getMonth();
+  const todayDate = today.getDate();
 
 
 
@@ -143,15 +143,27 @@ const todayDate = today.getDate();
   // Eliminar evento
   const handleDeleteEvent = async () => {
     if (!eventToDelete?.id) return;
-
+  
     try {
-      const response = await fetch(`${API_BASE_URL}/eliminarEvento?id=${eventToDelete.id}`, { method: 'GET' });
-
+      const response = await fetch(
+        `${API_BASE_URL}/eliminarEvento?id=${eventToDelete.id}`,
+        { method: 'GET' }
+      );
+  
       if (response.ok) {
-        setEvents((prev) => prev.filter((event) => event.id !== eventToDelete.id));
+        // Eliminar el evento de la lista principal
+        setEvents((prev) =>
+          prev.filter((event) => event.id !== eventToDelete.id)
+        );
+  
+        // Eliminar el evento del modal de "X más"
+        setSelectedDayEvents((prev) =>
+          prev.filter((event) => event.id !== eventToDelete.id)
+        );
+  
         setIsEventDetailModalOpen(false);
-        closeConfirmDeleteModal(); // Cerrar modal
-
+        closeConfirmDeleteModal();
+  
         toastRef.current.show({
           severity: 'success',
           summary: 'Evento Eliminado',
@@ -171,51 +183,72 @@ const todayDate = today.getDate();
       });
     }
   };
+  
 
 
   // Actualizar evento
   // Actualizar evento
   const handleUpdateEvent = async () => {
     if (!selectedEvent?.id) {
-      toastRef.current.show({ severity: 'error', summary: 'Error', detail: 'El evento no tiene un ID válido.', life: 3000 });
+      toastRef.current.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'El evento no tiene un ID válido.',
+        life: 3000,
+      });
       return;
     }
-
+  
     try {
-      const updateUrl = `${API_BASE_URL}/actualizarEvento?tituloEvento=${encodeURIComponent(selectedEvent.titulo_evento)}&descripcion=${encodeURIComponent(selectedEvent.descripcion)}&id=${selectedEvent.id}`;
+      const updateUrl = `${API_BASE_URL}/actualizarEvento?tituloEvento=${encodeURIComponent(
+        selectedEvent.titulo_evento
+      )}&descripcion=${encodeURIComponent(selectedEvent.descripcion)}&id=${selectedEvent.id}`;
       const response = await fetch(updateUrl, { method: 'GET' });
-
+  
       if (response.ok) {
+        // Crear una copia actualizada del evento
         const updatedEvent = {
           ...selectedEvent,
           titulo_evento: selectedEvent.titulo_evento,
           descripcion: selectedEvent.descripcion,
         };
-
+  
         // Actualizar la lista de eventos principal
         setEvents((prev) =>
           prev.map((event) =>
             event.id === selectedEvent.id ? updatedEvent : event
           )
         );
-
+  
         // Actualizar los eventos del modal de "X más"
         setSelectedDayEvents((prev) =>
           prev.map((event) =>
             event.id === selectedEvent.id ? updatedEvent : event
           )
         );
-
+  
         setIsEditing(false);
-        toastRef.current.show({ severity: 'success', summary: 'Evento Actualizado', detail: 'Evento actualizado correctamente.', life: 3000 });
+        toastRef.current.show({
+          severity: 'success',
+          summary: 'Evento Actualizado',
+          detail: 'Evento actualizado correctamente.',
+          life: 3000,
+        });
       } else {
         throw new Error('Error al actualizar el evento');
       }
     } catch (error) {
       console.error('Error al actualizar el evento:', error);
-      toastRef.current.show({ severity: 'error', summary: 'Error al actualizar', detail: 'No se pudo actualizar el evento.', life: 3000 });
+      toastRef.current.show({
+        severity: 'error',
+        summary: 'Error al actualizar',
+        detail: 'No se pudo actualizar el evento.',
+        life: 3000,
+      });
     }
   };
+  
+
 
 
   const renderDays = () => {
@@ -223,18 +256,18 @@ const todayDate = today.getDate();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
     const cells = [];
-  
+
     for (let i = 0; i < totalCells; i++) {
       const day = i - firstDayOfMonth + 1;
       const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const dayEvents = events.filter((event) => event.fecha === formattedDate);
-  
+
       // Verificar si es el día actual
       const isToday =
         currentYear === todayYear &&
         currentMonth === todayMonth &&
         day === todayDate;
-  
+
       cells.push(
         <td
           key={i}
@@ -252,13 +285,16 @@ const todayDate = today.getDate();
                     key={index}
                     className={styles.eventTag}
                     onDoubleClick={(e) => {
-                      e.stopPropagation(); // Evitar que abra el modal de agregar evento
+                      e.stopPropagation();
                       handleEventDoubleClick(event);
                     }}
                   >
-                    {event.titulo_evento}
+                    {event.titulo_evento.length > 20
+                      ? `${event.titulo_evento.slice(0, 20)}...` // Truncar títulos largos
+                      : event.titulo_evento}
                   </div>
                 ))}
+
                 {dayEvents.length > 3 && (
                   <div
                     className={styles.viewMoreTag}
@@ -273,7 +309,7 @@ const todayDate = today.getDate();
         </td>
       );
     }
-  
+
     return cells;
   };
 
@@ -323,10 +359,19 @@ const todayDate = today.getDate();
           <TextField
             label="Descripción"
             value={newEvent.descripcion}
-            onChange={(e) => setNewEvent({ ...newEvent, descripcion: e.target.value })}
+            onChange={(e) => {
+              const maxLength = 255;
+              if (e.target.value.length <= maxLength) {
+                setNewEvent({ ...newEvent, descripcion: e.target.value });
+              }
+            }}
             fullWidth
             margin="normal"
+            multiline
+            rows={4}
+            helperText={`${newEvent.descripcion.length}/255 caracteres`}
           />
+
           <Box textAlign="right" marginTop={2}>
             <Button onClick={handleSaveEvent} variant="contained" color="primary" sx={{ marginRight: 1 }}>
               Guardar
@@ -357,97 +402,149 @@ const todayDate = today.getDate();
       </Modal>
 
       {/* Modal para detalles del evento */}
-      <Modal open={isEventDetailModalOpen} onClose={() => setIsEventDetailModalOpen(false)}>
-        <Box className={styles.modal}>
-          <Typography variant="h6">Detalles del Evento</Typography>
-          {selectedEvent && (
-            <>
-              {/* Título del evento */}
-              {!isEditing ? (
-                <Typography variant="body1" sx={{ marginBottom: 2, fontWeight: 'bold' }}>
-                  <strong>Título:</strong> {selectedEvent.titulo_evento || 'Sin título'}
-                </Typography>
-              ) : (
-                <TextField
-                  label="Título"
-                  value={selectedEvent.titulo_evento}
-                  onChange={(e) => setSelectedEvent({ ...selectedEvent, titulo_evento: e.target.value })}
-                  fullWidth
-                  margin="normal"
-                  multiline
-                  rows={2}
-                />
-              )}
+      {/* Modal para detalles del evento */}
+<Modal open={isEventDetailModalOpen} onClose={() => setIsEventDetailModalOpen(false)}>
+  <Box className={styles.modal}>
+    <Typography variant="h6" sx={{ marginBottom: 2 }}>
+      Detalles del Evento
+    </Typography>
 
-              {/* Descripción del evento */}
-              {!isEditing ? (
-                <Typography variant="body2" sx={{ marginBottom: 2 }}>
-                  <strong>Descripción:</strong> {selectedEvent.descripcion || 'Sin descripción'}
-                </Typography>
-              ) : (
-                <TextField
-                  label="Descripción"
-                  value={selectedEvent.descripcion}
-                  onChange={(e) => setSelectedEvent({ ...selectedEvent, descripcion: e.target.value })}
-                  fullWidth
-                  margin="normal"
-                  multiline
-                  rows={4}
-                />
-              )}
+    {selectedEvent && (
+      <>
+        {/* Campo del título (editable o solo lectura) */}
+        {!isEditing ? (
+          <Typography
+            variant="body1"
+            sx={{
+              marginBottom: 2,
+              fontWeight: 'bold',
+              wordBreak: 'break-word',
+              whiteSpace: 'pre-wrap',
+              overflowWrap: 'break-word',
+            }}
+          >
+            <strong>Título:</strong> {selectedEvent.titulo_evento || 'Sin título'}
+          </Typography>
+        ) : (
+          <TextField
+            label="Título"
+            value={selectedEvent.titulo_evento}
+            onChange={(e) => setSelectedEvent({ ...selectedEvent, titulo_evento: e.target.value })}
+            fullWidth
+            margin="normal"
+            multiline
+            rows={2}
+          />
+        )}
 
-              {/* Información adicional */}
-              <Typography>
-                <strong>Quincena:</strong> {new Date(selectedEvent.fecha).getDate() <= 15 ? 'Primera Quincena' : 'Segunda Quincena'}
-              </Typography>
-              <Typography>
-                <strong>Fecha:</strong>{' '}
-                {(() => {
-                  const [year, month, day] = selectedEvent.fecha.split('-');
-                  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-                  return `${parseInt(day)} de ${monthNames[parseInt(month) - 1]} de ${year}`;
-                })()}
-              </Typography>
+        {/* Campo de la descripción (editable o solo lectura) */}
+        {!isEditing ? (
+          <Typography
+            variant="body2"
+            sx={{
+              marginBottom: 2,
+              wordBreak: 'break-word',
+              whiteSpace: 'pre-wrap',
+              overflowWrap: 'break-word',
+            }}
+          >
+            <strong>Descripción:</strong> {selectedEvent.descripcion || 'Sin descripción'}
+          </Typography>
+        ) : (
+          <TextField
+            label="Descripción"
+            value={selectedEvent.descripcion}
+            onChange={(e) =>
+              setSelectedEvent({ ...selectedEvent, descripcion: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+            multiline
+            rows={4}
+          />
+        )}
 
+        {/* Información adicional */}
+        <Typography>
+          <strong>Quincena:</strong>{' '}
+          {new Date(selectedEvent.fecha).getDate() <= 15 ? 'Primera Quincena' : 'Segunda Quincena'}
+        </Typography>
+        <Typography sx={{ marginBottom: 2 }}>
+          <strong>Fecha:</strong>{' '}
+          {(() => {
+            const [year, month, day] = selectedEvent.fecha.split('-');
+            const monthNames = [
+              'enero',
+              'febrero',
+              'marzo',
+              'abril',
+              'mayo',
+              'junio',
+              'julio',
+              'agosto',
+              'septiembre',
+              'octubre',
+              'noviembre',
+              'diciembre',
+            ];
+            return `${parseInt(day)} de ${monthNames[parseInt(month) - 1]} de ${year}`;
+          })()}
+        </Typography>
 
-              {/* Botones de acción */}
-              <Box display="flex" justifyContent="space-between" marginTop={2}>
-                {!isEditing ? (
-                  <Button variant="contained" color="primary" onClick={() => setIsEditing(true)}>
-                    Editar
-                  </Button>
-                ) : (
-                  <Button variant="contained" color="success" onClick={handleUpdateEvent}>
-                    Guardar Cambios
-                  </Button>
-                )}
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => openConfirmDeleteModal(selectedEvent)}
-                >
-                  Borrar Evento
-                </Button>
+        {/* Botones de acción */}
+<Box display="flex" justifyContent="space-between" marginTop={2}>
+  {/* Cambiar entre "Editar" y "Guardar Cambios" */}
+  {!isEditing ? (
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={() => setIsEditing(true)}
+      sx={{
+        backgroundColor: '#9b1d1d',
+        '&:hover': { backgroundColor: '#7b1616' },
+      }}
+    >
+      Editar
+    </Button>
+  ) : (
+    <Button
+      variant="contained"
+      color="success"
+      onClick={handleUpdateEvent} // Llamar a la función de actualización
+    >
+      Guardar Cambios
+    </Button>
+  )}
 
-              </Box>
-            </>
-          )}
-        </Box>
-      </Modal>
+  {/* Botón para borrar evento */}
+  <Button
+    variant="outlined"
+    color="error"
+    onClick={() => openConfirmDeleteModal(selectedEvent)} // Modal de confirmación para eliminar
+  >
+    Borrar Evento
+  </Button>
+</Box>
+
+      </>
+    )}
+  </Box>
+</Modal>
+
       <Dialog open={isConfirmDeleteModalOpen} onClose={closeConfirmDeleteModal}>
-                  <DialogTitle>Confirmación de Eliminación</DialogTitle>
-                  <DialogContent>
-                    <Typography>¿Estás seguro de que quieres eliminar este evento?</Typography>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={closeConfirmDeleteModal} variant="outlined" color="secondary">
-                      Cancelar
-                    </Button>
-                    <Button onClick={handleDeleteEvent} variant="contained" color="error">
-                      Eliminar
-                    </Button>
-                  </DialogActions>
-                </Dialog>
+        <DialogTitle>Confirmación de Eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>¿Estás seguro de que quieres eliminar este evento?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeConfirmDeleteModal} variant="outlined" color="secondary">
+            Cancelar
+          </Button>
+          <Button onClick={handleDeleteEvent} variant="contained" color="error">
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </section>
   );
 }
