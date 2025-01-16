@@ -10,11 +10,15 @@ import {
     Checkbox,
     Button,
     Box,
+    Menu,
+    MenuItem,
 } from "@mui/material";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import styles from "../page.module.css";
+
+
 
 const getDownloadURL = (quincena, anio, nombreEvidencia) => {
     const nombreSinExtension = removeFileExtension(nombreEvidencia);
@@ -29,6 +33,7 @@ const removeFileExtension = (fileName) => {
 
 export default function CancelacionesTable({ cancelaciones, loading, fechaSeleccionada }) {
     const [selectedRows, setSelectedRows] = useState([]);
+    const [anchorEl, setAnchorEl] = useState(null);
 
     // Manejar la selección de filas
     const handleSelectRow = (id) => {
@@ -39,25 +44,34 @@ export default function CancelacionesTable({ cancelaciones, loading, fechaSelecc
         );
     };
 
-    // Exportar datos seleccionados a CSV
+    // Abrir y cerrar menú
+    const handleMenuClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    // Exportar datos seleccionados
     const exportToCSV = () => {
         const selectedData = cancelaciones.filter((item) => selectedRows.includes(item.id));
         const worksheet = XLSX.utils.json_to_sheet(selectedData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Cancelaciones");
         XLSX.writeFile(workbook, "Cancelaciones.csv");
+        handleMenuClose();
     };
 
-    // Exportar datos seleccionados a Excel
     const exportToExcel = () => {
         const selectedData = cancelaciones.filter((item) => selectedRows.includes(item.id));
         const worksheet = XLSX.utils.json_to_sheet(selectedData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Cancelaciones");
         XLSX.writeFile(workbook, "Cancelaciones.xlsx");
+        handleMenuClose();
     };
 
-    // Exportar datos seleccionados a PDF
     const exportToPDF = () => {
         const selectedData = cancelaciones.filter((item) => selectedRows.includes(item.id));
         const doc = new jsPDF();
@@ -86,20 +100,29 @@ export default function CancelacionesTable({ cancelaciones, loading, fechaSelecc
             ]),
         });
         doc.save("Cancelaciones.pdf");
+        handleMenuClose();
     };
 
     return (
         <Box>
             <Box className={styles.exportButtons}>
-                <Button variant="contained" color="primary" onClick={exportToCSV} disabled={!selectedRows.length}>
-                    Exportar CSV
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleMenuClick}
+                    disabled={!selectedRows.length}
+                >
+                    Exportar
                 </Button>
-                <Button variant="contained" color="secondary" onClick={exportToExcel} disabled={!selectedRows.length}>
-                    Exportar Excel
-                </Button>
-                <Button variant="contained" color="success" onClick={exportToPDF} disabled={!selectedRows.length}>
-                    Exportar PDF
-                </Button>
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                >
+                    <MenuItem onClick={exportToCSV}>Exportar a CSV</MenuItem>
+                    <MenuItem onClick={exportToExcel}>Exportar a Excel</MenuItem>
+                    <MenuItem onClick={exportToPDF}>Exportar a PDF</MenuItem>
+                </Menu>
             </Box>
             <TableContainer component={Paper} className={styles.tableContainer}>
                 <Table>

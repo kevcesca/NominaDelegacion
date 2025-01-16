@@ -44,6 +44,14 @@ const ChequeManager = () => {
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
 
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+};
+
+const handleClose = () => {
+    setAnchorEl(null);
+};
+
   const nominaMap = {
     compuesta: ["COMPUESTA"],
     extraordinarios: ["EXTRAORDINARIOS"],

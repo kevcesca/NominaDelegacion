@@ -1,31 +1,23 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Box, Typography, TextField, Pagination, Button } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import DateFilter from "../../%Components/DateFilter/DateFilter";
 import EmpleadoSelector from "./components/EmpleadoSelector";
 import ChequeInfo from "./components/ChequeInfo";
 import EvidenciaUploader from "./components/EvidenciaUploader";
 import MotivoCancelacion from "./components/MotivoCancelacion";
-import CancelacionesTable from "./components/CancelacionesTable";
+import ReusableTable from "../../%Components/ReusableTable/ReusableTable"; // Importar la tabla reutilizable
 import styles from "./page.module.css";
 import API_BASE_URL, { API_USERS_URL } from "../../%Config/apiConfig";
 
 const CancelacionCheques = () => {
-  // Estados principales
   const [empleados, setEmpleados] = useState([]);
   const [selectedEmpleado, setSelectedEmpleado] = useState(null);
   const [chequeInfo, setChequeInfo] = useState(null);
   const [motivoCancelacion, setMotivoCancelacion] = useState("");
   const [archivo, setArchivo] = useState(null);
   const [fechaSeleccionada, setFechaSeleccionada] = useState({ anio: "", quincena: "" });
-
-  // Estados de la tabla de cancelaciones
-  const [cancelaciones, setCancelaciones] = useState([]);
-  const [filteredCancelaciones, setFilteredCancelaciones] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
 
   // Fetch de empleados
   useEffect(() => {
@@ -74,7 +66,6 @@ const CancelacionCheques = () => {
     if (archivo) formData.append("file", archivo);
 
     try {
-      // Subir la evidencia
       const evidenciaResponse = await fetch(evidenciaURL, { method: "POST", body: formData });
       if (!evidenciaResponse.ok) throw new Error("Error al subir la evidencia");
 
@@ -83,7 +74,6 @@ const CancelacionCheques = () => {
 
       alert(evidenciaData.message);
 
-      // Cancelar cheque
       const cancelarChequeURL = `${API_BASE_URL}/cancelarCheque?quincena=${fechaSeleccionada.quincena}&foliocheque=${chequeInfo.folio_cheque}&motivo=${encodeURIComponent(
         motivoCancelacion
       )}&evidencia=${evidenciaData.fileName}`;
@@ -93,8 +83,7 @@ const CancelacionCheques = () => {
       const cancelacionMessage = await cancelacionResponse.text();
       alert(`Cheque cancelado correctamente: ${cancelacionMessage}`);
 
-      // Actualizar la tabla de cancelaciones
-      fetchCancelaciones();
+      fetchCancelaciones(); // Actualiza la tabla de cancelaciones
     } catch (error) {
       console.error("Error en el proceso:", error);
       alert(`Error: ${error.message}`);
@@ -103,50 +92,20 @@ const CancelacionCheques = () => {
 
   // Fetch de la tabla de cancelaciones
   const fetchCancelaciones = async () => {
-    setLoading(true);
     try {
       const response = await fetch(
         `${API_BASE_URL}/chequesCancelados/tabla?quincena=${fechaSeleccionada.quincena}&anio=${fechaSeleccionada.anio}`
       );
       if (!response.ok) throw new Error("Error al obtener cancelaciones");
       const data = await response.json();
-      setCancelaciones(data);
-      setFilteredCancelaciones(data);
+      console.log("Datos de cancelaciones:", data);
+      return data || [];
     } catch (error) {
       console.error("Error al obtener cancelaciones:", error);
-      setCancelaciones([]);
-      setFilteredCancelaciones([]);
-    } finally {
-      setLoading(false);
+      return [];
     }
   };
-
-  useEffect(() => {
-    if (fechaSeleccionada.anio && fechaSeleccionada.quincena) {
-      fetchCancelaciones();
-    }
-  }, [fechaSeleccionada]);
-
-  // Búsqueda en la tabla
-  const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-    const filtered = cancelaciones.filter((item) =>
-      Object.values(item).some((value) => value.toString().toLowerCase().includes(query))
-    );
-    setFilteredCancelaciones(filtered);
-    setCurrentPage(1);
-  };
-
-  // Datos paginados
-  const paginatedData = filteredCancelaciones.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
-
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
+  
 
   return (
     <Box className={styles.container}>
@@ -177,31 +136,31 @@ const CancelacionCheques = () => {
       </form>
 
       {/* Tabla de cancelaciones */}
-      <Typography variant="h6" className={styles.subtitle} sx={{ marginTop: "2rem" }}>
-        Historial de Cancelaciones
-      </Typography>
-      <TextField
-        variant="outlined"
-        placeholder="Buscar cancelaciones..."
-        value={searchQuery}
-        onChange={handleSearch}
-        fullWidth
-        margin="normal"
-      />
-      <CancelacionesTable
-        cancelaciones={paginatedData}
-        loading={loading}
-        fechaSeleccionada={fechaSeleccionada} // Pasamos la quincena y el año
-      />
-      <Pagination
-        count={Math.ceil(filteredCancelaciones.length / rowsPerPage)}
-        page={currentPage}
-        onChange={handlePageChange}
-        color="primary"
-        className={styles.pagination}
-      />
+      {fechaSeleccionada.anio && fechaSeleccionada.quincena && (
+        <Box mt={3}>
+          <Typography variant="h6">Histórico de Cancelaciones</Typography>
+          <ReusableTable
+            columns={[
+              { label: "Folio Cheque", accessor: "folio_cheque" },
+              { label: "ID Empleado", accessor: "id_empleado" },
+              { label: "Nombre", accessor: "nombre_empleado" },
+              { label: "Fecha de Cancelación", accessor: "fecha_cancelacion" },
+              { label: "Motivo", accessor: "motivo_cancelacion" },
+              { label: "Evidencia", accessor: "evidencia" },
+            ]}
+            fetchData={fetchCancelaciones}
+            showExportButtons
+            selectable
+            editable={false}  // Se desactiva la edición
+            deletable={false}  // Se desactiva la opción de eliminar
+            insertable={false}  // Se desactiva la opción de agregar
+          />
+
+        </Box>
+      )}
     </Box>
   );
 };
 
 export default CancelacionCheques;
+

@@ -7,6 +7,7 @@ import {
     Select,
     MenuItem,
     TextField,
+    Menu,
 } from "@mui/material";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -22,6 +23,9 @@ import styles from "./EstatusCheque.module.css";
 import API_BASE_URL from "../../../%Config/apiConfig";
 import DateFilter from "../../../%Components/DateFilter/DateFilter";
 
+
+
+
 const StatusCheques = () => {
     const [chequeData, setChequeData] = useState([]); // Datos originales
     const [filteredData, setFilteredData] = useState([]); // Datos filtrados
@@ -29,6 +33,7 @@ const StatusCheques = () => {
     const [recordsPerPage, setRecordsPerPage] = useState(10); // Registros por página
     const [currentParams, setCurrentParams] = useState({ anio: "", quincena: "" }); // Parámetros actuales: año y quincena
     const [searchTerm, setSearchTerm] = useState("");
+    const [anchorEl, setAnchorEl] = useState(null); // Estado para el menú
 
     // Obtener datos desde el servicio
     const fetchChequeData = async (anio, quincena) => {
@@ -36,13 +41,13 @@ const StatusCheques = () => {
             alert("Por favor selecciona un año y una quincena.");
             return;
         }
-    
+
         try {
             // Nueva URL del servicio reemplazada correctamente
             const response = await fetch(
                 `${API_BASE_URL}/estadoCheques?quincena=${quincena}&anio=${anio}`
             );
-    
+
             if (response.ok) {
                 const data = await response.json();
                 setChequeData(data); // Guarda los datos en el estado
@@ -55,8 +60,17 @@ const StatusCheques = () => {
             alert("No se pudo conectar con el servicio.");
         }
     };
-    
+
     // Función para insertar nuevos datos (mantener el servicio existente)
+    
+    //Abrir y cerrar menu
+    const handleMenuClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
 
 
     // Manejar cambios en el filtro de fecha y quincena
@@ -143,8 +157,8 @@ const StatusCheques = () => {
         );
     };
 
-     // Filtrar datos por término de búsqueda
-     const handleSearch = (event) => {
+    // Filtrar datos por término de búsqueda
+    const handleSearch = (event) => {
         const term = event.target.value.toLowerCase();
         setSearchTerm(term);
 
@@ -266,8 +280,8 @@ const StatusCheques = () => {
             </Box>
 
             <Box className={styles.searchBar}>
-            <TextField 
-                    sx={{width:"50vw"}}
+                <TextField
+                    sx={{ width: "50vw" }}
                     variant="outlined"
                     placeholder="Buscar en todas las propiedades"
                     value={searchTerm}
@@ -275,7 +289,7 @@ const StatusCheques = () => {
                 />
             </Box>
 
-           
+
 
             <DataTable
                 value={filteredData}
@@ -316,30 +330,18 @@ const StatusCheques = () => {
                 Registros seleccionados: {selectedCheques.length}
             </Typography>
             <Box className={styles.exportButtons}>
-                <Button
-                    className={styles.exportButton}
-                    variant="contained"
-                    onClick={exportToPDF}
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
                 >
-                    Exportar a PDF
-                </Button>
-                <Button
-                    className={styles.exportButton}
-                    variant="contained"
-                    onClick={exportToExcel}
-                >
-                    Exportar a Excel
-                </Button>
-                <Button
-                    className={styles.exportButton}
-                    variant="contained"
-                    onClick={exportToCSV}
-                >
-                    Exportar a CSV
-                </Button>
+                    <MenuItem onClick={exportToCSV}>Exportar a CSV</MenuItem>
+                    <MenuItem onClick={exportToExcel}>Exportar a Excel</MenuItem>
+                    <MenuItem onClick={exportToPDF}>Exportar a PDF</MenuItem>
+                </Menu>
             </Box>
         </Box>
-        
+
     );
 };
 

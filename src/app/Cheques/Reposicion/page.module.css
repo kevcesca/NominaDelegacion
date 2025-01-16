@@ -1,83 +1,24 @@
-/* Estilos generales del contenedor */
 .container {
-    max-width: 1700px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Estilo del título */
-  .title {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 2rem;
-    color: #333;
-    font-weight: bold;
-  }
-  
-  /* Tabla */
-  .MuiTableContainer-root {
-    margin-top: 20px;
-  }
-  
-  .MuiTableHead-root {
-    background-color: #1976d2; /* Azul Material-UI */
-  }
-  
-  .MuiTableCell-head {
-    color: white;
-    font-weight: bold;
-  }
-  
-  .MuiTableCell-body {
-    font-size: 0.95rem;
-  }
-  
-  /* Input para subir archivo */
-  .input[type='file'] {
-    display: block;
-    margin: 0 auto;
-    color: #555;
-  }
-  
-  /* Botones de acción */
-  .MuiIconButton-root {
-    transition: transform 0.2s ease;
-  }
-  
-  .MuiIconButton-root:hover {
-    transform: scale(1.1);
-  }
-  
-  /* Diálogo de éxito */
-  .MuiDialog-paper {
-    border-radius: 10px;
-  }
-  
-  .MuiDialogTitle-root {
-    font-weight: bold;
-    font-size: 1.25rem;
-    text-align: center;
-  }
-  
-  .MuiButton-root {
-    text-transform: none;
-  }
-  
-  /* Asegúrate de agregar este estilo en tu archivo CSS */
-.buttons-container {
-    display: flex;
-    justify-content: flex-end; /* Alinea los botones a la derecha */
-    gap: 10px; /* Espaciado entre los botones */
-    margin-bottom: 20px; /* Espaciado debajo de los botones */
-    position: relative;
-    top: 55px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.button {
-    padding: 10px 20px; /* Tamaño del botón */
-    font-size: 1px; /* Tamaño de la fuente */
-    text-transform: uppercase; /* Opcional: Convierte el texto a mayúsculas */
+.header {
+  margin-bottom: 20px;
+  color: #b22234;
+  font-weight: bold;
+}
+
+
+.buttonContainer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.submitButton {
+  background-color: #b22234;
+  color: white;
+  font-weight: bold;
 }
