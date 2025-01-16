@@ -13,11 +13,9 @@ const TableRowComponent = ({
     handleSelectRow,
     selectedRows,
 }) => {
-    // Estado local para la edición de la fila
     const [isEditing, setIsEditing] = useState(false);
     const [editedRow, setEditedRow] = useState(row);
 
-    // Efecto para actualizar editedRow cuando cambian row o isNewRow
     useEffect(() => {
         setEditedRow(row);
     }, [row, isNewRow]);
@@ -28,39 +26,32 @@ const TableRowComponent = ({
         }
     };
 
+    const handleInputChange = (colAccessor, value) => {
+        if (colAccessor === "id_concepto") {
+            // Solo permitir números en id_concepto
+            if (!/^\d*$/.test(value)) return;
+        }
+    
+        setEditedRow((prevRow) => ({
+            ...prevRow,
+            [colAccessor]: colAccessor === "nombre_concepto" ? value.toUpperCase() : value, // Convertir a mayúsculas
+        }));
+    };
+    
+
     const handleSaveClick = () => {
         onSave(editedRow);
         setIsEditing(false);
     };
 
-    const handleSaveNewRow = () => {
-        if (onInsert) {
-            // Añade un ID único a la nueva fila antes de insertarla
-            const newRowWithId = { ...newRowData, id: Date.now() }; // o usa una librería como uuid
-            onInsert(newRowWithId);
-        }
-        setCreatingRow(false);
-        setNewRowData({});
-        setEditingRow(null);
-    };
-
     const handleCancelClick = () => {
         onCancel();
         setIsEditing(false);
-        // Restaurar los valores originales
-        setEditedRow(row);
-    };
-
-    const handleInputChange = (colAccessor, value) => {
-        setEditedRow((prevRow) => ({
-            ...prevRow,
-            [colAccessor]: value,
-        }));
+        setEditedRow(row); // Restaurar valores originales
     };
 
     return (
         <TableRow onDoubleClick={handleDoubleClick} style={{ cursor: editable ? "pointer" : "default" }}>
-            {/* Celda de selección */}
             <TableCell padding="checkbox">
                 {!isNewRow && (
                     <Checkbox
@@ -69,25 +60,29 @@ const TableRowComponent = ({
                     />
                 )}
             </TableCell>
-            {/* Renderizar columnas */}
             {columns.map((col) => (
                 <TableCell key={col.accessor}>
                     {isEditing || isNewRow ? (
-                        <TextField
-                            value={editedRow[col.accessor] || ""}
-                            onChange={(e) => handleInputChange(col.accessor, e.target.value)}
-                            size="small"
-                            variant="standard"
-                            InputProps={{
-                                disableUnderline: !isEditing && !isNewRow,
-                            }}
-                        />
+                        // Evaluamos si la columna es "id_concepto" y si no es nueva (isNewRow)
+                        (col.accessor === "id_concepto" && !isNewRow) ? (
+                            <span>{row[col.accessor]}</span> // Mostramos el ID como texto simple
+                        ) : (
+                            <TextField
+                                value={editedRow[col.accessor] || ""}
+                                onChange={(e) => handleInputChange(col.accessor, e.target.value)}
+                                size="small"
+                                variant="standard"
+                                InputProps={{
+                                    disableUnderline: !isEditing && !isNewRow,
+                                }}
+                            />
+                        )
                     ) : (
-                        row[col.accessor] || ""
+                        // Mostrar como texto si no está en edición o creación
+                        <span>{row[col.accessor]}</span>
                     )}
                 </TableCell>
             ))}
-            {/* Renderizar acciones solo si la fila está en edición o creación */}
             {(isEditing || isNewRow) && (
                 <TableCell>
                     <IconButton color="success" onClick={handleSaveClick}>

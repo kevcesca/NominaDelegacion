@@ -225,14 +225,25 @@ export default function ReusableTableCalendar({ API_BASE_URL, anio, mes }) {
                     />
                   </TableCell>
                   {columns.map((col) => (
-                    <TableCell key={col.accessor}>
-                      {row[col.accessor] || '-'}
+                    <TableCell
+                      key={col.accessor}
+                      style={{
+                        maxWidth: '200px', // Limitar ancho
+                        overflow: 'hidden', // Ocultar desbordamiento
+                        textOverflow: 'ellipsis', // Añadir "..." si se excede el espacio
+                        whiteSpace: 'nowrap', // Mantener en una sola línea
+                      }}
+                    >
+                      {row[col.accessor]?.length > 50
+                        ? `${row[col.accessor].slice(0, 50)}...` // Truncar texto largo
+                        : row[col.accessor] || '-'}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             )}
           </TableBody>
+
         </Table>
       </TableContainer>
 

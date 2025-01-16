@@ -4,6 +4,7 @@ import ReusableTable from '../../%Components/ReusableTable/ReusableTable'; // Aj
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Importar estilos
 import API_BASE_URL from '../../%Config/apiConfig';
+import { Alert } from '@mui/material'; // Importar Alert de Material-UI
 
 const ConceptosPage = () => {
     const [data, setData] = useState([]);
@@ -74,6 +75,10 @@ const ConceptosPage = () => {
 
     return (
         <div>
+            {/* Mensaje de advertencia */}
+            <Alert severity="info" sx={{ width: "31vw", textAlign: "center" }}>
+                Para actualizar el concepto se debe presionar doble click encima de la tabla.
+            </Alert>
             <ReusableTable
                 columns={columns}
                 fetchData={fetchConceptos}

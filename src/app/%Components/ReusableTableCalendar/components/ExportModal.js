@@ -51,20 +51,24 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
       });
       return;
     }
-
+  
     if (exportFormat === "pdf") {
       const doc = new jsPDF();
       doc.setFontSize(16);
       doc.text("Exportación de Eventos", 14, 15);
-
+  
       const tableColumnHeaders = selectedColumns.map(
         (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
       );
-
+  
       const tableRows = selectedRows.map((row) =>
-        selectedColumns.map((accessor) => row[accessor] || "-")
+        selectedColumns.map((accessor) =>
+          row[accessor]?.length > 50
+            ? `${row[accessor].slice(0, 50)}...` // Truncar texto si es muy largo
+            : row[accessor] || "-"
+        )
       );
-
+  
       doc.autoTable({
         head: [tableColumnHeaders],
         body: tableRows,
@@ -77,34 +81,42 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
         },
         margin: { left: 10, right: 10 },
       });
-
+  
       doc.save("eventos.pdf");
-
+  
     } else if (exportFormat === "excel") {
       const worksheetData = [
         selectedColumns.map(
           (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
         ),
         ...selectedRows.map((row) =>
-          selectedColumns.map((accessor) => row[accessor] || "-")
+          selectedColumns.map((accessor) =>
+            row[accessor]?.length > 50
+              ? `${row[accessor].slice(0, 50)}...` // Truncar texto si es muy largo
+              : row[accessor] || "-"
+          )
         ),
       ];
-
+  
       const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Eventos");
       XLSX.writeFile(workbook, "eventos.xlsx");
-
+  
     } else if (exportFormat === "csv") {
       const csvData = [
         selectedColumns.map(
           (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
         ),
         ...selectedRows.map((row) =>
-          selectedColumns.map((accessor) => row[accessor] || "-")
+          selectedColumns.map((accessor) =>
+            row[accessor]?.length > 50
+              ? `${row[accessor].slice(0, 50)}...` // Truncar texto si es muy largo
+              : row[accessor] || "-"
+          )
         ),
       ];
-
+  
       const csvString = Papa.unparse(csvData);
       const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
@@ -113,7 +125,7 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
+  
     } else {
       toastRef.current.show({
         severity: "warn",
@@ -123,6 +135,7 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
       });
     }
   };
+  
 
   return (
     <ThemeProvider theme={theme}>
