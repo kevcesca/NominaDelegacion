@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { TableRow, TableCell, Checkbox, TextField, IconButton } from "@mui/material";
-import { Save, Close } from "@mui/icons-material";
+import { Save, Close, Delete as DeleteIcon } from "@mui/icons-material";
 
 const TableRowComponent = ({
     row,
     columns,
     editable,
+    deletable, // Nueva prop para controlar la eliminación
     onSave,
     onCancel,
+    onDelete, // Función para eliminar la fila
     isNewRow,
     handleSelectRow,
     selectedRows,
 }) => {
-    // Estado local para la edición de la fila
     const [isEditing, setIsEditing] = useState(false);
     const [editedRow, setEditedRow] = useState(row);
 
-    // Efecto para actualizar editedRow cuando cambian row o isNewRow
     useEffect(() => {
         setEditedRow(row);
     }, [row, isNewRow]);
@@ -33,21 +33,9 @@ const TableRowComponent = ({
         setIsEditing(false);
     };
 
-    const handleSaveNewRow = () => {
-        if (onInsert) {
-            // Añade un ID único a la nueva fila antes de insertarla
-            const newRowWithId = { ...newRowData, id: Date.now() }; // o usa una librería como uuid
-            onInsert(newRowWithId);
-        }
-        setCreatingRow(false);
-        setNewRowData({});
-        setEditingRow(null);
-    };
-
     const handleCancelClick = () => {
         onCancel();
         setIsEditing(false);
-        // Restaurar los valores originales
         setEditedRow(row);
     };
 
@@ -57,6 +45,16 @@ const TableRowComponent = ({
             [colAccessor]: value,
         }));
     };
+
+    const handleDeleteClick = () => {
+        if (onDelete) {
+            onDelete(row); // Llama a la función de eliminación con la fila actual
+        }
+    };
+
+    console.log("TableRowComponent deletable prop:", deletable);
+    console.log("Soy un consolelog de tablerowcomponent");
+
 
     return (
         <TableRow onDoubleClick={handleDoubleClick} style={{ cursor: editable ? "pointer" : "default" }}>
@@ -87,7 +85,7 @@ const TableRowComponent = ({
                     )}
                 </TableCell>
             ))}
-            {/* Renderizar acciones solo si la fila está en edición o creación */}
+            {/* Renderizar acciones de guardar/cancelar si está en edición o creación */}
             {(isEditing || isNewRow) && (
                 <TableCell>
                     <IconButton color="success" onClick={handleSaveClick}>
@@ -95,6 +93,14 @@ const TableRowComponent = ({
                     </IconButton>
                     <IconButton color="error" onClick={handleCancelClick}>
                         <Close />
+                    </IconButton>
+                </TableCell>
+            )}
+            {/* Renderizar botón de eliminar solo si `deletable` es true y no es nueva fila */}
+            {deletable && !isNewRow && (
+                <TableCell>
+                    <IconButton color="error" onClick={handleDeleteClick}>
+                        <DeleteIcon />
                     </IconButton>
                 </TableCell>
             )}
@@ -106,8 +112,10 @@ TableRowComponent.propTypes = {
     row: PropTypes.object.isRequired,
     columns: PropTypes.array.isRequired,
     editable: PropTypes.bool,
+    deletable: PropTypes.bool, // Se agrega a las propTypes
     onSave: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
+    onDelete: PropTypes.func, // Se agrega a las propTypes
     isNewRow: PropTypes.bool,
     handleSelectRow: PropTypes.func,
     selectedRows: PropTypes.array,
