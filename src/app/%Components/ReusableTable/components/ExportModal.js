@@ -25,7 +25,7 @@ import * as XLSX from "xlsx";
 import * as Papa from "papaparse";
 import styles from "../ReusableTable.module.css";
 import theme from "../../../$tema/theme";
-
+ 
 const ExportModal = ({ open, onClose, selectedRows, columns }) => {
   const [selectedColumns, setSelectedColumns] = useState(columns.map((col) => col.accessor));
   const [exportFormat, setExportFormat] = useState("");

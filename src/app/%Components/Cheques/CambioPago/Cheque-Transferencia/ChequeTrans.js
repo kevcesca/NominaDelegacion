@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Alert,
 } from "@mui/material";
 import ReusableTable3 from "../../../../%Components/ReusableTable3"; // Cambiado a ReusableTable3
 import API_BASE_URL from "../../../../%Config/apiConfig";
@@ -86,6 +87,11 @@ const ChequeTrans = () => {
       return;
     }
 
+    if (employeeData.numCuenta.length !== 18) {
+      alert("La cuenta CLABE debe tener exactamente 18 dígitos.");
+      return;
+    }
+
     setModalOpen(true);
   };
 
@@ -107,6 +113,9 @@ const ChequeTrans = () => {
           await actualizarTipoPago();
           setModalOpen(false);
           await fetchChangesData();
+
+          // Limpiar formulario al confirmar RFC
+          cancelarCambio();
         } else {
           alert("El RFC ingresado no es válido.");
         }
@@ -179,6 +188,7 @@ const ChequeTrans = () => {
         Cambio de Cheque a Transferencia
       </Typography>
 
+      {/* Formulario */}
       <Box className={styles.searchContainer}>
         <Typography variant="h6">Buscar empleado por ID</Typography>
         <Box className={styles.searchField}>
@@ -194,14 +204,25 @@ const ChequeTrans = () => {
           </Button>
         </Box>
         <Box className={styles.volver}>
-          <Button variant="contained" color="primary" startIcon={<ArrowBackIcon />} onClick={() => (window.location.href = "/Cheques/CambioPago")}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => (window.location.href = "/Cheques/CambioPago")}
+          >
             Volver
           </Button>
         </Box>
       </Box>
 
       {employeeFound && (
+
         <Box className={styles.employeeForm}>
+          {/* Advertencias */}
+          <Box className={styles.alert}>
+            <Alert severity="info">La CLABE interbancaria debe estar a nombre del titular registrado.</Alert>
+            <Alert severity="info">La cuenta CLABE debe tener exactamente 18 dígitos.</Alert>
+          </Box>
           <Box className={styles.row}>
             <TextField label="ID Empleado" value={employeeData.id} InputProps={{ readOnly: true }} className={styles.input} />
             <TextField label="Nombre" value={employeeData.nombre} InputProps={{ readOnly: true }} className={styles.input} />
@@ -210,19 +231,34 @@ const ChequeTrans = () => {
             <TextField label="Monto" value={employeeData.monto} InputProps={{ readOnly: true }} className={styles.input} />
             <TextField label="Fecha de cambio" value={fechaCambio} InputProps={{ readOnly: true }} className={styles.input} />
           </Box>
-          <TextField label="Número de Cuenta" value={employeeData.numCuenta} fullWidth onChange={(e) => setEmployeeData({ ...employeeData, numCuenta: e.target.value })} className={styles.input} />
-          <TextField label="Banco" value={employeeData.banco} fullWidth onChange={(e) => setEmployeeData({ ...employeeData, banco: e.target.value })} className={styles.input} />
-          <TextField label="Titular de la Cuenta" value={employeeData.titular_cuenta} fullWidth onChange={(e) => setEmployeeData({ ...employeeData, titular_cuenta: e.target.value })} className={styles.input} />
+          <Box className={styles.row}>
+            <TextField
+              label="Cuenta Clabe"
+              value={employeeData.numCuenta}
+              fullWidth
+              inputProps={{ maxLength: 18, pattern: "\\d*" }}
+              onChange={(e) =>
+                setEmployeeData({ ...employeeData, numCuenta: e.target.value.replace(/\D/g, "") })
+              }
+              className={styles.input}
+            />
+            <TextField
+              label="Banco"
+              value={employeeData.banco}
+              fullWidth
+              onChange={(e) =>
+                setEmployeeData({ ...employeeData, banco: e.target.value.toUpperCase() })
+              }
+              className={styles.input}
+            />
+          </Box>
           <Box className={styles.buttonContainer}>
             <Button variant="contained" color="primary" onClick={handleHacerCambio}>
               Hacer Cambio
             </Button>
-            <Button variant="contained"  color="primary"  onClick={() => setChangesModalOpen(true)}>
+            <Button variant="contained" color="primary" onClick={() => setChangesModalOpen(true)}>
               Ver Cambios
             </Button>
-          </Box>
-          <Box className={styles.verCambios}>
-          
           </Box>
         </Box>
       )}
@@ -282,5 +318,6 @@ const ChequeTrans = () => {
     </Box>
   );
 };
+
 
 export default ChequeTrans;
