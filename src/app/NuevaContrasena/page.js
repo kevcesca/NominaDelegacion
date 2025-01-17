@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TextField, IconButton, Button } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useRouter } from 'next/navigation'; // Para redirección
 import styles from '../NuevaContrasena/NuevaContrasena.module.css'; 
 import { API_USERS_URL } from '../%Config/apiConfig';
 import { useAuth } from '../context/AuthContext';
+import { Toast } from 'primereact/toast';
 
 export default function RecuperarContraseña() {
   const { user, logout, checkPasswordForEmployee } = useAuth();
@@ -19,8 +20,8 @@ export default function RecuperarContraseña() {
   const [passwordError, setPasswordError] = useState('');
   const [matchError, setMatchError] = useState('');
   const [serverError, setServerError] = useState('');
-
   const idEmpleado = user?.id_empleado;
+  const toast = useRef(null);
 
   // Verificación al montar el componente
   useEffect(() => {
@@ -79,9 +80,10 @@ export default function RecuperarContraseña() {
         setServerError(errorData.message || 'Error al cambiar la contraseña.');
         return;
       }
-
-      alert(`La contraseña ha sido cambiada con éxito para el empleado con ID: ${idEmpleado}`);
-      logout(); // Cerrar la sesión después de cambiar la contraseña
+      toast.current.show({ severity: 'success', summary: 'Successful', detail: `La contraseña ha sido cambiada con éxito para el empleado con ID: ${idEmpleado}`, life: 3000 });
+      setTimeout(() => {
+        logout(); // Cerrar la sesión después de cambiar la contraseña
+      }, 2000);
     } catch (err) {
       setServerError('Ocurrió un error al intentar cambiar la contraseña.');
     } finally {
@@ -91,10 +93,11 @@ export default function RecuperarContraseña() {
 
   return (
     <div className={styles.body}>
+      <Toast ref={toast} />
       <div className={styles.container}>
-        <h1>Recuperación de Contraseña</h1>
+        <h1>Cambiar Contraseña</h1>
         <div className={styles.section}>
-          <h2 className={styles.h2}>Cambiar Contraseña</h2>
+          <h2 className={styles.h2}>Cambia tu contraseña por una más segura</h2>
 
           <TextField
             fullWidth
