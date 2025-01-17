@@ -40,8 +40,10 @@ export default function NavBar() {
     const [permissions, setPermissions] = useState(null); // Permisos del usuario
 
     useEffect(() => {
-        setCollapsed(isSmallScreen); // Contraer la barra en pantallas pequeñas
-    }, [isSmallScreen]);
+        if (isSmallScreen && !collapsed) {
+            setCollapsed(true); // Colapsar solo si la barra no está ya colapsada
+        }
+    }, [isSmallScreen]); // Actúa únicamente cuando cambia el tamaño de la pantalla
 
     useEffect(() => {
         const handleClickOutside = (event) => {
