@@ -18,6 +18,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import styles from "../page.module.css";
 
+
+
 const getDownloadURL = (quincena, anio, nombreEvidencia) => {
     const nombreSinExtension = removeFileExtension(nombreEvidencia);
     return `http://192.168.100.25:7080/Nomina/download/evidencias?quincena=${quincena}&anio=${anio}&tipo=Evidencias&nombre=${encodeURIComponent(
