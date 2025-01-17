@@ -2,16 +2,24 @@
 
 import React, { useEffect, useState } from 'react';
 import Calendar from './Calendar';
-import Sidebar from './Sidebar';
-import EventTable from './EventTable';
-import styles from './page.module.css';
+import ReusableTableCalendar from "../%Components/ReusableTableCalendar/ReusableTableCalendar";
+import styles from "../%Components/ReusableTableCalendar/ReusableTableCalendar.module.css";
 import API_BASE_URL from '../%Config/apiConfig';
+import { Alert } from '@mui/material'; // Importar Alert de Material-UI
 
 export default function Calendario() {
   const [selectedDate, setSelectedDate] = useState(null); // Fecha seleccionada
   const [events, setEvents] = useState([]); // Eventos del mes seleccionado
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // Mes actual
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear()); // Año actual
+
+  // Definir columnas fijas para la tabla
+  const columns = [
+    { label: 'ID', accessor: 'id' },
+    { label: 'Título del Evento', accessor: 'titulo_evento' },
+    { label: 'Descripción', accessor: 'descripcion' },
+    { label: 'Fecha', accessor: 'fecha' },
+  ];
 
   // Cargar la fecha desde el localStorage si existe
   useEffect(() => {
@@ -31,10 +39,11 @@ export default function Calendario() {
   useEffect(() => {
     const fetchEvents = async () => {
       if (selectedDate) {
-        const [year, month, day] = selectedDate.split('-');
+        const [year, month, day] = selectedDate.split('-'); // Año, mes y día
         const dateObj = new Date(selectedDate);
-        const monthName = dateObj.toLocaleString('en-US', { month: 'long' });
-
+        const monthNameInEnglish = dateObj.toLocaleString('en-US', { month: 'long' });
+  
+        // Función para convertir nombre del mes al español
         const getMonthInSpanish = (monthName) => {
           switch (monthName) {
             case 'January': return 'Enero';
@@ -52,24 +61,42 @@ export default function Calendario() {
             default: return monthName;
           }
         };
-
+  
+        const monthInSpanish = getMonthInSpanish(monthNameInEnglish);
+  
         try {
-          const monthInSpanish = getMonthInSpanish(monthName);
+          // Aquí el servicio manda el mes en formato numérico y el nombre del mes
           const response = await fetch(
-            `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${monthInSpanish}`
+            `${API_BASE_URL}/consultaEventosDia?dia=${day}&anio=${year}&mes=${String(month).padStart(2, '0')}&nombre_mes=${monthInSpanish}`
           );
+  
+          if (!response.ok) {
+            throw new Error('Error en la solicitud');
+          }
+  
           const data = await response.json();
-          setEvents(data); // Actualizar los eventos del estado
+          console.log("Eventos recibidos:", data); // Verificar en consola qué eventos se reciben
+  
+          // Verifica si los datos tienen la estructura correcta
+          const formattedEvents = data.map((event) => ({
+            id: event.id,
+            titulo_evento: event.titulo_evento || 'Sin título',
+            descripcion: event.descripcion || 'Sin descripción',
+            fecha: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+          }));
+  
+          setEvents(formattedEvents); // Guardar los eventos formateados
         } catch (error) {
           console.error('Error al obtener los eventos:', error);
         }
       }
     };
-
+  
     if (selectedDate) {
-      fetchEvents(); // Solo se ejecuta si selectedDate está definido
+      fetchEvents(); // Solo ejecuta si hay fecha seleccionada
     }
-  }, [selectedDate]); // Ejecutar cuando cambie la fecha seleccionada
+  }, [selectedDate]);
+  
 
   // Cargar eventos al cambiar el mes
   useEffect(() => {
@@ -158,7 +185,7 @@ export default function Calendario() {
             default: return monthName;
           }
         };
-  
+
         try {
           const monthInSpanish = getMonthInSpanish(monthName);
           const response = await fetch(
@@ -170,7 +197,7 @@ export default function Calendario() {
           console.error('Error al obtener los eventos actualizados:', error);
         }
       };
-  
+
       fetchUpdatedEvents(); // Llamada para actualizar los eventos después de guardar
     }
   };
@@ -181,6 +208,11 @@ export default function Calendario() {
       <div className={styles.title}>
         <h1>CALENDARIO</h1>
       </div>
+
+      {/* Mensaje de advertencia */}
+      <Alert severity="info" sx={{ width: "28.5vw", textAlign: "center" }}>
+        Al cambiar el mes se actualizará en automatico en "Eventos del mes".
+      </Alert>
 
       {/* Contenido del calendario */}
       <div className={styles.containerContent}>
@@ -194,21 +226,24 @@ export default function Calendario() {
             currentYear={currentYear}
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
-          />
-
-          {/* Barra lateral */}
-          <Sidebar
-            selectedDate={selectedDate}
-            events={events}
-            onSaveEvent={handleSaveEvent} // Pasamos la función que guarda el evento
+            fetchEvents={() => fetchMonthlyEvents()}
           />
         </div>
 
-        {/* Tabla resumen */}
         <div className={styles.summaryContainer}>
-          <EventTable
-            events={events}
-            anio={currentYear}
+          <div className={styles.title}>
+            <h1>EVENTOS DEL MES</h1>
+          </div>
+
+          {/* Mensaje de advertencia */}
+          <Alert severity="info" sx={{ width: "39.7vw", textAlign: "center" }}>
+            "Al insertar un nuevo evento en el calendario  se podra ver en la tabla al presionar el icono de refrescar. 
+          </Alert>
+
+          {/* Pasar correctamente el año y mes al componente de tabla */}
+          <ReusableTableCalendar
+            API_BASE_URL={API_BASE_URL}
+            anio={currentYear.toString()}
             mes={`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`}
           />
         </div>

@@ -3,89 +3,87 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, IconButton, Button } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import styles from '../NuevaContrasena/NuevaContrasena.module.css'; // Usamos estilos adicionales si son necesarios
-import { API_USERS_URL } from '../%Config/apiConfig'; // URL base de la API
-import { useAuth } from '../context/AuthContext';  // Importamos el contexto de autenticación
+import { useRouter } from 'next/navigation'; // Para redirección
+import styles from '../NuevaContrasena/NuevaContrasena.module.css'; 
+import { API_USERS_URL } from '../%Config/apiConfig';
+import { useAuth } from '../context/AuthContext';
 
 export default function RecuperarContraseña() {
-  const { user, logout } = useAuth();  // Recuperamos el usuario y la función logout desde el contexto
+  const { user, logout, checkPasswordForEmployee } = useAuth();
+  const router = useRouter(); // Instancia de router
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [passwordError, setPasswordError] = useState('');
+  const [matchError, setMatchError] = useState('');
+  const [serverError, setServerError] = useState('');
 
-  const idEmpleado = user?.id_empleado; // Obtenemos el ID del empleado directamente desde el contexto
+  const idEmpleado = user?.id_empleado;
 
-  // Asegurarnos de que el valor de idEmpleado esté disponible
+  // Verificación al montar el componente
   useEffect(() => {
-    if (!idEmpleado) {
-      setError('No se ha encontrado el ID del empleado en la sesión.');
-    }
-  }, [idEmpleado]);
+    const verifyPassword = async () => {
+      if (!idEmpleado) {
+        setServerError('No se ha encontrado el ID del empleado en la sesión.');
+        router.push('/'); // Redirige al inicio si no hay ID
+        return;
+      }
 
-  // Función para validar la seguridad de la contraseña
+      const isDefaultPassword = await checkPasswordForEmployee(idEmpleado);
+      if (!isDefaultPassword) {
+        router.push('/'); // Redirige al inicio si no es la contraseña por defecto
+      }
+    };
+
+    verifyPassword(); // Ejecuta la verificación al cargar
+  }, [idEmpleado, checkPasswordForEmployee, router]);
+
   const validarSeguridadContraseña = (password) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     return regex.test(password);
   };
 
-  // Función para cambiar la contraseña
   const changePassword = async () => {
-    // Validación de la seguridad de la nueva contraseña
+    setPasswordError('');
+    setMatchError('');
+    setServerError('');
+
     if (!validarSeguridadContraseña(newPassword)) {
-      alert(
-        'La contraseña debe tener al menos 8 caracteres, incluir una combinación de letras mayúsculas, minúsculas, números y símbolos.'
-      );
+      setPasswordError('La contraseña debe tener al menos 8 caracteres, incluir letras mayúsculas, minúsculas, números y símbolos.');
       return;
     }
 
-    // Validación de la confirmación de la contraseña
     if (newPassword !== confirmPassword) {
-      alert('Las contraseñas no coinciden. Por favor, inténtalo de nuevo.');
+      setMatchError('Las contraseñas no coinciden. Por favor, inténtalo de nuevo.');
       return;
     }
 
-    // Validación del ID del empleado
     if (!idEmpleado) {
-      alert('El ID del empleado es obligatorio.');
+      setServerError('El ID del empleado es obligatorio.');
       return;
     }
 
     setLoading(true);
-    setError(null);
 
-    // Verificar que el idEmpleado se pase correctamente en la solicitud
-    console.log("Enviando solicitud con ID:", idEmpleado);  // Debug
-
-    // Solicitud para cambiar la contraseña
     try {
       const response = await fetch(`${API_USERS_URL}/users/${idEmpleado}/change-password`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          newPassword,     // Nueva contraseña
-          confirmPassword, // Confirmación de la nueva contraseña
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword, confirmPassword }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message || 'Error al cambiar la contraseña.');
-        setLoading(false);
+        setServerError(errorData.message || 'Error al cambiar la contraseña.');
         return;
       }
 
       alert(`La contraseña ha sido cambiada con éxito para el empleado con ID: ${idEmpleado}`);
-
-      // Llamamos al logout después de cambiar la contraseña
-      logout();  // Cerrar la sesión del usuario
-
+      logout(); // Cerrar la sesión después de cambiar la contraseña
     } catch (err) {
-      setError('Ocurrió un error al intentar cambiar la contraseña.');
+      setServerError('Ocurrió un error al intentar cambiar la contraseña.');
     } finally {
       setLoading(false);
     }
@@ -95,13 +93,9 @@ export default function RecuperarContraseña() {
     <div className={styles.body}>
       <div className={styles.container}>
         <h1>Recuperación de Contraseña</h1>
-
         <div className={styles.section}>
           <h2 className={styles.h2}>Cambiar Contraseña</h2>
 
-          {/* El campo ID Empleado se elimina ya que se usa directamente desde el contexto */}
-
-          {/* Campo para Nueva Contraseña */}
           <TextField
             fullWidth
             label="Nueva Contraseña"
@@ -111,19 +105,17 @@ export default function RecuperarContraseña() {
             onChange={(e) => setNewPassword(e.target.value)}
             margin="normal"
             required
+            error={!!passwordError}
+            helperText={passwordError}
             InputProps={{
               endAdornment: (
-                <IconButton
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  edge="end"
-                >
+                <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
                   {showNewPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               ),
             }}
           />
 
-          {/* Campo para Confirmar Contraseña */}
           <TextField
             fullWidth
             label="Confirmar Contraseña"
@@ -133,32 +125,29 @@ export default function RecuperarContraseña() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             margin="normal"
             required
+            error={!!matchError}
+            helperText={matchError}
             InputProps={{
               endAdornment: (
-                <IconButton
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  edge="end"
-                >
+                <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
                   {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
               ),
             }}
           />
 
-          {/* Botón de Cambiar Contraseña */}
           <Button
             variant="contained"
             color="primary"
             onClick={changePassword}
-            disabled={loading}
+            disabled={loading || !newPassword || !confirmPassword}
             fullWidth
             style={{ marginTop: '16px' }}
           >
             {loading ? 'Cambiando...' : 'Cambiar Contraseña'}
           </Button>
 
-          {/* Muestra errores si los hay */}
-          {error && <p className={styles.error}>{error}</p>}
+          {serverError && <p className={styles.error}>{serverError}</p>}
         </div>
       </div>
     </div>
