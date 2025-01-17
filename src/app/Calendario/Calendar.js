@@ -33,6 +33,8 @@ export default function Calendar({
   const todayYear = today.getFullYear();
   const todayMonth = today.getMonth();
   const todayDate = today.getDate();
+  const [titleError, setTitleError] = useState(false); // Estado para manejar el error del título
+
 
 
 
@@ -53,11 +55,18 @@ export default function Calendar({
     }
   };
 
-  // Abrir modal para agregar evento al hacer doble clic en un día
+
   const handleDayDoubleClick = (date) => {
     setSelectedDate(date);
-    setNewEvent({ titulo_evento: '', descripcion: '' });
-    setIsAddEventModalOpen(true);
+    setNewEvent({ titulo_evento: '', descripcion: '' }); // Reinicia los valores del evento
+    setTitleError(false); // Reinicia el error del título al abrir el modal
+    setIsAddEventModalOpen(true); // Abre el modal
+  };
+
+  // Cerrar modal de agregar evento
+  const closeAddEventModal = () => {
+    setIsAddEventModalOpen(false); // Cierra el modal
+    setTitleError(false); // Reinicia el error del título al cerrar el modal
   };
 
   // Guardar evento nuevo
@@ -139,31 +148,32 @@ export default function Calendar({
     setIsEditing(false); // Deshabilitar edición al abrir el modal
   };
 
+
   // Eliminar evento
   // Eliminar evento
   const handleDeleteEvent = async () => {
     if (!eventToDelete?.id) return;
-  
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/eliminarEvento?id=${eventToDelete.id}`,
         { method: 'GET' }
       );
-  
+
       if (response.ok) {
         // Eliminar el evento de la lista principal
         setEvents((prev) =>
           prev.filter((event) => event.id !== eventToDelete.id)
         );
-  
+
         // Eliminar el evento del modal de "X más"
         setSelectedDayEvents((prev) =>
           prev.filter((event) => event.id !== eventToDelete.id)
         );
-  
+
         setIsEventDetailModalOpen(false);
         closeConfirmDeleteModal();
-  
+
         toastRef.current.show({
           severity: 'success',
           summary: 'Evento Eliminado',
@@ -183,7 +193,7 @@ export default function Calendar({
       });
     }
   };
-  
+
 
 
   // Actualizar evento
@@ -198,13 +208,13 @@ export default function Calendar({
       });
       return;
     }
-  
+
     try {
       const updateUrl = `${API_BASE_URL}/actualizarEvento?tituloEvento=${encodeURIComponent(
         selectedEvent.titulo_evento
       )}&descripcion=${encodeURIComponent(selectedEvent.descripcion)}&id=${selectedEvent.id}`;
       const response = await fetch(updateUrl, { method: 'GET' });
-  
+
       if (response.ok) {
         // Crear una copia actualizada del evento
         const updatedEvent = {
@@ -212,21 +222,21 @@ export default function Calendar({
           titulo_evento: selectedEvent.titulo_evento,
           descripcion: selectedEvent.descripcion,
         };
-  
+
         // Actualizar la lista de eventos principal
         setEvents((prev) =>
           prev.map((event) =>
             event.id === selectedEvent.id ? updatedEvent : event
           )
         );
-  
+
         // Actualizar los eventos del modal de "X más"
         setSelectedDayEvents((prev) =>
           prev.map((event) =>
             event.id === selectedEvent.id ? updatedEvent : event
           )
         );
-  
+
         setIsEditing(false);
         toastRef.current.show({
           severity: 'success',
@@ -247,7 +257,7 @@ export default function Calendar({
       });
     }
   };
-  
+
 
 
 
@@ -320,11 +330,17 @@ export default function Calendar({
         <button className={styles.navButton} onClick={onPrevMonth}>
           &lt;
         </button>
-        {`${new Date(currentYear, currentMonth).toLocaleString('es', { month: 'long' })} ${currentYear}`}
+        {`${new Date(currentYear, currentMonth)
+          .toLocaleString('es', { month: 'long' })
+          .charAt(0)
+          .toUpperCase()}${new Date(currentYear, currentMonth)
+            .toLocaleString('es', { month: 'long' })
+            .slice(1)} ${currentYear}`}
         <button className={styles.navButton} onClick={onNextMonth}>
           &gt;
         </button>
       </h2>
+
 
       <table className={styles.calendarTable}>
         <thead>
@@ -346,42 +362,53 @@ export default function Calendar({
       </table>
 
       {/* Modal para agregar evento */}
-      <Modal open={isAddEventModalOpen} onClose={() => setIsAddEventModalOpen(false)}>
+      <Modal open={isAddEventModalOpen} onClose={closeAddEventModal}>
         <Box className={styles.modal}>
           <Typography variant="h6">Agregar Evento</Typography>
           <TextField
             label="Título del Evento"
             value={newEvent.titulo_evento}
-            onChange={(e) => setNewEvent({ ...newEvent, titulo_evento: e.target.value })}
+            onChange={(e) => {
+              const maxLength = 60; // Límite de caracteres para el título
+              const value = e.target.value.slice(0, maxLength); // Truncar al límite
+              if (value.length === maxLength) {
+                setTitleError(true); // Mostrar error si alcanza el límite
+              } else {
+                setTitleError(false); // Limpiar error si está dentro del límite
+              }
+              setNewEvent({ ...newEvent, titulo_evento: value }); // Actualizar el título
+            }}
             fullWidth
             margin="normal"
+            error={titleError} // Mostrar error visualmente
+            helperText={titleError ? "El título no puede superar los 60 caracteres" : ""} // Mostrar el mensaje de error
           />
           <TextField
             label="Descripción"
             value={newEvent.descripcion}
             onChange={(e) => {
-              const maxLength = 255;
+              const maxLength = 255; // Límite de caracteres para la descripción
               if (e.target.value.length <= maxLength) {
-                setNewEvent({ ...newEvent, descripcion: e.target.value });
+                setNewEvent({ ...newEvent, descripcion: e.target.value }); // Actualizar la descripción
               }
             }}
             fullWidth
             margin="normal"
             multiline
             rows={4}
-            helperText={`${newEvent.descripcion.length}/255 caracteres`}
+            helperText={`${newEvent.descripcion.length}/255 caracteres`} // Contador de caracteres
           />
-
           <Box textAlign="right" marginTop={2}>
             <Button onClick={handleSaveEvent} variant="contained" color="primary" sx={{ marginRight: 1 }}>
               Guardar
             </Button>
-            <Button onClick={() => setIsAddEventModalOpen(false)} variant="outlined" color="error">
+            <Button onClick={closeAddEventModal} variant="outlined" color="error">
               Cancelar
             </Button>
           </Box>
         </Box>
       </Modal>
+
 
       {/* Modal para ver eventos del día */}
       <Modal open={isDayEventsModalOpen} onClose={() => setIsDayEventsModalOpen(false)}>
@@ -403,133 +430,150 @@ export default function Calendar({
 
       {/* Modal para detalles del evento */}
       {/* Modal para detalles del evento */}
-<Modal open={isEventDetailModalOpen} onClose={() => setIsEventDetailModalOpen(false)}>
-  <Box className={styles.modal}>
-    <Typography variant="h6" sx={{ marginBottom: 2 }}>
-      Detalles del Evento
-    </Typography>
-
-    {selectedEvent && (
-      <>
-        {/* Campo del título (editable o solo lectura) */}
-        {!isEditing ? (
-          <Typography
-            variant="body1"
-            sx={{
-              marginBottom: 2,
-              fontWeight: 'bold',
-              wordBreak: 'break-word',
-              whiteSpace: 'pre-wrap',
-              overflowWrap: 'break-word',
-            }}
-          >
-            <strong>Título:</strong> {selectedEvent.titulo_evento || 'Sin título'}
+      <Modal open={isEventDetailModalOpen} onClose={() => setIsEventDetailModalOpen(false)}>
+        <Box className={styles.modal}>
+          <Typography variant="h6" sx={{ marginBottom: 2 }}>
+            Detalles del Evento
           </Typography>
-        ) : (
-          <TextField
-            label="Título"
-            value={selectedEvent.titulo_evento}
-            onChange={(e) => setSelectedEvent({ ...selectedEvent, titulo_evento: e.target.value })}
-            fullWidth
-            margin="normal"
-            multiline
-            rows={2}
-          />
-        )}
 
-        {/* Campo de la descripción (editable o solo lectura) */}
-        {!isEditing ? (
-          <Typography
-            variant="body2"
-            sx={{
-              marginBottom: 2,
-              wordBreak: 'break-word',
-              whiteSpace: 'pre-wrap',
-              overflowWrap: 'break-word',
-            }}
-          >
-            <strong>Descripción:</strong> {selectedEvent.descripcion || 'Sin descripción'}
-          </Typography>
-        ) : (
-          <TextField
-            label="Descripción"
-            value={selectedEvent.descripcion}
-            onChange={(e) =>
-              setSelectedEvent({ ...selectedEvent, descripcion: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-            multiline
-            rows={4}
-          />
-        )}
+          {selectedEvent && (
+            <>
+              {/* Campo del título (editable o solo lectura) */}
+              {/* Campo del título (editable o solo lectura) */}
+              {!isEditing ? (
+                <Typography
+                  variant="body1"
+                  sx={{
+                    marginBottom: 2,
+                    fontWeight: 'bold',
+                    wordBreak: 'break-word',
+                    whiteSpace: 'pre-wrap',
+                    overflowWrap: 'break-word',
+                  }}
+                >
+                  <strong>Título:</strong> {selectedEvent.titulo_evento || 'Sin título'}
+                </Typography>
+              ) : (
+                <TextField
+                  label="Título"
+                  value={selectedEvent.titulo_evento}
+                  onChange={(e) => {
+                    const maxLength = 60;
+                    const value = e.target.value.slice(0, maxLength); // Truncar a 50 caracteres
+                    if (value.length === maxLength) {
+                      setTitleError(true); // Mostrar error si alcanza el límite
+                    } else {
+                      setTitleError(false); // Limpiar error si está dentro del límite
+                    }
+                    setSelectedEvent({ ...selectedEvent, titulo_evento: value });
+                  }}
+                  fullWidth
+                  margin="normal"
+                  error={titleError} // Mostrar error visualmente
+                  helperText={titleError ? "El título no puede superar los 60 caracteres" : ""} // Mostrar error si aplica
+                />
+              )}
 
-        {/* Información adicional */}
-        <Typography>
-          <strong>Quincena:</strong>{' '}
-          {new Date(selectedEvent.fecha).getDate() <= 15 ? 'Primera Quincena' : 'Segunda Quincena'}
-        </Typography>
-        <Typography sx={{ marginBottom: 2 }}>
-          <strong>Fecha:</strong>{' '}
-          {(() => {
-            const [year, month, day] = selectedEvent.fecha.split('-');
-            const monthNames = [
-              'enero',
-              'febrero',
-              'marzo',
-              'abril',
-              'mayo',
-              'junio',
-              'julio',
-              'agosto',
-              'septiembre',
-              'octubre',
-              'noviembre',
-              'diciembre',
-            ];
-            return `${parseInt(day)} de ${monthNames[parseInt(month) - 1]} de ${year}`;
-          })()}
-        </Typography>
 
-        {/* Botones de acción */}
-<Box display="flex" justifyContent="space-between" marginTop={2}>
-  {/* Cambiar entre "Editar" y "Guardar Cambios" */}
-  {!isEditing ? (
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={() => setIsEditing(true)}
-      sx={{
-        backgroundColor: '#9b1d1d',
-        '&:hover': { backgroundColor: '#7b1616' },
-      }}
-    >
-      Editar
-    </Button>
-  ) : (
-    <Button
-      variant="contained"
-      color="success"
-      onClick={handleUpdateEvent} // Llamar a la función de actualización
-    >
-      Guardar Cambios
-    </Button>
-  )}
 
-  {/* Botón para borrar evento */}
-  <Button
-    variant="outlined"
-    color="error"
-    onClick={() => openConfirmDeleteModal(selectedEvent)} // Modal de confirmación para eliminar
-  >
-    Borrar Evento
-  </Button>
-</Box>
+              {/* Campo de la descripción (editable o solo lectura) */}
+              {!isEditing ? (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    marginBottom: 2,
+                    wordBreak: 'break-word',
+                    whiteSpace: 'pre-wrap',
+                    overflowWrap: 'break-word',
+                  }}
+                >
+                  <strong>Descripción:</strong> {selectedEvent.descripcion || 'Sin descripción'}
+                </Typography>
+              ) : (
+                <TextField
+                  label="Descripción"
+                  value={selectedEvent.descripcion}
+                  onChange={(e) => {
+                    const maxLength = 255;
+                    if (e.target.value.length <= maxLength) {
+                      setSelectedEvent({ ...selectedEvent, descripcion: e.target.value });
+                    }
+                  }}
+                  fullWidth
+                  margin="normal"
+                  multiline
+                  rows={4}
+                  helperText={`${selectedEvent.descripcion.length}/255 caracteres`} // Mostrar el contador
+                />
+              )}
 
-      </>
-    )}
-  </Box>
-</Modal>
+
+              {/* Información adicional */}
+              <Typography>
+                <strong>Quincena:</strong>{' '}
+                {new Date(selectedEvent.fecha).getDate() <= 15 ? 'Primera Quincena' : 'Segunda Quincena'}
+              </Typography>
+              <Typography sx={{ marginBottom: 2 }}>
+                <strong>Fecha:</strong>{' '}
+                {(() => {
+                  const [year, month, day] = selectedEvent.fecha.split('-');
+                  const monthNames = [
+                    'enero',
+                    'febrero',
+                    'marzo',
+                    'abril',
+                    'mayo',
+                    'junio',
+                    'julio',
+                    'agosto',
+                    'septiembre',
+                    'octubre',
+                    'noviembre',
+                    'diciembre',
+                  ];
+                  return `${parseInt(day)} de ${monthNames[parseInt(month) - 1]} de ${year}`;
+                })()}
+              </Typography>
+
+              {/* Botones de acción */}
+              <Box display="flex" justifyContent="space-between" marginTop={2}>
+                {/* Cambiar entre "Editar" y "Guardar Cambios" */}
+                {!isEditing ? (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setIsEditing(true)}
+                    sx={{
+                      backgroundColor: '#9b1d1d',
+                      '&:hover': { backgroundColor: '#7b1616' },
+                    }}
+                  >
+                    Editar
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={handleUpdateEvent} // Llamar a la función de actualización
+                  >
+                    Guardar Cambios
+                  </Button>
+                )}
+
+                {/* Botón para borrar evento */}
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => openConfirmDeleteModal(selectedEvent)} // Modal de confirmación para eliminar
+                >
+                  Borrar Evento
+                </Button>
+              </Box>
+
+            </>
+          )}
+        </Box>
+      </Modal>
 
       <Dialog open={isConfirmDeleteModalOpen} onClose={closeConfirmDeleteModal}>
         <DialogTitle>Confirmación de Eliminación</DialogTitle>
