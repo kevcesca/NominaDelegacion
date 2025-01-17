@@ -110,7 +110,7 @@
             method: "GET",
           }
         );
-
+//gary no hizo bien los cambios 
         if (response.ok) {
           alert("¡El cambio fue realizado exitosamente!");
           setShowModal(false);
