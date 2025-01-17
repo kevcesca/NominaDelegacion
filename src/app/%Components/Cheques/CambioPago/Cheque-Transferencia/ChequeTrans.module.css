@@ -127,6 +127,17 @@
   background-color: #801616;
 }
 
+.alert {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  width: 35vw;
+}
+
+
 /* Ajustes responsivos */
 @media (max-width: 768px) {
   .row {
