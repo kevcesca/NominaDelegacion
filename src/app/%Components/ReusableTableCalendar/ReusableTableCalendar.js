@@ -17,6 +17,11 @@ import {
   TextField,
   InputAdornment,
   IconButton,
+  Tooltip,
+  Dialog, // Importar Dialog
+  DialogTitle, // Importar DialogTitle
+  DialogContent, // Importar DialogContent
+  DialogActions, // Importar DialogActions
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
@@ -53,6 +58,9 @@ export default function ReusableTableCalendar({ API_BASE_URL, anio, mes }) {
   const [isExportModalOpen, setExportModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const toastRef = useRef(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Controlar el estado del modal
+  const [selectedRow, setSelectedRow] = useState(null); // Almacenar la fila seleccionada
+
 
   // **Función para cargar datos desde la API**
   const fetchData = async () => {
@@ -138,6 +146,23 @@ export default function ReusableTableCalendar({ API_BASE_URL, anio, mes }) {
     setExportModalOpen(false);
   };
 
+  const handleOpenModal = (content) => {
+    setModalContent(content);
+    setIsModalOpen(true);
+  };
+
+  // Abrir el modal con la información de la fila seleccionada
+  const handleRowClick = (row) => {
+    setSelectedRow(row); // Guardar la fila seleccionada
+    setIsModalOpen(true); // Abrir el modal
+  };
+
+  // Cerrar el modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Cerrar el modal
+    setSelectedRow(null); // Limpiar la fila seleccionada
+  };
+
   return (
     <Paper className={styles.tableContainer}>
       <Toast ref={toastRef} />
@@ -203,48 +228,53 @@ export default function ReusableTableCalendar({ API_BASE_URL, anio, mes }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length + 1} align="center">
-                  Cargando...
-                </TableCell>
-              </TableRow>
-            ) : filteredData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length + 1} align="center">
-                  No hay eventos para mostrar
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selectedRows.includes(row)}
-                      onChange={() => handleSelectRow(row)}
-                    />
-                  </TableCell>
-                  {columns.map((col) => (
-                    <TableCell
-                      key={col.accessor}
-                      style={{
-                        maxWidth: '200px', // Limitar ancho
-                        overflow: 'hidden', // Ocultar desbordamiento
-                        textOverflow: 'ellipsis', // Añadir "..." si se excede el espacio
-                        whiteSpace: 'nowrap', // Mantener en una sola línea
-                      }}
-                    >
-                      {row[col.accessor]?.length > 50
-                        ? `${row[col.accessor].slice(0, 50)}...` // Truncar texto largo
-                        : row[col.accessor] || '-'}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
+  {isLoading ? (
+    <TableRow>
+      <TableCell colSpan={columns.length + 1} align="center">
+        Cargando...
+      </TableCell>
+    </TableRow>
+  ) : filteredData.length === 0 ? (
+    <TableRow>
+      <TableCell colSpan={columns.length + 1} align="center">
+        No hay eventos para mostrar
+      </TableCell>
+    </TableRow>
+  ) : (
+    filteredData
+      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+      .map((row) => (
+        <TableRow
+          key={row.id}
+          style={{ cursor: 'pointer' }}
+          onClick={() => handleRowClick(row)} // Abrir modal al hacer clic en la fila
+        >
+          {/* Checkbox con event.stopPropagation */}
+          <TableCell padding="checkbox" onClick={(event) => event.stopPropagation()}>
+            <Checkbox
+              checked={selectedRows.includes(row)}
+              onChange={() => handleSelectRow(row)} // Seleccionar o deseleccionar fila
+            />
+          </TableCell>
+          {/* Renderizar las celdas */}
+          {columns.map((col) => (
+            <TableCell key={col.accessor}>
+              <Tooltip title={row[col.accessor] || 'Sin contenido'} arrow>
+                <span>
+                  {row[col.accessor]?.length > 50
+                    ? `${row[col.accessor].slice(0, 50)}...`
+                    : row[col.accessor] || '-'}
+                </span>
+              </Tooltip>
+            </TableCell>
+          ))}
+        </TableRow>
+      ))
+  )}
+</TableBody>
 
         </Table>
+
       </TableContainer>
 
       <TablePagination
@@ -264,6 +294,35 @@ export default function ReusableTableCalendar({ API_BASE_URL, anio, mes }) {
         selectedRows={selectedRows}
         columns={columns}
       />
+
+      {selectedRow && (
+        <Dialog open={isModalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
+        <DialogTitle>Detalles del Evento</DialogTitle>
+        <DialogContent>
+          {columns.map((col) => (
+            <Typography
+              key={col.accessor}
+              variant="body1"
+              sx={{
+                marginBottom: 2,
+                wordBreak: "break-word", // Permite romper texto largo en palabras
+                whiteSpace: "normal",   // Ajusta el texto para que se muestre en varias líneas
+              }}
+            >
+              <strong>{col.label}:</strong> {selectedRow[col.accessor] || 'Sin contenido'}
+            </Typography>
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} variant="contained" color="primary">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      
+      )}
+
+
     </Paper>
   );
 }

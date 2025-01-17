@@ -10,12 +10,18 @@ const Header = ({
     setSearchQuery,
     onExport,
     disableExport,
-    onDeleteSelected, // Nueva prop
-    disableDeleteSelected, // Nueva prop
+    onDeleteSelected,
+    disableDeleteSelected,
+    deletable, // Nueva prop para controlar si se debe mostrar el botón de eliminar
 }) => (
     <div className={styles.header}>
         {insertable && (
-            <Button sx={{ marginRight: '2rem' }} color="success" variant="contained" onClick={onInsert}>
+            <Button
+                sx={{ marginRight: '2rem' }}
+                color="success"
+                variant="contained"
+                onClick={onInsert}
+            >
                 Crear
             </Button>
         )}
@@ -36,15 +42,18 @@ const Header = ({
         >
             Exportar
         </Button>
-        <Button
-            color="error"
-            variant="contained"
-            onClick={onDeleteSelected} // Llama a la función de eliminar seleccionados
-            disabled={disableDeleteSelected} // Deshabilitado si no hay filas seleccionadas
-            sx={{ marginLeft: '1rem' }}
-        >
-            Eliminar seleccionados
-        </Button>
+        {/* Mostrar botón de eliminar solo si deletable es true */}
+        {deletable && (
+            <Button
+                color="error"
+                variant="contained"
+                onClick={onDeleteSelected}
+                disabled={disableDeleteSelected}
+                sx={{ marginLeft: '1rem' }}
+            >
+                Eliminar seleccionados
+            </Button>
+        )}
     </div>
 );
 
@@ -55,8 +64,9 @@ Header.propTypes = {
     setSearchQuery: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     disableExport: PropTypes.bool.isRequired,
-    onDeleteSelected: PropTypes.func.isRequired, // Nueva prop
-    disableDeleteSelected: PropTypes.bool.isRequired, // Nueva prop
+    onDeleteSelected: PropTypes.func.isRequired,
+    disableDeleteSelected: PropTypes.bool.isRequired,
+    deletable: PropTypes.bool, // Nueva prop para indicar si el botón debe mostrarse
 };
 
 export default Header;

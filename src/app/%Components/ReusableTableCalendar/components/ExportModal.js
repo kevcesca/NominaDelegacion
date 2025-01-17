@@ -188,37 +188,69 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
           </div>
 
           {/* Vista previa */}
-          <TableContainer sx={{ flex: 2, maxHeight: "70vh", overflowY: "auto" }}>
-            <h3>Vista Previa</h3>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {selectedColumns.map((accessor) => (
-                    <TableCell
-                      key={accessor}
-                      sx={{
-                        backgroundColor: "#9b1d1d",
-                        color: "white",
-                        fontWeight: "bold",
-                        textAlign: "center",
-                      }}
-                    >
-                      {columns.find((col) => col.accessor === accessor)?.label || accessor}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {selectedRows.map((row, index) => (
-                  <TableRow key={index}>
-                    {selectedColumns.map((accessor) => (
-                      <TableCell key={accessor}>{row[accessor]}</TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          {/* Vista previa */} 
+<TableContainer
+  sx={{
+    flex: 2,
+    maxHeight: "70vh",
+    overflowY: "auto", // Scroll vertical si el contenido excede el espacio
+    border: "1px solid #ccc", // Borde para separar visualmente
+    borderRadius: "8px", // Bordes redondeados
+    padding: "0.5rem", // Espaciado interno
+  }}
+>
+  <Typography variant="h6" sx={{ marginBottom: "1rem", textAlign: "center", color: "#9b1d1d" }}>
+    Vista Previa
+  </Typography>
+  <Table>
+    <TableHead>
+      <TableRow>
+        {selectedColumns.map((accessor) => (
+          <TableCell
+            key={accessor}
+            sx={{
+              backgroundColor: "#9b1d1d",
+              color: "white",
+              fontWeight: "bold",
+              textAlign: "center",
+              whiteSpace: "nowrap", // Mantener texto en una línea si es posible
+            }}
+          >
+            {columns.find((col) => col.accessor === accessor)?.label || accessor}
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {selectedRows.length > 0 ? (
+        selectedRows.map((row, index) => (
+          <TableRow key={index}>
+            {selectedColumns.map((accessor) => (
+              <TableCell
+                key={accessor}
+                sx={{
+                  textAlign: "left",
+                  whiteSpace: "normal", // Permitir texto multilínea
+                  wordBreak: "break-word", // Cortar texto largo
+                  padding: "0.5rem", // Espaciado interno de las celdas
+                }}
+              >
+                {row[accessor] || "Sin contenido"}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))
+      ) : (
+        <TableRow>
+          <TableCell colSpan={selectedColumns.length} sx={{ textAlign: "center", padding: "1rem" }}>
+            No hay datos seleccionados para exportar.
+          </TableCell>
+        </TableRow>
+      )}
+    </TableBody>
+  </Table>
+</TableContainer>
+
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose} variant="contained" color="secondary">
