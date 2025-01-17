@@ -1,16 +1,10 @@
 .container {
   padding: 20px;
-  max-width: 80vw;
-  margin: 0 auto;
-  background-color: #f9f9f9;
+  background-color: #f4f4f4;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.header {
-  text-align: center;
-  margin-bottom: 20px;
-}
+
 
 .title {
   background-color: #d4a373;
@@ -29,35 +23,25 @@
   display: flex;
   gap: 10px;
   align-items: center;
-}
-
-.searchButton {
   margin-top: 10px;
-  background-color: #9b2c2c;
-  color: white;
 }
 
 .employeeForm {
+  margin-top: 20px;
   padding: 20px;
   background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+  border-radius: 8px;
 }
 
 .row {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  gap: 10px;
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 .input {
   flex: 1;
-  margin-right: 10px;
-}
-
-.input:last-child {
-  margin-right: 0;
 }
 
 .buttonContainer {
@@ -66,122 +50,96 @@
   margin-top: 20px;
 }
 
-.message {
-  text-align: center;
-  margin-top: 0px;
-}
+.verCambios {
 
-.viewChangesButton {
-  background-color: #d4a373;
-  color: white;margin-right: 5rem;
-  
-}
-
-.buttonchange {
   display: flex;
   justify-content: center;
-  align-items: center;
-  margin-top: 2rem;
-}
-
-.tableContainer {
-  margin-top: 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-/* Encabezado principal de la tabla */
-.tableContainer thead {
-  background-color: #004d00; /* Verde oscuro */
-  color: white;
-}
-
-.tableContainer th {
-  padding: 12px;
-  text-align: left;
-  font-weight: bold;
-  font-size: 16px;
-  text-transform: capitalize;
-}
-
-/* Fondo alternado de filas */
-.tableContainer tbody tr:nth-child(odd) {
-  background-color: #fff; /* Blanco */
-}
-
-.tableContainer tbody tr:nth-child(even) {
-  background-color: #f9f9f9; /* Gris claro */
-}
-
-/* Hover sobre las filas */
-.tableContainer tbody tr:hover {
-  background-color: #e0e0e0; /* Gris más oscuro para hover */
-}
-
-/* Primera fila (título) dentro del cuerpo de la tabla */
-.tableContainer thead th {
-  background-color: #9b2c2c; /* Rojo oscuro */
-  color: white;
-  font-size: 15px;
-}
-
-/* Celdas */
-.tableContainer td {
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
-}
-
-/* Checkbox alineado */
-.tableContainer td:first-child,
-.tableContainer th:first-child {
-  text-align: center;
-}
-
-/* Ajustes de texto */
-.tableContainer td {
-  font-size: 14px;
-  color: #333;
-}
-
-
-.dialogContent {
-  padding: 16px;
-}
-
-.dialogTitle {
-  font-weight: bold;
-  font-size: 20px;
-  margin-bottom: 8px;
-}
-
-.dialogActions {
-  display: flex;
-  justify-content: space-between;
-  padding: 16px;
-}
-
-.modalButton {
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.modalButton.success {
-  background-color: #28a745;
-  color: white;
-}
-
-.modalButton.error {
-  background-color: #dc3545;
-  color: white;
-}
-
-.modalButton:hover {
-  opacity: 0.9;
+  margin-top: 20px;
 }
 
 .volver {
-  
-  margin-top: 1rem;
-  
+  margin-top: 10px;
+}
+
+.dialogContent {
+  padding: 0;
+}
+
+/* Estilos específicos para la tabla */
+.tableContainer {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.tableHead {
+  background-color: #9b1d1d;
+  /* Rojo oscuro para encabezado */
+  color: #ffffff;
+}
+
+.tableHead .headerCell {
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.tableBody .row {
+  background-color: #ffffff;
+  transition: background-color 0.3s ease;
+}
+
+.tableBody .row:hover {
+  background-color: #f9f9f9;
+}
+
+.exportButtons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Ajustes para el modal */
+.dialog {
+  padding: 20px;
+}
+
+.dialogTitle {
+  color: #9b1d1d;
+  /* Rojo oscuro */
+  font-weight: bold;
+}
+
+.dialogActions {
+  justify-content: space-between;
+}
+
+/* Botones de acción */
+.button {
+  text-transform: capitalize;
+}
+
+.button[variant="contained"] {
+  background-color: #9b1d1d;
+  color: white;
+}
+
+.button[variant="contained"]:hover {
+  background-color: #801616;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .searchField {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .buttonContainer {
+    flex-direction: column;
+    gap: 5px;
+  }
 }

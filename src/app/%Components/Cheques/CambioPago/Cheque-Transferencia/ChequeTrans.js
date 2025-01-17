@@ -10,128 +10,88 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Checkbox,
-  Select,
-  row,
-  TablePagination,
 } from "@mui/material";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
-import styles from "./ChequeTrans.module.css";
+import ReusableTable3 from "../../../../%Components/ReusableTable3"; // Cambiado a ReusableTable3
 import API_BASE_URL from "../../../../%Config/apiConfig";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-
+import styles from "./ChequeTrans.module.css";
 
 const ChequeTrans = () => {
-  const [employeeFound, setEmployeeFound] = useState(false);
+  const [employeeFound, setEmployeeFound] = useState(false); // Control de formulario
   const [employeeData, setEmployeeData] = useState({
     id: "",
     nombre: "",
     monto: "",
     numCuenta: "",
     banco: "",
-    titular: "",
+    titular_cuenta: "",
   });
   const [fechaCambio, setFechaCambio] = useState("");
-  const [originalEmployeeData, setOriginalEmployeeData] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [rfc, setRfc] = useState("");
-  const [changesData, setChangesData] = useState([]);
-  const [changesModalOpen, setChangesModalOpen] = useState(false); // Modal para la tabla de cambios
+  const [modalOpen, setModalOpen] = useState(false); // Modal de validación RFC
+  const [rfc, setRfc] = useState(""); // RFC del usuario
+  const [changesModalOpen, setChangesModalOpen] = useState(false); // Modal de "Ver cambios realizados"
   const searchInputRef = useRef();
-  const [selectedRows, setSelectedRows] = useState([]); // Filas seleccionadas
-  const [page, setPage] = useState(0); // Página actual
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Filas por página
-  const [warningOpen, setWarningOpen] = useState(false);
+  const [warningOpen, setWarningOpen] = useState(false); // Advertencia si ya es "Transferencia"
 
-
-  // Inicializar la fecha al montar el componente
   useEffect(() => {
-    const fechaActual = new Date();
-    const fechaISO = fechaActual.toISOString().slice(0, 10);
-    setFechaCambio(fechaISO);
+    const fechaActual = new Date().toISOString().slice(0, 10);
+    setFechaCambio(fechaActual);
   }, []);
 
-// Buscar empleado por ID
-const buscarEmpleado = async () => {
-  const id = searchInputRef.current.value;
-  if (!id) {
-    alert("Por favor, ingrese un ID válido.");
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/chequeATransferencia?id_empleado=${id}&quincena=03`
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      if (data.length > 0) {
-        const empleado = data[0];
-        const employeeData = {
-          id: empleado.id_empleado,
-          nombre: empleado.nombre_completo,
-          monto: empleado.monto,
-          tipoPagoActual: empleado.tipo_pago_actual, // Asegurar que este campo esté presente
-          numCuenta: "",
-          banco: "",
-          titular: "",
-        };
-        setEmployeeData(employeeData);
-        setOriginalEmployeeData(employeeData); // Guardar datos originales
-        setEmployeeFound(true);
-      } else {
-        alert("El ID del empleado no existe. Por favor, intente nuevamente.");
-        setEmployeeFound(false);
-      }
-    } else {
-      alert("Error al buscar el empleado. Intente más tarde.");
+  // Función para buscar empleado
+  const buscarEmpleado = async () => {
+    const id = searchInputRef.current.value;
+    if (!id) {
+      alert("Por favor, ingrese un ID válido.");
+      return;
     }
-  } catch (error) {
-    console.error("Error al buscar el empleado:", error);
-    alert("Error al buscar el empleado. Intente nuevamente.");
-  }
-};
 
-
-// Abrir modal de confirmación
-const handleHacerCambio = () => {
-  if (!employeeData.id) {
-    alert("Debe buscar un empleado antes de realizar el cambio.");
-    return;
-  }
-
-  if (employeeData.tipoPagoActual === "Transferencia") {
-    setWarningOpen(true); // Mostrar advertencia
-    return;
-  }
-
-  setModalOpen(true); // Permitir cambio si el tipo de pago no es transferencia
-};
-
-  // Cancelar cambios y restaurar datos originales
-  const cancelarCambio = () => {
-    if (originalEmployeeData) {
-      setEmployeeData(originalEmployeeData); // Restaurar datos originales
-      alert("Los cambios han sido cancelados y se han restaurado los datos originales.");
-    } else {
-      alert("No hay cambios que cancelar.");
+    try {
+      const response = await fetch(`${API_BASE_URL}/chequeATransferencia?id_empleado=${id}&quincena=03`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.length > 0) {
+          const empleado = data[0];
+          setEmployeeData({
+            id: empleado.id_empleado,
+            nombre: empleado.nombre_completo,
+            monto: empleado.monto,
+            tipoPagoActual: empleado.tipo_pago_actual,
+            numCuenta: "",
+            banco: "",
+            titular_cuenta: "",
+          });
+          setEmployeeFound(true);
+        } else {
+          alert("El ID del empleado no existe.");
+          setEmployeeFound(false);
+        }
+      } else {
+        alert("Error al buscar el empleado. Intente más tarde.");
+      }
+    } catch (error) {
+      console.error("Error al buscar el empleado:", error);
+      alert("Error al buscar el empleado.");
     }
   };
 
-  // Validar RFC usando el servicio
+  const handleHacerCambio = () => {
+    if (!employeeData.id) {
+      alert("Debe buscar un empleado antes de realizar el cambio.");
+      return;
+    }
+
+    if (employeeData.tipoPagoActual === "Transferencia") {
+      setWarningOpen(true);
+      return;
+    }
+
+    setModalOpen(true);
+  };
+
   const validarRFC = async () => {
-    if (!rfc) {
-      alert("Ingrese un RFC para continuar.");
+    if (!rfc.trim()) {
+      alert("Ingrese un RFC válido.");
       return;
     }
 
@@ -143,393 +103,146 @@ const handleHacerCambio = () => {
         const data = await response.json();
         if (data[0]?.mensaje === "Es correcto") {
           alert("RFC validado correctamente. Ahora se procederá con el cambio.");
+
+          await actualizarTipoPago();
           setModalOpen(false);
-          actualizarTipoPago(); // Proceder a actualizar el tipo de pago
+          await fetchChangesData();
         } else {
-          alert("El RFC ingresado no es válido. Por favor, vuelva a ingresarlo.");
+          alert("El RFC ingresado no es válido.");
         }
       } else {
         alert("Error al validar el RFC. Intente más tarde.");
       }
     } catch (error) {
-      console.error("Error al conectar con el servicio:", error);
-      alert("Error al conectar con el servicio. Intente más tarde.");
+      console.error("Error al validar el RFC:", error);
+      alert("Error al validar el RFC.");
     }
   };
 
-  const BackButton = ({ text = "Volver", href = "/", className }) => {
-    return (
-        <Box className={className}>
-            <Button
-                variant="contained"
-                color="primary"
-                startIcon={<ArrowBackIcon />}
-                onClick={() => (window.location.href = href)}
-            >
-                {text}
-            </Button>
-        </Box>
-    );
-};
-
-  // Actualizar tipo de pago usando el servicio
   const actualizarTipoPago = async () => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/actualizarTipoPago?tipoPagoActual=Transferencia&referencia=${employeeData.numCuenta}&cambio=true&autorizadoPor=${rfc}&idEmpleado=${employeeData.id}&banco=${employeeData.banco}&titular=${employeeData.titular}`,
-        {
-          method: "GET",
-        }
+        `${API_BASE_URL}/actualizarTipoPago?tipoPagoActual=Transferencia&referencia=${employeeData.numCuenta}&cambio=true&autorizadoPor=${rfc}&idEmpleado=${employeeData.id}&banco=${employeeData.banco}&titular=${employeeData.titular_cuenta}`,
+        { method: "GET" }
       );
 
       if (response.ok) {
         alert("¡El cambio fue realizado exitosamente!");
+        setModalOpen(false);
       } else {
         alert("Error al actualizar el tipo de pago. Intente más tarde.");
       }
     } catch (error) {
       console.error("Error al actualizar el tipo de pago:", error);
-      alert("Error al realizar el cambio. Intente nuevamente.");
+      alert("Error al realizar el cambio.");
     }
   };
-  // Cambiar página
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+
+  const cancelarCambio = () => {
+    setEmployeeData({ id: "", nombre: "", monto: "", numCuenta: "", banco: "", titular_cuenta: "" });
+    setEmployeeFound(false);
+    setRfc("");
+    alert("El formulario ha sido limpiado.");
   };
 
-  // Cambiar filas por página
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reiniciar a la primera página
-  };
-
-
-  const handleRowSelect = (rowId) => {
-    setSelectedRows((prevSelected) =>
-      prevSelected.includes(rowId)
-        ? prevSelected.filter((id) => id !== rowId)
-        : [...prevSelected, rowId]
-    );
-  };
-
-
-  const exportToCSV = () => {
-    const selectedData = changesData.filter((row) =>
-      selectedRows.includes(row.id_empleado)
-    );
-    const worksheet = XLSX.utils.json_to_sheet(selectedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Cambios");
-    XLSX.writeFile(workbook, "CambiosRealizados.csv");
-  };
-
-  const exportToExcel = () => {
-    if (selectedRows.length === 0) {
-      alert("Seleccione al menos una fila para exportar.");
-      return;
-    }
-
-    const selectedData = changesData.filter((row) =>
-      selectedRows.includes(row.id_empleado)
-    );
-
-    const worksheet = XLSX.utils.json_to_sheet(selectedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Cambios");
-
-    // Descargar archivo Excel
-    XLSX.writeFile(workbook, "CambiosRealizados.xlsx");
-  };
-
-
-  const exportToPDF = () => {
-    const selectedData = changesData.filter((row) =>
-      selectedRows.includes(row.id_empleado)
-    );
-    const doc = new jsPDF();
-    autoTable(doc, {
-      head: [
-        [
-          "ID",
-          "Nombre Completo",
-          "Salario",
-          "Fecha de Cambio",
-          "Tipo de Pago Anterior",
-          "Tipo de Pago Actual",
-          "Número de Cuenta",
-          "Banco",
-          "Titular",
-        ],
-      ],
-      body: selectedData.map((row) => [
-        row.id_empleado,
-        row.nombre_completo,
-        row.salario,
-        new Date(row.fecha_cambio).toLocaleDateString(),
-        row.tipo_pago_anterior,
-        row.tipo_pago_actual,
-        row.referencia,
-        row.Banco,
-        row.titular_cuenta,
-      ]),
-    });
-    doc.save("CambiosRealizados.pdf");
-  };
-
-  // Mostrar cambios realizados este mes
-  const verCambiosRealizados = async () => {
+  const fetchChangesData = async () => {
     try {
-        const response = await fetch(
-            `${API_BASE_URL}/cambiosTipoPago?tipo_pago_anterior=Cheque&tipo_pago_actual=Transferencia&cambio=true&quincena=03`
-        );
+      const response = await fetch(
+        `${API_BASE_URL}/cambiosTipoPago?tipo_pago_anterior=Cheque&tipo_pago_actual=Transferencia&cambio=true&quincena=03`
+      );
+      if (!response.ok) {
+        throw new Error("Error al obtener los cambios.");
+      }
+      const data = await response.json();
 
-        if (response.ok) {
-            const data = await response.json();
-            setChangesData(data);
-            setChangesModalOpen(true);
-        } else {
-            const error = await response.text();
-            console.error("Error al obtener los cambios:", error);
-            alert(`Error: ${error}`);
-        }
+      return data.map((row) => ({
+        id_empleado: row.id_empleado || "Sin ID",
+        nombre_completo: row.nombre_completo || "Sin nombre",
+        salario: row.salario || "Sin salario",
+        fecha_cambio: row.fecha_cambio || "Sin fecha",
+        tipo_pago_anterior: row.tipo_pago_anterior || "Sin dato",
+        tipo_pago_actual: row.tipo_pago_actual || "Sin dato",
+        referencia: row.referencia || "Sin número de cuenta",
+        banco: row.Banco || "Sin banco",
+        titular_cuenta: row.titular_cuenta || "Sin titular",
+      }));
     } catch (error) {
-        console.error("Error al obtener los cambios:", error);
-        alert("Error al conectar con el servicio. Intente más tarde.");
+      console.error("Error al obtener los cambios:", error);
+      alert("Error al cargar los cambios realizados.");
+      return [];
     }
-};
-
+  };
 
   return (
     <Box className={styles.container}>
-      {/* Encabezado */}
-      <Box className={styles.header}>
-        <Typography variant="h4" className={styles.title}>
-          Cambio de Cheque a Transferencia
-        </Typography>
-      </Box>
-      {/* Buscar empleado */}
-      
+      <Typography variant="h4" className={styles.title}>
+        Cambio de Cheque a Transferencia
+      </Typography>
+
       <Box className={styles.searchContainer}>
-  <Typography variant="h6">Buscar otro empleado por ID</Typography>
+        <Typography variant="h6">Buscar empleado por ID</Typography>
+        <Box className={styles.searchField}>
+          <TextField
+            label="ID del empleado"
+            inputRef={searchInputRef}
+            variant="outlined"
+            fullWidth
+            onKeyDown={(e) => e.key === "Enter" && buscarEmpleado()}
+          />
+          <Button variant="contained" color="primary" onClick={buscarEmpleado}>
+            Buscar
+          </Button>
+        </Box>
+        <Box className={styles.volver}>
+          <Button variant="contained" color="primary" startIcon={<ArrowBackIcon />} onClick={() => (window.location.href = "/Cheques/CambioPago")}>
+            Volver
+          </Button>
+        </Box>
+      </Box>
 
-  <Box className={styles.searchField}>
-    <TextField
-      label="ID del empleado"
-      inputRef={searchInputRef}
-      variant="outlined"
-      fullWidth
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          buscarEmpleado();
-        }
-      }}
-    />
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={buscarEmpleado}
-      className={styles.searchButton}
-    >
-      Buscar
-    </Button>
-  </Box>
-
-  {/* Render BackButton dependiendo del estado */}
-  {!employeeFound && (
-    <BackButton className={styles.volver} href="/Cheques/CambioPago" />
-  )}
-</Box>
-
-{/* Mostrar formulario si se encuentra al empleado */}
-{employeeFound && (
-  <Box className={styles.employeeForm}>
-    <Box className={styles.row}>
-      <TextField
-        label="ID Empleado"
-        value={employeeData.id}
-        InputProps={{ readOnly: true }}
-        variant="outlined"
-        className={styles.input}
-      />
-      <TextField
-        label="Nombre"
-        value={employeeData.nombre}
-        InputProps={{ readOnly: true }}
-        variant="outlined"
-        className={styles.input}
-      />
-    </Box>
-    <Box className={styles.row}>
-      <TextField
-        label="Monto"
-        value={employeeData.monto}
-        InputProps={{ readOnly: true }}
-        variant="outlined"
-        className={styles.input}
-      />
-      <TextField
-        label="Fecha de cambio"
-        value={fechaCambio}
-        InputProps={{ readOnly: true }}
-        variant="outlined"
-        className={styles.input}
-      />
-    </Box>
-    <Box className={styles.row}>
-      <TextField
-        label="Número de cuenta actual"
-        value={employeeData.numCuenta}
-        placeholder="Ingrese el número de cuenta"
-        onChange={(e) =>
-          setEmployeeData({ ...employeeData, numCuenta: e.target.value })
-        }
-        variant="outlined"
-        className={styles.input}
-      />
-      <TextField
-        label="Banco"
-        value={employeeData.banco}
-        placeholder="Ingrese el nombre del banco"
-        onChange={(e) =>
-          setEmployeeData({ ...employeeData, banco: e.target.value })
-        }
-        variant="outlined"
-        className={styles.input}
-      />
-    </Box>
-    <Box className={styles.row}>
-      <TextField
-        label="Titular de la cuenta"
-        value={employeeData.titular}
-        placeholder="Ingrese el titular de la cuenta"
-        onChange={(e) =>
-          setEmployeeData({ ...employeeData, titular: e.target.value })
-        }
-        variant="outlined"
-        fullWidth
-      />
-    </Box>
-    <Box className={styles.buttonContainer}>
-      <Button variant="contained" color="success" onClick={handleHacerCambio}>
-        Hacer cambio
-      </Button>
-      <Button variant="contained" color="error" onClick={cancelarCambio}>
-        Cancelar cambio
-      </Button>
-    </Box>
-    <Typography
-      variant="subtitle1"
-      color="error"
-      align="center"
-      className={styles.message}
-    >
-      Los pagos empezarán a correr desde la primera quincena de{" "}
-      {fechaCambio.slice(0, 7)}.
-    </Typography>
-    <Box className={styles.buttonchange}>
-      <Button variant="contained" onClick={verCambiosRealizados}>
-        Ver cambios realizados este mes
-      </Button>
-    </Box>
-
-    {/* BackButton ahora está al final cuando se encuentra al empleado */}
-    <Box>
-      <BackButton className={styles.volver} href="/Cheques/CambioPago" />
-    </Box>
-  </Box>
-)}
-
-
-      {/* Modal con la tabla de cambios */}
-      <Dialog
-        open={changesModalOpen}
-        onClose={() => setChangesModalOpen(false)}
-        maxWidth="lg"
-        fullWidth
-      >
-        <DialogTitle>Cambios realizados este mes</DialogTitle>
-        <DialogContent>
-          {/* Botones de exportación */}
-          <Box className={styles.exportButtons}>
-            <Button variant="contained" onClick={exportToCSV}>
-              Exportar CSV
+      {employeeFound && (
+        <Box className={styles.employeeForm}>
+          <Box className={styles.row}>
+            <TextField label="ID Empleado" value={employeeData.id} InputProps={{ readOnly: true }} className={styles.input} />
+            <TextField label="Nombre" value={employeeData.nombre} InputProps={{ readOnly: true }} className={styles.input} />
+          </Box>
+          <Box className={styles.row}>
+            <TextField label="Monto" value={employeeData.monto} InputProps={{ readOnly: true }} className={styles.input} />
+            <TextField label="Fecha de cambio" value={fechaCambio} InputProps={{ readOnly: true }} className={styles.input} />
+          </Box>
+          <TextField label="Número de Cuenta" value={employeeData.numCuenta} fullWidth onChange={(e) => setEmployeeData({ ...employeeData, numCuenta: e.target.value })} className={styles.input} />
+          <TextField label="Banco" value={employeeData.banco} fullWidth onChange={(e) => setEmployeeData({ ...employeeData, banco: e.target.value })} className={styles.input} />
+          <TextField label="Titular de la Cuenta" value={employeeData.titular_cuenta} fullWidth onChange={(e) => setEmployeeData({ ...employeeData, titular_cuenta: e.target.value })} className={styles.input} />
+          <Box className={styles.buttonContainer}>
+            <Button variant="contained" color="primary" onClick={handleHacerCambio}>
+              Hacer Cambio
             </Button>
-            <Button variant="contained" onClick={exportToExcel}>
-              Exportar Excel
-            </Button>
-            <Button variant="contained" onClick={exportToPDF}>
-              Exportar PDF
+            <Button variant="contained"  color="primary"  onClick={() => setChangesModalOpen(true)}>
+              Ver Cambios
             </Button>
           </Box>
+          <Box className={styles.verCambios}>
+          
+          </Box>
+        </Box>
+      )}
 
-          {/* Tabla con paginación */}
-          <TableContainer component={Paper} className={styles.tableContainer}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      indeterminate={
-                        selectedRows.length > 0 &&
-                        selectedRows.length < changesData.length
-                      }
-                      checked={selectedRows.length === changesData.length}
-                      onChange={(e) =>
-                        setSelectedRows(
-                          e.target.checked
-                            ? changesData.map((row) => row.id_empleado)
-                            : []
-                        )
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Nombre Completo</TableCell>
-                  <TableCell>Salario</TableCell>
-                  <TableCell>Fecha de Cambio</TableCell>
-                  <TableCell>Tipo de Pago Anterior</TableCell>
-                  <TableCell>Tipo de Pago Actual</TableCell>
-                  <TableCell>Número de Cuenta</TableCell>
-                  <TableCell>Banco</TableCell>
-                  <TableCell>Titular</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {changesData
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <TableRow key={row.id_empleado}>
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={selectedRows.includes(row.id_empleado)}
-                          onChange={() => handleRowSelect(row.id_empleado)}
-                        />
-                      </TableCell>
-                      <TableCell>{row.id_empleado}</TableCell>
-                      <TableCell>{row.nombre_completo}</TableCell>
-                      <TableCell>{row.salario}</TableCell>
-                      <TableCell>{new Date(row.fecha_cambio).toLocaleDateString()}</TableCell>
-                      <TableCell>{row.tipo_pago_anterior}</TableCell>
-                      <TableCell>{row.tipo_pago_actual}</TableCell>
-                      <TableCell>{row.referencia}</TableCell>
-                      <TableCell>{row.Banco}</TableCell>
-                      <TableCell>{row.titular_cuenta}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          {/* Paginación */}
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 15]}
-            component="div"
-            count={changesData.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage="Filas por página"
+      <Dialog open={changesModalOpen} onClose={() => setChangesModalOpen(false)} fullWidth maxWidth="lg">
+        <DialogTitle>Cambios realizados</DialogTitle>
+        <DialogContent>
+          <ReusableTable3
+            columns={[
+              { label: "ID Empleado", accessor: "id_empleado" },
+              { label: "Nombre Completo", accessor: "nombre_completo" },
+              { label: "Salario", accessor: "salario" },
+              { label: "Fecha de Cambio", accessor: "fecha_cambio" },
+              { label: "Tipo de Pago Anterior", accessor: "tipo_pago_anterior" },
+              { label: "Tipo de Pago Actual", accessor: "tipo_pago_actual" },
+              { label: "Número de Cuenta", accessor: "referencia" },
+              { label: "Banco", accessor: "banco" },
+              { label: "Titular", accessor: "titular_cuenta" },
+            ]}
+            fetchData={fetchChangesData}
           />
         </DialogContent>
         <DialogActions>
@@ -539,41 +252,26 @@ const handleHacerCambio = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal de confirmación */}
       <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
         <DialogTitle>Confirmar cambios</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Ingrese su RFC para confirmar los cambios:
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="RFC"
-            type="text"
-            fullWidth
-            value={rfc}
-            onChange={(e) => setRfc(e.target.value)}
-          />
+          <DialogContentText>Ingrese su RFC para confirmar los cambios:</DialogContentText>
+          <TextField autoFocus margin="dense" label="RFC" fullWidth value={rfc} onChange={(e) => setRfc(e.target.value)} />
         </DialogContent>
         <DialogActions>
-          <Button onCli ck={() => setModalOpen(false)} color="error">
+          <Button onClick={() => setModalOpen(false)} color="error">
             Cancelar
           </Button>
-          <Button onClick={validarRFC} color="success">
+          <Button onClick={validarRFC} color="primary">
             Confirmar
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Modal de advertencia */}
       <Dialog open={warningOpen} onClose={() => setWarningOpen(false)}>
         <DialogTitle>Advertencia</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            No se puede realizar el cambio porque el tipo de pago actual ya es
-            transferencia.
-          </DialogContentText>
+          <DialogContentText>No se puede realizar el cambio porque el tipo de pago actual ya es "Transferencia".</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setWarningOpen(false)} color="primary">

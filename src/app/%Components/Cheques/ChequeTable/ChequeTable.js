@@ -1,97 +1,107 @@
-"use client";
-import React, { useState, useRef, useEffect } from "react"; // Importar useEffect
-import { Box, Button, IconButton } from "@mui/material";
-import useChequeTable from "./useChequeTable";
-import ChequeFilterSection from "./ChequeFilterSection";
-import ChequeSearchBar from "./ChequeSearchBar";
-import ReusableTable from "../../ReusableTable/ReusableTable"; // Importar ReusableTable
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { Toast } from 'primereact/toast'; // Importar Toast de PrimeReact
+    "use client";
+    import React, { useState } from "react";
+    import { Box, Button } from "@mui/material";
+    import useChequeTable from "./useChequeTable";
+    import ChequeFilterSection from "./ChequeFilterSection";
+    import ChequeSearchBar from "./ChequeSearchBar";
+    import ChequeTableSection from "./ChequeTableSection";
+    import RefreshIcon from '@mui/icons-material/Refresh';
+    import { IconButton } from '@mui/material';
 
-export default function ChequeTable() {
-    const {
-        tipoNomina,
-        cheques,
-        setCheques,
-        fetchCheques,
-        loading,
-        anio,
-        quincena,
-        fechaCompleta,
-        handleTipoNominaChange,
-        handleDateChange,
-        updateCheque // Asegúrate de que esta función esté en useChequeTable
-    } = useChequeTable();
+    export default function ChequeTable() {
+        const {
+            tipoNomina,
+            cheques,
+            loading,
+            selectedRows,
+            selectAll,
+            handleTipoNominaChange,
+            handleDateChange,
+            handleRowSelect,
+            handleSelectAll,
+            exportToExcel,
+            exportToCSV,
+            exportToPDF,
+            anio,
+            quincena,
+            fechaCompleta,
+            refreshCheques, // Función para recargar los datos
+        } = useChequeTable();
 
-    const toast = useRef(null);
+        // Estados para la búsqueda y paginación
+        const [searchTerm, setSearchTerm] = useState("");
+        const [page, setPage] = useState(0);
+        const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    const [searchTerm, setSearchTerm] = useState("");
+        // Filtrar los cheques según el término de búsqueda
+        const filteredCheques = cheques.filter((cheque) =>
+            Object.values(cheque).some((value) =>
+                (value ?? "").toString().toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        );
 
-    // Definir las columnas para ReusableTable
-    const columns = [
-        { label: "ID Empleado", accessor: "id_empleado" },
-        { label: "Nombre", accessor: "nombre" },
-        { label: "Tipo de Nomina", accessor: "tipo_nomina" },
-        { label: "Fecha Cheque", accessor: "fecha_cheque" },
-        { label: "Monto", accessor: "monto" },
-        { label: "Estado Cheque", accessor: "estado_cheque" },
-        { label: "Quincena", accessor: "quincena" },
-        { label: "Fecha", accessor: "fecha" },
-        { label: "Tipo de Pago", accessor: "tipo_pago" },
-        { label: "Num Folio", accessor: "num_folio" },
-        { label: "Descripción", accessor: "descripcion_nomina" }
-    ];
 
-    // Filtrar los cheques - esto podría ir dentro de un useMemo si es costoso
-    const filteredCheques = cheques.filter((cheque) =>
-        columns.some((col) =>
-            (cheque[col.accessor] ?? "")
-                .toString()
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())
-        )
-    );
+        // Manejar la paginación
+        const handleChangePage = (event, newPage) => setPage(newPage);
+        const handleChangeRowsPerPage = (event) => {
+            setRowsPerPage(parseInt(event.target.value, 10));
+            setPage(0);
+        };
 
-    // Llamar a fetchCheques solo cuando cambian los filtros relevantes
-    useEffect(() => {
-        if (anio && quincena && tipoNomina) {
-            fetchCheques();
-        }
-    }, [anio, quincena, tipoNomina, fechaCompleta]);
+        return (
+            <Box sx={{ padding: 2 }}>
+                {/* Sección de filtros */}
+                <ChequeFilterSection
+                    tipoNomina={tipoNomina}
+                    handleTipoNominaChange={handleTipoNominaChange}
+                    handleDateChange={handleDateChange}
+                    quincena={quincena}
+                    fechaCompleta={fechaCompleta}
+                    anio={anio}
+                />
 
-    // Función para refrescar los cheques
-    const handleRefreshCheques = () => {
-        fetchCheques();
-    };
+                {/* Barra de búsqueda */}
+                <ChequeSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-    return (
-        <Box sx={{ padding: 2 }}>
-            <Toast ref={toast} />
-            {/* Sección de filtros */}
-            <ChequeFilterSection
-                tipoNomina={tipoNomina}
-                handleTipoNominaChange={handleTipoNominaChange}
-                handleDateChange={handleDateChange}
-                quincena={quincena}
-                fechaCompleta={fechaCompleta}
-                anio={anio}
-            />
+                {/* Botón para actualizar la tabla */}
 
-            {/* Tabla de cheques usando ReusableTable */}
-            <ReusableTable
-                columns={columns}
-                fetchData={fetchCheques}
-                data={filteredCheques}
-            />
+                {/* Botón para actualizar después de generar nuevos cheques */}
 
-            <Button
-                color="primary"
-                variant="contained"
-                onClick={() => (window.location.href = "/Cheques/Poliza")}
-                sx={{ marginTop: "2rem" }}
-            >
-                Visualizar Pólizas
-            </Button>
-        </Box>
-    );
-}
+                <IconButton
+                    onClick={() => refreshCheques()}
+                    aria-label="refresh"
+                    size="large" // Opciones: "small", "medium", "large"
+                >
+                    <RefreshIcon fontSize="medium" /> {/* Opciones: "small", "medium", "large" */}
+                </IconButton>
+
+
+                {/* Tabla de cheques */}
+                <ChequeTableSection
+                    cheques={cheques}
+                    filteredCheques={filteredCheques}
+                    loading={loading}
+                    selectedRows={selectedRows}
+                    selectAll={selectAll}
+                    onRowSelect={handleRowSelect}
+                    onSelectAll={handleSelectAll}
+                    onExportExcel={exportToExcel}
+                    onExportCSV={exportToCSV}
+                    onExportPDF={exportToPDF}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    handleChangePage={handleChangePage}
+                    handleChangeRowsPerPage={handleChangeRowsPerPage}
+                />
+
+                <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={() => (window.location.href = "/Cheques/Poliza")}
+                    sx={{ marginTop: "2rem" }}
+                >
+                    Visualizar Pólizas
+                </Button>
+            </Box>
+        );
+    }
