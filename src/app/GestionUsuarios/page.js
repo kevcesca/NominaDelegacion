@@ -12,6 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { API_USERS_URL } from '../%Config/apiConfig';
 import AsyncButton from '../%Components/AsyncButton/AsyncButton';
 import ChangePasswordModal from './components/ChangePasswordModal';
+import ExportTableComponent from './components/ExportTableComponent'; // Importar el componente de exportación
 
 const UserTable = () => {
     const { users, setUsers, fetchUsers, toggleUserStatus } = useUsers(); // Incluimos `setUsers` para actualizar la lista localmente
@@ -28,6 +29,7 @@ const UserTable = () => {
     const [filteredUsers, setFilteredUsers] = useState(users);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10; // Número de usuarios por página
+   const [isExportModalOpen, setIsExportModalOpen] = useState(false); // Estado para el modal de exportación
 
     const openMenu = Boolean(anchorEl);
 
@@ -53,19 +55,44 @@ const UserTable = () => {
         setCurrentPage(1); // Reiniciar a la primera página
     };
 
-
-
-    // Función para abrir el modal de cambio de contraseña
-    const handleChangePassword = () => {
+     // Función para abrir el modal de cambio de contraseña
+     const handleChangePassword = () => {
         setIsPasswordModalOpen(true);
         setAnchorEl(null); // Cerrar el menú de opciones
     };
 
-    // Abrir el menú contextual de opciones
-    const handleMenuOpen = (event, user) => {
+     // Abrir el menú contextual de opciones
+     const handleMenuOpen = (event, user) => {
         setAnchorEl(event.currentTarget);
         setSelectedUser(user);
     };
+
+    const handleExportOpen = () => setIsExportModalOpen(true); // Abrir modal de exportación
+    const handleExportClose = () => setIsExportModalOpen(false); // Cerrar modal de exportación
+    // Definimos las columnas y filas para el modal de exportación
+    const columns = [
+        { label: 'ID Empleado', accessor: 'ID Empleado' },
+        { label: 'Nombre Empleado', accessor: 'Nombre Empleado' },
+        { label: 'Nombre Usuario', accessor: 'Nombre de Usuario' },
+        { label: 'Email', accessor: 'Email' },
+        { label: 'Rol', accessor: 'Rol' },
+        { label: 'Fecha de Alta', accessor: 'Fecha de Alta' },
+        { label: 'Asignó', accessor: 'Asignó' },
+    ];
+
+    const rows = users.map(user => ({
+        'ID Empleado': user['ID Empleado'],
+        'Nombre Empleado': user['Nombre Empleado'],
+        'Nombre de Usuario': user['Nombre de Usuario'],
+        Email: user.Email,
+        Rol: user.Rol,
+        'Fecha de Alta': user['Fecha de Alta'],
+        'Asignó': user['Asignó'],
+    }));
+
+   
+
+   
 
     // Cerrar el menú contextual de opciones
     const handleMenuClose = () => {
@@ -106,7 +133,6 @@ const UserTable = () => {
         await fetchUsers(); // Refrescamos la lista después de las operaciones
         setSelectedUsers([]); // Limpiamos la selección
     };
-
     // Entrar en modo edición al hacer doble clic
     const handleDoubleClick = (user, field) => {
         setEditingUser(user['ID Empleado']);
@@ -149,10 +175,7 @@ const UserTable = () => {
             await fetchUsers(); // Refrescar la lista de usuarios
             setEditingUser(null);
             setEditedFields({});
-
-        }
-
-        catch (error) {
+        } catch (error) {
             console.error('Error al confirmar la edición:', error);
         }
     };
@@ -172,6 +195,15 @@ const UserTable = () => {
             >
                 Añadir Usuario
             </AsyncButton>
+
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={handleExportOpen}
+                style={{ marginBottom: '10px', marginLeft: '10px' }}
+            >
+                Exportar Datos
+            </Button>
 
             {/* Botón dinámico: Solo aparece si se seleccionan 2 o más usuarios */}
             {selectedUsers.length >= 2 && (
@@ -250,6 +282,7 @@ const UserTable = () => {
                     ))}
                 </tbody>
             </table>
+
             <UserActionsMenu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
@@ -295,6 +328,13 @@ const UserTable = () => {
                 }}
             />
 
+            <ExportTableComponent
+                open={isExportModalOpen}
+                onClose={handleExportClose}
+                rows={rows}
+                columns={columns}
+            />
+
             <Pagination
                 count={Math.ceil(filteredUsers.length / itemsPerPage)} // Número total de páginas
                 page={currentPage} // Página actual
@@ -302,6 +342,7 @@ const UserTable = () => {
                 color="primary"
                 className={styles.pagination}
             />
+
         </div>
     );
 };

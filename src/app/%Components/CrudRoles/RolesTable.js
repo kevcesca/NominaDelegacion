@@ -115,7 +115,7 @@ const RolesTable = ({
                             size="small"
                             value={editValues.name}
                             onChange={(e) =>
-                                setEditValues((prev) => ({ ...prev, name: e.target.value }))
+                        setEditValues((prev) => ({ ...prev, name: e.target.value }))
                             }
                             autoFocus
                         />
