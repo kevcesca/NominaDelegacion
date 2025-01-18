@@ -49,12 +49,7 @@ export default function ExamplePage() {
         <ReusableTable
             columns={columns}
             data={data}
-            editable
-            deletable
-            insertable
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onInsert={handleInsert}
+
         />
     );
 }
