@@ -53,7 +53,11 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
     }
   
     if (exportFormat === "pdf") {
-      const doc = new jsPDF();
+      const doc = new jsPDF({
+        orientation: "landscape", // Cambiar orientación a horizontal para mayor espacio
+        unit: "mm",
+        format: "a4",
+      });
       doc.setFontSize(16);
       doc.text("Exportación de Eventos", 14, 15);
   
@@ -61,40 +65,48 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
         (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
       );
   
+      // Preparar filas con texto completo
       const tableRows = selectedRows.map((row) =>
-        selectedColumns.map((accessor) =>
-          row[accessor]?.length > 50
-            ? `${row[accessor].slice(0, 50)}...` // Truncar texto si es muy largo
-            : row[accessor] || "-"
-        )
+        selectedColumns.map((accessor) => row[accessor] || "-")
       );
   
+      // Configuración de autoTable
       doc.autoTable({
         head: [tableColumnHeaders],
         body: tableRows,
         startY: 25,
-        styles: { halign: "center", fontSize: 10 },
-        theme: "striped",
-        headStyles: {
-          fillColor: [155, 29, 29],
-          textColor: [255, 255, 255],
+        styles: {
+          halign: "left", // Alinear el texto a la izquierda
+          fontSize: 30, // Ajustar tamaño de fuente
+          cellPadding: 2, // Reducir padding de las celdas
         },
-        margin: { left: 10, right: 10 },
+        columnStyles: {
+          0: { cellWidth: 30 }, // Ancho fijo para la columna "ID"
+          1: { cellWidth: 70 }, // Ancho fijo para "Título del Evento"
+          2: { cellWidth: 120 }, // Ancho fijo para "Descripción"
+          3: { cellWidth: 45 }, // Ancho fijo para "Fecha"
+        },
+        headStyles: {
+          fillColor: [155, 29, 29], // Color de fondo del encabezado
+          textColor: [255, 255, 255], // Color de texto del encabezado
+          fontSize: 11, // Tamaño de fuente del encabezado
+        },
+        bodyStyles: {
+          cellPadding: 2, // Espaciado interno
+          fontSize: 9, // Tamaño de fuente en el cuerpo
+          overflow: "linebreak", // Forzar salto de línea en textos largos
+        },
+        margin: { top: 25 }, // Margen superior
       });
   
       doc.save("eventos.pdf");
-  
     } else if (exportFormat === "excel") {
       const worksheetData = [
         selectedColumns.map(
           (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
         ),
         ...selectedRows.map((row) =>
-          selectedColumns.map((accessor) =>
-            row[accessor]?.length > 50
-              ? `${row[accessor].slice(0, 50)}...` // Truncar texto si es muy largo
-              : row[accessor] || "-"
-          )
+          selectedColumns.map((accessor) => row[accessor] || "-")
         ),
       ];
   
@@ -102,18 +114,13 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Eventos");
       XLSX.writeFile(workbook, "eventos.xlsx");
-  
     } else if (exportFormat === "csv") {
       const csvData = [
         selectedColumns.map(
           (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
         ),
         ...selectedRows.map((row) =>
-          selectedColumns.map((accessor) =>
-            row[accessor]?.length > 50
-              ? `${row[accessor].slice(0, 50)}...` // Truncar texto si es muy largo
-              : row[accessor] || "-"
-          )
+          selectedColumns.map((accessor) => row[accessor] || "-")
         ),
       ];
   
@@ -125,7 +132,6 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
     } else {
       toastRef.current.show({
         severity: "warn",
@@ -135,6 +141,7 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
       });
     }
   };
+  
   
 
   return (

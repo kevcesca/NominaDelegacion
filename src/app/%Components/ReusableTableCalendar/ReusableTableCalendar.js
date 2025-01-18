@@ -191,9 +191,10 @@ export default function ReusableTableCalendar({ API_BASE_URL, anio, mes }) {
           onClick={fetchData}
           sx={{
             color: '#000000',
+            fontSize: '2rem', // Aumenta el tamaño del botón
           }}
         >
-          <RefreshIcon />
+          <RefreshIcon sx={{ fontSize: '2.5rem' }} /> {/* Aumenta el tamaño del ícono */}
         </IconButton>
         <Button
           variant="contained"
@@ -228,50 +229,50 @@ export default function ReusableTableCalendar({ API_BASE_URL, anio, mes }) {
             </TableRow>
           </TableHead>
           <TableBody>
-  {isLoading ? (
-    <TableRow>
-      <TableCell colSpan={columns.length + 1} align="center">
-        Cargando...
-      </TableCell>
-    </TableRow>
-  ) : filteredData.length === 0 ? (
-    <TableRow>
-      <TableCell colSpan={columns.length + 1} align="center">
-        No hay eventos para mostrar
-      </TableCell>
-    </TableRow>
-  ) : (
-    filteredData
-      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-      .map((row) => (
-        <TableRow
-          key={row.id}
-          style={{ cursor: 'pointer' }}
-          onClick={() => handleRowClick(row)} // Abrir modal al hacer clic en la fila
-        >
-          {/* Checkbox con event.stopPropagation */}
-          <TableCell padding="checkbox" onClick={(event) => event.stopPropagation()}>
-            <Checkbox
-              checked={selectedRows.includes(row)}
-              onChange={() => handleSelectRow(row)} // Seleccionar o deseleccionar fila
-            />
-          </TableCell>
-          {/* Renderizar las celdas */}
-          {columns.map((col) => (
-            <TableCell key={col.accessor}>
-              <Tooltip title={row[col.accessor] || 'Sin contenido'} arrow>
-                <span>
-                  {row[col.accessor]?.length > 50
-                    ? `${row[col.accessor].slice(0, 50)}...`
-                    : row[col.accessor] || '-'}
-                </span>
-              </Tooltip>
-            </TableCell>
-          ))}
-        </TableRow>
-      ))
-  )}
-</TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length + 1} align="center">
+                  Cargando...
+                </TableCell>
+              </TableRow>
+            ) : filteredData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length + 1} align="center">
+                  No hay eventos para mostrar
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredData
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row) => (
+                  <TableRow
+                    key={row.id}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleRowClick(row)} // Abrir modal al hacer clic en la fila
+                  >
+                    {/* Checkbox con event.stopPropagation */}
+                    <TableCell padding="checkbox" onClick={(event) => event.stopPropagation()}>
+                      <Checkbox
+                        checked={selectedRows.includes(row)}
+                        onChange={() => handleSelectRow(row)} // Seleccionar o deseleccionar fila
+                      />
+                    </TableCell>
+                    {/* Renderizar las celdas */}
+                    {columns.map((col) => (
+                      <TableCell key={col.accessor}>
+                        <Tooltip title={row[col.accessor] || 'Sin contenido'} arrow>
+                          <span>
+                            {row[col.accessor]?.length > 50
+                              ? `${row[col.accessor].slice(0, 50)}...`
+                              : row[col.accessor] || '-'}
+                          </span>
+                        </Tooltip>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+            )}
+          </TableBody>
 
         </Table>
 
@@ -297,29 +298,29 @@ export default function ReusableTableCalendar({ API_BASE_URL, anio, mes }) {
 
       {selectedRow && (
         <Dialog open={isModalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
-        <DialogTitle>Detalles del Evento</DialogTitle>
-        <DialogContent>
-          {columns.map((col) => (
-            <Typography
-              key={col.accessor}
-              variant="body1"
-              sx={{
-                marginBottom: 2,
-                wordBreak: "break-word", // Permite romper texto largo en palabras
-                whiteSpace: "normal",   // Ajusta el texto para que se muestre en varias líneas
-              }}
-            >
-              <strong>{col.label}:</strong> {selectedRow[col.accessor] || 'Sin contenido'}
-            </Typography>
-          ))}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal} variant="contained" color="primary">
-            Cerrar
-          </Button>
-        </DialogActions>
-      </Dialog>
-      
+          <DialogTitle>Detalles del Evento</DialogTitle>
+          <DialogContent>
+            {columns.map((col) => (
+              <Typography
+                key={col.accessor}
+                variant="body1"
+                sx={{
+                  marginBottom: 2,
+                  wordBreak: "break-word", // Permite romper texto largo en palabras
+                  whiteSpace: "normal",   // Ajusta el texto para que se muestre en varias líneas
+                }}
+              >
+                <strong>{col.label}:</strong> {selectedRow[col.accessor] || 'Sin contenido'}
+              </Typography>
+            ))}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseModal} variant="contained" color="primary">
+              Cerrar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
       )}
 
 
