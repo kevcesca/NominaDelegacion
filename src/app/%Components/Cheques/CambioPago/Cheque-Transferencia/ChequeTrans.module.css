@@ -129,12 +129,13 @@
 
 .alert {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 1rem;  
   width: 35vw;
+  padding: .001px !important;
+
+  
 }
 
 
