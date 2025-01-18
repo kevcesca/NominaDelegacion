@@ -11,6 +11,7 @@ import {
     ListItemIcon,
     ListItemText,
     TextField,
+    Typography,
 } from '@mui/material';
 import { API_USERS_URL } from '../../%Config/apiConfig';
 
@@ -18,6 +19,7 @@ const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
     const [permissions, setPermissions] = useState([]); // Todos los permisos disponibles
     const [selectedPermissions, setSelectedPermissions] = useState([]); // IDs de los permisos seleccionados
     const [searchTerm, setSearchTerm] = useState(''); // Texto de búsqueda
+    const [error, setError] = useState(''); // Mensaje de error para la validación
 
     // Cargar permisos y mapear los seleccionados
     useEffect(() => {
@@ -47,6 +49,7 @@ const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
 
     // Manejar la selección o deselección de un permiso
     const handleTogglePermission = (permissionId) => {
+        setError(''); // Limpiar el mensaje de error al seleccionar permisos
         setSelectedPermissions((prev) =>
             prev.includes(permissionId)
                 ? prev.filter((id) => id !== permissionId) // Quitar el ID si ya estaba seleccionado
@@ -56,6 +59,11 @@ const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
 
     // Guardar cambios y enviar los IDs al backend
     const handleSave = async () => {
+        if (selectedPermissions.length === 0) {
+            setError('Debes asignar al menos un permiso.');
+            return; // No continuar si no hay permisos seleccionados
+        }
+
         try {
             const response = await fetch(`${API_USERS_URL}/roles/${role.id}/assign-permissions`, {
                 method: 'POST',
@@ -100,6 +108,7 @@ const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
+
                 {/* Lista de permisos */}
                 <Grid container spacing={2}>
                     {filteredPermissions.map((permission) => (
@@ -127,12 +136,23 @@ const AssignPermissionsModal = ({ role, onClose, onPermissionsUpdated }) => {
                         </Grid>
                     ))}
                 </Grid>
+
+                {/* Mensaje de error */}
+                {error && (
+                    <Typography color="error" style={{ marginTop: '16px', fontSize: '0.9rem' }}>
+                        {error}
+                    </Typography>
+                )}
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="secondary">
                     Cancelar
                 </Button>
-                <Button onClick={handleSave} color="primary">
+                <Button
+                    onClick={handleSave}
+                    color="primary"
+                    disabled={selectedPermissions.length === 0} // Deshabilitar si no hay permisos seleccionados
+                >
                     Guardar Permisos
                 </Button>
             </DialogActions>
