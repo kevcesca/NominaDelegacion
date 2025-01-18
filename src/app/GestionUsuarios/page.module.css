@@ -46,7 +46,8 @@
 }
 
 .table tbody tr:hover {
-    background-color: #d0706b8d; /* Resaltar fila al pasar el mouse */
+    background-color: #235b4e; /* Resaltar fila al pasar el mouse */
+    color: white;
     transition: background-color 0.3s ease; /* Suavizar el efecto */
 }
 
@@ -119,4 +120,13 @@ form .MuiButton-root {
     margin-top: 20px;
     display: flex;
     justify-content: center;
+}
+
+.rowWidth{
+    max-width: 15vw;
+    min-width: 9vw;
+}
+
+.wordNoWrap{
+    word-wrap: break-word;
 }

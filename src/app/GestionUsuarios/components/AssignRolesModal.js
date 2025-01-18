@@ -14,6 +14,7 @@ import {
     FormHelperText, // Importar el componente FormHelperText para mostrar mensajes de error
 } from '@mui/material';
 import { API_USERS_URL } from '../../%Config/apiConfig';
+import styles from '../page.module.css'
 
 const AssignRolesModal = ({ isOpen, onClose, user, onRolesUpdated }) => {
     const [roles, setRoles] = useState([]); // Todos los roles disponibles
@@ -112,6 +113,7 @@ const AssignRolesModal = ({ isOpen, onClose, user, onRolesUpdated }) => {
                                     />
                                 </ListItemIcon>
                                 <ListItemText
+                                    className={styles.wordNoWrap}
                                     primary={role.nombre_rol}
                                     secondary={role.descripcion_rol}
                                 />

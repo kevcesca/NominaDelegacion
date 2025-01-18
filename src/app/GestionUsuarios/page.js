@@ -13,6 +13,7 @@ import { API_USERS_URL } from '../%Config/apiConfig';
 import AsyncButton from '../%Components/AsyncButton/AsyncButton';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import ExportTableComponent from './components/ExportTableComponent'; // Importar el componente de exportación
+import ConfirmToggleUsersModal from './components/ConfirmToggleUsersModal';
 
 const UserTable = () => {
     const { users, setUsers, fetchUsers, toggleUserStatus } = useUsers(); // Incluimos `setUsers` para actualizar la lista localmente
@@ -29,7 +30,10 @@ const UserTable = () => {
     const [filteredUsers, setFilteredUsers] = useState(users);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10; // Número de usuarios por página
-   const [isExportModalOpen, setIsExportModalOpen] = useState(false); // Estado para el modal de exportación
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false); // Estado para el modal de exportación
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // Estado para abrir/cerrar el modal
+    const [isEnabling, setIsEnabling] = useState(true); // Indica si estamos habilitando o deshabilitando usuarios
+
 
     const openMenu = Boolean(anchorEl);
 
@@ -55,14 +59,14 @@ const UserTable = () => {
         setCurrentPage(1); // Reiniciar a la primera página
     };
 
-     // Función para abrir el modal de cambio de contraseña
-     const handleChangePassword = () => {
+    // Función para abrir el modal de cambio de contraseña
+    const handleChangePassword = () => {
         setIsPasswordModalOpen(true);
         setAnchorEl(null); // Cerrar el menú de opciones
     };
 
-     // Abrir el menú contextual de opciones
-     const handleMenuOpen = (event, user) => {
+    // Abrir el menú contextual de opciones
+    const handleMenuOpen = (event, user) => {
         setAnchorEl(event.currentTarget);
         setSelectedUser(user);
     };
@@ -89,10 +93,6 @@ const UserTable = () => {
         'Fecha de Alta': user['Fecha de Alta'],
         'Asignó': user['Asignó'],
     }));
-
-   
-
-   
 
     // Cerrar el menú contextual de opciones
     const handleMenuClose = () => {
@@ -126,13 +126,22 @@ const UserTable = () => {
     });
 
     // Acción para habilitar/deshabilitar usuarios seleccionados
-    const handleToggleSelectedUsers = async () => {
-        for (const userId of selectedUsers) {
-            await toggleUserStatus(userId); // Usamos el método de `useUsers`
+    const handleToggleSelectedUsers = () => {
+        // Filtrar usuarios seleccionados que tienen el rol de "Administrador"
+        const adminUsers = selectedUsers.filter((userId) => {
+            const user = users.find((u) => u['ID Empleado'] === userId);
+            return user?.Rol.split(',').some((role) => role.trim() === 'Administrador'); // Verifica si "Administrador" está entre los roles
+        });
+
+        if (adminUsers.length > 0) {
+            alert('No se pueden deshabilitar usuarios con el rol de Administrador.');
+            return; // Detiene la operación si hay un administrador seleccionado
         }
-        await fetchUsers(); // Refrescamos la lista después de las operaciones
-        setSelectedUsers([]); // Limpiamos la selección
+
+        setIsEnabling(!areAllSelectedUsersActive); // Determina si estamos habilitando o deshabilitando
+        setIsConfirmModalOpen(true); // Abre el modal de confirmación
     };
+
     // Entrar en modo edición al hacer doble clic
     const handleDoubleClick = (user, field) => {
         setEditingUser(user['ID Empleado']);
@@ -183,6 +192,21 @@ const UserTable = () => {
     React.useEffect(() => {
         setFilteredUsers(users);
     }, [users]);
+
+    const confirmToggleUsers = async () => {
+        try {
+            for (const userId of selectedUsers) {
+                await toggleUserStatus(userId); // Cambia el estado de cada usuario
+            }
+            await fetchUsers(); // Refresca la lista de usuarios
+            setSelectedUsers([]); // Limpia la selección
+        } catch (error) {
+            console.error('Error al cambiar el estado de los usuarios:', error);
+        } finally {
+            setIsConfirmModalOpen(false); // Cierra el modal
+        }
+    };
+
 
     return (
         <div className={styles.container}>
@@ -255,6 +279,7 @@ const UserTable = () => {
                 <tbody>
                     {currentItems.map((user) => (
                         <UserTableRow
+                            className={styles.rowWidth}
                             key={user['ID Empleado']}
                             user={user}
                             isEditing={editingUser === user['ID Empleado']}
@@ -310,6 +335,16 @@ const UserTable = () => {
                 onClose={() => setIsModalOpen(false)}
                 onUserAdded={fetchUsers}
                 currentUser={currentUser?.nombre_usuario}
+            />
+
+            <ConfirmToggleUsersModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={confirmToggleUsers}
+                usersToToggle={selectedUsers.map((userId) =>
+                    users.find((user) => user['ID Empleado'] === userId)
+                )}
+                isEnabling={isEnabling}
             />
 
             <AssignRolesModal
