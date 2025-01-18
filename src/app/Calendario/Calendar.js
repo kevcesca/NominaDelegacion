@@ -6,6 +6,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import styles from './page.module.css';
 import API_BASE_URL from '../%Config/apiConfig';
 import { Toast } from 'primereact/toast';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
 
 // Tu código restante...
 
@@ -364,7 +366,23 @@ export default function Calendar({
       {/* Modal para agregar evento */}
       <Modal open={isAddEventModalOpen} onClose={closeAddEventModal}>
         <Box className={styles.modal}>
-          <Typography variant="h6">Agregar Evento</Typography>
+          {/* Botón de cierre en la esquina superior derecha */}
+          <IconButton
+            onClick={closeAddEventModal}
+            sx={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              color: '#9b1d1d',
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+
+          <Typography variant="h6" sx={{ textAlign: 'center', marginBottom: 2 }}>
+            Agregar Evento
+          </Typography>
+
           <TextField
             label="Título del Evento"
             value={newEvent.titulo_evento}
@@ -383,6 +401,7 @@ export default function Calendar({
             error={titleError} // Mostrar error visualmente
             helperText={titleError ? "El título no puede superar los 60 caracteres" : ""} // Mostrar el mensaje de error
           />
+
           <TextField
             label="Descripción"
             value={newEvent.descripcion}
@@ -398,16 +417,15 @@ export default function Calendar({
             rows={4}
             helperText={`${newEvent.descripcion.length}/255 caracteres`} // Contador de caracteres
           />
+
           <Box textAlign="right" marginTop={2}>
-            <Button onClick={handleSaveEvent} variant="contained" color="primary" sx={{ marginRight: 1 }}>
+            <Button onClick={handleSaveEvent} variant="contained" color="primary">
               Guardar
-            </Button>
-            <Button onClick={closeAddEventModal} variant="outlined" color="error">
-              Cancelar
             </Button>
           </Box>
         </Box>
       </Modal>
+
 
 
       {/* Modal para ver eventos del día */}
@@ -428,18 +446,56 @@ export default function Calendar({
         </Box>
       </Modal>
 
-      {/* Modal para detalles del evento */}
+
       {/* Modal para detalles del evento */}
       <Modal open={isEventDetailModalOpen} onClose={() => setIsEventDetailModalOpen(false)}>
         <Box className={styles.modal}>
-          <Typography variant="h6" sx={{ marginBottom: 2 }}>
+          {/* Botones de cierre y retroceso en la esquina superior derecha */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px', // Ahora la "X" estará en la esquina superior derecha
+            }}
+          >
+            <IconButton
+              onClick={() => setIsEventDetailModalOpen(false)} // Cierra el modal
+              sx={{
+                color: '#9b1d1d',
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {/* Si está en modo edición, muestra la flecha */}
+          {isEditing && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '8px',
+                left: '8px', // Ahora la flecha estará en la esquina superior izquierda
+              }}
+            >
+              <IconButton
+                onClick={() => setIsEditing(false)} // Regresa al modo de solo lectura
+                sx={{
+                  color: '#9b1d1d',
+                }}
+              >
+                <ArrowBackIcon />
+              </IconButton>
+            </Box>
+          )}
+
+
+          <Typography variant="h6" sx={{ textAlign: 'center', marginBottom: 2 }}>
             Detalles del Evento
           </Typography>
 
           {selectedEvent && (
             <>
-              {/* Campo del título (editable o solo lectura) */}
-              {/* Campo del título (editable o solo lectura) */}
+              {/* Campo del título */}
               {!isEditing ? (
                 <Typography
                   variant="body1"
@@ -459,24 +515,22 @@ export default function Calendar({
                   value={selectedEvent.titulo_evento}
                   onChange={(e) => {
                     const maxLength = 60;
-                    const value = e.target.value.slice(0, maxLength); // Truncar a 50 caracteres
+                    const value = e.target.value.slice(0, maxLength);
                     if (value.length === maxLength) {
-                      setTitleError(true); // Mostrar error si alcanza el límite
+                      setTitleError(true);
                     } else {
-                      setTitleError(false); // Limpiar error si está dentro del límite
+                      setTitleError(false);
                     }
                     setSelectedEvent({ ...selectedEvent, titulo_evento: value });
                   }}
                   fullWidth
                   margin="normal"
-                  error={titleError} // Mostrar error visualmente
-                  helperText={titleError ? "El título no puede superar los 60 caracteres" : ""} // Mostrar error si aplica
+                  error={titleError}
+                  helperText={titleError ? 'El título no puede superar los 60 caracteres' : ''}
                 />
               )}
 
-
-
-              {/* Campo de la descripción (editable o solo lectura) */}
+              {/* Campo de la descripción */}
               {!isEditing ? (
                 <Typography
                   variant="body2"
@@ -503,10 +557,9 @@ export default function Calendar({
                   margin="normal"
                   multiline
                   rows={4}
-                  helperText={`${selectedEvent.descripcion.length}/255 caracteres`} // Mostrar el contador
+                  helperText={`${selectedEvent.descripcion.length}/255 caracteres`}
                 />
               )}
-
 
               {/* Información adicional */}
               <Typography>
@@ -537,12 +590,11 @@ export default function Calendar({
 
               {/* Botones de acción */}
               <Box display="flex" justifyContent="space-between" marginTop={2}>
-                {/* Cambiar entre "Editar" y "Guardar Cambios" */}
                 {!isEditing ? (
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => setIsEditing(true)}
+                    onClick={() => setIsEditing(true)} // Activar edición
                     sx={{
                       backgroundColor: '#9b1d1d',
                       '&:hover': { backgroundColor: '#7b1616' },
@@ -554,26 +606,26 @@ export default function Calendar({
                   <Button
                     variant="contained"
                     color="success"
-                    onClick={handleUpdateEvent} // Llamar a la función de actualización
+                    onClick={handleUpdateEvent} // Guardar cambios
                   >
                     Guardar Cambios
                   </Button>
                 )}
 
-                {/* Botón para borrar evento */}
                 <Button
                   variant="outlined"
                   color="error"
-                  onClick={() => openConfirmDeleteModal(selectedEvent)} // Modal de confirmación para eliminar
+                  onClick={() => openConfirmDeleteModal(selectedEvent)} // Confirmar eliminación
                 >
                   Borrar Evento
                 </Button>
               </Box>
-
             </>
           )}
         </Box>
       </Modal>
+
+
 
       <Dialog open={isConfirmDeleteModalOpen} onClose={closeConfirmDeleteModal}>
         <DialogTitle>Confirmación de Eliminación</DialogTitle>
