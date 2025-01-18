@@ -1,7 +1,6 @@
 .tableContainer {
   padding: 20px;
   background-color: #f9f9f9;
-  border: 2px solid #9b1d1d;
   border-radius: 8px;
 }
 
@@ -18,7 +17,6 @@
 }
 
 .tableHead {
-  background-color: #9b1d1d;
   color: white;
 }
 
@@ -26,6 +24,7 @@
   color: white !important; /* Color de las letras en blanco */
   text-align: center;
   font-weight: bold;
+  background-color: #9b1d1d;
 }
 
 .selectedRow {
@@ -72,4 +71,25 @@
 
 .refreshIcon {
   color: white;
+}
+
+/* Estilos generales */
+.filtersContainer {
+  max-width: 35%; /* Ancho fijo para filtros */
+}
+
+.previewContainer {
+  flex-grow: 1; /* Vista previa ocupa el resto del espacio */
+}
+
+/* Opcional: ajustar alturas y scroll para mantener el diseño limpio */
+.previewTable {
+  max-height: 400px; /* Altura fija con scroll */
+  overflow-y: auto;
+}
+
+.columnsSelector {
+  max-height: 300px; /* Limitar altura de selección de columnas */
+  overflow-y: auto;
+  margin-top: 16px;
 }

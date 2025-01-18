@@ -97,18 +97,9 @@
     
 }
 
-/* Estilo para el botón */
-.resetButton {
-    background-color: #ff5c5c;
-    color: white;
-    border-radius: 8px;
-    padding: 8px 10px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
+
     
-}
+
 
 .resetButton:hover {
     background-color: #d9534f;

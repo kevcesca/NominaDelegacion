@@ -9,6 +9,7 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import saveAs from 'file-saver';
 import styles from './page.module.css';
+import { Alert } from '@mui/material'; // Importar Alert de Material-UI
 
 export default function EventTable({ anio, mes }) {
     const [data, setData] = useState([]); // Datos obtenidos de la API
@@ -137,6 +138,11 @@ export default function EventTable({ anio, mes }) {
             >
                 Eventos del Mes
             </Typography>
+
+            {/* Mensaje de advertencia */}
+            <Alert severity="info" sx={{ width: "36vw", textAlign: "center", marginBottom: "1rem" }}>
+                Para ver los eventos recien agregados en la tabla es importante presionar "Refrescar tabla".
+            </Alert>
 
             {/* Botones de Acciones */}
             <Box

@@ -9,6 +9,7 @@ import CLCForm from './CLCForm';
 import CLCDataTable from './CLCDataTable';
 import DateFilter from '../../%Components/DateFilter/DateFilter';;
 import API_BASE_URL from '../../%Config/apiConfig';
+import { Alert } from '@mui/material'; // Importar Alert de Material-UI
 
 export default function VerificacionCLC() {
   const [data, setData] = useState([]);
@@ -208,6 +209,11 @@ export default function VerificacionCLC() {
         <Typography variant="h4" gutterBottom>
           Verificación de CLC
         </Typography>
+
+        {/* Mensaje de advertencia */}
+        <Alert severity="info" sx={{ width: "26vw", textAlign: "center", marginBottom: "1rem" }}>
+                Selecciona un mes y dia antes de buscar un concepto de CLC".
+            </Alert>
 
         {/* Componente de filtro de fecha */}
         <DateFilter onDateChange={handleDateChange} />

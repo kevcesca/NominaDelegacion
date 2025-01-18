@@ -1,3 +1,4 @@
+
 .container {
     padding: 20px;
 }
@@ -26,9 +27,9 @@
 }
 
 .table th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-    text-transform: uppercase; /* Opcional: hacer que los encabezados destaquen */
+    background-color: #9b1d1d !important;
+    color: white !important;
+    /* Opcional: hacer que los encabezados destaquen */
     font-size: 13px;
 }
 
@@ -45,18 +46,20 @@
 }
 
 .table tbody tr:hover {
-    background-color: #762c288d; /* Resaltar fila al pasar el mouse */
+    background-color: #235b4e; /* Resaltar fila al pasar el mouse */
+    color: white;
     transition: background-color 0.3s ease; /* Suavizar el efecto */
 }
 
 .disabledRow {
     opacity: 0.6; /* Reducir la opacidad para destacar que está deshabilitado */
-    background-color: #e62f2f; /* Fondo rojo para fila deshabilitada */
+    background-color: #b3b3b367; 
+    color: rgb(0, 0, 0) !important;/* Fondo rojo para fila deshabilitada */
 }
 
 .disabledRow td:last-child {
     opacity: 1 !important;
-    background-color: #ddd !important; /* Mantener la visibilidad completa del botón de opciones */
+    background-color: #ddd 0.5s ease !important; /* Mantener la visibilidad completa del botón de opciones */
 }
 
 /* Cambiar el color de los tres puntos (ícono de opciones) a negro cuando esté deshabilitado */
@@ -117,4 +120,13 @@ form .MuiButton-root {
     margin-top: 20px;
     display: flex;
     justify-content: center;
+}
+
+.rowWidth{
+    max-width: 15vw;
+    min-width: 9vw;
+}
+
+.wordNoWrap{
+    word-wrap: break-word;
 }

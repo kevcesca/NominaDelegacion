@@ -70,11 +70,19 @@ const ReusableTable = ({
         if (onInsert) {
             onInsert(newRow)
                 .then(() => {
-                    fetchData().then((response) => setData(response));
+                    fetchData().then((response) => {
+                        setData(response);
+                        setSelectedRows([]); // Limpia la selección al crear un nuevo concepto
+                    });
                     setCreatingRow(false);
                     setNewRowData({});
                     setEditingRow(null);
-                    toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Elemento creado correctamente', life: 3000 });
+                    toast.current.show({
+                        severity: "success",
+                        summary: "Éxito",
+                        detail: "Elemento creado correctamente",
+                        life: 3000,
+                    });
                 })
                 .catch((error) => {
                     console.error("Error al insertar:", error);
@@ -116,24 +124,35 @@ const ReusableTable = ({
         setEditedData({});
     };
 
-    // Manejar la eliminación de filas seleccionadas
+    // Función para eliminar filas seleccionadas
     const handleDeleteSelected = () => {
         if (onDelete && selectedRows.length > 0) {
-            const deletePromises = selectedRows.map((id) => onDelete(id));
+            const deletePromises = selectedRows.map((row) => onDelete(row.id_concepto || row.id)); // Extrae solo el ID
+
             Promise.all(deletePromises)
                 .then((results) => {
-                    const allDeleted = results.every((result) => result);
+                    const allDeleted = results.every((result) => result); // Verifica si todos se eliminaron correctamente
                     if (allDeleted) {
-                        toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Elementos eliminados correctamente', life: 3000 });
+                        toast.current.show({
+                            severity: 'success',
+                            summary: 'Éxito',
+                            detail: 'Elementos eliminados correctamente',
+                            life: 3000,
+                        });
                     } else {
-                        toast.current.show({ severity: 'warn', summary: 'Advertencia', detail: 'Algunos elementos no se pudieron eliminar', life: 3000 });
+                        toast.current.show({
+                            severity: 'warn',
+                            summary: 'Advertencia',
+                            detail: 'Algunos elementos no se pudieron eliminar',
+                            life: 3000,
+                        });
                     }
-                    fetchData().then((response) => setData(response));
-                    setSelectedRows([]);
+                    fetchData().then((response) => setData(response)); // Refresca los datos
+                    setSelectedRows([]); // Limpia la selección
                 })
                 .catch((error) => {
                     console.error("Error deleting rows:", error);
-                    showErrorToast(error);
+                    showErrorToast(error); // Muestra mensaje de error
                 });
         } else {
             console.error("onDelete prop is not defined or no rows selected");
@@ -154,17 +173,21 @@ const ReusableTable = ({
     };
 
     const handleSelectRow = (row) => {
-        const id = row.id_concepto || row.id;
-        setSelectedRows((prevSelected) =>
-            prevSelected.includes(id) ? prevSelected.filter((selectedId) => selectedId !== id) : [...prevSelected, id]
-        );
+        const isSelected = selectedRows.some((selected) => selected.id === row.id);
+        if (isSelected) {
+            // Si ya está seleccionada, la quitamos
+            setSelectedRows((prev) => prev.filter((selected) => selected.id !== row.id));
+        } else {
+            // Si no está seleccionada, la agregamos
+            setSelectedRows([row]); // Solo permite seleccionar una fila
+        }
     };
 
     const handleSelectAll = (event) => {
         if (event.target.checked) {
-            setSelectedRows(data.map((row) => row.id_concepto || row.id));
+            setSelectedRows(filteredData); // Selecciona todas las filas
         } else {
-            setSelectedRows([]);
+            setSelectedRows([]); // Deselecciona todas
         }
     };
 
@@ -246,6 +269,7 @@ const ReusableTable = ({
                 disableExport={selectedRows.length === 0}
                 onDeleteSelected={handleDeleteSelected}
                 disableDeleteSelected={selectedRows.length === 0}
+                deletable={deletable} // Pasar la prop deletable al Header
             />
             <TableContainer className={styles.tableContainer}>
                 <Table>
@@ -288,6 +312,7 @@ const ReusableTable = ({
                                     setEditedData={setEditedData}
                                     onSave={handleSave}
                                     onCancel={handleCancel}
+                                    onDelete={() => handleDeleteRow(row)} // Se agrega la función de eliminación
                                     handleSelectRow={handleSelectRow}
                                     selectedRows={selectedRows}
                                 />

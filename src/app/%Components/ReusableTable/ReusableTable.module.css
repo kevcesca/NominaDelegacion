@@ -58,3 +58,33 @@
 .tableContainer{
     width: 98%;
 }
+
+.dialogContent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: space-between;
+  }
+  
+  .previewContainer {
+    flex: 2;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .dialogTitle {
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .exportButton {
+    background-color: #9b1d1d;
+    color: white;
+    text-transform: uppercase;
+  }
+  
+  .exportButton:hover {
+    background-color: #7b1616;
+  }
+  

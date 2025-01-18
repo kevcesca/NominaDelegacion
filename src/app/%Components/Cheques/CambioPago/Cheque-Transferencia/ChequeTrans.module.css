@@ -127,6 +127,18 @@
   background-color: #801616;
 }
 
+.alert {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 1rem;  
+  width: 35vw;
+  padding: .001px !important;
+
+  
+}
+
+
 /* Ajustes responsivos */
 @media (max-width: 768px) {
   .row {

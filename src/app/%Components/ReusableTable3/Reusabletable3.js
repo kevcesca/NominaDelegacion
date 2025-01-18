@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
   Dialog,
@@ -43,21 +43,22 @@ const ReusableTable3 = ({ columns, fetchData }) => {
   const [page, setPage] = useState(0); // Página actual
   const [rowsPerPage, setRowsPerPage] = useState(5); // Registros por página
 
-  // Obtener datos
+  // Obtener datos al cargar
   const handleFetchData = async () => {
     try {
       const fetchedData = await fetchData();
-      setData(fetchedData);
+      setData(fetchedData || []); // Asegura que siempre sea un array
       setSelectedRows([]);
     } catch (error) {
       console.error("Error al obtener los datos:", error);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     handleFetchData();
   }, []);
 
+  // Selección de filas
   const handleRowSelect = (row) => {
     setSelectedRows((prev) =>
       prev.includes(row)
@@ -70,6 +71,7 @@ const ReusableTable3 = ({ columns, fetchData }) => {
     setSelectedRows(event.target.checked ? data : []);
   };
 
+  // Cambio de columnas visibles
   const handleColumnToggle = (accessor) => {
     setSelectedColumns((prev) =>
       prev.includes(accessor)
@@ -78,6 +80,7 @@ const ReusableTable3 = ({ columns, fetchData }) => {
     );
   };
 
+  // Filtrar datos
   const handleSearch = (e) => {
     setSearchQuery(e.target.value.toLowerCase());
   };
@@ -243,77 +246,91 @@ const ReusableTable3 = ({ columns, fetchData }) => {
       />
 
       {/* Modal de exportación */}
-      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="md">
+      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="lg">
         <DialogTitle>Exportar Datos</DialogTitle>
         <DialogContent>
-          <FormControl fullWidth className={styles.formatSelector}>
-            <InputLabel>Formato de Exportación</InputLabel>
-            <Select
-              value={exportFormat}
-              onChange={(e) => setExportFormat(e.target.value)}
-              displayEmpty
-            >
-              <MenuItem value="pdf">PDF</MenuItem>
-              <MenuItem value="excel">Excel</MenuItem>
-              <MenuItem value="csv">CSV</MenuItem>
-            </Select>
-          </FormControl>
+          <Box display="flex" gap={2}>
+            {/* Filtros (Izquierda) */}
+            <Box flex={1} className={styles.filtersContainer}>
+              <FormControl fullWidth className={styles.formatSelector}>
+                <InputLabel>Formato de Exportación</InputLabel>
+                <Select
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value)}
+                  displayEmpty
+                >
+                  <MenuItem value="pdf">PDF</MenuItem>
+                  <MenuItem value="excel">Excel</MenuItem>
+                  <MenuItem value="csv">CSV</MenuItem>
+                </Select>
+              </FormControl>
 
-          <Box className={styles.columnsSelector}>
-            <Typography variant="h6" className={styles.columnsSelectorTitle}>Seleccionar Columnas</Typography>
-            {columns.map((col) => (
-              <FormControlLabel
-                key={col.accessor}
-                control={
-                  <Checkbox
-                    checked={selectedColumns.includes(col.accessor)}
-                    onChange={() => handleColumnToggle(col.accessor)}
+              <Box className={styles.columnsSelector}>
+                <Typography variant="h6" className={styles.columnsSelectorTitle}>
+                  Seleccionar Columnas
+                </Typography>
+                {columns.map((col) => (
+                  <FormControlLabel
+                    key={col.accessor}
+                    control={
+                      <Checkbox
+                        checked={selectedColumns.includes(col.accessor)}
+                        onChange={() => handleColumnToggle(col.accessor)}
+                      />
+                    }
+                    label={col.label}
                   />
-                }
-                label={col.label}
-              />
-            ))}
-          </Box>
+                ))}
+              </Box>
+            </Box>
 
-          <Typography variant="h6" className={styles.previewTitle}>
-            Vista Previa
-          </Typography>
-          <TableContainer className={styles.previewTable}>
-            <Table>
-              <TableHead className={styles.tableHead}>
-                <TableRow>
-                  {selectedColumns.map((accessor) => (
-                    <TableCell className={styles.headerCell} key={accessor}>
-                      {columns.find((col) => col.accessor === accessor)?.label || accessor}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {selectedRows.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={selectedColumns.length} align="center">
-                      No hay registros seleccionados
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  selectedRows.map((row, index) => (
-                    <TableRow key={index}>
+            {/* Vista Previa (Derecha) */}
+            <Box flex={2} className={styles.previewContainer}>
+              <Typography variant="h6" className={styles.previewTitle}>
+                Vista Previa
+              </Typography>
+              <TableContainer className={styles.previewTable}>
+                <Table>
+                  <TableHead className={styles.tableHead}>
+                    <TableRow>
                       {selectedColumns.map((accessor) => (
-                        <TableCell key={accessor}>{row[accessor] || "N/A"}</TableCell>
+                        <TableCell className={styles.headerCell} key={accessor}>
+                          {columns.find((col) => col.accessor === accessor)?.label || accessor}
+                        </TableCell>
                       ))}
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {selectedRows.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={selectedColumns.length} align="center">
+                          No hay registros seleccionados
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      selectedRows.map((row, index) => (
+                        <TableRow key={index}>
+                          {selectedColumns.map((accessor) => (
+                            <TableCell key={accessor}>{row[accessor]}</TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenModal(false)} color="secondary">
             Cancelar
           </Button>
-          <Button onClick={handleExport} color="primary" disabled={!exportFormat}>
+          <Button
+            onClick={handleExport}
+            color="primary"
+            disabled={!exportFormat || selectedColumns.length === 0}
+          >
             Exportar
           </Button>
         </DialogActions>
