@@ -13,6 +13,7 @@ import { API_USERS_URL } from '../%Config/apiConfig';
 import AsyncButton from '../%Components/AsyncButton/AsyncButton';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import ExportTableComponent from './components/ExportTableComponent'; // Importar el componente de exportación
+import ConfirmToggleUsersModal from './components/ConfirmToggleUsersModal';
 
 const UserTable = () => {
     const { users, setUsers, fetchUsers, toggleUserStatus } = useUsers(); // Incluimos `setUsers` para actualizar la lista localmente
