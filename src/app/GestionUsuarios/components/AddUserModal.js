@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, TextField, Button, Autocomplete } from '@mui/material';
+import { Modal, Box, TextField, Button, Autocomplete, Typography } from '@mui/material';
 import styles from '../page.module.css'; // Archivo de estilos
 import { API_USERS_URL } from '../../%Config/apiConfig';
 
@@ -13,8 +13,9 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
     });
     const [employeeOptions, setEmployeeOptions] = useState([]);
     const [selectedEmployeeName, setSelectedEmployeeName] = useState(''); // Nombre del empleado seleccionado
+    const [emailError, setEmailError] = useState(''); // Estado para el mensaje de error del correo
+    const [usernameError, setUsernameError] = useState(''); // Estado para el mensaje de error del nombre de usuario
 
-    // Cargar IDs y nombres de empleados al montar el componente
     useEffect(() => {
         const fetchEmployeeOptions = async () => {
             try {
@@ -35,13 +36,50 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
         setSelectedEmployeeName(value?.nombre_completo || ''); // Actualizar el nombre del empleado seleccionado
     };
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expresión regular para un correo válido
+        if (email.length > 30) {
+            return 'El correo no puede tener más de 30 caracteres.';
+        } else if (!emailRegex.test(email)) {
+            return 'Por favor, ingresa un correo válido.';
+        }
+        return ''; // Sin errores
+    };
+
+    const validateUsername = (username) => {
+        if (username.length > 15) {
+            return 'El nombre de usuario no puede tener más de 15 caracteres.';
+        }
+        return ''; // Sin errores
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+
+        if (name === 'correo_usuario') {
+            const lowercaseEmail = value.toLowerCase();
+            setFormData((prev) => ({ ...prev, [name]: lowercaseEmail }));
+
+            const error = validateEmail(lowercaseEmail); // Validar el correo ingresado
+            setEmailError(error);
+        } else if (name === 'nombre_usuario') {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+
+            const error = validateUsername(value); // Validar el nombre de usuario
+            setUsernameError(error);
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (emailError || usernameError) {
+            alert('Por favor, corrige los errores antes de continuar.');
+            return;
+        }
+
         try {
             const response = await fetch(`${API_USERS_URL}/register`, {
                 method: 'POST',
@@ -64,7 +102,6 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
             <Box className={styles.modal}>
                 <h2>Registrar Usuario</h2>
                 <form onSubmit={handleSubmit}>
-                    {/* Autocomplete para seleccionar ID de empleado */}
                     <Autocomplete
                         options={employeeOptions}
                         getOptionLabel={(option) => `${option.id_empleado} - ${option.nombre_completo}`}
@@ -87,7 +124,6 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
                         isOptionEqualToValue={(option, value) => option.id_empleado === value.id_empleado}
                     />
 
-                    {/* Campo no editable para mostrar el nombre del empleado */}
                     <TextField
                         label="Nombre del Empleado"
                         value={selectedEmployeeName}
@@ -106,7 +142,10 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
                         fullWidth
                         required
                         margin="normal"
+                        error={Boolean(usernameError)}
+                        helperText={usernameError} // Mostrar mensaje de error del nombre de usuario
                     />
+
                     <TextField
                         label="Correo Electrónico"
                         name="correo_usuario"
@@ -115,9 +154,10 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
                         fullWidth
                         required
                         margin="normal"
+                        error={Boolean(emailError)}
+                        helperText={emailError} // Mostrar mensaje de error del correo
                     />
 
-                    {/* Mensaje de Contraseña Provisional */}
                     <label className={styles.provisionalPasswordMessage}>
                         Contraseña provisional: Por seguridad, cámbiala en tu primer acceso.
                     </label>
@@ -130,7 +170,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
                         required
                         margin="normal"
                         InputProps={{
-                            readOnly: true, // Campo bloqueado
+                            readOnly: true,
                         }}
                     />
 
@@ -141,7 +181,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded, currentUser }) => {
                         fullWidth
                         margin="normal"
                         InputProps={{
-                            readOnly: true, // Campo bloqueado
+                            readOnly: true,
                         }}
                     />
 

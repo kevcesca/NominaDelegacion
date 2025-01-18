@@ -326,7 +326,11 @@ const ReusableTable3 = ({ columns, fetchData }) => {
           <Button onClick={() => setOpenModal(false)} color="secondary">
             Cancelar
           </Button>
-          <Button onClick={handleExport} color="primary" disabled={!exportFormat}>
+          <Button
+            onClick={handleExport}
+            color="primary"
+            disabled={!exportFormat || selectedColumns.length === 0}
+          >
             Exportar
           </Button>
         </DialogActions>

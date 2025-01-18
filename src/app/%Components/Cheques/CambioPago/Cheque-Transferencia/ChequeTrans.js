@@ -12,13 +12,13 @@ import {
   DialogTitle,
   Alert,
 } from "@mui/material";
-import ReusableTable3 from "../../../../%Components/ReusableTable3"; // Cambiado a ReusableTable3
+import ReusableTable3 from "../../../../%Components/ReusableTable3";
 import API_BASE_URL from "../../../../%Config/apiConfig";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import styles from "./ChequeTrans.module.css";
 
 const ChequeTrans = () => {
-  const [employeeFound, setEmployeeFound] = useState(false); // Control de formulario
+  const [employeeFound, setEmployeeFound] = useState(false);
   const [employeeData, setEmployeeData] = useState({
     id: "",
     nombre: "",
@@ -28,18 +28,20 @@ const ChequeTrans = () => {
     titular_cuenta: "",
   });
   const [fechaCambio, setFechaCambio] = useState("");
-  const [modalOpen, setModalOpen] = useState(false); // Modal de validación RFC
+  const [modalOpen, setModalOpen] = useState(false); // Estado para el modal
   const [rfc, setRfc] = useState(""); // RFC del usuario
   const [changesModalOpen, setChangesModalOpen] = useState(false); // Modal de "Ver cambios realizados"
   const searchInputRef = useRef();
   const [warningOpen, setWarningOpen] = useState(false); // Advertencia si ya es "Transferencia"
+
+  // Estado derivado para habilitar el botón "Hacer Cambio"
+  const isFormValid = employeeData.numCuenta.length === 18 && employeeData.banco.trim() !== "";
 
   useEffect(() => {
     const fechaActual = new Date().toISOString().slice(0, 10);
     setFechaCambio(fechaActual);
   }, []);
 
-  // Función para buscar empleado
   const buscarEmpleado = async () => {
     const id = searchInputRef.current.value;
     if (!id) {
@@ -77,21 +79,12 @@ const ChequeTrans = () => {
   };
 
   const handleHacerCambio = () => {
-    if (!employeeData.id) {
-      alert("Debe buscar un empleado antes de realizar el cambio.");
-      return;
-    }
-
     if (employeeData.tipoPagoActual === "Transferencia") {
       setWarningOpen(true);
       return;
     }
 
-    if (employeeData.numCuenta.length !== 18) {
-      alert("La cuenta CLABE debe tener exactamente 18 dígitos.");
-      return;
-    }
-
+    // Abrir modal
     setModalOpen(true);
   };
 
@@ -112,10 +105,20 @@ const ChequeTrans = () => {
 
           await actualizarTipoPago();
           setModalOpen(false);
+
+          // Actualizar tabla de cambios
           await fetchChangesData();
 
-          // Limpiar formulario al confirmar RFC
-          cancelarCambio();
+          // Limpiar formulario
+          setEmployeeData({
+            id: employeeData.id,
+            nombre: employeeData.nombre,
+            monto: employeeData.monto,
+            numCuenta: "",
+            banco: "",
+            titular_cuenta: "",
+          });
+          setRfc("");
         } else {
           alert("El RFC ingresado no es válido.");
         }
@@ -137,7 +140,6 @@ const ChequeTrans = () => {
 
       if (response.ok) {
         alert("¡El cambio fue realizado exitosamente!");
-        setModalOpen(false);
       } else {
         alert("Error al actualizar el tipo de pago. Intente más tarde.");
       }
@@ -145,13 +147,6 @@ const ChequeTrans = () => {
       console.error("Error al actualizar el tipo de pago:", error);
       alert("Error al realizar el cambio.");
     }
-  };
-
-  const cancelarCambio = () => {
-    setEmployeeData({ id: "", nombre: "", monto: "", numCuenta: "", banco: "", titular_cuenta: "" });
-    setEmployeeFound(false);
-    setRfc("");
-    alert("El formulario ha sido limpiado.");
   };
 
   const fetchChangesData = async () => {
@@ -188,7 +183,6 @@ const ChequeTrans = () => {
         Cambio de Cheque a Transferencia
       </Typography>
 
-      {/* Formulario */}
       <Box className={styles.searchContainer}>
         <Typography variant="h6">Buscar empleado por ID</Typography>
         <Box className={styles.searchField}>
@@ -216,12 +210,9 @@ const ChequeTrans = () => {
       </Box>
 
       {employeeFound && (
-
         <Box className={styles.employeeForm}>
-          {/* Advertencias */}
-          <Box className={styles.alert}>
-            <Alert severity="info">La CLABE interbancaria debe estar a nombre del titular registrado.</Alert>
-            <Alert severity="info">La cuenta CLABE debe tener exactamente 18 dígitos.</Alert>
+         <Box>
+            <Alert className={styles.alert} severity="info">La CLABE interbancaria debe estar a nombre del titular registrado.</Alert>
           </Box>
           <Box className={styles.row}>
             <TextField label="ID Empleado" value={employeeData.id} InputProps={{ readOnly: true }} className={styles.input} />
@@ -231,29 +222,28 @@ const ChequeTrans = () => {
             <TextField label="Monto" value={employeeData.monto} InputProps={{ readOnly: true }} className={styles.input} />
             <TextField label="Fecha de cambio" value={fechaCambio} InputProps={{ readOnly: true }} className={styles.input} />
           </Box>
+          <Box>
+            <Alert className={styles.alert} severity="info">La CLABE interbancaria debe estar a nombre del titular registrado.</Alert>
+          </Box>
           <Box className={styles.row}>
             <TextField
               label="Cuenta Clabe"
               value={employeeData.numCuenta}
-              fullWidth
               inputProps={{ maxLength: 18, pattern: "\\d*" }}
-              onChange={(e) =>
-                setEmployeeData({ ...employeeData, numCuenta: e.target.value.replace(/\D/g, "") })
-              }
+              fullWidth
+              onChange={(e) => setEmployeeData({ ...employeeData, numCuenta: e.target.value.replace(/\D/g, "") })}
               className={styles.input}
             />
             <TextField
               label="Banco"
               value={employeeData.banco}
               fullWidth
-              onChange={(e) =>
-                setEmployeeData({ ...employeeData, banco: e.target.value.toUpperCase() })
-              }
+              onChange={(e) => setEmployeeData({ ...employeeData, banco: e.target.value.toUpperCase() })}
               className={styles.input}
             />
           </Box>
           <Box className={styles.buttonContainer}>
-            <Button variant="contained" color="primary" onClick={handleHacerCambio}>
+            <Button variant="contained" color="primary" onClick={handleHacerCambio} disabled={!isFormValid}>
               Hacer Cambio
             </Button>
             <Button variant="contained" color="primary" onClick={() => setChangesModalOpen(true)}>
@@ -303,21 +293,8 @@ const ChequeTrans = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Dialog open={warningOpen} onClose={() => setWarningOpen(false)}>
-        <DialogTitle>Advertencia</DialogTitle>
-        <DialogContent>
-          <DialogContentText>No se puede realizar el cambio porque el tipo de pago actual ya es "Transferencia".</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setWarningOpen(false)} color="primary">
-            Cerrar
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
-
 
 export default ChequeTrans;
