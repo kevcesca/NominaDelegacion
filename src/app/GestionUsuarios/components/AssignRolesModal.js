@@ -121,10 +121,10 @@ const AssignRolesModal = ({ isOpen, onClose, user, onRolesUpdated }) => {
                         </Grid>
                     ))}
                 </Grid>
-                {/* Mostrar mensaje de error si no se selecciona ningún rol */}
-                {error && <FormHelperText error>{error}</FormHelperText>}
             </DialogContent>
             <DialogActions>
+                {/* Mostrar mensaje de error si no se selecciona ningún rol */}
+                {error && <FormHelperText className={styles.sticky} error>{error}</FormHelperText>}
                 <Button onClick={onClose} color="secondary">
                     Cancelar
                 </Button>
