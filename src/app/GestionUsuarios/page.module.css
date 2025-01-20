@@ -130,3 +130,7 @@ form .MuiButton-root {
 .wordNoWrap{
     word-wrap: break-word;
 }
+
+.sticky{
+    margin-right: 15rem !important;
+}

@@ -34,7 +34,6 @@ const UserTable = () => {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // Estado para abrir/cerrar el modal
     const [isEnabling, setIsEnabling] = useState(true); // Indica si estamos habilitando o deshabilitando usuarios
 
-
     const openMenu = Boolean(anchorEl);
 
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -206,7 +205,6 @@ const UserTable = () => {
             setIsConfirmModalOpen(false); // Cierra el modal
         }
     };
-
 
     return (
         <div className={styles.container}>
