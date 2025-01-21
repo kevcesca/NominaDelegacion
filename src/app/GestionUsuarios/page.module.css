@@ -134,3 +134,8 @@ form .MuiButton-root {
 .sticky{
     margin-right: 15rem !important;
 }
+
+.buttons{
+    display: flex;
+    justify-content: space-between;
+}

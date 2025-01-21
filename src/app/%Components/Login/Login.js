@@ -4,7 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import Image from 'next/image';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { Button, TextField, Container, Typography, Box, ThemeProvider } from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Button, TextField, Container, Typography, Box, IconButton, InputAdornment, ThemeProvider } from '@mui/material';
 import styles from './Login.module.css';
 import theme from '../../$tema/theme';
 import { API_USERS_URL } from '../../%Config/apiConfig';
@@ -12,22 +14,22 @@ import { API_USERS_URL } from '../../%Config/apiConfig';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // Para deshabilitar el botón mientras se procesa
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { setUser, checkPasswordForEmployee } = useAuth();
 
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        // Validación del lado del cliente
         if (!email || !password) {
             setError('Por favor, complete todos los campos');
             return;
         }
 
-        setIsLoading(true); // Activa el estado de carga
-        setError(''); // Reinicia los errores
+        setIsLoading(true);
+        setError('');
 
         try {
             const response = await fetch(`${API_USERS_URL}/login`, {
@@ -40,33 +42,34 @@ const Login = () => {
                 credentials: 'include',
             });
 
-            // Si la respuesta no es exitosa (código 4xx o 5xx)
+            // Manejar errores de autenticación genéricamente
             if (!response.ok) {
-                const errorMessage = await response.text(); // Leer como texto plano
-                setError(errorMessage || 'Error de autenticación'); // Usar el mensaje del servidor si existe
+                setError('Usuario y/o contraseña inválido'); // Mensaje genérico
                 return;
             }
 
             const data = await response.json();
-
-            // Guardar los datos del usuario en el contexto de sesión
             setUser(data.user);
 
-            // Verificar si se requiere un cambio de contraseña
-            const idEmpleado = data.user.id_empleado; // Ajusta según la estructura de `data.user`
+            const idEmpleado = data.user.id_empleado;
             const isPasswordCorrect = await checkPasswordForEmployee(idEmpleado);
 
+            // Validar si la contraseña necesita ser cambiada
             if (isPasswordCorrect) {
-                router.push('/NuevaContrasena'); // Redirige a la página de cambio de contraseña
+                router.push('/NuevaContrasena');
             } else {
-                setError('Contraseña incorrecta');
+                setError('Usuario y/o contraseña inválido'); // Mensaje genérico
             }
         } catch (err) {
             console.error('Login error:', err);
             setError('Ocurrió un error inesperado. Por favor, intente nuevamente.');
         } finally {
-            setIsLoading(false); // Desactiva el estado de carga
+            setIsLoading(false);
         }
+    };
+
+    const toggleShowPassword = () => {
+        setShowPassword((prev) => !prev);
     };
 
     return (
@@ -115,12 +118,21 @@ const Login = () => {
                                 fullWidth
                                 name="password"
                                 label="Contraseña"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 id="password"
                                 autoComplete="current-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Contraseña"
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={toggleShowPassword} edge="end">
+                                                {showPassword ? <Visibility /> : <VisibilityOff />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                             {error && (
                                 <Typography color="error" align="center" sx={{ mt: 2 }}>
@@ -133,7 +145,7 @@ const Login = () => {
                                 variant="contained"
                                 color="primary"
                                 sx={{ mt: 3, mb: 2 }}
-                                disabled={isLoading} // Deshabilita el botón mientras se procesa
+                                disabled={isLoading}
                             >
                                 {isLoading ? 'Iniciando...' : 'Iniciar'}
                             </Button>

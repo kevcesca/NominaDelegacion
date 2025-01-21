@@ -118,6 +118,47 @@ const UserTable = () => {
         );
     };
 
+    // Usuarios a habilitar y deshabilitar
+    const usersToEnable = selectedUsers.filter((userId) => {
+        const user = users.find((u) => u['ID Empleado'] === userId);
+        return user && !user.Activo; // Usuarios deshabilitados
+    });
+
+    const usersToDisable = selectedUsers.filter((userId) => {
+        const user = users.find((u) => u['ID Empleado'] === userId);
+        return (
+            user &&
+            user.Activo && // Solo usuarios habilitados
+            !user.Rol.split(',').some((role) => role.trim() === 'Administrador') // Excluir administradores
+        );
+    });
+
+    const handleEnableUsers = () => {
+        setIsEnabling(true); // Establece que la acción es habilitar
+        setIsConfirmModalOpen(true); // Abre el modal de confirmación
+    };
+
+    const handleDisableUsers = () => {
+        const adminUsers = selectedUsers.filter((userId) => {
+            const user = users.find((u) => u['ID Empleado'] === userId);
+            return user?.Rol.split(',').some((role) => role.trim() === 'Administrador');
+        });
+
+        if (adminUsers.length > 0) {
+            alert(
+                `Los siguientes usuarios no pueden ser deshabilitados porque son administradores:\n${adminUsers
+                    .map((userId) => {
+                        const user = users.find((u) => u['ID Empleado'] === userId);
+                        return `${user['Nombre Empleado']} (${user['Nombre de Usuario']})`;
+                    })
+                    .join('\n')}`
+            );
+        }
+
+        setIsEnabling(false); // Establece que la acción es deshabilitar
+        setIsConfirmModalOpen(true); // Abre el modal de confirmación
+    };
+
     // Verificar si todos los usuarios seleccionados están habilitados
     const areAllSelectedUsersActive = selectedUsers.every((userId) => {
         const user = users.find((u) => u['ID Empleado'] === userId);
@@ -194,7 +235,8 @@ const UserTable = () => {
 
     const confirmToggleUsers = async () => {
         try {
-            for (const userId of selectedUsers) {
+            const targetUsers = isEnabling ? usersToEnable : usersToDisable; // Filtrar según la acción
+            for (const userId of targetUsers) {
                 await toggleUserStatus(userId); // Cambia el estado de cada usuario
             }
             await fetchUsers(); // Refresca la lista de usuarios
@@ -209,37 +251,47 @@ const UserTable = () => {
     return (
         <div className={styles.container}>
             <h2 className={styles.title}>Gestión de Usuarios</h2>
-            <AsyncButton
-                variant="contained"
-                color="primary"
-                onClick={() => setIsModalOpen(true)}
-                style={{ marginBottom: '10px' }}
-            >
-                Añadir Usuario
-            </AsyncButton>
+            <div className={styles.buttons}>
+                <div>
+                    <AsyncButton
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setIsModalOpen(true)}
+                        style={{ marginBottom: '10px' }}
+                    >
+                        Añadir Usuario
+                    </AsyncButton>
 
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={handleExportOpen}
-                style={{ marginBottom: '10px', marginLeft: '10px' }}
-            >
-                Exportar Datos
-            </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleExportOpen}
+                        style={{ marginBottom: '10px', marginLeft: '10px' }}
+                    >
+                        Exportar Datos
+                    </Button>
+                </div>
 
-            {/* Botón dinámico: Solo aparece si se seleccionan 2 o más usuarios */}
-            {selectedUsers.length >= 2 && (
-                <AsyncButton
-                    variant="contained"
-                    color="secondary"
-                    onClick={handleToggleSelectedUsers}
-                    style={{ marginBottom: '10px', marginLeft: '10px' }}
-                >
-                    {areAllSelectedUsersActive
-                        ? 'Deshabilitar Usuarios'
-                        : 'Habilitar Usuarios'}
-                </AsyncButton>
-            )}
+                <div style={{ marginBottom: '10px' }}>
+                    <AsyncButton
+                        variant="contained"
+                        color="primary"
+                        onClick={handleEnableUsers}
+                        disabled={usersToEnable.length === 0} // Deshabilitado si no hay usuarios deshabilitados seleccionados
+                        style={{ marginRight: '10px' }}
+                    >
+                        Habilitar Usuarios
+                    </AsyncButton>
+                    <AsyncButton
+                        variant="contained"
+                        color="secondary"
+                        onClick={handleDisableUsers}
+                        disabled={usersToDisable.length === 0} // Deshabilitado si no hay usuarios habilitados seleccionados
+                    >
+                        Deshabilitar Usuarios
+                    </AsyncButton>
+                </div>
+            </div>
 
             <div className={styles.searchBar}>
                 <TextField
@@ -339,10 +391,16 @@ const UserTable = () => {
                 isOpen={isConfirmModalOpen}
                 onClose={() => setIsConfirmModalOpen(false)}
                 onConfirm={confirmToggleUsers}
-                usersToToggle={selectedUsers.map((userId) =>
-                    users.find((user) => user['ID Empleado'] === userId)
-                )}
-                isEnabling={isEnabling}
+                usersToToggle={
+                    isEnabling
+                        ? usersToEnable.map((userId) =>
+                            users.find((user) => user['ID Empleado'] === userId)
+                        )
+                        : usersToDisable.map((userId) =>
+                            users.find((user) => user['ID Empleado'] === userId)
+                        )
+                } // Transformar los IDs en objetos de usuario completos
+                isEnabling={isEnabling} // Define si la acción es habilitar o deshabilitar
             />
 
             <AssignRolesModal
