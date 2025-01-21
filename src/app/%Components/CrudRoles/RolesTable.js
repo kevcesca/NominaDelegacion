@@ -234,7 +234,7 @@ const RolesTable = ({
                 onPageChange={handleChangePage}
                 rowsPerPage={rowsPerPage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[5, 10, 25]} // Opciones de filas por página
+                rowsPerPageOptions={[10, 25, 30]} // Opciones de filas por página
                 labelRowsPerPage="Filas por página"
                 labelDisplayedRows={({ from, to, count }) =>
                     `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`

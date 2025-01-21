@@ -33,11 +33,7 @@ const Toolbar = ({ selectedRoles, onDeleteSelected, disableDelete, onRoleCreated
   const handleExportClose = () => setIsExportModalOpen(false);
 
   // Exportar a CSV (deprecated: ahora usa ExportTableModal)
-  const handleExportCSV = () => {
-    console.warn("Esta función ahora se maneja con ExportTableModal");
-    handleExportOpen();
-  };
-
+  
   // Validar creación de rol
   const handleValidateCreateRole = () => setIsValidationModalOpen(true);
 
@@ -71,6 +67,7 @@ const Toolbar = ({ selectedRoles, onDeleteSelected, disableDelete, onRoleCreated
         color="secondary"
         onClick={() => handleExportOpen()}
         disabled={!selectedRoles || !selectedRoles.length}
+        className={styles.exportbutton}
       >
         Exportar
       </Button>

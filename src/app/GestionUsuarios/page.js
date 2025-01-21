@@ -99,7 +99,11 @@ const UserTable = () => {
         setAnchorEl(null);
         setSelectedUser(null);
     };
-
+    
+    const selectedRows = rows.filter((row) =>
+        selectedUsers.includes(row['ID Empleado'])
+    );
+    
     // Selección global de usuarios
     const handleSelectAll = (checked) => {
         if (checked) {
@@ -219,15 +223,16 @@ const UserTable = () => {
             >
                 Añadir Usuario
             </AsyncButton>
-
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={handleExportOpen}
-                style={{ marginBottom: '10px', marginLeft: '10px' }}
-            >
-                Exportar Datos
-            </Button>
+            {selectedUsers.length >= 2 && (
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleExportOpen}
+                    style={{ marginBottom: '10px', marginLeft: '10px' }}
+                >
+                    Exportar Datos
+                </Button>
+            )}
 
             {/* Botón dinámico: Solo aparece si se seleccionan 2 o más usuarios */}
             {selectedUsers.length >= 2 && (
@@ -366,9 +371,10 @@ const UserTable = () => {
             <ExportTableComponent
                 open={isExportModalOpen}
                 onClose={handleExportClose}
-                rows={rows}
+                rows={selectedRows} // Pasar solo las filas seleccionadas
                 columns={columns}
             />
+
 
             <Pagination
                 count={Math.ceil(filteredUsers.length / itemsPerPage)} // Número total de páginas

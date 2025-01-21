@@ -10,7 +10,7 @@
 
 .button {
     padding: 8px 12px;
-    background-color: #b8860b; /* Dorado */
+    background-color: #9b1d1d !important; /* Dorado */
     color: #fff;
     border: none;
     cursor: pointer;
@@ -22,7 +22,7 @@
 }
 
 .button:hover {
-    background-color: #8b6914; /* Dorado más oscuro */
+    background-color: #9b1d1d !important; /* Dorado más oscuro */
 }
 
 .table {
@@ -101,7 +101,7 @@
 }
 
 .actionButton.edit {
-    background-color: #b8860b; /* Dorado */
+    background-color: #9b1d1d !important; /* Dorado */
 }
 
 .actionButton.edit:hover {
@@ -109,7 +109,7 @@
 }
 
 .actionButton.delete {
-    background-color: #dc3545; /* Rojo */
+    background-color: #9b1d1d !important; /* Rojo */
 }
 
 .actionButton.delete:hover {
